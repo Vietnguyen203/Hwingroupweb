@@ -6,6 +6,11 @@ Mỗi chuyển trạng thái là **một method của aggregate root**. Chuyển
 
 ## 1. Order
 
+![04-state-order](images/04-state-order.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
+
 ```mermaid
 stateDiagram-v2
     [*] --> PENDING: place()
@@ -27,6 +32,8 @@ stateDiagram-v2
     end note
 ```
 
+</details>
+
 | Method | Từ | Sang | Event | Ai gọi |
 |---|---|---|---|---|
 | `place()` | – | PENDING | `OrderPlaced` | Khách |
@@ -44,6 +51,11 @@ stateDiagram-v2
 
 ## 2. Affiliate
 
+![04-state-affiliate](images/04-state-affiliate.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
+
 ```mermaid
 stateDiagram-v2
     [*] --> PENDING: register()
@@ -53,6 +65,8 @@ stateDiagram-v2
     SUSPENDED --> APPROVED: reinstate()
     REJECTED --> PENDING: reapply() – sau khi bổ sung thông tin
 ```
+
+</details>
 
 | Trạng thái | Link `?ref` | Hoa hồng mới | Rút tiền số dư cũ |
 |---|---|---|---|
@@ -65,6 +79,11 @@ stateDiagram-v2
 
 ## 3. Commission
 
+![04-state-commission](images/04-state-commission.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
+
 ```mermaid
 stateDiagram-v2
     [*] --> PENDING: create() khi OrderPlaced
@@ -75,6 +94,8 @@ stateDiagram-v2
     CANCELLED --> [*]
 ```
 
+</details>
+
 - `approve()` ném `DomainException` nếu `eligibleAt == null` (đơn chưa giao) hoặc chưa đủ 7 ngày.
 - Không có trạng thái PAID ở Commission: việc chi trả được theo dõi ở `Payout`; số dư được **tính**, không cộng trừ trực tiếp → một transaction chỉ sửa một aggregate.
 - Vì cửa sổ đổi trả (7 ngày) = thời gian giữ (7 ngày), một commission APPROVED không thể bị hủy do trả hàng.
@@ -82,6 +103,11 @@ stateDiagram-v2
 ---
 
 ## 4. Payout
+
+![04-state-payout](images/04-state-payout.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
 
 ```mermaid
 stateDiagram-v2
@@ -99,9 +125,16 @@ stateDiagram-v2
     end note
 ```
 
+</details>
+
 ---
 
 ## 5. Quy trình đăng ký và duyệt CTV
+
+![04-flow-affiliate-onboarding](images/04-flow-affiliate-onboarding.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
 
 ```mermaid
 flowchart TD
@@ -129,9 +162,16 @@ flowchart TD
     BANK --> SHARE[Copy link /?ref=CODE hoặc /p/slug?ref=CODE<br/>chia sẻ lên Facebook, TikTok, Zalo]
 ```
 
+</details>
+
 ---
 
 ## 6. Quy trình xử lý đơn hằng ngày của admin
+
+![04-flow-admin-daily-orders](images/04-flow-admin-daily-orders.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
 
 ```mermaid
 flowchart TD
@@ -156,9 +196,16 @@ flowchart TD
     CP --> E2([Hoa hồng đã được job duyệt sau 7 ngày])
 ```
 
+</details>
+
 ---
 
 ## 7. Quy trình đối soát và chi trả hoa hồng
+
+![04-flow-commission-payout](images/04-flow-commission-payout.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
 
 ```mermaid
 flowchart TD
@@ -182,3 +229,5 @@ flowchart TD
     MP --> EXP[Xuất báo cáo chi trả tháng từ audit_log]
     RJ --> BAL
 ```
+
+</details>

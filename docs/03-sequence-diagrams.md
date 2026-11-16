@@ -9,6 +9,11 @@ Ký hiệu chung:
 
 ## a. Đăng nhập OTP + cấp và xoay vòng JWT
 
+![03-seq-a-otp-login](images/03-seq-a-otp-login.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -80,9 +85,16 @@ sequenceDiagram
     end
 ```
 
+</details>
+
 ---
 
 ## b. Ghi nhận click link CTV (?ref)
+
+![03-seq-b-referral-click](images/03-seq-b-referral-click.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
 
 ```mermaid
 sequenceDiagram
@@ -115,9 +127,16 @@ sequenceDiagram
     Note over FE: Cookie ref mới ghi đè cookie cũ, nhưng việc GẮN KHÁCH<br/>chỉ xảy ra ở đơn đầu tiên (first-touch, xem luồng d)
 ```
 
+</details>
+
 ---
 
 ## c. Thanh toán và đặt hàng (kèm tạo tài khoản bằng OTP)
+
+![03-seq-c-checkout](images/03-seq-c-checkout.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
 
 ```mermaid
 sequenceDiagram
@@ -181,11 +200,18 @@ sequenceDiagram
     end
 ```
 
+</details>
+
 ---
 
 ## d. Xử lý event sau OrderPlaced
 
 Mỗi listener là một transaction riêng, chỉ sửa **một** aggregate, idempotent.
+
+![03-seq-d-order-placed](images/03-seq-d-order-placed.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
 
 ```mermaid
 sequenceDiagram
@@ -245,11 +271,18 @@ sequenceDiagram
     end
 ```
 
+</details>
+
 > Khách đã có binding nhưng CTV đó bị `SUSPENDED` → **không** tạo hoa hồng và **không** chuyển khách sang CTV mới (binding vĩnh viễn).
 
 ---
 
 ## e. Giao thành công → job duyệt hoa hồng sau 7 ngày
+
+![03-seq-e-commission-approval](images/03-seq-e-commission-approval.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
 
 ```mermaid
 sequenceDiagram
@@ -288,9 +321,16 @@ sequenceDiagram
     end
 ```
 
+</details>
+
 ---
 
 ## f. Hủy / hoàn đơn → hoàn kho + hủy hoa hồng
+
+![03-seq-f-cancel-return](images/03-seq-f-cancel-return.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
 
 ```mermaid
 sequenceDiagram
@@ -333,9 +373,16 @@ sequenceDiagram
     end
 ```
 
+</details>
+
 ---
 
 ## g. CTV yêu cầu rút tiền → admin duyệt → chi trả
+
+![03-seq-g-payout](images/03-seq-g-payout.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
 
 ```mermaid
 sequenceDiagram
@@ -383,11 +430,18 @@ sequenceDiagram
     end
 ```
 
+</details>
+
 **Đổi tài khoản ngân hàng** (liên quan): `POST /api/ctv/bank-account/otp` → OTP purpose `BANK_CHANGE` gửi tới SĐT CTV → `PUT /api/ctv/bank-account {bankName, accountNo, holder, otp}` → `OtpService.verify` → `affiliate.changeBankAccount(encrypted, now)` đặt `bankChangedAt = now` (lần đầu thiết lập không khóa) → audit `BANK_CHANGED`.
 
 ---
 
 ## h. Mua lại đơn cũ
+
+![03-seq-h-reorder](images/03-seq-h-reorder.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
 
 ```mermaid
 sequenceDiagram
@@ -417,3 +471,5 @@ sequenceDiagram
         FE-->>K: Chuyển tới giỏ hàng + thông báo sản phẩm bị bỏ qua
     end
 ```
+
+</details>

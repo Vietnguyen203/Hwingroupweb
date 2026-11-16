@@ -76,6 +76,11 @@ common  ←  identity  ←  catalog  ←  ordering  ←  customer
 
 ### 3.2 Sơ đồ context map
 
+![01-context-map](images/01-context-map.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
+
 ```mermaid
 flowchart LR
     subgraph SK[common - Shared Kernel]
@@ -106,6 +111,8 @@ flowchart LR
     AFF --> SK
 ```
 
+</details>
+
 | Upstream → Downstream | Kiểu quan hệ | Cơ chế |
 |---|---|---|
 | catalog → ordering | Customer/Supplier | ordering gọi `ProductQueryService`, `InventoryService` |
@@ -118,6 +125,11 @@ flowchart LR
 ---
 
 ## 4. Kiến trúc tổng thể
+
+![01-architecture](images/01-architecture.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
 
 ```mermaid
 flowchart TB
@@ -172,6 +184,8 @@ flowchart TB
     I --> P4
     C --> P5
 ```
+
+</details>
 
 **Quyết định chính**
 

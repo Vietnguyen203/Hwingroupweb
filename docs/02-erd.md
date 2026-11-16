@@ -14,6 +14,11 @@
 
 ## 1. Schema `identity`
 
+![02-erd-identity](images/02-erd-identity.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
+
 ```mermaid
 erDiagram
     user_account ||--o{ user_role : "có"
@@ -52,6 +57,8 @@ erDiagram
     }
 ```
 
+</details>
+
 | Ràng buộc / index | Mục đích |
 |---|---|
 | `CHECK (phone IS NOT NULL OR email IS NOT NULL)` | Mỗi user có ít nhất 1 định danh |
@@ -71,6 +78,11 @@ erDiagram
 ---
 
 ## 2. Schema `catalog`
+
+![02-erd-catalog](images/02-erd-catalog.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
 
 ```mermaid
 erDiagram
@@ -133,6 +145,8 @@ erDiagram
     }
 ```
 
+</details>
+
 | Ràng buộc / index | Mục đích |
 |---|---|
 | `CREATE EXTENSION unaccent, pg_trgm` + hàm `immutable f_unaccent(text)` | Tìm kiếm không dấu |
@@ -146,6 +160,11 @@ erDiagram
 ---
 
 ## 3. Schema `ordering`
+
+![02-erd-ordering](images/02-erd-ordering.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
 
 ```mermaid
 erDiagram
@@ -229,6 +248,8 @@ erDiagram
     }
 ```
 
+</details>
+
 | Ràng buộc / index | Mục đích |
 |---|---|
 | Bảng tên `orders` (tránh từ khóa `order`) | |
@@ -240,6 +261,11 @@ erDiagram
 ---
 
 ## 4. Schema `customer`
+
+![02-erd-customer](images/02-erd-customer.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
 
 ```mermaid
 erDiagram
@@ -293,6 +319,8 @@ erDiagram
     }
 ```
 
+</details>
+
 | Ràng buộc / index | Mục đích |
 |---|---|
 | `uq_customer_address_default (customer_id) WHERE is_default` | Tối đa 1 địa chỉ mặc định |
@@ -302,6 +330,11 @@ erDiagram
 ---
 
 ## 5. Schema `affiliate`
+
+![02-erd-affiliate](images/02-erd-affiliate.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
 
 ```mermaid
 erDiagram
@@ -388,6 +421,8 @@ erDiagram
     }
 ```
 
+</details>
+
 | Ràng buộc / index | Mục đích |
 |---|---|
 | `uq_customer_binding_customer (customer_id)` | **Gắn khách vĩnh viễn** – lần thứ 2 insert sẽ fail |
@@ -400,6 +435,11 @@ erDiagram
 ---
 
 ## 6. Schema `audit` và `public`
+
+![02-erd-audit](images/02-erd-audit.svg)
+
+<details>
+<summary>Mã nguồn Mermaid</summary>
 
 ```mermaid
 erDiagram
@@ -424,6 +464,8 @@ erDiagram
         timestamptz completion_date "null = chưa xử lý xong"
     }
 ```
+
+</details>
 
 - `audit.audit_log` **chỉ ghi thêm**: trigger `BEFORE UPDATE OR DELETE … RAISE EXCEPTION`, và user ứng dụng chỉ có quyền `INSERT, SELECT`.
 - `public.event_publication`: bảng chuẩn của Spring Modulith (cột chính xác theo phiên bản Modulith 2.x, tạo bằng Flyway).
