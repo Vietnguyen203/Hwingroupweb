@@ -6,5 +6,8 @@ hwin:
   otp:
     pepper: test-only-pepper
     log-code: true
+  affiliate:
+    bank-encryption-key: dGVzdC1vbmx5LWFlcy1nY20ta2V5LTMyLWJ5dGVzISE=
+    simulated-time-enabled: true
   storage:
     local-dir: build/test-uploads

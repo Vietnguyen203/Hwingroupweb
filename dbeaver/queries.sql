@@ -75,3 +75,30 @@ from customer.customer_address order by customer_id, is_default desc;
 select ps.customer_id, p.name, ps.total_quantity, ps.order_count, ps.last_ordered_at
 from customer.customer_product_stat ps join catalog.product p on p.id = ps.product_id
 order by ps.customer_id, ps.total_quantity desc;
+
+-- 17. CTV: trạng thái, mã, ngân hàng (đã che)
+select id, full_name, phone, status, referral_code, bank_name, bank_account_no_last4, bank_changed_at, created_at
+from affiliate.affiliate order by created_at desc;
+
+-- 18. Hoa hồng theo CTV + trạng thái
+select a.referral_code, c.status, count(*) as so_don, sum(c.amount) as tong_hoa_hong
+from affiliate.commission c join affiliate.affiliate a on a.id = c.affiliate_id
+group by a.referral_code, c.status order by 1, 2;
+
+-- 19. Số dư khả dụng từng CTV = hoa hồng APPROVED - rút tiền (trừ REJECTED)
+select a.referral_code,
+       coalesce((select sum(amount) from affiliate.commission where affiliate_id = a.id and status = 'APPROVED'), 0)
+     - coalesce((select sum(amount) from affiliate.payout where affiliate_id = a.id and status <> 'REJECTED'), 0) as so_du
+from affiliate.affiliate a where a.referral_code is not null;
+
+-- 20. Khách đã gắn vĩnh viễn với CTV
+select b.customer_id, a.referral_code, b.first_order_id, b.bound_at
+from affiliate.customer_binding b join affiliate.affiliate a on a.id = b.affiliate_id order by b.bound_at desc;
+
+-- 21. Yêu cầu rút tiền
+select p.id, a.referral_code, p.amount, p.status, p.transaction_ref, p.requested_at, p.paid_at
+from affiliate.payout p join affiliate.affiliate a on a.id = p.affiliate_id order by p.requested_at desc;
+
+-- 22. Lượt click theo CTV (30 ngày)
+select referral_code, count(*) from affiliate.referral_click
+where clicked_at > now() - interval '30 days' group by referral_code order by 2 desc;

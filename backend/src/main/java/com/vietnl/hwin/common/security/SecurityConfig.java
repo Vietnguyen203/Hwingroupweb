@@ -51,6 +51,12 @@ public class SecurityConfig {
                         // Giỏ ẩn danh tính giá + cấu hình thanh toán
                         .requestMatchers(HttpMethod.POST, "/api/cart/quote").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/checkout/config").permitAll()
+                        // Click link CTV (đặt cookie ref) + OTP dev (endpoint chỉ tồn tại ở profile dev)
+                        .requestMatchers(HttpMethod.POST, "/api/affiliate/clicks").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/dev/otp/**").permitAll()
+                        // CTV: đăng ký / xem hồ sơ cần đăng nhập; còn lại cần vai trò AFFILIATE
+                        .requestMatchers("/api/ctv/register", "/api/ctv/me").hasRole("CUSTOMER")
+                        .requestMatchers("/api/ctv/**").hasRole("AFFILIATE")
                         // Chức năng của khách đã đăng nhập
                         .requestMatchers("/api/cart/**", "/api/checkout/**", "/api/orders/**", "/api/me/**")
                         .hasRole("CUSTOMER")

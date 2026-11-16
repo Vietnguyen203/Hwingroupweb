@@ -30,7 +30,7 @@ Mỗi module một schema – mở **hwin → Schemas**:
 | `catalog` | `category`, `product`, `product_image`, `stock_movement` |
 | `ordering` | `cart`, `cart_item`, `orders`, `order_item`, `order_status_history` |
 | `customer` | `customer`, `customer_address`, `customer_stats`, `customer_product_stat` |
-| `affiliate` | (Chặng 3) |
+| `affiliate` | `affiliate`, `referral_click`, `customer_binding`, `commission`, `payout` |
 
 > `customer_stats`, `customer_product_stat` là read model – được cập nhật vài trăm mili-giây sau khi đặt/hủy đơn (qua event).
 | `audit` | `audit_log` – chỉ ghi thêm, sửa/xóa sẽ báo lỗi |

@@ -31,9 +31,13 @@
 | `customer` | [`customer_product_stat`](#customercustomer_product_stat) | Read model: khách đã mua sản phẩm nào bao nhiêu – "Sản phẩm bạn hay mua" |
 | `customer` | [`customer_stats`](#customercustomer_stats) | Read model: thống kê mua hàng, cập nhật từ event ordering (không tính đơn hủy/trả) |
 | `customer` | [`processed_event`](#customerprocessed_event) | Event đã xử lý theo từng listener – chống cập nhật trùng khi event phát lại |
+| `affiliate` | [`affiliate`](#affiliateaffiliate) | Cộng tác viên (CTV). PENDING -> APPROVED / REJECTED; APPROVED <-> SUSPENDED. Chỉ APPROVED có link hoạt động |
+| `affiliate` | [`commission`](#affiliatecommission) | Hoa hồng: rate x (subtotal - discount), không tính phí ship, 1 cấp. PENDING -> APPROVED (giao + 7 ngày) / CANCELLED (hủy, trả hàng) |
+| `affiliate` | [`customer_binding`](#affiliatecustomer_binding) | Gắn khách vĩnh viễn (first-touch): đơn đầu tiên có ref hợp lệ -> mọi đơn sau của khách tính hoa hồng cho CTV này |
+| `affiliate` | [`payout`](#affiliatepayout) | Yêu cầu rút tiền: REQUESTED -> APPROVED -> PAID; REJECTED (tiền tự trở lại số dư). Tối thiểu 200.000đ |
+| `affiliate` | [`referral_click`](#affiliatereferral_click) | Lượt click link CTV. Không đếm trùng cùng IP + mã trong 24 giờ (Redis) |
 | `audit` | [`audit_log`](#auditaudit_log) | Nhật ký thay đổi liên quan tới tiền. Chỉ INSERT – trigger chặn UPDATE/DELETE |
 | `public` | [`event_publication`](#publicevent_publication) | Spring Modulith: event nội bộ giữa các module; completion_date null = chưa xử lý xong (sẽ phát lại) |
-| `affiliate` | – | Bounded context affiliate: cộng tác viên, hoa hồng, rút tiền (Chặng 3) – chưa có bảng |
 
 ## Schema `identity`
 
@@ -453,6 +457,162 @@ Event đã xử lý theo từng listener – chống cập nhật trùng khi eve
 | **event_id** 🔑 | `uuid` |  |  |  |
 | **listener** 🔑 | `character varying(100)` |  |  |  |
 | processed_at | `timestamp with time zone` |  | now() |  |
+
+## Schema `affiliate`
+
+Bounded context affiliate: cộng tác viên, hoa hồng, rút tiền (Chặng 3)
+
+### affiliate.affiliate
+
+Cộng tác viên (CTV). PENDING -> APPROVED / REJECTED; APPROVED <-> SUSPENDED. Chỉ APPROVED có link hoạt động
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
+| user_id | `uuid` |  |  | Tài khoản identity của CTV (một người vừa là khách vừa là CTV) |
+| phone | `character varying(16)` |  |  | SĐT của CTV (bản chụp) – dùng chặn tự giới thiệu |
+| full_name | `character varying(100)` |  |  |  |
+| referral_code | `character varying(16)` | ✓ |  | Mã giới thiệu duy nhất, sinh khi được duyệt. Link: /?ref=CODE hoặc /p/slug?ref=CODE |
+| status | `character varying(16)` |  |  |  |
+| social_link | `character varying(500)` | ✓ |  |  |
+| note | `character varying(1000)` | ✓ |  |  |
+| bank_name | `character varying(100)` | ✓ |  |  |
+| bank_account_no_enc | `character varying(255)` | ✓ |  | Số tài khoản – mã hóa AES-GCM (khóa AFFILIATE_BANK_KEY) |
+| bank_account_holder_enc | `character varying(255)` | ✓ |  | Chủ tài khoản – mã hóa AES-GCM |
+| bank_account_no_last4 | `character varying(4)` | ✓ |  | 4 số cuối để hiển thị ****1234 |
+| bank_changed_at | `timestamp with time zone` | ✓ |  | Lần đổi tài khoản ngân hàng gần nhất – khóa rút tiền 48 giờ sau khi đổi (lần thiết lập đầu tiên không khóa) |
+| reviewed_by | `uuid` | ✓ |  |  |
+| reviewed_at | `timestamp with time zone` | ✓ |  |  |
+| status_reason | `character varying(500)` | ✓ |  | Lý do từ chối / tạm khóa |
+| version | `bigint` |  | 0 |  |
+| created_at | `timestamp with time zone` |  | now() |  |
+| updated_at | `timestamp with time zone` |  | now() |  |
+
+Ràng buộc:
+
+- `affiliate_status_check` – CHECK `CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying, 'REJECTED'::character varying, 'SUSPENDED'::character varying])::text[])))`
+- `affiliate_referral_code_key` – UNIQUE `UNIQUE (referral_code)`
+- `affiliate_user_id_key` – UNIQUE `UNIQUE (user_id)`
+
+Index:
+
+- `idx_affiliate_status` – `btree (status, created_at DESC)`
+
+### affiliate.commission
+
+Hoa hồng: rate x (subtotal - discount), không tính phí ship, 1 cấp. PENDING -> APPROVED (giao + 7 ngày) / CANCELLED (hủy, trả hàng)
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
+| order_id | `uuid` |  |  |  |
+| order_code | `character varying(20)` |  |  |  |
+| affiliate_id | `uuid` |  |  |  |
+| customer_id | `uuid` |  |  |  |
+| base_amount | `bigint` |  |  | Cơ sở tính = subtotal - discount (VND) |
+| rate | `numeric(5,4)` |  |  |  |
+| amount | `bigint` |  |  | floor(base_amount x rate) (VND) |
+| status | `character varying(16)` |  |  |  |
+| eligible_at | `timestamp with time zone` | ✓ |  | Thời điểm được duyệt = ngày giao + hold-days; null khi đơn chưa giao |
+| approved_at | `timestamp with time zone` | ✓ |  |  |
+| cancelled_at | `timestamp with time zone` | ✓ |  |  |
+| version | `bigint` |  | 0 |  |
+| created_at | `timestamp with time zone` |  | now() |  |
+| updated_at | `timestamp with time zone` |  | now() |  |
+
+Ràng buộc:
+
+- `commission_amount_check` – CHECK `CHECK ((amount >= 0))`
+- `commission_base_amount_check` – CHECK `CHECK ((base_amount >= 0))`
+- `commission_rate_check` – CHECK `CHECK (((rate >= (0)::numeric) AND (rate <= (1)::numeric)))`
+- `commission_status_check` – CHECK `CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying, 'CANCELLED'::character varying])::text[])))`
+- `commission_affiliate_id_fkey` – FOREIGN KEY `FOREIGN KEY (affiliate_id) REFERENCES affiliate.affiliate(id)`
+- `commission_order_id_key` – UNIQUE `UNIQUE (order_id)`
+
+Index:
+
+- `idx_commission_affiliate` – `btree (affiliate_id, created_at DESC)`
+- `idx_commission_status_eligible` – `btree (status, eligible_at)`
+
+### affiliate.customer_binding
+
+Gắn khách vĩnh viễn (first-touch): đơn đầu tiên có ref hợp lệ -> mọi đơn sau của khách tính hoa hồng cho CTV này
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
+| customer_id | `uuid` |  |  |  |
+| affiliate_id | `uuid` |  |  |  |
+| first_order_id | `uuid` |  |  |  |
+| referral_code | `character varying(16)` |  |  |  |
+| bound_at | `timestamp with time zone` |  |  |  |
+
+Ràng buộc:
+
+- `customer_binding_affiliate_id_fkey` – FOREIGN KEY `FOREIGN KEY (affiliate_id) REFERENCES affiliate.affiliate(id)`
+- `customer_binding_customer_id_key` – UNIQUE `UNIQUE (customer_id)`
+
+Index:
+
+- `idx_customer_binding_affiliate` – `btree (affiliate_id)`
+
+### affiliate.payout
+
+Yêu cầu rút tiền: REQUESTED -> APPROVED -> PAID; REJECTED (tiền tự trở lại số dư). Tối thiểu 200.000đ
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
+| affiliate_id | `uuid` |  |  |  |
+| amount | `bigint` |  |  |  |
+| status | `character varying(16)` |  |  |  |
+| bank_name | `character varying(100)` |  |  |  |
+| bank_account_no_enc | `character varying(255)` |  |  | Bản chụp tài khoản nhận tiền tại thời điểm yêu cầu (mã hóa) |
+| bank_account_holder_enc | `character varying(255)` |  |  |  |
+| transaction_ref | `character varying(100)` | ✓ |  | Mã giao dịch chuyển khoản admin nhập khi chi trả |
+| reject_reason | `character varying(500)` | ✓ |  |  |
+| processed_by | `uuid` | ✓ |  |  |
+| requested_at | `timestamp with time zone` |  |  |  |
+| approved_at | `timestamp with time zone` | ✓ |  |  |
+| paid_at | `timestamp with time zone` | ✓ |  |  |
+| rejected_at | `timestamp with time zone` | ✓ |  |  |
+| version | `bigint` |  | 0 |  |
+| created_at | `timestamp with time zone` |  | now() |  |
+| updated_at | `timestamp with time zone` |  | now() |  |
+
+Ràng buộc:
+
+- `payout_amount_check` – CHECK `CHECK ((amount > 0))`
+- `payout_status_check` – CHECK `CHECK (((status)::text = ANY ((ARRAY['REQUESTED'::character varying, 'APPROVED'::character varying, 'PAID'::character varying, 'REJECTED'::character varying])::text[])))`
+- `payout_affiliate_id_fkey` – FOREIGN KEY `FOREIGN KEY (affiliate_id) REFERENCES affiliate.affiliate(id)`
+
+Index:
+
+- `idx_payout_affiliate` – `btree (affiliate_id, requested_at DESC)`
+- `idx_payout_status` – `btree (status, requested_at)`
+- `uq_payout_open` – `btree (affiliate_id) WHERE ((status)::text = ANY ((ARRAY['REQUESTED'::character varying, 'APPROVED'::character varying])::text[]))`
+
+### affiliate.referral_click
+
+Lượt click link CTV. Không đếm trùng cùng IP + mã trong 24 giờ (Redis)
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
+| affiliate_id | `uuid` |  |  |  |
+| referral_code | `character varying(16)` |  |  |  |
+| ip_hash | `character varying(64)` |  |  | SHA-256 của IP – không lưu IP gốc |
+| user_agent | `character varying(255)` | ✓ |  |  |
+| landing_path | `character varying(500)` | ✓ |  |  |
+| clicked_at | `timestamp with time zone` |  |  |  |
+
+Ràng buộc:
+
+- `referral_click_affiliate_id_fkey` – FOREIGN KEY `FOREIGN KEY (affiliate_id) REFERENCES affiliate.affiliate(id)`
+
+Index:
+
+- `idx_referral_click_affiliate_time` – `btree (affiliate_id, clicked_at)`
 
 ## Schema `audit`
 

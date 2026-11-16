@@ -44,7 +44,7 @@ public class OtpService {
     public long send(PhoneNumber phone, OtpPurpose purpose, String ipHash) {
         ensureNotLocked(phone);
         if (!rateLimiter.tryAcquire("rl:otp:phone:" + phone.value(), props.sendLimit(), props.sendWindow())
-                || !rateLimiter.tryAcquire("rl:otp:ip:" + ipHash, props.sendLimit(), props.sendWindow())) {
+                || !rateLimiter.tryAcquire("rl:otp:ip:" + ipHash, props.ipSendLimit(), props.sendWindow())) {
             throw new TooManyRequestsException("OTP_SEND_LIMIT",
                     "Bạn đã yêu cầu OTP quá nhiều lần, vui lòng thử lại sau ít phút");
         }
@@ -55,6 +55,15 @@ public class OtpService {
         redis.expire(key, props.ttl());
         sender.send(phone, code, purpose);
         return props.ttl().toSeconds();
+    }
+
+    /** OTP xác nhận đổi tài khoản ngân hàng (affiliate dùng – không lộ enum OtpPurpose ra ngoài module). */
+    public long sendBankChangeOtp(PhoneNumber phone, String ipHash) {
+        return send(phone, OtpPurpose.BANK_CHANGE, ipHash);
+    }
+
+    public void verifyBankChangeOtp(PhoneNumber phone, String code) {
+        verify(phone, OtpPurpose.BANK_CHANGE, code);
     }
 
     /** Kiểm tra OTP; đúng thì xóa (dùng 1 lần), sai thì tăng bộ đếm và có thể khóa. */

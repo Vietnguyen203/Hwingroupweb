@@ -71,6 +71,7 @@ hwin:
     max-attempts: 5
     lock-duration: 15m
     send-limit: 3
+    ip-send-limit: 3
     send-window: 10m
     pepper: ${OTP_PEPPER}
     log-code: false
@@ -99,3 +100,6 @@ hwin:
     ref-cookie-days: 30
     click-dedupe-hours: 24
     bank-change-lock-hours: 48
+    bank-encryption-key: ${AFFILIATE_BANK_KEY}
+    share-base-url: ${FRONTEND_ORIGIN:http://localhost:3100}
+    simulated-time-enabled: false

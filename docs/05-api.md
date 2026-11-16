@@ -90,29 +90,36 @@
 
 | Method | Path | Quyền | Mô tả |
 |---|---|---|---|
-| POST | `/api/affiliate/clicks` | public | `{code, landingPath}` → ghi click (dedupe 24h), set cookie `hwin_ref` 30 ngày |
-| POST | `/api/ctv/register` | CUSTOMER | Đăng ký CTV `{fullName, socialLink, note, acceptTerms}` |
-| GET | `/api/ctv/me` | auth | Hồ sơ CTV + trạng thái (404 nếu chưa đăng ký) |
-| GET | `/api/ctv/dashboard` | AFFILIATE | Link, số click (7/30 ngày), số đơn, hoa hồng theo trạng thái, số dư khả dụng |
-| GET | `/api/ctv/commissions` | AFFILIATE | Danh sách hoa hồng (mã đơn, base, amount, status) – không lộ thông tin khách |
-| GET | `/api/ctv/customers` | AFFILIATE | Số khách đã gắn (chỉ đếm + SĐT che) |
-| GET | `/api/ctv/bank-account` | AFFILIATE | `{bankName, accountNoMasked, holder, withdrawLockedUntil}` |
-| POST | `/api/ctv/bank-account/otp` | AFFILIATE | Gửi OTP `BANK_CHANGE` |
-| PUT | `/api/ctv/bank-account` | AFFILIATE | `{bankName, accountNo, holder, otp}` – mã hóa AES-GCM, khóa rút 48h |
+| POST | `/api/affiliate/clicks` | public | `{code, landingPath}` → ghi click (không đếm trùng IP + mã trong 24h), mã hợp lệ thì set cookie `hwin_ref` 30 ngày. Luôn 204 |
+| POST | `/api/ctv/register` | CUSTOMER | Đăng ký CTV `{fullName, socialLink, note, acceptTerms}` (đăng ký lại nếu đã bị từ chối) |
+| GET | `/api/ctv/me` | CUSTOMER | Hồ sơ CTV + trạng thái + lý do (404 nếu chưa đăng ký) |
+| GET | `/api/ctv/dashboard` | AFFILIATE | Mã, link chia sẻ, click (tổng / 30 ngày), khách đã gắn, hoa hồng theo trạng thái, số dư khả dụng, đã rút, khóa rút đến |
+| GET | `/api/ctv/commissions` | AFFILIATE | Hoa hồng của tôi (mã đơn, cơ sở tính, số tiền, trạng thái, mốc duyệt) |
+| GET | `/api/ctv/customers` | AFFILIATE | Khách đã gắn (SĐT đã che, ngày gắn) |
+| GET | `/api/ctv/bank-account` | AFFILIATE | Ngân hàng (chỉ 4 số cuối) + `withdrawLockedUntil` |
+| POST | `/api/ctv/bank-account/otp` | AFFILIATE | Gửi OTP `BANK_CHANGE` tới SĐT của CTV |
+| PUT | `/api/ctv/bank-account` | AFFILIATE | `{bankName, accountNo, accountHolder, otp}` – mã hóa AES-GCM; đổi (không phải lần đầu) khóa rút 48h |
 | GET | `/api/ctv/payouts` | AFFILIATE | Lịch sử rút tiền |
-| POST | `/api/ctv/payouts` | AFFILIATE | Yêu cầu rút `{amount}` |
-| GET | `/api/admin/affiliates` | ADMIN | Lọc `status, q` |
-| GET | `/api/admin/affiliates/{id}` | ADMIN | Chi tiết + thống kê |
-| POST | `/api/admin/affiliates/{id}/approve` | ADMIN | Duyệt → sinh ReferralCode |
+| POST | `/api/ctv/payouts` | AFFILIATE | Yêu cầu rút `{amount}` (≥ 200.000, ≤ số dư, 1 yêu cầu mở / CTV) |
+| GET | `/api/admin/affiliates` | ADMIN | Lọc `status`, `q` (SĐT / tên / mã) |
+| GET | `/api/admin/affiliates/{id}` | ADMIN | Chi tiết |
+| POST | `/api/admin/affiliates/{id}/approve` | ADMIN | Duyệt → sinh mã giới thiệu, cấp vai trò AFFILIATE |
 | POST | `/api/admin/affiliates/{id}/reject` | ADMIN | `{reason}` |
-| POST | `/api/admin/affiliates/{id}/suspend` | ADMIN | `{reason}` |
-| POST | `/api/admin/affiliates/{id}/reinstate` | ADMIN | SUSPENDED → APPROVED |
-| GET | `/api/admin/commissions` | ADMIN | Lọc `status, affiliateId, from, to` |
+| POST | `/api/admin/affiliates/{id}/suspend` | ADMIN | `{reason}` – link ngừng hoạt động, gỡ vai trò |
+| POST | `/api/admin/affiliates/{id}/reinstate` | ADMIN | Mở khóa (giữ nguyên mã) |
+| GET | `/api/admin/commissions` | ADMIN | Lọc `status, affiliateId, orderCode` |
+| POST | `/api/admin/commissions/run-approval-job` | ADMIN | Chạy ngay job duyệt hoa hồng. `?asOf=` (giả lập thời điểm) chỉ dùng được ở profile dev |
 | GET | `/api/admin/payouts` | ADMIN | Lọc `status` |
-| GET | `/api/admin/payouts/{id}` | ADMIN | Chi tiết + thông tin ngân hàng **giải mã** (ghi audit lượt xem) |
+| GET | `/api/admin/payouts/{id}` | ADMIN | Chi tiết + số tài khoản **giải mã** (ghi audit `BANK_VIEWED`) |
 | POST | `/api/admin/payouts/{id}/approve` | ADMIN | REQUESTED → APPROVED |
 | POST | `/api/admin/payouts/{id}/pay` | ADMIN | `{transactionRef}` → PAID |
-| POST | `/api/admin/payouts/{id}/reject` | ADMIN | `{reason}` → REJECTED |
+| POST | `/api/admin/payouts/{id}/reject` | ADMIN | `{reason}` → REJECTED (tiền tự trở lại số dư) |
+
+## Chỉ có ở profile dev
+
+| Method | Path | Mô tả |
+|---|---|---|
+| GET | `/api/dev/otp/latest?phone=&purpose=LOGIN\|BANK_CHANGE` | OTP vừa gửi – để Postman/test tự đăng nhập. Môi trường khác không có endpoint này (404) |
 
 ## common / vận hành
 

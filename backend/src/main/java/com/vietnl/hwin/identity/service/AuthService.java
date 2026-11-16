@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.vietnl.hwin.common.domain.PhoneNumber;
+import com.vietnl.hwin.common.exception.TooManyRequestsException;
 import com.vietnl.hwin.common.exception.UnauthorizedException;
 import com.vietnl.hwin.common.ratelimit.RateLimiter;
 import com.vietnl.hwin.common.web.ClientInfo;
@@ -53,12 +54,19 @@ public class AuthService {
     }
 
     public IssuedTokens adminLogin(String email, String password, ClientInfo client) {
-        rateLimiter.acquireOrThrow("rl:admin-login:" + client.ipHash(), ADMIN_LOGIN_LIMIT, ADMIN_LOGIN_WINDOW,
-                "Đăng nhập sai quá nhiều lần, vui lòng thử lại sau");
+        // Chống dò mật khẩu: chỉ đếm lần đăng nhập SAI (5 lần / 10 phút / IP)
+        String key = "rl:admin-login-fail:" + client.ipHash();
+        if (rateLimiter.isExhausted(key, ADMIN_LOGIN_LIMIT)) {
+            throw new TooManyRequestsException("RATE_LIMITED", "Đăng nhập sai quá nhiều lần, vui lòng thử lại sau 10 phút");
+        }
         UserAccount user = users.findByEmail(email == null ? "" : email.trim().toLowerCase())
                 .filter(UserAccount::isAdmin)
                 .filter(u -> u.getPasswordHash() != null && passwordEncoder.matches(password, u.getPasswordHash()))
-                .orElseThrow(() -> new UnauthorizedException("BAD_CREDENTIALS", "Tên đăng nhập hoặc mật khẩu không đúng"));
+                .orElse(null);
+        if (user == null) {
+            rateLimiter.hit(key, ADMIN_LOGIN_WINDOW);
+            throw new UnauthorizedException("BAD_CREDENTIALS", "Tên đăng nhập hoặc mật khẩu không đúng");
+        }
         userAccountService.recordLogin(user.getId());
         return tokenService.issue(user, client);
     }

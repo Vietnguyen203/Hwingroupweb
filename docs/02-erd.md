@@ -349,7 +349,7 @@ erDiagram
         uuid user_id UK "ref → identity.user_account (ID, không FK)"
         varchar phone "snapshot, dùng chống tự giới thiệu"
         varchar full_name
-        varchar referral_code UK "A-Z0-9, 6-10 ký tự"
+        varchar referral_code UK "A-Z0-9, 6-10 ký tự, sinh khi được duyệt"
         varchar status "PENDING | APPROVED | REJECTED | SUSPENDED"
         varchar social_link "kênh bán của CTV"
         text note
@@ -360,7 +360,7 @@ erDiagram
         timestamptz bank_changed_at "khóa rút 48h"
         uuid reviewed_by "ref → identity.user_account"
         timestamptz reviewed_at
-        varchar reject_reason
+        varchar status_reason "lý do từ chối / tạm khóa"
         bigint version
         timestamptz created_at
         timestamptz updated_at

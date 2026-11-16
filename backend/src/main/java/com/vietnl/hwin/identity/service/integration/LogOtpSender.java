@@ -18,15 +18,18 @@ public class LogOtpSender implements OtpSender {
     private static final Logger log = LoggerFactory.getLogger(LogOtpSender.class);
 
     private final OtpProperties props;
+    private final DevOtpInbox devInbox;
 
-    public LogOtpSender(OtpProperties props) {
+    public LogOtpSender(OtpProperties props, DevOtpInbox devInbox) {
         this.props = props;
+        this.devInbox = devInbox;
     }
 
     @Override
     public void send(PhoneNumber phone, String code, OtpPurpose purpose) {
         if (props.logCode()) {
             log.info("[DEV OTP] {} {} -> {}", purpose, phone.masked(), code);
+            devInbox.put(phone, purpose, code);
         } else {
             log.info("Đã gửi OTP {} tới {}", purpose, phone.masked());
         }

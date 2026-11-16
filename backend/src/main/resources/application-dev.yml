@@ -8,6 +8,9 @@ hwin:
     cookie-secure: ${COOKIE_SECURE:false}
   otp:
     log-code: true
+    ip-send-limit: 50          # dev: nới giới hạn theo IP để chạy Postman nhiều lần
+  affiliate:
+    simulated-time-enabled: true   # dev: admin chạy job duyệt hoa hồng với thời điểm giả lập
 
 springdoc:
   api-docs:
