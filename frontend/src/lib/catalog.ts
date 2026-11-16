@@ -1,4 +1,6 @@
 // Gọi API catalog từ Server Component (SSR). Không cache: dữ liệu giá/tồn kho luôn mới.
+import { cache } from "react";
+
 import { backendUrl } from "./config";
 import type { Category, Page, ProductCard, ProductDetail, ProductSort } from "./types";
 
@@ -9,9 +11,10 @@ async function get<T>(path: string): Promise<T | null> {
   return (await res.json()) as T;
 }
 
-export async function getCategories(): Promise<Category[]> {
+/** cache(): header, menu và trang dùng chung một lần gọi trong cùng request. */
+export const getCategories = cache(async (): Promise<Category[]> => {
   return (await get<Category[]>("/api/categories")) ?? [];
-}
+});
 
 export async function getBestsellers(limit = 8): Promise<ProductCard[]> {
   return (await get<ProductCard[]>(`/api/products/bestsellers?limit=${limit}`)) ?? [];

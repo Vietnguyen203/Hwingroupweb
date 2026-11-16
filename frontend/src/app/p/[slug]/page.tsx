@@ -60,7 +60,7 @@ async function ProductContent({ params }: PageProps<"/p/[slug]">) {
           <div className="flex items-center gap-2">
             <Price price={product.price} compareAtPrice={product.compareAtPrice} size="lg" />
             {product.discountPercent > 0 && (
-              <span className="rounded bg-brand px-1.5 py-0.5 text-xs font-bold text-white">-{product.discountPercent}%</span>
+              <span className="rounded bg-brand-red px-1.5 py-0.5 text-xs font-bold text-white">-{product.discountPercent}%</span>
             )}
           </div>
           <p className="text-sm text-muted-foreground">

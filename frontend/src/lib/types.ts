@@ -1,4 +1,4 @@
-// Kiểu dữ liệu trả về từ backend (khớp DTO ở hwin/.../catalog/api/dto)
+// Kiểu dữ liệu trả về từ backend (khớp DTO ở backend/.../catalog/api/dto)
 
 export type Category = {
   id: number;

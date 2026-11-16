@@ -36,7 +36,7 @@ export default function CartPage() {
           {l.imageUrl && <img src={l.imageUrl} alt="" className="size-20 rounded-lg object-cover" />}
           <div className="flex flex-1 flex-col">
             <Link href={`/p/${l.slug}`} className="line-clamp-2 text-sm font-medium">{l.name}</Link>
-            <span className="text-sm font-bold text-brand">{formatVnd(l.price)}</span>
+            <span className="text-sm font-bold text-brand-red">{formatVnd(l.price)}</span>
             <div className="mt-auto flex items-center justify-between">
               <div className="flex items-center rounded-lg border">
                 <button className="p-1.5" aria-label="Giảm" onClick={() => setQuantity(l.productId, l.quantity - 1)}><Minus className="size-4" /></button>

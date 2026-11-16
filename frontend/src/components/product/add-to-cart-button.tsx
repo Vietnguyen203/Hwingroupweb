@@ -9,11 +9,11 @@ import { useCart, type CartLine } from "@/stores/cart";
 type Props = {
   product: Omit<CartLine, "quantity">;
   disabled?: boolean;
-  /** compact: nút nhỏ trên thẻ sản phẩm; full: có chọn số lượng (trang chi tiết). */
-  variant?: "compact" | "full";
+  /** icon: nút tròn trên thẻ sản phẩm; full: có chọn số lượng (trang chi tiết). */
+  variant?: "icon" | "full";
 };
 
-export function AddToCartButton({ product, disabled, variant = "compact" }: Props) {
+export function AddToCartButton({ product, disabled, variant = "icon" }: Props) {
   const add = useCart((s) => s.add);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
@@ -24,26 +24,27 @@ export function AddToCartButton({ product, disabled, variant = "compact" }: Prop
     setTimeout(() => setAdded(false), 1500);
   };
 
-  if (disabled) {
+  if (variant === "icon") {
     return (
-      <Button disabled variant="secondary" className={variant === "full" ? "h-12 w-full text-base" : "w-full"}>
-        Hết hàng
-      </Button>
+      <button
+        type="button"
+        onClick={onAdd}
+        disabled={disabled}
+        aria-label={disabled ? "Hết hàng" : `Thêm ${product.name} vào giỏ`}
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#eeeefc] text-[#6c64d9] transition active:scale-95 disabled:opacity-40"
+      >
+        {added ? <Check className="size-4" /> : <ShoppingCart className="size-4" />}
+      </button>
     );
   }
 
-  if (variant === "compact") {
-    return (
-      <Button onClick={onAdd} className="w-full" aria-label={`Thêm ${product.name} vào giỏ`}>
-        {added ? <Check /> : <ShoppingCart />}
-        {added ? "Đã thêm" : "Thêm"}
-      </Button>
-    );
+  if (disabled) {
+    return <Button disabled variant="secondary" className="h-12 w-full rounded-full text-base">Hết hàng</Button>;
   }
 
   return (
     <div className="flex items-center gap-3">
-      <div className="flex h-12 items-center rounded-lg border bg-white">
+      <div className="flex h-12 items-center rounded-full border bg-white">
         <button type="button" className="px-3" aria-label="Giảm" onClick={() => setQty((q) => Math.max(1, q - 1))}>
           <Minus className="size-4" />
         </button>
@@ -52,7 +53,7 @@ export function AddToCartButton({ product, disabled, variant = "compact" }: Prop
           <Plus className="size-4" />
         </button>
       </div>
-      <Button onClick={onAdd} className="h-12 flex-1 text-base">
+      <Button onClick={onAdd} className="h-12 flex-1 rounded-full text-base">
         {added ? <Check /> : <ShoppingCart />}
         {added ? "Đã thêm vào giỏ" : "Thêm vào giỏ"}
       </Button>

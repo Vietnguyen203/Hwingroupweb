@@ -1,21 +1,21 @@
-import { BadgeCheck, RotateCcw, Snowflake, Truck } from "lucide-react";
+import { BadgeCheck, Headset, ShieldCheck, Snowflake } from "lucide-react";
 
 const ITEMS = [
-  { icon: BadgeCheck, title: "Chứng nhận ATTP", text: "Đủ giấy công bố, nguồn gốc rõ ràng" },
-  { icon: Snowflake, title: "Giao giữ lạnh", text: "Đóng gói hút chân không, thùng đá" },
-  { icon: Truck, title: "Giao nhanh", text: "Nội thành 2–4 giờ, toàn quốc 1–3 ngày" },
-  { icon: RotateCcw, title: "Đổi trả 7 ngày", text: "Hàng lỗi đổi ngay, hoàn tiền nhanh" },
+  { icon: BadgeCheck, title: "100% rõ nguồn gốc", text: "Đủ giấy công bố & chứng nhận ATTP" },
+  { icon: Headset, title: "Dịch vụ tận tâm", text: "Hỗ trợ khách hàng 24/7 từ HWIN" },
+  { icon: ShieldCheck, title: "Thanh toán an toàn", text: "COD hoặc chuyển khoản QR" },
+  { icon: Snowflake, title: "Giao hàng giữ lạnh", text: "Đổi trả trong 7 ngày nếu lỗi" },
 ];
 
-/** Khối cam kết. */
+/** 4 ô cam kết (đặt phía trên footer). */
 export function Commitments() {
   return (
-    <section className="mx-3 grid grid-cols-2 gap-3 rounded-xl bg-brand-soft p-4 sm:grid-cols-4">
+    <section className="mx-auto grid max-w-6xl grid-cols-2 gap-3 px-3 lg:grid-cols-4">
       {ITEMS.map(({ icon: Icon, title, text }) => (
-        <div key={title} className="flex gap-2">
-          <Icon className="size-7 shrink-0 text-brand" />
+        <div key={title} className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-white p-3">
+          <Icon className="size-8 shrink-0 text-brand" />
           <div>
-            <p className="text-sm font-semibold">{title}</p>
+            <p className="text-sm font-semibold text-neutral-900">{title}</p>
             <p className="text-xs text-muted-foreground">{text}</p>
           </div>
         </div>
