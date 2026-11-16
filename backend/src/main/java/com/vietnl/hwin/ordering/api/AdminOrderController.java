@@ -3,6 +3,7 @@ package com.vietnl.hwin.ordering.api;
 import java.util.UUID;
 
 import java.time.Instant;
+import java.util.Map;
 
 import jakarta.validation.Valid;
 
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vietnl.hwin.common.exception.NotFoundException;
 import com.vietnl.hwin.common.security.AuthPrincipal;
 import com.vietnl.hwin.common.web.PageResponse;
 import com.vietnl.hwin.ordering.api.dto.OrderingDtos.AdminCancelRequest;
@@ -29,6 +31,8 @@ import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentStatus;
 import com.vietnl.hwin.ordering.entity.OrderStatus;
 import com.vietnl.hwin.ordering.service.OrderAdminService;
 import com.vietnl.hwin.ordering.service.OrderAdminService.OrderFilter;
+import com.vietnl.hwin.ordering.service.OrderPaymentTimeoutJob;
+import com.vietnl.hwin.ordering.service.OrderingProperties;
 import com.vietnl.hwin.ordering.service.integration.PaymentGateway;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,11 +46,16 @@ public class AdminOrderController {
     private final OrderAdminService service;
     private final PaymentGateway paymentGateway;
     private final OrderingMapper mapper;
+    private final OrderPaymentTimeoutJob paymentTimeoutJob;
+    private final OrderingProperties props;
 
-    public AdminOrderController(OrderAdminService service, PaymentGateway paymentGateway, OrderingMapper mapper) {
+    public AdminOrderController(OrderAdminService service, PaymentGateway paymentGateway, OrderingMapper mapper,
+                                OrderPaymentTimeoutJob paymentTimeoutJob, OrderingProperties props) {
         this.service = service;
         this.paymentGateway = paymentGateway;
         this.mapper = mapper;
+        this.paymentTimeoutJob = paymentTimeoutJob;
+        this.props = props;
     }
 
     @GetMapping
@@ -60,6 +69,20 @@ public class AdminOrderController {
                                             @RequestParam(defaultValue = "20") int size) {
         var filter = new OrderFilter(status, paymentMethod, paymentStatus, q, from, to, page, size);
         return PageResponse.of(service.search(filter, mapper::toRow), x -> x);
+    }
+
+    /**
+     * Chạy ngay job hủy đơn chuyển khoản quá hạn. {@code asOf} (giả lập thời điểm) chỉ dùng được khi
+     * hwin.ordering.simulated-time-enabled=true (profile dev).
+     */
+    @PostMapping("/run-payment-timeout-job")
+    public Map<String, Object> runPaymentTimeoutJob(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant asOf) {
+        if (asOf != null && !props.simulatedTimeEnabled()) {
+            throw new NotFoundException("Không hỗ trợ giả lập thời điểm ở môi trường này");
+        }
+        Instant when = asOf != null ? asOf : Instant.now();
+        return Map.of("asOf", when.toString(), "cancelled", paymentTimeoutJob.cancelOverdue(when));
     }
 
     @GetMapping("/{id}")

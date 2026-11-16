@@ -68,6 +68,7 @@
 | POST | `/api/admin/orders/{id}/deliver` | ADMIN | SHIPPING → DELIVERED |
 | POST | `/api/admin/orders/{id}/return` | ADMIN | DELIVERED → RETURNED |
 | POST | `/api/admin/orders/{id}/cancel` | ADMIN | `{reason}` |
+| POST | `/api/admin/orders/run-payment-timeout-job` | ADMIN | Chạy ngay job hủy đơn chuyển khoản quá hạn. `?asOf=` (giả lập thời điểm) chỉ ở profile dev |
 
 ## customer
 
@@ -127,7 +128,7 @@
 |---|---|---|---|
 | GET | `/actuator/health` | public | Health check |
 | GET | `/actuator/modulith` | ADMIN | Cấu trúc module (Spring Modulith) |
-| GET | `/api/admin/audit-logs` | ADMIN | Xem audit log `?aggregateType=&aggregateId=` |
+| GET | `/api/admin/audit-logs` | ADMIN | Nhật ký thay đổi liên quan tới tiền. Lọc `module, aggregateType, aggregateId, action, actorId, from, to` |
 
 ---
 

@@ -6,6 +6,8 @@ hwin:
   otp:
     pepper: test-only-pepper
     log-code: true
+  ordering:
+    simulated-time-enabled: true
   affiliate:
     bank-encryption-key: dGVzdC1vbmx5LWFlcy1nY20ta2V5LTMyLWJ5dGVzISE=
     simulated-time-enabled: true

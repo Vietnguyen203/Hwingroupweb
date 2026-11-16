@@ -20,6 +20,8 @@ spring:
           time_zone: UTC
   flyway:
     locations: classpath:db/migration
+    # Dữ liệu mẫu (db/demo) chỉ nạp ở dev -> môi trường khác bỏ qua migration "missing" thay vì báo lỗi
+    ignore-migration-patterns: "*:missing"
   data:
     redis:
       host: ${REDIS_HOST:localhost}
@@ -86,6 +88,8 @@ hwin:
     shipping-fee: 30000
     return-window-days: 7
     place-order-limit: 5          # số đơn tối đa / 10 phút / user
+    bank-qr-payment-timeout-hours: 24   # đơn chuyển khoản chưa nhận tiền quá hạn -> tự hủy
+    simulated-time-enabled: false
     bank-qr:                      # tài khoản nhận chuyển khoản (sinh ảnh VietQR)
       bank-bin: ${BANK_QR_BIN:970436}
       account-no: ${BANK_QR_ACCOUNT:0123456789}

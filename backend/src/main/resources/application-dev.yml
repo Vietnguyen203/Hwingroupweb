@@ -1,5 +1,8 @@
 # Profile dev: bật Swagger, in OTP ra log, cookie không bắt buộc HTTPS.
 spring:
+  flyway:
+    # dev: nạp thêm dữ liệu mẫu (1 CTV đã duyệt + đơn hàng mẫu) – xem db/demo/V9_0_0__demo_data.sql
+    locations: classpath:db/migration,classpath:db/demo
   datasource:
     password: ${DB_PASSWORD:hwin_dev}
 
@@ -9,6 +12,9 @@ hwin:
   otp:
     log-code: true
     ip-send-limit: 50          # dev: nới giới hạn theo IP để chạy Postman nhiều lần
+  ordering:
+    place-order-limit: 30          # dev: nới giới hạn đặt hàng để chạy Postman (thật: 5 đơn / 10 phút)
+    simulated-time-enabled: true   # dev: admin chạy job hủy đơn quá hạn với thời điểm giả lập
   affiliate:
     simulated-time-enabled: true   # dev: admin chạy job duyệt hoa hồng với thời điểm giả lập
 

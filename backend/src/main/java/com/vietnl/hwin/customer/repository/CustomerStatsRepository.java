@@ -21,4 +21,8 @@ public interface CustomerStatsRepository extends JpaRepository<CustomerStats, UU
             on conflict do nothing
             """, nativeQuery = true)
     int markProcessed(@Param("eventId") UUID eventId, @Param("listener") String listener);
+
+    @Modifying
+    @Query(value = "delete from customer.processed_event where processed_at < :cutoff", nativeQuery = true)
+    int deleteProcessedBefore(@Param("cutoff") java.time.Instant cutoff);
 }

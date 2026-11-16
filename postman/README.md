@@ -9,7 +9,7 @@
 
 1. Chạy backend (`backend\run-dev.ps1`) – chờ log `Started HwinApplication`.
 2. Postman → **Import** cả 2 file trong thư mục này (import lại mỗi khi file thay đổi).
-3. Chọn environment **HWIN Local** → chuột phải collection → **Run collection** (chạy folder 0 → 14).
+3. Chọn environment **HWIN Local** → chuột phải collection → **Run collection** (chạy folder 0 → 15).
 
 Không cần thao tác tay:
 
@@ -35,8 +35,9 @@ Không cần thao tác tay:
 | 10. Admin – duyệt CTV | Duyệt → sinh mã giới thiệu |
 | 11. CTV – sau khi duyệt & tài khoản ngân hàng | Nhận vai trò AFFILIATE, dashboard, đổi ngân hàng bằng OTP, các lỗi rút tiền |
 | 12. Đơn qua link CTV → hoa hồng → rút tiền | Click link (cookie ref), khách đặt đơn ~2 triệu, hoa hồng 10%, chặn tự giới thiệu, giao hàng, job duyệt +8 ngày, rút 200.000, admin duyệt + chi trả |
-| 13. Admin – tạm khóa / mở khóa CTV | Link bị khóa không đặt cookie, CTV mất vai trò, mở khóa giữ mã |
-| 14. Đăng xuất & phân quyền (khách) | Khách gọi API admin bị 403, đăng xuất, 401 |
+| 13. Admin – nhật ký kiểm toán & đơn chuyển khoản quá hạn | Xem nhật ký (rút tiền, hoa hồng, xem số tài khoản); đơn QR chưa thanh toán bị hủy sau 24h (giả lập +25h) |
+| 14. Admin – tạm khóa / mở khóa CTV | Link bị khóa không đặt cookie, CTV mất vai trò, mở khóa giữ mã |
+| 15. Đăng xuất & phân quyền (khách) | Khách gọi API admin bị 403, đăng xuất, 401 |
 
 ## Chạy bằng Postman CLI
 
@@ -44,6 +45,7 @@ Không cần thao tác tay:
 postman collection run postman/HWIN.postman_collection.json -e postman/HWIN-local.postman_environment.json
 ```
 
-Lần chạy gần nhất: **147 request, 263 kiểm tra, 0 lỗi** (chạy lặp lại nhiều lần liên tiếp vẫn đạt).
+Lần chạy gần nhất: **156 request, 280 kiểm tra, 0 lỗi** (chạy lặp lại nhiều lần liên tiếp vẫn đạt).
 
+> Folder 13 giả lập +25 giờ nên hủy MỌI đơn chuyển khoản chưa thanh toán, kể cả đơn mẫu `HWDEMO0003`.
 > Mỗi lần chạy tạo thêm dữ liệu test (khách, CTV, đơn, hoa hồng, rút tiền) trong DB dev.

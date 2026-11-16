@@ -19,7 +19,7 @@ Tài liệu database đầy đủ (sinh tự động từ DB): [`docs/06-databas
 | 0 | Thiết kế (`docs/`) | Xong |
 | 1 | Nền tảng, identity (OTP + JWT), catalog, frontend: trang chủ / danh mục / chi tiết / tìm kiếm | Xong |
 | 2 | ordering + customer: giỏ server, thanh toán kèm OTP, đơn hàng, Mua lại, địa chỉ | Backend xong (Postman 90 request đạt); frontend chưa |
-| 3 | affiliate, trang CTV, trang admin, test domain | Backend affiliate xong (41 test, Postman 263 kiểm tra đạt); frontend CTV / admin chưa |
+| 3 | affiliate, trang CTV, trang admin, test domain | Backend xong (43 test, Postman 280 kiểm tra đạt); frontend CTV / admin chưa |
 
 ## Yêu cầu
 
@@ -54,6 +54,17 @@ npm run dev
 ```
 
 Mở http://localhost:3100 (nên bật chế độ điện thoại trong DevTools).
+
+**Tài khoản mẫu (profile dev)** – đăng nhập OTP, mã in ra log backend hoặc lấy qua `GET /api/dev/otp/latest?phone=...`:
+
+| Vai trò | Đăng nhập | Dữ liệu sẵn có |
+|---|---|---|
+| Admin | `admin` / `admin` | – |
+| CTV đã duyệt | SĐT `0901000001` (mã giới thiệu `HWINDEMO`) | 12 click, 1 khách đã gắn, hoa hồng 31.000 đã duyệt + 11.500 đang chờ |
+| Khách 1 | SĐT `0901000002` | Đã gắn với CTV, 2 đơn (`HWDEMO0001` đã giao, `HWDEMO0002` đã xác nhận) |
+| Khách 2 | SĐT `0901000003` | 1 đơn chuyển khoản chờ thanh toán (`HWDEMO0003`), 1 đơn đã hủy (`HWDEMO0004`) |
+
+Dữ liệu mẫu nằm ở `backend/src/main/resources/db/demo/V9_0_0__demo_data.sql`, chỉ nạp ở profile dev.
 
 **3. Thử đăng nhập OTP** (chưa có giao diện – dùng Swagger hoặc curl)
 
@@ -91,12 +102,14 @@ cd ..\frontend; npm run build; npm run lint
 - **Chống đặt trùng**: client gửi `idempotencyKey` cho mỗi lần bấm "Đặt hàng"; gửi lại cùng key trong 24 giờ nhận lại đúng đơn cũ. Giới hạn 5 đơn / 10 phút / người.
 - **Nhóm khách**: DORMANT (lần mua cuối > 60 ngày) ưu tiên, rồi LOYAL (≥ 3 đơn), còn lại NEW. Thống kê không tính đơn hủy / trả hàng.
 - **Hạn trả hàng** 7 ngày sau khi giao; job mỗi giờ chuyển đơn quá hạn sang COMPLETED.
+- **Đơn chuyển khoản quá hạn**: BANK_QR còn chờ, chưa nhận tiền sau 24 giờ (`hwin.ordering.bank-qr-payment-timeout-hours`) → job 15 phút/lần tự hủy (`PAYMENT_TIMEOUT`), hoàn kho, hủy hoa hồng.
+- **Dọn dữ liệu kỹ thuật** hằng đêm: refresh token hết hạn / đã thu hồi > 7 ngày, event nội bộ đã xử lý > 7 ngày, dấu event đã xử lý của customer > 30 ngày.
 - **CTV**: hoa hồng = floor(10% × (tạm tính − giảm giá)), không tính ship, 1 cấp. Gắn khách vĩnh viễn ở đơn đầu tiên có mã hợp lệ (`customer_binding.customer_id` UNIQUE); đơn sau luôn tính cho CTV đó kể cả khi mở link CTV khác. Tự giới thiệu (cùng tài khoản hoặc cùng SĐT) không có binding / hoa hồng.
 - **Vai trò AFFILIATE** cấp qua event khi admin duyệt; có hiệu lực từ access token kế tiếp (`POST /api/auth/refresh` hoặc đăng nhập lại).
 - **Số dư CTV** được tính (hoa hồng APPROVED − rút tiền chưa bị từ chối), không lưu cột số dư → từ chối rút tiền tự trả tiền về. Mỗi CTV tối đa 1 yêu cầu rút đang mở (unique index).
 - **Ngân hàng CTV** mã hóa AES-256-GCM (khóa `AFFILIATE_BANK_KEY`); CTV chỉ thấy 4 số cuối; admin xem bản giải mã khi chi trả (ghi audit). Lần thiết lập đầu không khóa rút, các lần đổi sau khóa 48 giờ.
 - **Đăng nhập admin**: chống dò mật khẩu bằng cách chỉ đếm lần **sai** (5 lần / 10 phút / IP).
-- **Chỉ ở profile dev**: `GET /api/dev/otp/latest` (lấy OTP cho Postman/test), chạy job duyệt hoa hồng với thời điểm giả lập (`asOf`), giới hạn gửi OTP theo IP nới lên 50.
+- **Chỉ ở profile dev**: dữ liệu mẫu (`db/demo`), `GET /api/dev/otp/latest` (lấy OTP cho Postman/test), chạy job duyệt hoa hồng / hủy đơn quá hạn với thời điểm giả lập (`asOf`), nới giới hạn để chạy Postman nhiều lần (OTP theo IP: 50, đặt hàng: 30 đơn / 10 phút).
 - **Ảnh VietQR** sinh theo cấu hình `BANK_QR_*` trong `.env` (mặc định là tài khoản giả).
 - **Jackson 3** (Spring Boot 4) mặc định báo lỗi khi JSON thiếu field `boolean`/`int` – đã tắt (`spring.jackson.deserialization.fail-on-null-for-primitives=false`), field thiếu nhận giá trị mặc định.
 - Màu thương hiệu tạm đặt ở `frontend/src/app/globals.css` (`--brand`, `--brand-accent`).

@@ -1,8 +1,8 @@
 {
   "info": {
-    "_postman_id": "70484aa6-81c9-4e07-a52b-4e539f581ec5",
+    "_postman_id": "15430758-4413-4aeb-889f-8ec3d28ebdfa",
     "name": "HWIN Backend",
-    "description": "Test API backend HWIN. Chọn environment 'HWIN Local' rồi Run cả collection (folder 0 → 14). SĐT sinh ngẫu nhiên mỗi lần chạy, OTP tự lấy qua /api/dev/otp/latest (chỉ có ở profile dev). Ba phiên song song: khách (localhost), admin (127.0.0.1), CTV ([::1]).",
+    "description": "Test API backend HWIN. Chọn environment 'HWIN Local' rồi Run cả collection (folder 0 → 15). SĐT sinh ngẫu nhiên mỗi lần chạy, OTP tự lấy qua /api/dev/otp/latest (chỉ có ở profile dev). Ba phiên song song: khách (localhost), admin (127.0.0.1), CTV ([::1]).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "event": [
@@ -5440,7 +5440,365 @@
       "description": ""
     },
     {
-      "name": "13. Admin – tạm khóa / mở khóa CTV",
+      "name": "13. Admin – nhật ký kiểm toán & đơn chuyển khoản quá hạn",
+      "item": [
+        {
+          "name": "Nhật ký: chi trả rút tiền",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/audit-logs?action=PAYOUT_PAID",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "audit-logs"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "PAYOUT_PAID"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Có bản ghi PAYOUT_PAID', () => pm.expect(pm.response.json().totalElements).to.be.at.least(1));",
+                  "pm.test('Có số tiền', () => pm.expect(pm.response.json().content[0].amount).to.be.above(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nhật ký theo hoa hồng",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/audit-logs?aggregateType=Commission",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "audit-logs"
+              ],
+              "query": [
+                {
+                  "key": "aggregateType",
+                  "value": "Commission"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Có tạo + duyệt hoa hồng', () => { const a = pm.response.json().content.map(x => x.action); pm.expect(a).to.include('COMMISSION_CREATED'); pm.expect(a).to.include('COMMISSION_APPROVED'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nhật ký: admin xem số tài khoản",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/audit-logs?action=BANK_VIEWED",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "audit-logs"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "BANK_VIEWED"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Có ghi lại lần xem', () => pm.expect(pm.response.json().totalElements).to.be.at.least(1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách thêm hàng cho đơn chuyển khoản",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/cart/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cart",
+                "items"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"productId\": \"{{productB}}\", \"quantity\": 1 }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách đặt BANK_QR rồi không chuyển khoản",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/checkout/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "checkout",
+                "orders"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shippingAddress\": {\n    \"recipientName\": \"Nguyễn Văn Test\",\n    \"recipientPhone\": \"{{customerPhone}}\",\n    \"province\": \"Hà Nội\",\n    \"district\": \"Cầu Giấy\",\n    \"ward\": \"Dịch Vọng Hậu\",\n    \"street\": \"144 Xuân Thủy\"\n  },\n  \"paymentMethod\": \"BANK_QR\",\n  \"note\": \"Giao giờ hành chính\",\n  \"idempotencyKey\": \"{{$guid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('timeoutCode', pm.response.json().code);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Chạy job hủy quá hạn (thời điểm thật) → đơn mới chưa bị hủy",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/orders/run-payment-timeout-job",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "orders",
+                "run-payment-timeout-job"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "setTimeout(() => {}, 800); // chờ listener async (trừ kho, xóa giỏ, thống kê) xử lý xong"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Đơn vẫn PENDING",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{timeoutCode}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{timeoutCode}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('PENDING', () => pm.expect(pm.response.json().status).to.eql('PENDING'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Chạy job với thời điểm giả lập +25 giờ (dev)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/orders/run-payment-timeout-job?asOf={{asOfTimeout}}",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "orders",
+                "run-payment-timeout-job"
+              ],
+              "query": [
+                {
+                  "key": "asOf",
+                  "value": "{{asOfTimeout}}"
+                }
+              ]
+            },
+            "description": "Hủy MỌI đơn chuyển khoản chưa thanh toán đặt trước thời điểm giả lập – kể cả đơn mẫu HWDEMO0003."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('asOfTimeout', new Date(Date.now() + 25 * 3600000).toISOString());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Hủy ≥ 1 đơn', () => pm.expect(pm.response.json().cancelled).to.be.at.least(1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Đơn bị hủy do quá hạn thanh toán",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{timeoutCode}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{timeoutCode}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const o = pm.response.json();",
+                  "pm.test('CANCELLED – PAYMENT_TIMEOUT', () => { pm.expect(o.status).to.eql('CANCELLED'); pm.expect(o.cancelReason).to.eql('PAYMENT_TIMEOUT'); });",
+                  "pm.test('Không còn QR', () => pm.expect(o.payment).to.be.null);"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": ""
+    },
+    {
+      "name": "14. Admin – tạm khóa / mở khóa CTV",
       "item": [
         {
           "name": "Tạm khóa CTV",
@@ -5731,7 +6089,7 @@
       "description": ""
     },
     {
-      "name": "14. Đăng xuất & phân quyền (khách)",
+      "name": "15. Đăng xuất & phân quyền (khách)",
       "item": [
         {
           "name": "Khách gọi API admin → 403",
@@ -5991,6 +6349,14 @@
     },
     {
       "key": "payoutId",
+      "value": ""
+    },
+    {
+      "key": "timeoutCode",
+      "value": ""
+    },
+    {
+      "key": "asOfTimeout",
       "value": ""
     }
   ]
