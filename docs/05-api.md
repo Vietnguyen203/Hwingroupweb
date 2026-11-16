@@ -1,0 +1,140 @@
+# 05 – Danh sách API
+
+## Quy ước
+
+- Base path: `/api`. JSON, `camelCase`. Tiền là số nguyên VND.
+- Xác thực bằng cookie `hwin_at` (access JWT 15 phút) và `hwin_rt` (refresh 7 ngày, `Path=/api/auth`). Cả hai `HttpOnly; Secure; SameSite=Lax`.
+- Quyền: `public` · `auth` (đã đăng nhập, mọi role) · `CUSTOMER` · `AFFILIATE` · `ADMIN`.
+- `me` / `ctv` = tài nguyên của chính user trong JWT → **không bao giờ nhận userId từ client** (chống IDOR). Tài nguyên có mã (đơn hàng) luôn lọc thêm `customerId = currentUser`, không khớp trả **404**.
+- Endpoint admin có tiền tố `/api/admin/**` và nằm trong module sở hữu dữ liệu.
+- Phân trang: `?page=0&size=20&sort=field,dir` → `{content, page, size, totalElements, totalPages}`.
+- Lỗi chuẩn (RFC 9457 ProblemDetail): `{type, title, status, code, detail, errors?[]}`; `code` ví dụ `OTP_INVALID`, `OUT_OF_STOCK`, `INVALID_STATE_TRANSITION`, `PAYOUT_BELOW_MINIMUM`.
+- Swagger UI: `/swagger-ui.html` (springdoc), chỉ bật ở profile `dev`.
+
+---
+
+## identity
+
+| Method | Path | Quyền | Mô tả |
+|---|---|---|---|
+| POST | `/api/auth/otp` | public | Gửi OTP đăng nhập `{phone}`. Rate limit 3/10 phút theo SĐT và IP |
+| POST | `/api/auth/otp/verify` | public | `{phone, otp}` → tạo tài khoản nếu chưa có, set cookie JWT |
+| POST | `/api/auth/refresh` | cookie `hwin_rt` | Xoay vòng refresh token, set cookie mới |
+| POST | `/api/auth/logout` | auth | Thu hồi refresh token hiện tại, xóa cookie |
+| GET | `/api/auth/me` | auth | `{id, phone (che), fullName, roles}` – frontend & middleware dùng |
+| POST | `/api/admin/auth/login` | public | `{email, password}` → cookie JWT (role ADMIN). Rate limit 5/10 phút/IP |
+
+## catalog
+
+| Method | Path | Quyền | Mô tả |
+|---|---|---|---|
+| GET | `/api/categories` | public | Danh mục active theo `sortOrder` (menu icon) |
+| GET | `/api/products` | public | `?q=&category=slug&sort=newest\|price_asc\|price_desc\|bestseller&page=&size=` – tìm không dấu |
+| GET | `/api/products/bestsellers` | public | Sản phẩm cờ `bestseller` (trang chủ) |
+| GET | `/api/products/{slug}` | public | Chi tiết + ảnh + thông tin thực phẩm |
+| GET | `/api/admin/categories` | ADMIN | Tất cả danh mục (kể cả ẩn) |
+| POST | `/api/admin/categories` | ADMIN | Tạo danh mục |
+| PUT | `/api/admin/categories/{id}` | ADMIN | Sửa danh mục |
+| DELETE | `/api/admin/categories/{id}` | ADMIN | Ẩn danh mục (chặn nếu còn sản phẩm active) |
+| GET | `/api/admin/products` | ADMIN | Danh sách + lọc `q, category, active, lowStock` |
+| GET | `/api/admin/products/{id}` | ADMIN | Chi tiết để sửa |
+| POST | `/api/admin/products` | ADMIN | Tạo sản phẩm |
+| PUT | `/api/admin/products/{id}` | ADMIN | Sửa sản phẩm (giá, thông tin thực phẩm, ảnh, cờ) |
+| PATCH | `/api/admin/products/{id}/stock` | ADMIN | Điều chỉnh tồn kho `{delta, note}` |
+| PATCH | `/api/admin/products/{id}/active` | ADMIN | Bật/tắt bán |
+| POST | `/api/admin/uploads` | ADMIN | Upload ảnh (multipart, ≤ 5MB, jpg/png/webp) → `{url}` |
+| GET | `/uploads/**` | public | File tĩnh từ `LocalStorageService` |
+
+## ordering
+
+| Method | Path | Quyền | Mô tả |
+|---|---|---|---|
+| GET | `/api/cart` | CUSTOMER | Giỏ server, giá/tồn kho tính lại từ catalog |
+| POST | `/api/cart/items` | CUSTOMER | Thêm `{productId, quantity}` |
+| PATCH | `/api/cart/items/{productId}` | CUSTOMER | Đổi số lượng |
+| DELETE | `/api/cart/items/{productId}` | CUSTOMER | Xóa dòng |
+| POST | `/api/cart/merge` | CUSTOMER | Gộp giỏ localStorage `{items:[{productId, quantity}]}` sau đăng nhập |
+| POST | `/api/cart/quote` | public | Tính giá giỏ ẩn danh (giỏ localStorage) – trả subtotal, phí ship, total do backend tính |
+| GET | `/api/checkout/config` | public | `{shippingFee, paymentMethods}` |
+| POST | `/api/checkout/orders` | CUSTOMER | Đặt hàng `{shippingAddress, paymentMethod, vatInvoice?, note, idempotencyKey}`; ref đọc từ cookie `hwin_ref`. Rate limit 5/10 phút |
+| GET | `/api/orders` | CUSTOMER | Đơn của tôi (phân trang, lọc trạng thái) |
+| GET | `/api/orders/{code}` | CUSTOMER | Chi tiết đơn của tôi (+ `qrUrl` nếu BANK_QR chưa trả) |
+| POST | `/api/orders/{code}/cancel` | CUSTOMER | Tự hủy khi còn PENDING |
+| GET | `/api/admin/orders` | ADMIN | Lọc `status, paymentMethod, paymentStatus, q (mã/SĐT), from, to` |
+| GET | `/api/admin/orders/{id}` | ADMIN | Chi tiết + lịch sử trạng thái + VAT |
+| POST | `/api/admin/orders/{id}/mark-paid` | ADMIN | `{paymentRef}` – xác nhận đã nhận chuyển khoản |
+| POST | `/api/admin/orders/{id}/confirm` | ADMIN | PENDING → CONFIRMED |
+| POST | `/api/admin/orders/{id}/ship` | ADMIN | CONFIRMED → SHIPPING |
+| POST | `/api/admin/orders/{id}/deliver` | ADMIN | SHIPPING → DELIVERED |
+| POST | `/api/admin/orders/{id}/return` | ADMIN | DELIVERED → RETURNED |
+| POST | `/api/admin/orders/{id}/cancel` | ADMIN | `{reason}` |
+
+## customer
+
+| Method | Path | Quyền | Mô tả |
+|---|---|---|---|
+| GET | `/api/me/profile` | CUSTOMER | Hồ sơ + thống kê (tổng đơn, tổng chi tiêu) |
+| PUT | `/api/me/profile` | CUSTOMER | Cập nhật họ tên |
+| GET | `/api/me/addresses` | CUSTOMER | Sổ địa chỉ |
+| POST | `/api/me/addresses` | CUSTOMER | Thêm địa chỉ |
+| PUT | `/api/me/addresses/{id}` | CUSTOMER | Sửa (kiểm tra sở hữu) |
+| DELETE | `/api/me/addresses/{id}` | CUSTOMER | Xóa (kiểm tra sở hữu) |
+| POST | `/api/me/addresses/{id}/default` | CUSTOMER | Đặt mặc định |
+| GET | `/api/me/favorite-products` | CUSTOMER | Top sản phẩm hay mua (`?limit=8`) |
+| POST | `/api/me/orders/{code}/reorder` | CUSTOMER | Mua lại → `{added[], skipped[{productId, name, reason}]}` |
+| GET | `/api/admin/customers` | ADMIN | `?q=&segment=NEW\|LOYAL\|DORMANT&page=` |
+| GET | `/api/admin/customers/{id}` | ADMIN | Chi tiết + địa chỉ + thống kê |
+| GET | `/api/admin/customers/export.csv` | ADMIN | Xuất CSV theo bộ lọc hiện tại (UTF-8 BOM cho Excel) |
+
+## affiliate
+
+| Method | Path | Quyền | Mô tả |
+|---|---|---|---|
+| POST | `/api/affiliate/clicks` | public | `{code, landingPath}` → ghi click (dedupe 24h), set cookie `hwin_ref` 30 ngày |
+| POST | `/api/ctv/register` | CUSTOMER | Đăng ký CTV `{fullName, socialLink, note, acceptTerms}` |
+| GET | `/api/ctv/me` | auth | Hồ sơ CTV + trạng thái (404 nếu chưa đăng ký) |
+| GET | `/api/ctv/dashboard` | AFFILIATE | Link, số click (7/30 ngày), số đơn, hoa hồng theo trạng thái, số dư khả dụng |
+| GET | `/api/ctv/commissions` | AFFILIATE | Danh sách hoa hồng (mã đơn, base, amount, status) – không lộ thông tin khách |
+| GET | `/api/ctv/customers` | AFFILIATE | Số khách đã gắn (chỉ đếm + SĐT che) |
+| GET | `/api/ctv/bank-account` | AFFILIATE | `{bankName, accountNoMasked, holder, withdrawLockedUntil}` |
+| POST | `/api/ctv/bank-account/otp` | AFFILIATE | Gửi OTP `BANK_CHANGE` |
+| PUT | `/api/ctv/bank-account` | AFFILIATE | `{bankName, accountNo, holder, otp}` – mã hóa AES-GCM, khóa rút 48h |
+| GET | `/api/ctv/payouts` | AFFILIATE | Lịch sử rút tiền |
+| POST | `/api/ctv/payouts` | AFFILIATE | Yêu cầu rút `{amount}` |
+| GET | `/api/admin/affiliates` | ADMIN | Lọc `status, q` |
+| GET | `/api/admin/affiliates/{id}` | ADMIN | Chi tiết + thống kê |
+| POST | `/api/admin/affiliates/{id}/approve` | ADMIN | Duyệt → sinh ReferralCode |
+| POST | `/api/admin/affiliates/{id}/reject` | ADMIN | `{reason}` |
+| POST | `/api/admin/affiliates/{id}/suspend` | ADMIN | `{reason}` |
+| POST | `/api/admin/affiliates/{id}/reinstate` | ADMIN | SUSPENDED → APPROVED |
+| GET | `/api/admin/commissions` | ADMIN | Lọc `status, affiliateId, from, to` |
+| GET | `/api/admin/payouts` | ADMIN | Lọc `status` |
+| GET | `/api/admin/payouts/{id}` | ADMIN | Chi tiết + thông tin ngân hàng **giải mã** (ghi audit lượt xem) |
+| POST | `/api/admin/payouts/{id}/approve` | ADMIN | REQUESTED → APPROVED |
+| POST | `/api/admin/payouts/{id}/pay` | ADMIN | `{transactionRef}` → PAID |
+| POST | `/api/admin/payouts/{id}/reject` | ADMIN | `{reason}` → REJECTED |
+
+## common / vận hành
+
+| Method | Path | Quyền | Mô tả |
+|---|---|---|---|
+| GET | `/actuator/health` | public | Health check |
+| GET | `/actuator/modulith` | ADMIN | Cấu trúc module (Spring Modulith) |
+| GET | `/api/admin/audit-logs` | ADMIN | Xem audit log `?aggregateType=&aggregateId=` |
+
+---
+
+## Trang frontend tương ứng
+
+| Route | Render | Quyền (middleware.ts) |
+|---|---|---|
+| `/`, `/c/[slug]`, `/p/[slug]`, `/search` | SSR | public |
+| `/cart` | CSR | public |
+| `/checkout` | CSR (từng bước) | public → bắt buộc OTP trong luồng |
+| `/order/success/[code]` | SSR | CUSTOMER |
+| `/account`, `/account/orders`, `/account/orders/[code]`, `/account/addresses` | CSR | CUSTOMER |
+| `/ctv`, `/ctv/register`, `/ctv/bank`, `/ctv/payouts` | CSR | auth (`/ctv/register`), AFFILIATE (còn lại) |
+| `/admin/login` | CSR | public |
+| `/admin/**` | CSR | ADMIN |
+
+`middleware.ts` đọc cookie `hwin_at`, giải mã payload JWT (chỉ để điều hướng UX – backend vẫn là nơi kiểm quyền thật) và chuyển hướng về đăng nhập nếu thiếu role.
