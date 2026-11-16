@@ -1,0 +1,90 @@
+spring:
+  application:
+    name: hwin
+  profiles:
+    default: dev
+  config:
+    # Bí mật lấy từ biến môi trường hoặc file .env (không commit). Xem .env.example
+    import: optional:file:.env[.properties]
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:15432/hwin}
+    username: ${DB_USERNAME:hwin}
+    password: ${DB_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    locations: classpath:db/migration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:16379}
+  docker:
+    compose:
+      lifecycle-management: start-only
+  modulith:
+    events:
+      republish-outstanding-events-on-restart: true
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+
+server:
+  port: ${PORT:8088}
+  error:
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,modulith
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+hwin:
+  security:
+    jwt-secret: ${JWT_SECRET}
+    access-token-ttl: 15m
+    refresh-token-ttl: 7d
+    cookie-secure: ${COOKIE_SECURE:true}
+    cors-origins: ${FRONTEND_ORIGIN:http://localhost:3100}
+  otp:
+    ttl: 5m
+    max-attempts: 5
+    lock-duration: 15m
+    send-limit: 3
+    send-window: 10m
+    pepper: ${OTP_PEPPER}
+    log-code: false
+  admin-seed:
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
+    full-name: Quản trị viên
+  storage:
+    local-dir: ${STORAGE_DIR:./uploads}
+    public-path: /uploads/
+  ordering:
+    shipping-fee: 30000
+    return-window-days: 7
+  customer:
+    loyal-min-orders: 3
+    dormant-days: 60
+    new-days: 30
+  affiliate:
+    commission-rate: 0.10
+    hold-days: 7
+    min-payout: 200000
+    ref-cookie-days: 30
+    click-dedupe-hours: 24
+    bank-change-lock-hours: 48

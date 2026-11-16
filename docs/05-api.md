@@ -21,7 +21,7 @@
 | POST | `/api/auth/otp/verify` | public | `{phone, otp}` → tạo tài khoản nếu chưa có, set cookie JWT |
 | POST | `/api/auth/refresh` | cookie `hwin_rt` | Xoay vòng refresh token, set cookie mới |
 | POST | `/api/auth/logout` | auth | Thu hồi refresh token hiện tại, xóa cookie |
-| GET | `/api/auth/me` | auth | `{id, phone (che), fullName, roles}` – frontend & middleware dùng |
+| GET | `/api/auth/me` | auth | `{id, phone (che), fullName, roles}` – frontend & proxy.ts dùng |
 | POST | `/api/admin/auth/login` | public | `{email, password}` → cookie JWT (role ADMIN). Rate limit 5/10 phút/IP |
 
 ## catalog
@@ -29,7 +29,7 @@
 | Method | Path | Quyền | Mô tả |
 |---|---|---|---|
 | GET | `/api/categories` | public | Danh mục active theo `sortOrder` (menu icon) |
-| GET | `/api/products` | public | `?q=&category=slug&sort=newest\|price_asc\|price_desc\|bestseller&page=&size=` – tìm không dấu |
+| GET | `/api/products` | public | `?q=&category=slug&sort=NEWEST\|PRICE_ASC\|PRICE_DESC\|BESTSELLER&page=&size=` – tìm không dấu |
 | GET | `/api/products/bestsellers` | public | Sản phẩm cờ `bestseller` (trang chủ) |
 | GET | `/api/products/{slug}` | public | Chi tiết + ảnh + thông tin thực phẩm |
 | GET | `/api/admin/categories` | ADMIN | Tất cả danh mục (kể cả ẩn) |
@@ -126,7 +126,7 @@
 
 ## Trang frontend tương ứng
 
-| Route | Render | Quyền (middleware.ts) |
+| Route | Render | Quyền (proxy.ts) |
 |---|---|---|
 | `/`, `/c/[slug]`, `/p/[slug]`, `/search` | SSR | public |
 | `/cart` | CSR | public |
@@ -137,4 +137,4 @@
 | `/admin/login` | CSR | public |
 | `/admin/**` | CSR | ADMIN |
 
-`middleware.ts` đọc cookie `hwin_at`, giải mã payload JWT (chỉ để điều hướng UX – backend vẫn là nơi kiểm quyền thật) và chuyển hướng về đăng nhập nếu thiếu role.
+`src/proxy.ts` (Next.js 16 đổi tên `middleware.ts` thành `proxy.ts`) đọc cookie `hwin_at`, giải mã payload JWT (chỉ để điều hướng UX – backend vẫn là nơi kiểm quyền thật) và chuyển hướng về đăng nhập nếu thiếu role.

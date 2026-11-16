@@ -1,0 +1,85 @@
+package com.vietnl.hwin.catalog.service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Predicate;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.vietnl.hwin.catalog.entity.Category;
+import com.vietnl.hwin.catalog.entity.Product;
+import com.vietnl.hwin.catalog.repository.CategoryRepository;
+import com.vietnl.hwin.catalog.repository.ProductRepository;
+import com.vietnl.hwin.common.exception.NotFoundException;
+import com.vietnl.hwin.common.util.TextNormalizer;
+
+/**
+ * Tìm kiếm sản phẩm cho web khách.
+ * Không dấu: so khớp cột search_text (= f_unaccent(lower(tên + mô tả ngắn))) với f_unaccent(lower(từ khóa)),
+ * từ khóa luôn được bind dạng tham số (không nối chuỗi SQL).
+ */
+@Service
+public class ProductSearchService {
+
+    private final ProductRepository products;
+    private final CategoryRepository categories;
+
+    public ProductSearchService(ProductRepository products, CategoryRepository categories) {
+        this.products = products;
+        this.categories = categories;
+    }
+
+    @Transactional(readOnly = true)
+    public <T> Page<T> search(ProductSearchCriteria c, Function<Product, T> mapper) {
+        List<Specification<Product>> specs = new ArrayList<>();
+        if (c.onlyActive()) {
+            specs.add((root, query, cb) -> cb.isTrue(root.get("active")));
+        }
+        if (c.categorySlug() != null && !c.categorySlug().isBlank()) {
+            Long categoryId = categories.findBySlug(c.categorySlug()).map(Category::getId).orElse(-1L);
+            specs.add((root, query, cb) -> cb.equal(root.get("categoryId"), categoryId));
+        }
+        if (c.q() != null && !c.q().isBlank()) {
+            String pattern = "%" + TextNormalizer.escapeLike(c.q().trim().toLowerCase()) + "%";
+            specs.add((root, query, cb) -> {
+                Expression<String> normalized = cb.function("f_unaccent", String.class, cb.literal(pattern));
+                Predicate p = cb.like(root.get("searchText"), normalized, '\\');
+                return p;
+            });
+        }
+        PageRequest pageable = PageRequest.of(c.page(), c.size(), toSort(c));
+        return products.findAll(Specification.allOf(specs), pageable).map(mapper);
+    }
+
+    @Transactional(readOnly = true)
+    public <T> List<T> bestsellers(int limit, Function<Product, T> mapper) {
+        Specification<Product> spec = (root, query, cb) ->
+                cb.and(cb.isTrue(root.get("active")), cb.isTrue(root.get("bestseller")));
+        return products.findAll(spec, PageRequest.of(0, Math.clamp(limit, 1, 24),
+                        Sort.by(Sort.Order.desc("soldCount"), Sort.Order.desc("id"))))
+                .map(mapper).getContent();
+    }
+
+    @Transactional(readOnly = true)
+    public <T> T getActiveBySlug(String slug, Function<Product, T> mapper) {
+        return products.findBySlugAndActiveTrue(slug).map(mapper)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm"));
+    }
+
+    private static Sort toSort(ProductSearchCriteria c) {
+        return switch (c.sort()) {
+            case PRICE_ASC -> Sort.by(Sort.Order.asc("price"), Sort.Order.desc("id"));
+            case PRICE_DESC -> Sort.by(Sort.Order.desc("price"), Sort.Order.desc("id"));
+            case BESTSELLER -> Sort.by(Sort.Order.desc("soldCount"), Sort.Order.desc("id"));
+            case NEWEST -> Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id"));
+        };
+    }
+}

@@ -1,0 +1,20 @@
+# Profile dev: bật Swagger, in OTP ra log, cookie không bắt buộc HTTPS.
+spring:
+  datasource:
+    password: ${DB_PASSWORD:hwin_dev}
+
+hwin:
+  security:
+    cookie-secure: ${COOKIE_SECURE:false}
+  otp:
+    log-code: true
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+logging:
+  level:
+    com.vietnl.hwin: DEBUG

@@ -100,14 +100,14 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     actor K as Khách (điện thoại)
-    participant FE as Next.js middleware + trang
+    participant FE as Next.js proxy.ts + trang
     participant RC as affiliate ReferralClickController
     participant RS as ReferralClickService
     participant R as Redis
     participant DB as PostgreSQL affiliate
 
     K->>FE: Mở /p/cha-lua?ref=ABC123 (link CTV chia sẻ)
-    FE->>FE: middleware đọc ?ref, kiểm tra định dạng A-Z0-9
+    FE->>FE: proxy.ts đọc ?ref, kiểm tra định dạng A-Z0-9
     FE->>RC: POST /api/affiliate/clicks {code, landingPath} (kèm IP, UA)
     RC->>RS: record(code, ip, ua, path)
     RS->>DB: findByReferralCode(code)

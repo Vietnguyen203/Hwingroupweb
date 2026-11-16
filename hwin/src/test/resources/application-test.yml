@@ -1,0 +1,10 @@
+# Cấu hình cho test (Testcontainers cung cấp Postgres/Redis). Giá trị chỉ dùng cho test.
+hwin:
+  security:
+    jwt-secret: test-only-secret-0123456789abcdef-0123456789
+    cookie-secure: false
+  otp:
+    pepper: test-only-pepper
+    log-code: true
+  storage:
+    local-dir: build/test-uploads

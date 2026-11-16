@@ -139,7 +139,7 @@ flowchart TB
         SSR["Trang khách SSR<br/>/, /c/slug, /p/slug, /search, /cart, /checkout, /account"]
         CTV["/ctv - CSR"]
         ADM["/admin - CSR"]
-        MW["middleware.ts<br/>chặn /admin, /ctv theo role<br/>đọc ?ref"]
+        MW["proxy.ts (middleware Next 16)<br/>chặn /admin, /ctv theo role<br/>đọc ?ref"]
         RW["rewrites /api/* → backend<br/>cookie cùng origin"]
     end
 
@@ -215,20 +215,23 @@ com.vietnl.hwin
 │
 ├── identity/
 │   ├── api/             AuthController, AdminAuthController
-│   │   ├── dto/         OtpRequest, OtpVerifyRequest, AdminLoginRequest, MeResponse
+│   │   ├── dto/         AuthDtos (OtpRequest, OtpVerifyRequest, AdminLoginRequest, MeResponse)
 │   │   └── mapper/      UserMapper
-│   ├── service/         AuthService, OtpService*, TokenService, UserQueryService*, UserRoleService*, AdminSeeder
+│   ├── service/         AuthService, UserAccountService, OtpService*, TokenService, UserQueryService*, UserRoleService*,
+│   │   │                OtpProperties, AdminSeeder
 │   │   └── integration/ OtpSender (port), LogOtpSender (dev)
-│   ├── entity/          UserAccount, RefreshToken, Role, UserStatus, UserRegistered*  (event)
+│   ├── entity/          UserAccount, RefreshToken, Role, UserStatus, OtpPurpose, UserRegistered*  (event)
 │   └── repository/      UserAccountRepository, RefreshTokenRepository
 │
 ├── catalog/
-│   ├── api/             CategoryController, ProductController, AdminCategoryController, AdminProductController, UploadController
-│   │   ├── dto/         CategoryResponse, ProductCardResponse, ProductDetailResponse, ProductUpsertRequest, …
-│   │   └── mapper/      CategoryMapper, ProductMapper
-│   ├── service/         CategoryService, ProductService, ProductSearchService, ProductQueryService*, InventoryService*
+│   ├── api/             CategoryController, ProductController, AdminCategoryController, AdminProductController (kèm upload)
+│   │   ├── dto/         CatalogDtos (CategoryResponse, ProductCardResponse, ProductDetailResponse, ProductUpsertRequest, …)
+│   │   └── mapper/      CatalogMapper
+│   ├── service/         CategoryService, ProductAdminService, ProductSearchService, ProductQueryService*, ProductSnapshot*,
+│   │   │                InventoryService* (Chặng 2)
 │   │   └── integration/ StorageService (port), LocalStorageService
-│   ├── entity/          Category, Product, ProductImage, FoodInfo (@Embeddable), StockMovement, StockMovementType
+│   ├── entity/          Category, Product, ProductImage, ProductDetails (VO), FoodInfo (@Embeddable), ProductSort,
+│   │                StockMovement, StockMovementType (Chặng 2)
 │   └── repository/      CategoryRepository, ProductRepository
 │
 ├── ordering/
@@ -317,7 +320,7 @@ Tất cả event là `record` bất biến, kế thừa `DomainEvent` (`eventId`
 
 ```yaml
 hwin:
-  frontend-origin: ${FRONTEND_ORIGIN:http://localhost:3000}
+  cors-origins: ${FRONTEND_ORIGIN:http://localhost:3100}   # nằm trong hwin.security
   security:
     jwt-secret: ${JWT_SECRET}
     access-token-ttl: 15m

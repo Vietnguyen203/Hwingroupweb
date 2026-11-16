@@ -1,0 +1,41 @@
+// Gọi API catalog từ Server Component (SSR). Không cache: dữ liệu giá/tồn kho luôn mới.
+import { backendUrl } from "./config";
+import type { Category, Page, ProductCard, ProductDetail, ProductSort } from "./types";
+
+async function get<T>(path: string): Promise<T | null> {
+  const res = await fetch(`${backendUrl}${path}`, { headers: { Accept: "application/json" } });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Backend ${res.status} khi gọi ${path}`);
+  return (await res.json()) as T;
+}
+
+export async function getCategories(): Promise<Category[]> {
+  return (await get<Category[]>("/api/categories")) ?? [];
+}
+
+export async function getBestsellers(limit = 8): Promise<ProductCard[]> {
+  return (await get<ProductCard[]>(`/api/products/bestsellers?limit=${limit}`)) ?? [];
+}
+
+export type SearchParams = {
+  q?: string;
+  category?: string;
+  sort?: ProductSort;
+  page?: number;
+  size?: number;
+};
+
+export async function searchProducts(params: SearchParams): Promise<Page<ProductCard>> {
+  const qs = new URLSearchParams();
+  if (params.q) qs.set("q", params.q);
+  if (params.category) qs.set("category", params.category);
+  if (params.sort) qs.set("sort", params.sort);
+  qs.set("page", String(params.page ?? 0));
+  qs.set("size", String(params.size ?? 20));
+  const page = await get<Page<ProductCard>>(`/api/products?${qs.toString()}`);
+  return page ?? { content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 };
+}
+
+export async function getProduct(slug: string): Promise<ProductDetail | null> {
+  return get<ProductDetail>(`/api/products/${encodeURIComponent(slug)}`);
+}

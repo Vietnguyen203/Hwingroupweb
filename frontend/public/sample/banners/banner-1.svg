@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" width="1200" height="500">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c31432"/><stop offset="1" stop-color="#f7b733"/></linearGradient></defs>
+<rect width="1200" height="500" fill="url(#g)"/>
+<text x="80" y="210" font-family="Arial, sans-serif" font-size="76" font-weight="800" fill="#fff">Đặc sản chế biến sẵn</text>
+<text x="80" y="290" font-family="Arial, sans-serif" font-size="40" fill="#fff" fill-opacity="0.92">Giao nhanh – Giữ lạnh tận nơi</text>
+<rect x="80" y="340" width="260" height="70" rx="35" fill="#fff"/>
+<text x="210" y="386" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#c31432" text-anchor="middle">Mua ngay</text>
+<text x="1000" y="330" font-size="180" text-anchor="middle">🍥🌭🦐</text>
+</svg>

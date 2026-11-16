@@ -40,7 +40,6 @@ erDiagram
     user_role {
         bigint user_id PK, FK
         varchar role PK "CUSTOMER | AFFILIATE | ADMIN"
-        timestamptz granted_at
     }
 
     refresh_token {
