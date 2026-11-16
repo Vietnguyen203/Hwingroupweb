@@ -1,6 +1,6 @@
 create table ordering.cart
 (
-    id         uuid primary key default gen_random_uuid(),
+    id         uuid primary key default public.uuid_generate_v7(),
     user_id    uuid        not null unique, -- ref -> identity.user_account (ID, không FK)
     version    bigint      not null default 0,
     created_at timestamptz not null default now(),
@@ -9,7 +9,7 @@ create table ordering.cart
 
 create table ordering.cart_item
 (
-    id         uuid primary key default gen_random_uuid(),
+    id         uuid primary key default public.uuid_generate_v7(),
     cart_id    uuid        not null references ordering.cart (id) on delete cascade,
     product_id uuid        not null, -- ref -> catalog.product (ID, không FK)
     quantity   integer     not null check (quantity between 1 and 99),
@@ -19,7 +19,7 @@ create table ordering.cart_item
 
 create table ordering.orders
 (
-    id               uuid primary key default gen_random_uuid(),
+    id               uuid primary key default public.uuid_generate_v7(),
     order_code       varchar(20)  not null unique,
     customer_id      uuid         not null, -- ref -> customer.customer (= userId)
     referral_code    varchar(16),
@@ -62,7 +62,7 @@ create index idx_orders_status on ordering.orders (status, placed_at);
 
 create table ordering.order_item
 (
-    id           uuid primary key default gen_random_uuid(),
+    id           uuid primary key default public.uuid_generate_v7(),
     order_id     uuid         not null references ordering.orders (id) on delete cascade,
     product_id   uuid         not null, -- ref -> catalog.product (ID, không FK)
     product_name varchar(200) not null,
@@ -76,7 +76,7 @@ create index idx_order_item_order on ordering.order_item (order_id);
 
 create table ordering.order_status_history
 (
-    id          uuid primary key default gen_random_uuid(),
+    id          uuid primary key default public.uuid_generate_v7(),
     order_id    uuid        not null references ordering.orders (id) on delete cascade,
     from_status varchar(16),
     to_status   varchar(16) not null,

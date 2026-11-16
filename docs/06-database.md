@@ -45,7 +45,7 @@ Refresh token (lưu hash SHA-256). Xoay vòng mỗi lần dùng; dùng lại tok
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
 | user_id | `uuid` |  |  |  |
 | token_hash | `character varying(64)` |  |  | SHA-256 của token – không lưu token gốc |
 | family_id | `uuid` |  |  | Chuỗi token sinh ra từ cùng một lần đăng nhập |
@@ -72,7 +72,7 @@ Tài khoản. Khách/CTV định danh bằng SĐT (đăng nhập OTP); admin b�
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
 | phone | `character varying(16)` | ✓ |  | SĐT chuẩn hóa E.164 (+84xxxxxxxxx); null với admin |
 | email | `character varying(255)` | ✓ |  | Email hoặc tên đăng nhập của admin |
 | password_hash | `character varying(100)` | ✓ |  | BCrypt – chỉ admin có |
@@ -114,7 +114,7 @@ Danh mục sản phẩm (menu icon trang chủ)
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
 | name | `character varying(100)` |  |  |  |
 | slug | `character varying(120)` |  |  |  |
 | icon_url | `character varying(500)` | ✓ |  |  |
@@ -134,7 +134,7 @@ Sản phẩm – không có biến thể (1 sản phẩm = 1 giá). Tiền tính
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
 | category_id | `uuid` |  |  | Danh mục (cùng schema – có FK) |
 | name | `character varying(200)` |  |  |  |
 | slug | `character varying(220)` |  |  |  |
@@ -178,7 +178,7 @@ Index:
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
 | product_id | `uuid` |  |  |  |
 | url | `character varying(500)` |  |  |  |
 | sort_order | `integer` |  | 0 |  |
@@ -197,7 +197,7 @@ Nhật ký trừ/hoàn kho theo đơn. Unique (order_id, product_id, type) giúp
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
 | product_id | `uuid` |  |  |  |
 | order_id | `uuid` |  |  | ID đơn bên ordering.orders – chỉ lưu ID, không FK xuyên schema |
 | type | `character varying(16)` |  |  | DEDUCT (trừ khi đặt) \| RESTORE (hoàn khi hủy/trả) |
@@ -225,7 +225,7 @@ Giỏ hàng lưu server – mỗi user một giỏ
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
 | user_id | `uuid` |  |  | ID tài khoản (identity) – không FK xuyên schema |
 | version | `bigint` |  | 0 |  |
 | created_at | `timestamp with time zone` |  | now() |  |
@@ -241,7 +241,7 @@ Dòng giỏ hàng: chỉ productId + số lượng, giá luôn lấy mới từ 
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
 | cart_id | `uuid` |  |  |  |
 | product_id | `uuid` |  |  |  |
 | quantity | `integer` |  |  |  |
@@ -259,7 +259,7 @@ Dòng đơn – chụp lại tên và giá tại thời điểm đặt
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
 | order_id | `uuid` |  |  |  |
 | product_id | `uuid` |  |  | ID sản phẩm bên catalog – không FK xuyên schema |
 | product_name | `character varying(200)` |  |  |  |
@@ -286,7 +286,7 @@ Lịch sử chuyển trạng thái đơn (ai, lúc nào, ghi chú)
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
 | order_id | `uuid` |  |  |  |
 | from_status | `character varying(16)` | ✓ |  |  |
 | to_status | `character varying(16)` |  |  |  |
@@ -308,7 +308,7 @@ Index:
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
 | order_code | `character varying(20)` |  |  | Mã đơn hiển thị cho khách: HW + yyMMdd + 4 ký tự ngẫu nhiên |
 | customer_id | `uuid` |  |  | ID khách (= id tài khoản) – không FK xuyên schema |
 | referral_code | `character varying(16)` | ✓ |  | Mã CTV đọc từ cookie hwin_ref lúc đặt hàng |
@@ -388,7 +388,7 @@ Sổ địa chỉ (tối đa 10, đúng 1 địa chỉ mặc định)
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
 | customer_id | `uuid` |  |  |  |
 | recipient_name | `character varying(100)` |  |  |  |
 | recipient_phone | `character varying(16)` |  |  |  |
@@ -464,7 +464,7 @@ Nhật ký thay đổi liên quan tới tiền. Chỉ INSERT – trigger chặn 
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
 | module | `character varying(32)` |  |  |  |
 | aggregate_type | `character varying(64)` |  |  |  |
 | aggregate_id | `character varying(64)` |  |  |  |

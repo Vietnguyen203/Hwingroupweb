@@ -15,6 +15,21 @@ create or replace function public.f_unaccent(text) returns text
     language sql immutable parallel safe strict
 as $$ select public.unaccent('public.unaccent'::regdictionary, $1) $$;
 
+-- UUID v7 (RFC 9562): 48 bit thời gian (ms) + ngẫu nhiên -> có thứ tự theo thời gian, index B-tree gọn.
+-- Dùng làm DEFAULT cho mọi cột id. Postgres 18 có sẵn uuidv7(); Postgres 17 chưa có nên tự định nghĩa.
+-- Cách làm: lấy UUID v4 ngẫu nhiên, ghi đè 6 byte đầu bằng timestamp ms, đổi version 4 -> 7 (bật bit 52, 53).
+create or replace function public.uuid_generate_v7() returns uuid
+    language sql volatile parallel safe
+as $$
+select encode(
+           set_bit(set_bit(
+               overlay(uuid_send(gen_random_uuid())
+                       placing substring(int8send((extract(epoch from clock_timestamp()) * 1000)::bigint) from 3)
+                       from 1 for 6),
+               52, 1), 53, 1),
+           'hex')::uuid
+$$;
+
 -- Spring Modulith Event Publication Registry (JPA)
 create table public.event_publication
 (
@@ -34,7 +49,7 @@ create index idx_event_publication_incomplete on public.event_publication (compl
 -- Nhật ký kiểm toán: chỉ ghi thêm
 create table audit.audit_log
 (
-    id             uuid primary key default gen_random_uuid(),
+    id             uuid primary key default public.uuid_generate_v7(),
     module         varchar(32)  not null,
     aggregate_type varchar(64)  not null,
     aggregate_id   varchar(64)  not null,

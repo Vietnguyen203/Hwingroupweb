@@ -2,7 +2,7 @@
 -- khi listener chạy lại.
 create table catalog.stock_movement
 (
-    id         uuid primary key default gen_random_uuid(),
+    id         uuid primary key default public.uuid_generate_v7(),
     product_id uuid        not null references catalog.product (id),
     order_id   uuid        not null, -- ref -> ordering.orders (ID, không FK)
     type       varchar(16) not null check (type in ('DEDUCT', 'RESTORE')),

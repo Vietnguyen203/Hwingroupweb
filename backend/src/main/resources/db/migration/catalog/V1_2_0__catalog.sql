@@ -1,6 +1,6 @@
 create table catalog.category
 (
-    id         uuid primary key default gen_random_uuid(),
+    id         uuid primary key default public.uuid_generate_v7(),
     name       varchar(100) not null,
     slug       varchar(120) not null unique,
     icon_url   varchar(500),
@@ -13,7 +13,7 @@ create table catalog.category
 
 create table catalog.product
 (
-    id                      uuid primary key default gen_random_uuid(),
+    id                      uuid primary key default public.uuid_generate_v7(),
     category_id             uuid         not null references catalog.category (id),
     name                    varchar(200) not null,
     slug                    varchar(220) not null unique,
@@ -46,7 +46,7 @@ create index idx_product_search_trgm on catalog.product using gin (search_text g
 
 create table catalog.product_image
 (
-    id         uuid primary key default gen_random_uuid(),
+    id         uuid primary key default public.uuid_generate_v7(),
     product_id uuid         not null references catalog.product (id) on delete cascade,
     url        varchar(500) not null,
     sort_order integer      not null default 0

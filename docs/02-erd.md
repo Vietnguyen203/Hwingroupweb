@@ -6,7 +6,7 @@
 
 - Mỗi bounded context một **schema PostgreSQL**: `identity`, `catalog`, `ordering`, `customer`, `affiliate`; thêm `audit` (do `common` quản lý) và `public` (bảng `event_publication` của Spring Modulith, bảng lịch sử Flyway).
 - **Không có foreign key xuyên schema.** Cột tham chiếu sang module khác chỉ lưu ID và được đánh dấu `"ref → schema.table (ID, không FK)"` trong sơ đồ.
-- Khóa chính: `uuid` – ứng dụng sinh **UUID v7** (có thứ tự theo thời gian, index B-tree gọn như số tăng dần; không đoán được số lượng bản ghi). DB có `default gen_random_uuid()` cho dữ liệu chèn tay. Riêng `customer.customer.id` **= `identity.user_account.id`** (không tự sinh).
+- Khóa chính: `uuid` – ứng dụng sinh **UUID v7** (có thứ tự theo thời gian, index B-tree gọn như số tăng dần; không đoán được số lượng bản ghi). DB cũng mặc định sinh UUID v7 (`default public.uuid_generate_v7()`) nên dữ liệu chèn tay bằng SQL cùng định dạng. Riêng `customer.customer.id` **= `identity.user_account.id`** (không tự sinh).
 - Tiền: `bigint` đơn vị **VND** (value object `Money`), ràng buộc `CHECK (>= 0)`.
 - Thời gian: `timestamptz` (UTC). Mọi bảng có `created_at`, `updated_at`; aggregate root có thêm `version bigint` cho optimistic locking.
 - Enum lưu dạng `varchar` + `CHECK` (dễ đọc, dễ đổi hơn enum PostgreSQL).

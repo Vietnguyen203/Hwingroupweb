@@ -10,7 +10,7 @@ create table customer.customer
 
 create table customer.customer_address
 (
-    id              uuid primary key default gen_random_uuid(),
+    id              uuid primary key default public.uuid_generate_v7(),
     customer_id     uuid         not null references customer.customer (id) on delete cascade,
     recipient_name  varchar(100) not null,
     recipient_phone varchar(16)  not null,

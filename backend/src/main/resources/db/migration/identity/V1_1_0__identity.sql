@@ -1,6 +1,6 @@
 create table identity.user_account
 (
-    id            uuid primary key default gen_random_uuid(),
+    id            uuid primary key default public.uuid_generate_v7(),
     phone         varchar(16) unique,
     email         varchar(255) unique,
     password_hash varchar(100),
@@ -22,7 +22,7 @@ create table identity.user_role
 
 create table identity.refresh_token
 (
-    id             uuid primary key default gen_random_uuid(),
+    id             uuid primary key default public.uuid_generate_v7(),
     user_id        uuid         not null references identity.user_account (id) on delete cascade,
     token_hash     varchar(64)  not null unique,
     family_id      uuid         not null,
