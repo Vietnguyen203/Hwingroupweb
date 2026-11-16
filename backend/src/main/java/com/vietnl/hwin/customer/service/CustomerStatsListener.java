@@ -67,7 +67,7 @@ public class CustomerStatsListener {
         voided(e.eventId(), e.customerId(), e.total(), e.items(), e.occurredAt());
     }
 
-    private void voided(UUID eventId, Long customerId, long total, List<OrderItemSnapshot> items, Instant at) {
+    private void voided(UUID eventId, UUID customerId, long total, List<OrderItemSnapshot> items, Instant at) {
         if (!firstTime(eventId)) {
             return;
         }
@@ -83,7 +83,7 @@ public class CustomerStatsListener {
         }
     }
 
-    private CustomerStats load(Long customerId) {
+    private CustomerStats load(UUID customerId) {
         return stats.findById(customerId).orElseGet(() -> CustomerStats.empty(customerId, clock.instant()));
     }
 

@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.api.mapper;
 
+import java.util.UUID;
+
 import java.util.List;
 import java.util.Map;
 
@@ -87,8 +89,8 @@ public interface OrderingMapper {
                 h.getToStatus().name(), h.getActorId(), h.getNote(), h.getCreatedAt());
     }
 
-    default Map<Long, Integer> toQuantities(List<CartItemRequest> items) {
-        java.util.LinkedHashMap<Long, Integer> map = new java.util.LinkedHashMap<>();
+    default Map<UUID, Integer> toQuantities(List<CartItemRequest> items) {
+        java.util.LinkedHashMap<UUID, Integer> map = new java.util.LinkedHashMap<>();
         items.forEach(i -> map.merge(i.productId(), i.quantity(), Integer::sum));
         return map;
     }

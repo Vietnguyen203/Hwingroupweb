@@ -12,9 +12,9 @@ import com.vietnl.hwin.common.domain.DomainEvent;
  * Module customer nghe để tạo hồ sơ Customer (id = userId).
  */
 @NamedInterface("events")
-public record UserRegistered(UUID eventId, Instant occurredAt, Long userId, String phone) implements DomainEvent {
+public record UserRegistered(UUID eventId, Instant occurredAt, UUID userId, String phone) implements DomainEvent {
 
-    public static UserRegistered of(Long userId, String phone, Instant now) {
+    public static UserRegistered of(UUID userId, String phone, Instant now) {
         return new UserRegistered(UUID.randomUUID(), now, userId, phone);
     }
 }

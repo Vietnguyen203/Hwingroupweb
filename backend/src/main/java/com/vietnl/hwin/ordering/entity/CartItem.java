@@ -1,13 +1,16 @@
 package com.vietnl.hwin.ordering.entity;
 
+import java.util.UUID;
+
 import java.time.Instant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
+import org.hibernate.annotations.UuidGenerator;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,18 +24,19 @@ import lombok.NoArgsConstructor;
 public class CartItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    private UUID id;
 
     @Column(nullable = false)
-    private Long productId;
+    private UUID productId;
 
     private int quantity;
 
     @Column(nullable = false)
     private Instant addedAt;
 
-    CartItem(Long productId, int quantity, Instant addedAt) {
+    CartItem(UUID productId, int quantity, Instant addedAt) {
         this.productId = productId;
         this.quantity = quantity;
         this.addedAt = addedAt;

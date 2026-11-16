@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.service;
 
+import java.util.UUID;
+
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -90,12 +92,12 @@ public class OrderAdminService {
     }
 
     @Transactional(readOnly = true)
-    public <T> T get(Long id, Function<Order, T> mapper) {
+    public <T> T get(UUID id, Function<Order, T> mapper) {
         return mapper.apply(load(id));
     }
 
     @Transactional
-    public <T> T markPaid(Long id, String paymentRef, Long adminId, Function<Order, T> mapper) {
+    public <T> T markPaid(UUID id, String paymentRef, UUID adminId, Function<Order, T> mapper) {
         Order o = load(id);
         o.markPaid(paymentRef, adminId, clock.instant());
         audit.log("ordering", "Order", o.getOrderCode(), "ORDER_PAID", adminId, o.getTotal().amount(),
@@ -104,14 +106,14 @@ public class OrderAdminService {
     }
 
     @Transactional
-    public <T> T confirm(Long id, Long adminId, Function<Order, T> mapper) {
+    public <T> T confirm(UUID id, UUID adminId, Function<Order, T> mapper) {
         Order o = load(id);
         o.confirm(adminId, clock.instant());
         return mapper.apply(orders.save(o));
     }
 
     @Transactional
-    public <T> T ship(Long id, Long adminId, Function<Order, T> mapper) {
+    public <T> T ship(UUID id, UUID adminId, Function<Order, T> mapper) {
         Order o = load(id);
         o.markShipping(adminId, clock.instant());
         shipping.createShipment(o.getOrderCode(), o.getShippingAddress());
@@ -119,14 +121,14 @@ public class OrderAdminService {
     }
 
     @Transactional
-    public <T> T deliver(Long id, Long adminId, Function<Order, T> mapper) {
+    public <T> T deliver(UUID id, UUID adminId, Function<Order, T> mapper) {
         Order o = load(id);
         o.markDelivered(adminId, clock.instant());
         return mapper.apply(orders.save(o));
     }
 
     @Transactional
-    public <T> T returnOrder(Long id, Long adminId, Function<Order, T> mapper) {
+    public <T> T returnOrder(UUID id, UUID adminId, Function<Order, T> mapper) {
         Order o = load(id);
         o.markReturned(adminId, props.returnWindow(), clock.instant());
         audit.log("ordering", "Order", o.getOrderCode(), "ORDER_RETURNED", adminId, o.getTotal().amount(), null);
@@ -134,7 +136,7 @@ public class OrderAdminService {
     }
 
     @Transactional
-    public <T> T cancel(Long id, String reason, Long adminId, Function<Order, T> mapper) {
+    public <T> T cancel(UUID id, String reason, UUID adminId, Function<Order, T> mapper) {
         Order o = load(id);
         CancelReason r;
         try {
@@ -146,7 +148,7 @@ public class OrderAdminService {
         return mapper.apply(orders.save(o));
     }
 
-    private Order load(Long id) {
+    private Order load(UUID id) {
         return orders.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy đơn hàng"));
     }
 

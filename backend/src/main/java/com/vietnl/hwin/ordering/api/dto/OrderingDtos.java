@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.api.dto;
 
+import java.util.UUID;
+
 import java.time.Instant;
 import java.util.List;
 
@@ -23,7 +25,7 @@ public final class OrderingDtos {
 
     // ------------------------------------------------------------------ giỏ hàng
 
-    public record CartItemRequest(@NotNull Long productId, @Min(1) @Max(99) int quantity) {
+    public record CartItemRequest(@NotNull UUID productId, @Min(1) @Max(99) int quantity) {
     }
 
     public record QuantityRequest(@Min(1) @Max(99) int quantity) {
@@ -75,7 +77,7 @@ public final class OrderingDtos {
     public record VatInvoiceResponse(String companyName, String taxCode, String address, String email) {
     }
 
-    public record OrderItemResponse(Long productId, String productName, String productSlug, String imageUrl,
+    public record OrderItemResponse(UUID productId, String productName, String productSlug, String imageUrl,
                                     long unitPrice, int quantity, long lineTotal) {
     }
 
@@ -98,15 +100,15 @@ public final class OrderingDtos {
                                       boolean cancellable, PaymentInstructionResponse payment) {
     }
 
-    public record HistoryResponse(String fromStatus, String toStatus, Long actorId, String note, Instant at) {
+    public record HistoryResponse(String fromStatus, String toStatus, UUID actorId, String note, Instant at) {
     }
 
     /** Chi tiết cho admin: thêm id, khách, mã CTV, mã giao dịch, lịch sử trạng thái. */
-    public record AdminOrderResponse(Long id, Long customerId, String referralCode, String paymentRef,
+    public record AdminOrderResponse(UUID id, UUID customerId, String referralCode, String paymentRef,
                                      OrderDetailResponse detail, List<HistoryResponse> history) {
     }
 
-    public record AdminOrderRow(Long id, String code, Long customerId, String recipientName, String recipientPhone,
+    public record AdminOrderRow(UUID id, String code, UUID customerId, String recipientName, String recipientPhone,
                                 String status, String paymentMethod, String paymentStatus, long total,
                                 String referralCode, Instant placedAt) {
     }

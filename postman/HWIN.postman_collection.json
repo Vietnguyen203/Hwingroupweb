@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "28d49945-f2eb-4e68-bcc5-5f4204aecc99",
+    "_postman_id": "6f7d4a92-07c5-486a-afc5-2974b969874c",
     "name": "HWIN Backend",
     "description": "Test API backend HWIN. Chọn environment 'HWIN Local'. Chạy theo thứ tự folder 0 → 9. Folder 2 gửi OTP – lấy mã ở log backend, điền vào biến `otp` rồi chạy tiếp từ folder 3.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -320,7 +320,7 @@
             "description": "Giỏ localStorage của khách chưa đăng nhập: client chỉ gửi productId + số lượng, giá do backend tính.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"items\": [\n    {\"productId\": {{productA}}, \"quantity\": 2},\n    {\"productId\": {{productB}}, \"quantity\": 1}\n  ]\n}",
+              "raw": "{\n  \"items\": [\n    {\"productId\": \"{{productA}}\", \"quantity\": 2},\n    {\"productId\": \"{{productB}}\", \"quantity\": 1}\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -643,7 +643,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"items\": [ {\"productId\": {{productA}}, \"quantity\": 2} ]\n}",
+              "raw": "{\n  \"items\": [ {\"productId\": \"{{productA}}\", \"quantity\": 2} ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -689,7 +689,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{ \"productId\": {{productB}}, \"quantity\": 1 }",
+              "raw": "{ \"productId\": \"{{productB}}\", \"quantity\": 1 }",
               "options": {
                 "raw": {
                   "language": "json"
@@ -813,7 +813,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"productId\": 999999,\n  \"quantity\": 1\n}",
+              "raw": "{\n  \"productId\": \"00000000-0000-7000-8000-000000000000\",\n  \"quantity\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -858,7 +858,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{ \"productId\": {{productA}}, \"quantity\": 0 }",
+              "raw": "{ \"productId\": \"{{productA}}\", \"quantity\": 0 }",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1175,7 +1175,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{ \"productId\": {{productB}}, \"quantity\": 1 }",
+              "raw": "{ \"productId\": \"{{productB}}\", \"quantity\": 1 }",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1312,7 +1312,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{ \"productId\": {{productC}}, \"quantity\": 1 }",
+              "raw": "{ \"productId\": \"{{productC}}\", \"quantity\": 1 }",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1827,7 +1827,7 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/me/addresses/999999",
+              "raw": "{{baseUrl}}/api/me/addresses/00000000-0000-7000-8000-000000000000",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1835,7 +1835,7 @@
                 "api",
                 "me",
                 "addresses",
-                "999999"
+                "00000000-0000-7000-8000-000000000000"
               ]
             },
             "description": ""
@@ -1877,7 +1877,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
-                  "pm.test('Có chả lụa', () => pm.expect(pm.response.json().map(p => p.productId)).to.include(Number(pm.collectionVariables.get('productA'))));"
+                  "pm.test('Có chả lụa', () => pm.expect(pm.response.json().map(p => p.productId)).to.include(pm.collectionVariables.get('productA')));"
                 ]
               }
             }
@@ -2371,7 +2371,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"categoryId\": {{categoryId}},\n  \"name\": \"Chả lụa test Postman {{$timestamp}}\",\n  \"slug\": \"\",\n  \"price\": 99000,\n  \"compareAtPrice\": 120000,\n  \"shortDescription\": \"Sản phẩm tạo từ Postman\",\n  \"description\": \"Mô tả chi tiết\",\n  \"unit\": \"đòn 500g\",\n  \"initialStock\": 50,\n  \"bestseller\": false,\n  \"images\": [\n    \"/sample/products/cha-lua-truyen-thong-500g.svg\"\n  ],\n  \"foodInfo\": {\n    \"manufacturer\": \"Công ty test\",\n    \"shelfLife\": \"30 ngày\",\n    \"storageInstructions\": \"Ngăn mát 0–5°C\",\n    \"declarationNumber\": \"TCB-999/2025\",\n    \"foodSafetyCertNumber\": \"ATTP-TEST\",\n    \"foodSafetyCertUrl\": null\n  }\n}",
+              "raw": "{\n  \"categoryId\": \"{{categoryId}}\",\n  \"name\": \"Chả lụa test Postman {{$timestamp}}\",\n  \"slug\": \"\",\n  \"price\": 99000,\n  \"compareAtPrice\": 120000,\n  \"shortDescription\": \"Sản phẩm tạo từ Postman\",\n  \"description\": \"Mô tả chi tiết\",\n  \"unit\": \"đòn 500g\",\n  \"initialStock\": 50,\n  \"bestseller\": false,\n  \"images\": [\n    \"/sample/products/cha-lua-truyen-thong-500g.svg\"\n  ],\n  \"foodInfo\": {\n    \"manufacturer\": \"Công ty test\",\n    \"shelfLife\": \"30 ngày\",\n    \"storageInstructions\": \"Ngăn mát 0–5°C\",\n    \"declarationNumber\": \"TCB-999/2025\",\n    \"foodSafetyCertNumber\": \"ATTP-TEST\",\n    \"foodSafetyCertUrl\": null\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2659,7 +2659,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"categoryId\": 1,\n  \"name\": \"Sai giá\",\n  \"price\": 100000,\n  \"compareAtPrice\": 90000\n}",
+              "raw": "{\n  \"categoryId\": \"{{categoryId}}\",\n  \"name\": \"Sai giá\",\n  \"price\": 100000,\n  \"compareAtPrice\": 90000\n}",
               "options": {
                 "raw": {
                   "language": "json"

@@ -1,14 +1,17 @@
 package com.vietnl.hwin.customer.entity;
 
+import java.util.UUID;
+
 import java.time.Instant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
+import org.hibernate.annotations.UuidGenerator;
 
 import com.vietnl.hwin.common.domain.Address;
 
@@ -24,8 +27,9 @@ import lombok.NoArgsConstructor;
 public class CustomerAddress {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    private UUID id;
 
     @Embedded
     private Address address;

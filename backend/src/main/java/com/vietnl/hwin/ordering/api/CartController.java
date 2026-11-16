@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.api;
 
+import java.util.UUID;
+
 import jakarta.validation.Valid;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -47,13 +49,13 @@ public class CartController {
     }
 
     @PatchMapping("/items/{productId}")
-    public CartView changeQuantity(@AuthenticationPrincipal AuthPrincipal me, @PathVariable Long productId,
+    public CartView changeQuantity(@AuthenticationPrincipal AuthPrincipal me, @PathVariable UUID productId,
                                    @Valid @RequestBody QuantityRequest r) {
         return cartService.changeQuantity(me.userId(), productId, r.quantity());
     }
 
     @DeleteMapping("/items/{productId}")
-    public CartView remove(@AuthenticationPrincipal AuthPrincipal me, @PathVariable Long productId) {
+    public CartView remove(@AuthenticationPrincipal AuthPrincipal me, @PathVariable UUID productId) {
         return cartService.remove(me.userId(), productId);
     }
 

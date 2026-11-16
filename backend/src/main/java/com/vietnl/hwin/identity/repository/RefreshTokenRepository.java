@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.vietnl.hwin.identity.entity.RefreshToken;
 
-public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
+public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID> {
 
     Optional<RefreshToken> findByTokenHash(String tokenHash);
 

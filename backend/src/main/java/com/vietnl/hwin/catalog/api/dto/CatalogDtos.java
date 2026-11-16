@@ -1,5 +1,7 @@
 package com.vietnl.hwin.catalog.api.dto;
 
+import java.util.UUID;
+
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -19,11 +21,11 @@ public final class CatalogDtos {
 
     // ---------- Response ----------
 
-    public record CategoryResponse(Long id, String name, String slug, String iconUrl, int sortOrder, boolean active) {
+    public record CategoryResponse(UUID id, String name, String slug, String iconUrl, int sortOrder, boolean active) {
     }
 
     /** Thẻ sản phẩm trong danh sách. */
-    public record ProductCardResponse(Long id, String name, String slug, long price, Long compareAtPrice,
+    public record ProductCardResponse(UUID id, String name, String slug, long price, Long compareAtPrice,
                                       int discountPercent, String imageUrl, String unit, boolean inStock,
                                       boolean bestseller) {
     }
@@ -37,14 +39,14 @@ public final class CatalogDtos {
             @Size(max = 500) String foodSafetyCertUrl) {
     }
 
-    public record ProductDetailResponse(Long id, String name, String slug, long price, Long compareAtPrice,
+    public record ProductDetailResponse(UUID id, String name, String slug, long price, Long compareAtPrice,
                                         int discountPercent, String shortDescription, String description,
                                         String unit, boolean inStock, int stock, boolean bestseller,
                                         List<String> images, FoodInfoDto foodInfo, CategoryResponse category) {
     }
 
     /** Dòng sản phẩm trong trang admin. */
-    public record AdminProductResponse(Long id, Long categoryId, String name, String slug, long price,
+    public record AdminProductResponse(UUID id, UUID categoryId, String name, String slug, long price,
                                        Long compareAtPrice, String shortDescription, String description,
                                        String unit, int stock, boolean active, boolean bestseller, int soldCount,
                                        List<String> images, FoodInfoDto foodInfo) {
@@ -61,7 +63,7 @@ public final class CatalogDtos {
     }
 
     public record ProductUpsertRequest(
-            @NotNull Long categoryId,
+            @NotNull UUID categoryId,
             @NotBlank @Size(max = 200) String name,
             @Size(max = 220) String slug,
             @NotNull @Positive Long price,

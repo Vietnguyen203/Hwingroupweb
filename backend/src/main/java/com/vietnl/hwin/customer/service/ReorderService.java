@@ -1,5 +1,7 @@
 package com.vietnl.hwin.customer.service;
 
+import java.util.UUID;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,23 +34,23 @@ public class ReorderService {
         this.cart = cart;
     }
 
-    public record Added(Long productId, String name, int quantity) {
+    public record Added(UUID productId, String name, int quantity) {
     }
 
     /** @param reason INACTIVE (ngừng bán), OUT_OF_STOCK, NOT_FOUND */
-    public record Skipped(Long productId, String name, String reason) {
+    public record Skipped(UUID productId, String name, String reason) {
     }
 
     public record Result(List<Added> added, List<Skipped> skipped) {
     }
 
-    public Result reorder(Long customerId, String orderCode) {
-        Map<Long, Integer> items = orders.findItemsForCustomer(orderCode, customerId)
+    public Result reorder(UUID customerId, String orderCode) {
+        Map<UUID, Integer> items = orders.findItemsForCustomer(orderCode, customerId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy đơn hàng"));
-        Map<Long, ProductSnapshot> snapshots = products.findSnapshots(items.keySet()).stream()
+        Map<UUID, ProductSnapshot> snapshots = products.findSnapshots(items.keySet()).stream()
                 .collect(Collectors.toMap(ProductSnapshot::id, Function.identity()));
 
-        Map<Long, Integer> toAdd = new LinkedHashMap<>();
+        Map<UUID, Integer> toAdd = new LinkedHashMap<>();
         List<Added> added = new ArrayList<>();
         List<Skipped> skipped = new ArrayList<>();
         items.forEach((productId, qty) -> {

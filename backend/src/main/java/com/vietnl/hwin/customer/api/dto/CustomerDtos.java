@@ -1,5 +1,7 @@
 package com.vietnl.hwin.customer.api.dto;
 
+import java.util.UUID;
+
 import java.time.Instant;
 
 import jakarta.validation.constraints.NotBlank;
@@ -12,7 +14,7 @@ public final class CustomerDtos {
     private CustomerDtos() {
     }
 
-    public record ProfileResponse(Long id, String phone, String fullName, int totalOrders, long totalSpent,
+    public record ProfileResponse(UUID id, String phone, String fullName, int totalOrders, long totalSpent,
                                   Instant firstOrderAt, Instant lastOrderAt) {
     }
 
@@ -29,12 +31,12 @@ public final class CustomerDtos {
             boolean makeDefault) {
     }
 
-    public record AddressResponse(Long id, String recipientName, String recipientPhone, String province,
+    public record AddressResponse(UUID id, String recipientName, String recipientPhone, String province,
                                   String district, String ward, String street, String fullText,
                                   boolean isDefault) {
     }
 
-    public record FavoriteProductResponse(Long productId, String name, String slug, String imageUrl, long price,
+    public record FavoriteProductResponse(UUID productId, String name, String slug, String imageUrl, long price,
                                           boolean inStock, int totalQuantity, int orderCount) {
     }
 }

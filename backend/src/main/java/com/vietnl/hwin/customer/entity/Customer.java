@@ -1,5 +1,7 @@
 package com.vietnl.hwin.customer.entity;
 
+import java.util.UUID;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,7 +39,7 @@ public class Customer extends AggregateRoot<Customer> {
     public static final int MAX_ADDRESSES = 10;
 
     @Id
-    private Long id;
+    private UUID id;
 
     @Column(nullable = false, unique = true)
     private PhoneNumber phone;
@@ -48,7 +50,7 @@ public class Customer extends AggregateRoot<Customer> {
     @JoinColumn(name = "customer_id", nullable = false)
     private List<CustomerAddress> addresses = new ArrayList<>();
 
-    public static Customer register(Long userId, PhoneNumber phone) {
+    public static Customer register(UUID userId, PhoneNumber phone) {
         Customer c = new Customer();
         c.id = userId;
         c.phone = phone;
@@ -76,17 +78,17 @@ public class Customer extends AggregateRoot<Customer> {
         return a;
     }
 
-    public void updateAddress(Long addressId, Address address) {
+    public void updateAddress(UUID addressId, Address address) {
         find(addressId).change(address);
     }
 
-    public void setDefaultAddress(Long addressId) {
+    public void setDefaultAddress(UUID addressId) {
         CustomerAddress target = find(addressId);
         addresses.forEach(a -> a.markDefault(a == target));
     }
 
     /** Xóa địa chỉ; nếu xóa địa chỉ mặc định thì địa chỉ mới nhất còn lại thành mặc định. */
-    public void removeAddress(Long addressId) {
+    public void removeAddress(UUID addressId) {
         CustomerAddress target = find(addressId);
         addresses.remove(target);
         if (target.isDefaultAddress() && !addresses.isEmpty()) {
@@ -104,7 +106,7 @@ public class Customer extends AggregateRoot<Customer> {
     }
 
     /** Không tìm thấy -> 404 (không tiết lộ địa chỉ của khách khác – chống IDOR). */
-    private CustomerAddress find(Long addressId) {
+    private CustomerAddress find(UUID addressId) {
         return addresses.stream().filter(a -> a.getId() != null && a.getId().equals(addressId)).findFirst()
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy địa chỉ"));
     }

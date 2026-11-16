@@ -9,7 +9,7 @@ import { persist } from "zustand/middleware";
  * Sau khi đăng nhập (Chặng 2) sẽ gộp lên giỏ server qua POST /api/cart/merge.
  */
 export type CartLine = {
-  productId: number;
+  productId: string;
   slug: string;
   name: string;
   price: number;
@@ -22,8 +22,8 @@ const MAX_QTY = 99;
 type CartState = {
   lines: CartLine[];
   add: (line: Omit<CartLine, "quantity">, quantity?: number) => void;
-  setQuantity: (productId: number, quantity: number) => void;
-  remove: (productId: number) => void;
+  setQuantity: (productId: string, quantity: number) => void;
+  remove: (productId: string) => void;
   clear: () => void;
 };
 
@@ -54,7 +54,7 @@ export const useCart = create<CartState>()(
       remove: (productId) => set((s) => ({ lines: s.lines.filter((l) => l.productId !== productId) })),
       clear: () => set({ lines: [] }),
     }),
-    { name: "hwin-cart" },
+    { name: "hwin-cart-v2" }, // v2: id sản phẩm dạng UUID
   ),
 );
 

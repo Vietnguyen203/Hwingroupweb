@@ -1,5 +1,7 @@
 package com.vietnl.hwin.customer.entity;
 
+import java.util.UUID;
+
 import java.io.Serializable;
 import java.time.Instant;
 
@@ -28,7 +30,7 @@ public class CustomerProductStat {
 
     private Instant lastOrderedAt;
 
-    public static CustomerProductStat start(Long customerId, Long productId) {
+    public static CustomerProductStat start(UUID customerId, UUID productId) {
         CustomerProductStat s = new CustomerProductStat();
         s.id = new Key(customerId, productId);
         return s;
@@ -48,6 +50,6 @@ public class CustomerProductStat {
     }
 
     @Embeddable
-    public record Key(Long customerId, Long productId) implements Serializable {
+    public record Key(UUID customerId, UUID productId) implements Serializable {
     }
 }

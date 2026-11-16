@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.entity;
 
+import java.util.UUID;
+
 import java.time.Instant;
 
 import jakarta.persistence.Column;
@@ -7,9 +9,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
+import org.hibernate.annotations.UuidGenerator;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -23,8 +26,9 @@ import lombok.NoArgsConstructor;
 public class OrderStatusHistory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    private UUID id;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus fromStatus;
@@ -34,14 +38,14 @@ public class OrderStatusHistory {
     private OrderStatus toStatus;
 
     /** null khi do hệ thống / job thực hiện. */
-    private Long actorId;
+    private UUID actorId;
 
     private String note;
 
     @Column(nullable = false)
     private Instant createdAt;
 
-    OrderStatusHistory(OrderStatus from, OrderStatus to, Long actorId, String note, Instant at) {
+    OrderStatusHistory(OrderStatus from, OrderStatus to, UUID actorId, String note, Instant at) {
         this.fromStatus = from;
         this.toStatus = to;
         this.actorId = actorId;

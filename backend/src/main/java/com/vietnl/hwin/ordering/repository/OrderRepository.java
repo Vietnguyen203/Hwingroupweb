@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.repository;
 
+import java.util.UUID;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -14,19 +16,19 @@ import org.springframework.data.repository.query.Param;
 import com.vietnl.hwin.ordering.entity.Order;
 import com.vietnl.hwin.ordering.entity.OrderStatus;
 
-public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
+public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecificationExecutor<Order> {
 
     /** Luôn lọc theo customerId để chống xem đơn của người khác (IDOR). */
-    Optional<Order> findByOrderCodeAndCustomerId(String orderCode, Long customerId);
+    Optional<Order> findByOrderCodeAndCustomerId(String orderCode, UUID customerId);
 
-    Page<Order> findByCustomerId(Long customerId, Pageable pageable);
+    Page<Order> findByCustomerId(UUID customerId, Pageable pageable);
 
-    Page<Order> findByCustomerIdAndStatus(Long customerId, OrderStatus status, Pageable pageable);
+    Page<Order> findByCustomerIdAndStatus(UUID customerId, OrderStatus status, Pageable pageable);
 
     boolean existsByOrderCode(String orderCode);
 
     /** Đơn đã giao quá hạn đổi trả – để job chuyển COMPLETED. */
     @Query("select o.id from Order o where o.status = com.vietnl.hwin.ordering.entity.OrderStatus.DELIVERED "
             + "and o.deliveredAt < :cutoff")
-    List<Long> findDeliveredBefore(@Param("cutoff") Instant cutoff, Pageable pageable);
+    List<UUID> findDeliveredBefore(@Param("cutoff") Instant cutoff, Pageable pageable);
 }

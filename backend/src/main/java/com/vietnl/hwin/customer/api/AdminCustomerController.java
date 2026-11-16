@@ -1,5 +1,7 @@
 package com.vietnl.hwin.customer.api;
 
+import java.util.UUID;
+
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
@@ -43,7 +45,7 @@ public class AdminCustomerController {
     }
 
     @GetMapping("/{id}")
-    public CustomerRow get(@PathVariable Long id) {
+    public CustomerRow get(@PathVariable UUID id) {
         return service.get(id);
     }
 

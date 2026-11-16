@@ -1,7 +1,7 @@
 create table ordering.cart
 (
-    id         bigint generated always as identity primary key,
-    user_id    bigint      not null unique, -- ref -> identity.user_account (ID, không FK)
+    id         uuid primary key default gen_random_uuid(),
+    user_id    uuid        not null unique, -- ref -> identity.user_account (ID, không FK)
     version    bigint      not null default 0,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
@@ -9,9 +9,9 @@ create table ordering.cart
 
 create table ordering.cart_item
 (
-    id         bigint generated always as identity primary key,
-    cart_id    bigint      not null references ordering.cart (id) on delete cascade,
-    product_id bigint      not null, -- ref -> catalog.product (ID, không FK)
+    id         uuid primary key default gen_random_uuid(),
+    cart_id    uuid        not null references ordering.cart (id) on delete cascade,
+    product_id uuid        not null, -- ref -> catalog.product (ID, không FK)
     quantity   integer     not null check (quantity between 1 and 99),
     added_at   timestamptz not null default now(),
     constraint uq_cart_item unique (cart_id, product_id)
@@ -19,9 +19,9 @@ create table ordering.cart_item
 
 create table ordering.orders
 (
-    id               bigint generated always as identity primary key,
+    id               uuid primary key default gen_random_uuid(),
     order_code       varchar(20)  not null unique,
-    customer_id      bigint       not null, -- ref -> customer.customer (= userId)
+    customer_id      uuid         not null, -- ref -> customer.customer (= userId)
     referral_code    varchar(16),
     status           varchar(16)  not null check (status in
         ('PENDING', 'CONFIRMED', 'SHIPPING', 'DELIVERED', 'COMPLETED', 'CANCELLED', 'RETURNED')),
@@ -62,9 +62,9 @@ create index idx_orders_status on ordering.orders (status, placed_at);
 
 create table ordering.order_item
 (
-    id           bigint generated always as identity primary key,
-    order_id     bigint       not null references ordering.orders (id) on delete cascade,
-    product_id   bigint       not null, -- ref -> catalog.product (ID, không FK)
+    id           uuid primary key default gen_random_uuid(),
+    order_id     uuid         not null references ordering.orders (id) on delete cascade,
+    product_id   uuid         not null, -- ref -> catalog.product (ID, không FK)
     product_name varchar(200) not null,
     product_slug varchar(220) not null,
     image_url    varchar(500),
@@ -76,11 +76,11 @@ create index idx_order_item_order on ordering.order_item (order_id);
 
 create table ordering.order_status_history
 (
-    id          bigint generated always as identity primary key,
-    order_id    bigint      not null references ordering.orders (id) on delete cascade,
+    id          uuid primary key default gen_random_uuid(),
+    order_id    uuid        not null references ordering.orders (id) on delete cascade,
     from_status varchar(16),
     to_status   varchar(16) not null,
-    actor_id    bigint, -- ref -> identity.user_account, null với job/hệ thống
+    actor_id    uuid  , -- ref -> identity.user_account, null với job/hệ thống
     note        varchar(255),
     created_at  timestamptz not null default now()
 );

@@ -1,6 +1,6 @@
 create table customer.customer
 (
-    id         bigint primary key, -- = identity.user_account.id (ID, không FK)
+    id         uuid   primary key, -- = identity.user_account.id (ID, không FK)
     phone      varchar(16)  not null unique,
     full_name  varchar(100),
     version    bigint       not null default 0,
@@ -10,8 +10,8 @@ create table customer.customer
 
 create table customer.customer_address
 (
-    id              bigint generated always as identity primary key,
-    customer_id     bigint       not null references customer.customer (id) on delete cascade,
+    id              uuid primary key default gen_random_uuid(),
+    customer_id     uuid         not null references customer.customer (id) on delete cascade,
     recipient_name  varchar(100) not null,
     recipient_phone varchar(16)  not null,
     province        varchar(100) not null,
@@ -28,7 +28,7 @@ create index idx_customer_address_customer on customer.customer_address (custome
 -- Read model: thống kê khách, cập nhật qua event của ordering
 create table customer.customer_stats
 (
-    customer_id    bigint primary key references customer.customer (id) on delete cascade,
+    customer_id    uuid   primary key references customer.customer (id) on delete cascade,
     total_orders   integer     not null default 0,
     total_spent    bigint      not null default 0,
     first_order_at timestamptz,
@@ -39,8 +39,8 @@ create index idx_customer_stats_last_order on customer.customer_stats (last_orde
 
 create table customer.customer_product_stat
 (
-    customer_id     bigint      not null references customer.customer (id) on delete cascade,
-    product_id      bigint      not null, -- ref -> catalog.product (ID, không FK)
+    customer_id     uuid        not null references customer.customer (id) on delete cascade,
+    product_id      uuid        not null, -- ref -> catalog.product (ID, không FK)
     total_quantity  integer     not null default 0,
     order_count     integer     not null default 0,
     last_ordered_at timestamptz,

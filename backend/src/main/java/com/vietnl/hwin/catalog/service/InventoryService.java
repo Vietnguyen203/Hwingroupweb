@@ -1,5 +1,7 @@
 package com.vietnl.hwin.catalog.service;
 
+import java.util.UUID;
+
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +43,7 @@ public class InventoryService {
      * @throws DomainException mã {@link #OUT_OF_STOCK} nếu một sản phẩm không đủ hàng
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void deductForOrder(Long orderId, Map<Long, Integer> quantities) {
+    public void deductForOrder(UUID orderId, Map<UUID, Integer> quantities) {
         quantities.forEach((productId, qty) -> {
             if (inventory.recordMovement(productId, orderId, "DEDUCT", qty) == 0) {
                 return; // đã trừ trước đó (event phát lại)
@@ -55,10 +57,10 @@ public class InventoryService {
 
     /** Hoàn kho cho đơn đã trừ kho (không làm gì nếu chưa từng trừ hoặc đã hoàn). */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void restoreForOrder(Long orderId) {
+    public void restoreForOrder(UUID orderId) {
         List<Object[]> rows = inventory.findDeducted(orderId);
         for (Object[] row : rows) {
-            Long productId = ((Number) row[0]).longValue();
+            UUID productId = (UUID) row[0];
             int qty = ((Number) row[1]).intValue();
             if (inventory.recordMovement(productId, orderId, "RESTORE", qty) == 1) {
                 inventory.restore(productId, qty);

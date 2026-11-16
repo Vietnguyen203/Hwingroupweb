@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.service;
 
+import java.util.UUID;
+
 import java.util.List;
 
 /**
@@ -13,7 +15,7 @@ public record CartView(List<Line> lines, long subtotal, long shippingFee, long t
     /**
      * @param problem null nếu mua được; INACTIVE (ngừng bán), OUT_OF_STOCK, INSUFFICIENT_STOCK, NOT_FOUND
      */
-    public record Line(Long productId, String slug, String name, String imageUrl, long unitPrice, int quantity,
+    public record Line(UUID productId, String slug, String name, String imageUrl, long unitPrice, int quantity,
                        long lineTotal, int stock, String problem) {
 
         public boolean available() {

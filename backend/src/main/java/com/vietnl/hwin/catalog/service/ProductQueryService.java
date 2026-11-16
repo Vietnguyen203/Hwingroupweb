@@ -1,5 +1,7 @@
 package com.vietnl.hwin.catalog.service;
 
+import java.util.UUID;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +27,7 @@ public class ProductQueryService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductSnapshot> findSnapshots(Collection<Long> ids) {
+    public List<ProductSnapshot> findSnapshots(Collection<UUID> ids) {
         if (ids == null || ids.isEmpty()) {
             return List.of();
         }
@@ -33,7 +35,7 @@ public class ProductQueryService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<ProductSnapshot> findSnapshot(Long id) {
+    public Optional<ProductSnapshot> findSnapshot(UUID id) {
         return products.findById(id).map(ProductQueryService::toSnapshot);
     }
 

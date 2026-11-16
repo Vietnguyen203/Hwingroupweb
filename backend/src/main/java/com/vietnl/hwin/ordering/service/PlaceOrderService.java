@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.service;
 
+import java.util.UUID;
+
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -70,7 +72,7 @@ public class PlaceOrderService {
      * @param mapper       chuyển Order sang DTO ngay trong transaction (tránh lỗi lazy-load)
      */
     @Transactional
-    public <T> T place(Long customerId, PlaceOrderCommand cmd, String referralCode, Function<Order, T> mapper) {
+    public <T> T place(UUID customerId, PlaceOrderCommand cmd, String referralCode, Function<Order, T> mapper) {
         String idemKey = cmd.idempotencyKey() == null || cmd.idempotencyKey().isBlank() ? null
                 : "idem:order:" + customerId + ":" + cmd.idempotencyKey().trim();
         if (idemKey != null) {
@@ -83,7 +85,7 @@ public class PlaceOrderService {
         rateLimiter.acquireOrThrow("rl:place-order:" + customerId, props.placeOrderLimit(), Duration.ofMinutes(10),
                 "Bạn đặt hàng quá nhanh, vui lòng thử lại sau ít phút");
 
-        Map<Long, Integer> cart = cartService.quantitiesOf(customerId);
+        Map<UUID, Integer> cart = cartService.quantitiesOf(customerId);
         List<OrderLine> lines = pricing.toOrderLines(cart);
         Money subtotal = lines.stream().map(l -> l.unitPrice().times(l.quantity())).reduce(Money.ZERO, Money::plus);
         Instant now = clock.instant();

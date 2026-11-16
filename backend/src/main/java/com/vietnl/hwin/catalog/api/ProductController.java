@@ -1,5 +1,7 @@
 package com.vietnl.hwin.catalog.api;
 
+import java.util.UUID;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -58,7 +60,7 @@ public class ProductController {
 
     @GetMapping("/{slug}")
     public ProductDetailResponse detail(@PathVariable String slug) {
-        Map<Long, CategoryResponse> categories = categoryService.listAll(mapper::toResponse).stream()
+        Map<UUID, CategoryResponse> categories = categoryService.listAll(mapper::toResponse).stream()
                 .collect(Collectors.toMap(CategoryResponse::id, Function.identity()));
         return searchService.getActiveBySlug(slug, p -> mapper.toDetail(p, categories.get(p.getCategoryId())));
     }

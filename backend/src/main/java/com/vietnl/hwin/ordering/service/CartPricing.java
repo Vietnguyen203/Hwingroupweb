@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.service;
 
+import java.util.UUID;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +32,8 @@ public class CartPricing {
     }
 
     /** @param quantities productId -> số lượng, giữ thứ tự hiển thị */
-    public CartView price(Map<Long, Integer> quantities) {
-        Map<Long, ProductSnapshot> snapshots = snapshots(quantities);
+    public CartView price(Map<UUID, Integer> quantities) {
+        Map<UUID, ProductSnapshot> snapshots = snapshots(quantities);
         List<CartView.Line> lines = new ArrayList<>();
         Money subtotal = Money.ZERO;
         int count = 0;
@@ -60,7 +62,7 @@ public class CartPricing {
     /**
      * Chuyển giỏ thành các dòng đặt hàng với giá hiện tại. Dòng nào không mua được -> ném lỗi kèm chi tiết.
      */
-    public List<OrderLine> toOrderLines(Map<Long, Integer> quantities) {
+    public List<OrderLine> toOrderLines(Map<UUID, Integer> quantities) {
         CartView view = price(quantities);
         List<CartView.Line> problems = view.lines().stream().filter(l -> !l.available()).toList();
         if (view.lines().isEmpty()) {
@@ -84,7 +86,7 @@ public class CartPricing {
         return shipping.quoteFee(subtotal, address);
     }
 
-    private Map<Long, ProductSnapshot> snapshots(Map<Long, Integer> quantities) {
+    private Map<UUID, ProductSnapshot> snapshots(Map<UUID, Integer> quantities) {
         return products.findSnapshots(quantities.keySet()).stream()
                 .collect(Collectors.toMap(ProductSnapshot::id, Function.identity()));
     }

@@ -1,5 +1,7 @@
 package com.vietnl.hwin.catalog.api;
 
+import java.util.UUID;
+
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -48,14 +50,14 @@ public class AdminCategoryController {
     }
 
     @PutMapping("/{id}")
-    public CategoryResponse update(@PathVariable Long id, @Valid @RequestBody CategoryUpsertRequest r) {
+    public CategoryResponse update(@PathVariable UUID id, @Valid @RequestBody CategoryUpsertRequest r) {
         return mapper.toResponse(categoryService.update(id, r.name(), r.slug(), r.iconUrl(), r.sortOrder(), r.active()));
     }
 
     /** Ẩn danh mục (không xóa cứng). */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deactivate(@PathVariable Long id) {
+    public void deactivate(@PathVariable UUID id) {
         categoryService.deactivate(id);
     }
 }

@@ -1,5 +1,7 @@
 package com.vietnl.hwin.customer.api;
 
+import java.util.UUID;
+
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -76,7 +78,7 @@ public class MyAccountController {
     }
 
     @PutMapping("/addresses/{id}")
-    public List<AddressResponse> updateAddress(@AuthenticationPrincipal AuthPrincipal me, @PathVariable Long id,
+    public List<AddressResponse> updateAddress(@AuthenticationPrincipal AuthPrincipal me, @PathVariable UUID id,
                                                @Valid @RequestBody AddressRequest r) {
         customers.updateAddress(me.userId(), id, mapper.toAddress(r));
         if (r.makeDefault()) {
@@ -86,14 +88,14 @@ public class MyAccountController {
     }
 
     @PostMapping("/addresses/{id}/default")
-    public List<AddressResponse> setDefault(@AuthenticationPrincipal AuthPrincipal me, @PathVariable Long id) {
+    public List<AddressResponse> setDefault(@AuthenticationPrincipal AuthPrincipal me, @PathVariable UUID id) {
         customers.setDefaultAddress(me.userId(), id);
         return customers.addresses(me.userId(), mapper::toResponse);
     }
 
     @DeleteMapping("/addresses/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteAddress(@AuthenticationPrincipal AuthPrincipal me, @PathVariable Long id) {
+    public void deleteAddress(@AuthenticationPrincipal AuthPrincipal me, @PathVariable UUID id) {
         customers.removeAddress(me.userId(), id);
     }
 

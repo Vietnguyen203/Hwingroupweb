@@ -1,5 +1,7 @@
 package com.vietnl.hwin.identity.entity;
 
+import java.util.UUID;
+
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashSet;
@@ -13,10 +15,11 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
+
+import org.hibernate.annotations.UuidGenerator;
 
 import com.vietnl.hwin.common.domain.AggregateRoot;
 import com.vietnl.hwin.common.domain.PhoneNumber;
@@ -38,8 +41,9 @@ import lombok.NoArgsConstructor;
 public class UserAccount extends AggregateRoot<UserAccount> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    private UUID id;
 
     private PhoneNumber phone;
 

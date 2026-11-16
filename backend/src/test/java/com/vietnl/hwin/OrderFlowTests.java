@@ -55,8 +55,8 @@ class OrderFlowTests {
 
     @Test
     void placeOrderTriggersStockCartAndStatsThenCancelRestores() {
-        Long userId = users.loginByPhone(PhoneNumber.of("0911000001")).getId();
-        Long productId = productIdBySlug("cha-lua-truyen-thong-500g");
+        UUID userId = users.loginByPhone(PhoneNumber.of("0911000001")).getId();
+        UUID productId = productIdBySlug("cha-lua-truyen-thong-500g");
         int stockBefore = products.findSnapshot(productId).orElseThrow().stock();
 
         cart.addItem(userId, productId, 2);
@@ -69,7 +69,7 @@ class OrderFlowTests {
         await(() -> cart.view(userId).lines().isEmpty(), "xóa giỏ");
         await(() -> customers.profile(userId, p -> p.stats().getTotalOrders()) == 1, "thống kê khách");
 
-        orderAdmin.cancel(order.getId(), "ADMIN", 1L, o -> o);
+        orderAdmin.cancel(order.getId(), "ADMIN", UUID.randomUUID(), o -> o);
         await(() -> products.findSnapshot(productId).orElseThrow().stock() == stockBefore, "hoàn kho");
         await(() -> customers.profile(userId, p -> p.stats().getTotalOrders()) == 0, "trừ thống kê");
 
@@ -80,7 +80,7 @@ class OrderFlowTests {
 
     @Test
     void sameIdempotencyKeyReturnsSameOrder() {
-        Long userId = users.loginByPhone(PhoneNumber.of("0911000002")).getId();
+        UUID userId = users.loginByPhone(PhoneNumber.of("0911000002")).getId();
         cart.addItem(userId, productIdBySlug("gio-thu-500g"), 1);
         String key = UUID.randomUUID().toString();
         Order first = placeOrder.place(userId, new PlaceOrderCommand(ADDRESS, PaymentMethod.BANK_QR, null, null, key), null, o -> o);
@@ -91,8 +91,8 @@ class OrderFlowTests {
 
     @Test
     void cannotOrderMoreThanStock() {
-        Long userId = users.loginByPhone(PhoneNumber.of("0911000003")).getId();
-        Long productId = productIdBySlug("tom-kho-loai-1-200g");
+        UUID userId = users.loginByPhone(PhoneNumber.of("0911000003")).getId();
+        UUID productId = productIdBySlug("tom-kho-loai-1-200g");
         int stock = products.findSnapshot(productId).orElseThrow().stock();
         cart.addItem(userId, productId, Math.min(99, stock + 1));
         assertThatThrownBy(() -> placeOrder.place(userId,
@@ -102,15 +102,15 @@ class OrderFlowTests {
 
     @Test
     void reorderOfAnotherCustomersOrderIsNotFound() {
-        Long owner = users.loginByPhone(PhoneNumber.of("0911000004")).getId();
-        Long other = users.loginByPhone(PhoneNumber.of("0911000005")).getId();
+        UUID owner = users.loginByPhone(PhoneNumber.of("0911000004")).getId();
+        UUID other = users.loginByPhone(PhoneNumber.of("0911000005")).getId();
         cart.addItem(owner, productIdBySlug("ruoc-cha-bong-heo-200g"), 1);
         Order order = placeOrder.place(owner, new PlaceOrderCommand(ADDRESS, PaymentMethod.COD, null, null, null), null, o -> o);
         assertThatThrownBy(() -> reorder.reorder(other, order.getOrderCode()))
                 .hasFieldOrPropertyWithValue("code", "NOT_FOUND");
     }
 
-    private Long productIdBySlug(String slug) {
+    private UUID productIdBySlug(String slug) {
         return search.search(new ProductSearchCriteria(null, null, ProductSort.NEWEST, 0, 60, false), p -> p)
                 .getContent().stream().filter(p -> p.getSlug().equals(slug)).findFirst().orElseThrow().getId();
     }

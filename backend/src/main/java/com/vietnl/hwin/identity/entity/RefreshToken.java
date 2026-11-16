@@ -6,9 +6,10 @@ import java.util.UUID;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
+import org.hibernate.annotations.UuidGenerator;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -30,11 +31,12 @@ import lombok.NoArgsConstructor;
 public class RefreshToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    private UUID id;
 
     @Column(nullable = false)
-    private Long userId;
+    private UUID userId;
 
     @Column(nullable = false, unique = true)
     private String tokenHash;
@@ -47,7 +49,7 @@ public class RefreshToken {
 
     private Instant revokedAt;
 
-    private Long replacedById;
+    private UUID replacedById;
 
     private String userAgent;
 
@@ -57,7 +59,7 @@ public class RefreshToken {
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
-    public static RefreshToken issue(Long userId, String tokenHash, UUID familyId, Instant expiresAt,
+    public static RefreshToken issue(UUID userId, String tokenHash, UUID familyId, Instant expiresAt,
                                      String userAgent, String ipHash) {
         RefreshToken t = new RefreshToken();
         t.userId = userId;
@@ -78,7 +80,7 @@ public class RefreshToken {
     }
 
     /** Đánh dấu đã được thay bằng token mới (xoay vòng). */
-    public void rotatedTo(Long newTokenId, Instant now) {
+    public void rotatedTo(UUID newTokenId, Instant now) {
         if (isRevoked()) {
             throw new DomainException("REFRESH_REVOKED", "Refresh token đã bị thu hồi");
         }

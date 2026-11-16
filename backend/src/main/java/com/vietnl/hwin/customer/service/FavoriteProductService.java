@@ -1,5 +1,7 @@
 package com.vietnl.hwin.customer.service;
 
+import java.util.UUID;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -30,9 +32,9 @@ public class FavoriteProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<Favorite> top(Long customerId, int limit) {
+    public List<Favorite> top(UUID customerId, int limit) {
         List<CustomerProductStat> stats = productStats.findTop(customerId, PageRequest.of(0, Math.clamp(limit, 1, 20) * 2));
-        Map<Long, ProductSnapshot> snapshots = products.findSnapshots(
+        Map<UUID, ProductSnapshot> snapshots = products.findSnapshots(
                         stats.stream().map(s -> s.getId().productId()).toList()).stream()
                 .collect(Collectors.toMap(ProductSnapshot::id, Function.identity()));
         return stats.stream()

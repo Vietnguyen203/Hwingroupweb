@@ -1,7 +1,7 @@
 // Kiểu dữ liệu trả về từ backend (khớp DTO ở backend/.../catalog/api/dto)
 
 export type Category = {
-  id: number;
+  id: string;
   name: string;
   slug: string;
   iconUrl: string | null;
@@ -10,7 +10,7 @@ export type Category = {
 };
 
 export type ProductCard = {
-  id: number;
+  id: string;
   name: string;
   slug: string;
   price: number;

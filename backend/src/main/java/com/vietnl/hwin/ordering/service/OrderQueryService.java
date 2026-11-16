@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.service;
 
+import java.util.UUID;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -31,9 +33,9 @@ public class OrderQueryService {
      * @return productId -> số lượng; empty nếu không tìm thấy hoặc không phải đơn của khách
      */
     @Transactional(readOnly = true)
-    public Optional<Map<Long, Integer>> findItemsForCustomer(String orderCode, Long customerId) {
+    public Optional<Map<UUID, Integer>> findItemsForCustomer(String orderCode, UUID customerId) {
         return orders.findByOrderCodeAndCustomerId(orderCode, customerId).map(o -> {
-            Map<Long, Integer> map = new LinkedHashMap<>();
+            Map<UUID, Integer> map = new LinkedHashMap<>();
             for (OrderItem i : o.getItems()) {
                 map.merge(i.getProductId(), i.getQuantity(), Integer::sum);
             }

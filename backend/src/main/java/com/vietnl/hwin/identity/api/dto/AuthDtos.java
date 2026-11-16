@@ -1,5 +1,7 @@
 package com.vietnl.hwin.identity.api.dto;
 
+import java.util.UUID;
+
 import java.util.Set;
 
 import jakarta.validation.constraints.NotBlank;
@@ -33,6 +35,6 @@ public final class AuthDtos {
     }
 
     /** Thông tin người dùng hiện tại. SĐT luôn được che. */
-    public record MeResponse(Long id, String phoneMasked, String email, String fullName, Set<String> roles) {
+    public record MeResponse(UUID id, String phoneMasked, String email, String fullName, Set<String> roles) {
     }
 }

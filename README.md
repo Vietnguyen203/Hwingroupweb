@@ -74,6 +74,7 @@ cd ..\frontend; npm run build; npm run lint
 
 ## Giả định
 
+- **Khóa chính là UUID v7** (sinh bởi Hibernate `@UuidGenerator(style = VERSION_7)`): có thứ tự theo thời gian nên index gọn, không đoán được số bản ghi, sau này tách microservice không lo trùng id. Dữ liệu mẫu chèn bằng SQL dùng `gen_random_uuid()`.
 - **Cổng**: backend 8088, frontend 3100, Postgres 15432, Redis 16379 – tránh trùng các dịch vụ đã chạy sẵn trên máy dev (8080, 3000, 5432, 6379 đang bận).
 - **Next.js 16** đổi tên `middleware.ts` thành `proxy.ts`; file chặn quyền nằm ở `frontend/src/proxy.ts`.
 - **Next.js gọi backend qua rewrite** `/api/*` → cookie JWT là first-party, không cần cấu hình cookie cross-site.

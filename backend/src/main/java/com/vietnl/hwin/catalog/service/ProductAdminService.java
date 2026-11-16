@@ -1,5 +1,7 @@
 package com.vietnl.hwin.catalog.service;
 
+import java.util.UUID;
+
 import java.util.List;
 import java.util.function.Function;
 
@@ -26,12 +28,12 @@ public class ProductAdminService {
     }
 
     @Transactional(readOnly = true)
-    public <T> T get(Long id, Function<Product, T> mapper) {
+    public <T> T get(UUID id, Function<Product, T> mapper) {
         return mapper.apply(load(id));
     }
 
     @Transactional
-    public Long create(ProductDetails details, int stock, List<String> imageUrls, boolean bestseller) {
+    public UUID create(ProductDetails details, int stock, List<String> imageUrls, boolean bestseller) {
         ensureCategoryExists(details.categoryId());
         Product p = Product.create(details, stock, imageUrls);
         p.markBestseller(bestseller);
@@ -42,7 +44,7 @@ public class ProductAdminService {
     }
 
     @Transactional
-    public void update(Long id, ProductDetails details, List<String> imageUrls, boolean bestseller) {
+    public void update(UUID id, ProductDetails details, List<String> imageUrls, boolean bestseller) {
         ensureCategoryExists(details.categoryId());
         Product p = load(id);
         p.updateDetails(details);
@@ -54,12 +56,12 @@ public class ProductAdminService {
     }
 
     @Transactional
-    public void adjustStock(Long id, int delta) {
+    public void adjustStock(UUID id, int delta) {
         load(id).adjustStock(delta);
     }
 
     @Transactional
-    public void setActive(Long id, boolean active) {
+    public void setActive(UUID id, boolean active) {
         Product p = load(id);
         if (active) {
             p.activate();
@@ -68,11 +70,11 @@ public class ProductAdminService {
         }
     }
 
-    private Product load(Long id) {
+    private Product load(UUID id) {
         return products.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm"));
     }
 
-    private void ensureCategoryExists(Long categoryId) {
+    private void ensureCategoryExists(UUID categoryId) {
         if (categoryId == null || !categories.existsById(categoryId)) {
             throw new DomainException("CATEGORY_NOT_FOUND", "Danh mục không tồn tại");
         }

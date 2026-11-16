@@ -1,5 +1,7 @@
 package com.vietnl.hwin.common.audit;
 
+import java.util.UUID;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +22,7 @@ public class AuditLogger {
      * @param detailJson JSON mô tả trước/sau – KHÔNG chứa dữ liệu nhạy cảm (số tài khoản, OTP...)
      */
     public void log(String module, String aggregateType, Object aggregateId, String action,
-                    Long actorId, Long amount, String detailJson) {
+                    UUID actorId, Long amount, String detailJson) {
         jdbc.update("""
                 insert into audit.audit_log(module, aggregate_type, aggregate_id, action, actor_id, amount, detail)
                 values (?, ?, ?, ?, ?, ?, cast(? as jsonb))

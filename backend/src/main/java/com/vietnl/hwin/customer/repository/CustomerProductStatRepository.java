@@ -1,5 +1,7 @@
 package com.vietnl.hwin.customer.repository;
 
+import java.util.UUID;
+
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -14,5 +16,5 @@ public interface CustomerProductStatRepository extends JpaRepository<CustomerPro
 
     @Query("select s from CustomerProductStat s where s.id.customerId = :customerId and s.totalQuantity > 0 "
             + "order by s.totalQuantity desc, s.lastOrderedAt desc")
-    List<CustomerProductStat> findTop(@Param("customerId") Long customerId, Pageable pageable);
+    List<CustomerProductStat> findTop(@Param("customerId") UUID customerId, Pageable pageable);
 }

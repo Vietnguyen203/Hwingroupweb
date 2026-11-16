@@ -1,5 +1,7 @@
 package com.vietnl.hwin.identity.service;
 
+import java.util.UUID;
+
 import java.time.Clock;
 import java.time.Instant;
 
@@ -49,12 +51,12 @@ public class UserAccountService {
     }
 
     @Transactional
-    public void recordLogin(Long userId) {
+    public void recordLogin(UUID userId) {
         get(userId).recordLogin(clock.instant());
     }
 
     @Transactional(readOnly = true)
-    public UserAccount get(Long userId) {
+    public UserAccount get(UUID userId) {
         return users.findById(userId).orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản"));
     }
 }

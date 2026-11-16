@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.service;
 
+import java.util.UUID;
+
 import java.time.Clock;
 import java.util.function.Function;
 
@@ -28,7 +30,7 @@ public class CustomerOrderService {
     }
 
     @Transactional(readOnly = true)
-    public <T> Page<T> list(Long customerId, OrderStatus status, int page, int size, Function<Order, T> mapper) {
+    public <T> Page<T> list(UUID customerId, OrderStatus status, int page, int size, Function<Order, T> mapper) {
         PageRequest pageable = PageRequest.of(Math.max(page, 0), Math.clamp(size, 1, 50),
                 Sort.by(Sort.Order.desc("placedAt")));
         Page<Order> result = status == null ? orders.findByCustomerId(customerId, pageable)
@@ -37,19 +39,19 @@ public class CustomerOrderService {
     }
 
     @Transactional(readOnly = true)
-    public <T> T get(Long customerId, String orderCode, Function<Order, T> mapper) {
+    public <T> T get(UUID customerId, String orderCode, Function<Order, T> mapper) {
         return mapper.apply(load(customerId, orderCode));
     }
 
     /** Khách tự hủy – chỉ khi đơn còn PENDING (quy tắc trong Order.cancel). */
     @Transactional
-    public <T> T cancel(Long customerId, String orderCode, Function<Order, T> mapper) {
+    public <T> T cancel(UUID customerId, String orderCode, Function<Order, T> mapper) {
         Order order = load(customerId, orderCode);
         order.cancel(CancelReason.CUSTOMER_REQUEST, customerId, true, clock.instant());
         return mapper.apply(orders.save(order));
     }
 
-    private Order load(Long customerId, String orderCode) {
+    private Order load(UUID customerId, String orderCode) {
         return orders.findByOrderCodeAndCustomerId(orderCode, customerId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy đơn hàng"));
     }

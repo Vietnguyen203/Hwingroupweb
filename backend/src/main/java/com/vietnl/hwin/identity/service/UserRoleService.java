@@ -1,5 +1,7 @@
 package com.vietnl.hwin.identity.service;
 
+import java.util.UUID;
+
 import org.springframework.modulith.NamedInterface;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,12 +23,12 @@ public class UserRoleService {
     }
 
     @Transactional
-    public void grantAffiliate(Long userId) {
+    public void grantAffiliate(UUID userId) {
         userAccountService.get(userId).grantRole(Role.AFFILIATE);
     }
 
     @Transactional
-    public void revokeAffiliate(Long userId) {
+    public void revokeAffiliate(UUID userId) {
         userAccountService.get(userId).revokeRole(Role.AFFILIATE);
     }
 }

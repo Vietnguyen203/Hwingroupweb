@@ -45,13 +45,13 @@ Refresh token (lưu hash SHA-256). Xoay vòng mỗi lần dùng; dùng lại tok
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `bigint` |  | identity |  |
-| user_id | `bigint` |  |  |  |
+| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| user_id | `uuid` |  |  |  |
 | token_hash | `character varying(64)` |  |  | SHA-256 của token – không lưu token gốc |
 | family_id | `uuid` |  |  | Chuỗi token sinh ra từ cùng một lần đăng nhập |
 | expires_at | `timestamp with time zone` |  |  |  |
 | revoked_at | `timestamp with time zone` | ✓ |  |  |
-| replaced_by_id | `bigint` | ✓ |  | Token kế tiếp sau khi xoay vòng |
+| replaced_by_id | `uuid` | ✓ |  | Token kế tiếp sau khi xoay vòng |
 | user_agent | `character varying(255)` | ✓ |  |  |
 | ip_hash | `character varying(64)` | ✓ |  | SHA-256 của IP – không lưu IP gốc |
 | created_at | `timestamp with time zone` |  | now() |  |
@@ -72,7 +72,7 @@ Tài khoản. Khách/CTV định danh bằng SĐT (đăng nhập OTP); admin b�
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `bigint` |  | identity |  |
+| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
 | phone | `character varying(16)` | ✓ |  | SĐT chuẩn hóa E.164 (+84xxxxxxxxx); null với admin |
 | email | `character varying(255)` | ✓ |  | Email hoặc tên đăng nhập của admin |
 | password_hash | `character varying(100)` | ✓ |  | BCrypt – chỉ admin có |
@@ -96,7 +96,7 @@ Vai trò của tài khoản (nhiều-nhiều): CUSTOMER \| AFFILIATE \| ADMIN
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **user_id** 🔑 | `bigint` |  |  |  |
+| **user_id** 🔑 | `uuid` |  |  |  |
 | **role** 🔑 | `character varying(16)` |  |  |  |
 
 Ràng buộc:
@@ -114,7 +114,7 @@ Danh mục sản phẩm (menu icon trang chủ)
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `bigint` |  | identity |  |
+| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
 | name | `character varying(100)` |  |  |  |
 | slug | `character varying(120)` |  |  |  |
 | icon_url | `character varying(500)` | ✓ |  |  |
@@ -134,8 +134,8 @@ Sản phẩm – không có biến thể (1 sản phẩm = 1 giá). Tiền tính
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `bigint` |  | identity |  |
-| category_id | `bigint` |  |  | Danh mục (cùng schema – có FK) |
+| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| category_id | `uuid` |  |  | Danh mục (cùng schema – có FK) |
 | name | `character varying(200)` |  |  |  |
 | slug | `character varying(220)` |  |  |  |
 | price | `bigint` |  |  | Giá bán (VND) |
@@ -178,8 +178,8 @@ Index:
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `bigint` |  | identity |  |
-| product_id | `bigint` |  |  |  |
+| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| product_id | `uuid` |  |  |  |
 | url | `character varying(500)` |  |  |  |
 | sort_order | `integer` |  | 0 |  |
 
@@ -197,9 +197,9 @@ Nhật ký trừ/hoàn kho theo đơn. Unique (order_id, product_id, type) giúp
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `bigint` |  | identity |  |
-| product_id | `bigint` |  |  |  |
-| order_id | `bigint` |  |  | ID đơn bên ordering.orders – chỉ lưu ID, không FK xuyên schema |
+| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| product_id | `uuid` |  |  |  |
+| order_id | `uuid` |  |  | ID đơn bên ordering.orders – chỉ lưu ID, không FK xuyên schema |
 | type | `character varying(16)` |  |  | DEDUCT (trừ khi đặt) \| RESTORE (hoàn khi hủy/trả) |
 | quantity | `integer` |  |  |  |
 | created_at | `timestamp with time zone` |  | now() |  |
@@ -225,8 +225,8 @@ Giỏ hàng lưu server – mỗi user một giỏ
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `bigint` |  | identity |  |
-| user_id | `bigint` |  |  | ID tài khoản (identity) – không FK xuyên schema |
+| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| user_id | `uuid` |  |  | ID tài khoản (identity) – không FK xuyên schema |
 | version | `bigint` |  | 0 |  |
 | created_at | `timestamp with time zone` |  | now() |  |
 | updated_at | `timestamp with time zone` |  | now() |  |
@@ -241,9 +241,9 @@ Dòng giỏ hàng: chỉ productId + số lượng, giá luôn lấy mới từ 
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `bigint` |  | identity |  |
-| cart_id | `bigint` |  |  |  |
-| product_id | `bigint` |  |  |  |
+| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| cart_id | `uuid` |  |  |  |
+| product_id | `uuid` |  |  |  |
 | quantity | `integer` |  |  |  |
 | added_at | `timestamp with time zone` |  | now() |  |
 
@@ -259,9 +259,9 @@ Dòng đơn – chụp lại tên và giá tại thời điểm đặt
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `bigint` |  | identity |  |
-| order_id | `bigint` |  |  |  |
-| product_id | `bigint` |  |  | ID sản phẩm bên catalog – không FK xuyên schema |
+| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| order_id | `uuid` |  |  |  |
+| product_id | `uuid` |  |  | ID sản phẩm bên catalog – không FK xuyên schema |
 | product_name | `character varying(200)` |  |  |  |
 | product_slug | `character varying(220)` |  |  |  |
 | image_url | `character varying(500)` | ✓ |  |  |
@@ -286,11 +286,11 @@ Lịch sử chuyển trạng thái đơn (ai, lúc nào, ghi chú)
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `bigint` |  | identity |  |
-| order_id | `bigint` |  |  |  |
+| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| order_id | `uuid` |  |  |  |
 | from_status | `character varying(16)` | ✓ |  |  |
 | to_status | `character varying(16)` |  |  |  |
-| actor_id | `bigint` | ✓ |  | Người thực hiện (id tài khoản); null = hệ thống/job |
+| actor_id | `uuid` | ✓ |  | Người thực hiện (id tài khoản); null = hệ thống/job |
 | note | `character varying(255)` | ✓ |  |  |
 | created_at | `timestamp with time zone` |  | now() |  |
 
@@ -308,9 +308,9 @@ Index:
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `bigint` |  | identity |  |
+| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
 | order_code | `character varying(20)` |  |  | Mã đơn hiển thị cho khách: HW + yyMMdd + 4 ký tự ngẫu nhiên |
-| customer_id | `bigint` |  |  | ID khách (= id tài khoản) – không FK xuyên schema |
+| customer_id | `uuid` |  |  | ID khách (= id tài khoản) – không FK xuyên schema |
 | referral_code | `character varying(16)` | ✓ |  | Mã CTV đọc từ cookie hwin_ref lúc đặt hàng |
 | status | `character varying(16)` |  |  |  |
 | payment_method | `character varying(16)` |  |  | COD \| BANK_QR (chuyển khoản VietQR, admin xác nhận) |
@@ -371,7 +371,7 @@ Hồ sơ khách. id = identity.user_account.id (tạo khi nhận event UserRegis
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `bigint` |  |  |  |
+| **id** 🔑 | `uuid` |  |  |  |
 | phone | `character varying(16)` |  |  |  |
 | full_name | `character varying(100)` | ✓ |  |  |
 | version | `bigint` |  | 0 |  |
@@ -388,8 +388,8 @@ Sổ địa chỉ (tối đa 10, đúng 1 địa chỉ mặc định)
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `bigint` |  | identity |  |
-| customer_id | `bigint` |  |  |  |
+| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
+| customer_id | `uuid` |  |  |  |
 | recipient_name | `character varying(100)` |  |  |  |
 | recipient_phone | `character varying(16)` |  |  |  |
 | province | `character varying(100)` |  |  |  |
@@ -413,8 +413,8 @@ Read model: khách đã mua sản phẩm nào bao nhiêu – "Sản phẩm bạn
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **customer_id** 🔑 | `bigint` |  |  |  |
-| **product_id** 🔑 | `bigint` |  |  |  |
+| **customer_id** 🔑 | `uuid` |  |  |  |
+| **product_id** 🔑 | `uuid` |  |  |  |
 | total_quantity | `integer` |  | 0 |  |
 | order_count | `integer` |  | 0 |  |
 | last_ordered_at | `timestamp with time zone` | ✓ |  |  |
@@ -429,7 +429,7 @@ Read model: thống kê mua hàng, cập nhật từ event ordering (không tín
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **customer_id** 🔑 | `bigint` |  |  |  |
+| **customer_id** 🔑 | `uuid` |  |  |  |
 | total_orders | `integer` |  | 0 |  |
 | total_spent | `bigint` |  | 0 |  |
 | first_order_at | `timestamp with time zone` | ✓ |  |  |
@@ -464,12 +464,12 @@ Nhật ký thay đổi liên quan tới tiền. Chỉ INSERT – trigger chặn 
 
 | Cột | Kiểu | Null | Mặc định | Mô tả |
 |---|---|:-:|---|---|
-| **id** 🔑 | `bigint` |  | identity |  |
+| **id** 🔑 | `uuid` |  | gen_random_uuid() |  |
 | module | `character varying(32)` |  |  |  |
 | aggregate_type | `character varying(64)` |  |  |  |
 | aggregate_id | `character varying(64)` |  |  |  |
 | action | `character varying(64)` |  |  |  |
-| actor_id | `bigint` | ✓ |  |  |
+| actor_id | `uuid` | ✓ |  |  |
 | amount | `bigint` | ✓ |  |  |
 | detail | `jsonb` |  | '{}'::jsonb |  |
 | created_at | `timestamp with time zone` |  | now() |  |

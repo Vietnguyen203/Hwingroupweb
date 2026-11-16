@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.service;
 
+import java.util.UUID;
+
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -36,8 +38,8 @@ public class OrderAutoCompleteJob {
     @Scheduled(cron = "${hwin.ordering.auto-complete-cron:0 5 * * * *}")
     public void run() {
         Instant now = clock.instant();
-        List<Long> ids = orders.findDeliveredBefore(now.minus(props.returnWindow()), PageRequest.of(0, 200));
-        for (Long id : ids) {
+        List<UUID> ids = orders.findDeliveredBefore(now.minus(props.returnWindow()), PageRequest.of(0, 200));
+        for (UUID id : ids) {
             tx.executeWithoutResult(s -> orders.findById(id).ifPresent(o -> {
                 o.complete(props.returnWindow(), now);
                 orders.save(o);

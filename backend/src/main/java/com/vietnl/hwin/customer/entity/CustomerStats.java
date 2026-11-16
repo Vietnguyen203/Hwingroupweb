@@ -1,5 +1,7 @@
 package com.vietnl.hwin.customer.entity;
 
+import java.util.UUID;
+
 import java.time.Instant;
 
 import jakarta.persistence.Column;
@@ -24,7 +26,7 @@ import lombok.NoArgsConstructor;
 public class CustomerStats {
 
     @Id
-    private Long customerId;
+    private UUID customerId;
 
     private int totalOrders;
 
@@ -38,7 +40,7 @@ public class CustomerStats {
     @Column(nullable = false)
     private Instant updatedAt;
 
-    public static CustomerStats empty(Long customerId, Instant now) {
+    public static CustomerStats empty(UUID customerId, Instant now) {
         CustomerStats s = new CustomerStats();
         s.customerId = customerId;
         s.updatedAt = now;

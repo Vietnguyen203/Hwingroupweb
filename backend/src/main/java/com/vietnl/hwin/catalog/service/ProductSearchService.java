@@ -1,5 +1,7 @@
 package com.vietnl.hwin.catalog.service;
 
+import java.util.UUID;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -44,8 +46,9 @@ public class ProductSearchService {
             specs.add((root, query, cb) -> cb.isTrue(root.get("active")));
         }
         if (c.categorySlug() != null && !c.categorySlug().isBlank()) {
-            Long categoryId = categories.findBySlug(c.categorySlug()).map(Category::getId).orElse(-1L);
-            specs.add((root, query, cb) -> cb.equal(root.get("categoryId"), categoryId));
+            UUID categoryId = categories.findBySlug(c.categorySlug()).map(Category::getId).orElse(null);
+            // danh mục không tồn tại -> không có kết quả
+            specs.add((root, query, cb) -> categoryId == null ? cb.disjunction() : cb.equal(root.get("categoryId"), categoryId));
         }
         if (c.q() != null && !c.q().isBlank()) {
             String pattern = "%" + TextNormalizer.escapeLike(c.q().trim().toLowerCase()) + "%";

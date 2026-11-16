@@ -1,5 +1,7 @@
 package com.vietnl.hwin.common.security;
 
+import java.util.UUID;
+
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Collection;
@@ -44,7 +46,7 @@ public class JwtService {
         this.decoder = NimbusJwtDecoder.withSecretKey(key).macAlgorithm(MacAlgorithm.HS256).build();
     }
 
-    public String issueAccessToken(Long userId, Collection<String> roles, Instant now) {
+    public String issueAccessToken(UUID userId, Collection<String> roles, Instant now) {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(ISSUER)
                 .subject(String.valueOf(userId))
@@ -62,8 +64,8 @@ public class JwtService {
             Jwt jwt = decoder.decode(token);
             List<String> roles = jwt.getClaimAsStringList("roles");
             Set<String> roleSet = roles == null ? Set.of() : new HashSet<>(roles);
-            return Optional.of(new AuthPrincipal(Long.valueOf(jwt.getSubject()), roleSet));
-        } catch (JwtException | NumberFormatException e) {
+            return Optional.of(new AuthPrincipal(UUID.fromString(jwt.getSubject()), roleSet));
+        } catch (JwtException | IllegalArgumentException e) {
             return Optional.empty();
         }
     }

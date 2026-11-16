@@ -1,5 +1,7 @@
 package com.vietnl.hwin.identity.service;
 
+import java.util.UUID;
+
 import java.util.Optional;
 
 import org.springframework.modulith.NamedInterface;
@@ -23,7 +25,7 @@ public class UserQueryService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<PhoneNumber> findPhone(Long userId) {
+    public Optional<PhoneNumber> findPhone(UUID userId) {
         return users.findById(userId).map(u -> u.getPhone());
     }
 }

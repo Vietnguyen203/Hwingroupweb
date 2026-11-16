@@ -1,5 +1,7 @@
 package com.vietnl.hwin.catalog.api;
 
+import java.util.UUID;
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -64,33 +66,33 @@ public class AdminProductController {
     }
 
     @GetMapping("/products/{id}")
-    public AdminProductResponse get(@PathVariable Long id) {
+    public AdminProductResponse get(@PathVariable UUID id) {
         return adminService.get(id, mapper::toAdmin);
     }
 
     @PostMapping("/products")
     @ResponseStatus(HttpStatus.CREATED)
-    public Map<String, Long> create(@Valid @RequestBody ProductUpsertRequest r) {
-        Long id = adminService.create(mapper.toDetails(r), r.initialStock() == null ? 0 : r.initialStock(),
+    public Map<String, UUID> create(@Valid @RequestBody ProductUpsertRequest r) {
+        UUID id = adminService.create(mapper.toDetails(r), r.initialStock() == null ? 0 : r.initialStock(),
                 r.images(), r.bestseller());
         return Map.of("id", id);
     }
 
     @PutMapping("/products/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void update(@PathVariable Long id, @Valid @RequestBody ProductUpsertRequest r) {
+    public void update(@PathVariable UUID id, @Valid @RequestBody ProductUpsertRequest r) {
         adminService.update(id, mapper.toDetails(r), r.images(), r.bestseller());
     }
 
     @PatchMapping("/products/{id}/stock")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void adjustStock(@PathVariable Long id, @Valid @RequestBody StockAdjustRequest r) {
+    public void adjustStock(@PathVariable UUID id, @Valid @RequestBody StockAdjustRequest r) {
         adminService.adjustStock(id, r.delta());
     }
 
     @PatchMapping("/products/{id}/active")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void setActive(@PathVariable Long id, @RequestBody ActiveRequest r) {
+    public void setActive(@PathVariable UUID id, @RequestBody ActiveRequest r) {
         adminService.setActive(id, r.active());
     }
 

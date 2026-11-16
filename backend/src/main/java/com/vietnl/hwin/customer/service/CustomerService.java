@@ -1,5 +1,7 @@
 package com.vietnl.hwin.customer.service;
 
+import java.util.UUID;
+
 import java.time.Clock;
 import java.util.function.Function;
 
@@ -45,7 +47,7 @@ public class CustomerService {
      * trường hợp khách thao tác trước khi event kịp xử lý).
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void ensureCustomer(Long userId, PhoneNumber knownPhone) {
+    public void ensureCustomer(UUID userId, PhoneNumber knownPhone) {
         if (customers.existsById(userId)) {
             return;
         }
@@ -59,24 +61,24 @@ public class CustomerService {
     }
 
     @Transactional(readOnly = true)
-    public <T> T profile(Long customerId, Function<Profile, T> mapper) {
+    public <T> T profile(UUID customerId, Function<Profile, T> mapper) {
         Customer c = load(customerId);
         CustomerStats s = stats.findById(customerId).orElse(CustomerStats.empty(customerId, clock.instant()));
         return mapper.apply(new Profile(c, s));
     }
 
     @Transactional
-    public void rename(Long customerId, String fullName) {
+    public void rename(UUID customerId, String fullName) {
         load(customerId).rename(fullName);
     }
 
     @Transactional(readOnly = true)
-    public <T> java.util.List<T> addresses(Long customerId, Function<CustomerAddress, T> mapper) {
+    public <T> java.util.List<T> addresses(UUID customerId, Function<CustomerAddress, T> mapper) {
         return load(customerId).getAddresses().stream().map(mapper).toList();
     }
 
     @Transactional
-    public <T> T addAddress(Long customerId, Address address, boolean makeDefault, Function<CustomerAddress, T> mapper) {
+    public <T> T addAddress(UUID customerId, Address address, boolean makeDefault, Function<CustomerAddress, T> mapper) {
         Customer c = load(customerId);
         CustomerAddress a = c.addAddress(address, makeDefault, clock.instant());
         // c đang được quản lý trong transaction -> flush để DB sinh id cho địa chỉ mới (không dùng save():
@@ -86,21 +88,21 @@ public class CustomerService {
     }
 
     @Transactional
-    public void updateAddress(Long customerId, Long addressId, Address address) {
+    public void updateAddress(UUID customerId, UUID addressId, Address address) {
         load(customerId).updateAddress(addressId, address);
     }
 
     @Transactional
-    public void setDefaultAddress(Long customerId, Long addressId) {
+    public void setDefaultAddress(UUID customerId, UUID addressId) {
         load(customerId).setDefaultAddress(addressId);
     }
 
     @Transactional
-    public void removeAddress(Long customerId, Long addressId) {
+    public void removeAddress(UUID customerId, UUID addressId) {
         load(customerId).removeAddress(addressId);
     }
 
-    private Customer load(Long customerId) {
+    private Customer load(UUID customerId) {
         ensureCustomer(customerId, null);
         return customers.findById(customerId).orElseThrow(() -> new NotFoundException("Không tìm thấy khách hàng"));
     }

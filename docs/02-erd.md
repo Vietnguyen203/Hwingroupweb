@@ -6,7 +6,7 @@
 
 - Mỗi bounded context một **schema PostgreSQL**: `identity`, `catalog`, `ordering`, `customer`, `affiliate`; thêm `audit` (do `common` quản lý) và `public` (bảng `event_publication` của Spring Modulith, bảng lịch sử Flyway).
 - **Không có foreign key xuyên schema.** Cột tham chiếu sang module khác chỉ lưu ID và được đánh dấu `"ref → schema.table (ID, không FK)"` trong sơ đồ.
-- Khóa chính: `bigint generated always as identity` (gọi tắt `bigint PK`). Riêng `customer.customer.id` **= `identity.user_account.id`** (không tự sinh).
+- Khóa chính: `uuid` – ứng dụng sinh **UUID v7** (có thứ tự theo thời gian, index B-tree gọn như số tăng dần; không đoán được số lượng bản ghi). DB có `default gen_random_uuid()` cho dữ liệu chèn tay. Riêng `customer.customer.id` **= `identity.user_account.id`** (không tự sinh).
 - Tiền: `bigint` đơn vị **VND** (value object `Money`), ràng buộc `CHECK (>= 0)`.
 - Thời gian: `timestamptz` (UTC). Mọi bảng có `created_at`, `updated_at`; aggregate root có thêm `version bigint` cho optimistic locking.
 - Enum lưu dạng `varchar` + `CHECK` (dễ đọc, dễ đổi hơn enum PostgreSQL).
@@ -27,7 +27,7 @@ erDiagram
     user_account ||--o{ refresh_token : "sở hữu"
 
     user_account {
-        bigint id PK
+        uuid id PK
         varchar phone UK "E.164 chuẩn hóa +849xxxxxxxx, nullable với admin"
         varchar email UK "chỉ admin, nullable"
         varchar password_hash "BCrypt, chỉ admin"
@@ -40,18 +40,18 @@ erDiagram
     }
 
     user_role {
-        bigint user_id PK, FK
+        uuid user_id PK, FK
         varchar role PK "CUSTOMER | AFFILIATE | ADMIN"
     }
 
     refresh_token {
-        bigint id PK
-        bigint user_id FK "index"
+        uuid id PK
+        uuid user_id FK "index"
         varchar token_hash UK "SHA-256 của token, không lưu token gốc"
         uuid family_id "index – chuỗi xoay vòng"
         timestamptz expires_at
         timestamptz revoked_at "nullable"
-        bigint replaced_by_id "nullable – token kế tiếp"
+        uuid replaced_by_id "nullable – token kế tiếp"
         varchar user_agent
         varchar ip_hash
         timestamptz created_at
@@ -92,7 +92,7 @@ erDiagram
     product ||--o{ stock_movement : "biến động"
 
     category {
-        bigint id PK
+        uuid id PK
         varchar name "<= 100"
         varchar slug UK
         varchar icon_url
@@ -104,8 +104,8 @@ erDiagram
     }
 
     product {
-        bigint id PK
-        bigint category_id FK "index"
+        uuid id PK
+        uuid category_id FK "index"
         varchar name "<= 200"
         varchar slug UK
         bigint price "CHECK >= 0"
@@ -130,16 +130,16 @@ erDiagram
     }
 
     product_image {
-        bigint id PK
-        bigint product_id FK "index"
+        uuid id PK
+        uuid product_id FK "index"
         varchar url
         int sort_order
     }
 
     stock_movement {
-        bigint id PK
-        bigint product_id FK
-        bigint order_id "ref → ordering.orders (ID, không FK)"
+        uuid id PK
+        uuid product_id FK
+        uuid order_id "ref → ordering.orders (ID, không FK)"
         varchar type "DEDUCT | RESTORE"
         int quantity
         timestamptz created_at
@@ -174,24 +174,24 @@ erDiagram
     orders ||--o{ order_status_history : "lịch sử"
 
     cart {
-        bigint id PK
-        bigint user_id UK "ref → identity.user_account (ID, không FK)"
+        uuid id PK
+        uuid user_id UK "ref → identity.user_account (ID, không FK)"
         bigint version
         timestamptz updated_at
     }
 
     cart_item {
-        bigint id PK
-        bigint cart_id FK
-        bigint product_id "ref → catalog.product (ID, không FK)"
+        uuid id PK
+        uuid cart_id FK
+        uuid product_id "ref → catalog.product (ID, không FK)"
         int quantity "1..99"
         timestamptz added_at
     }
 
     orders {
-        bigint id PK
+        uuid id PK
         varchar order_code UK "HW + yyMMdd + 4 ký tự, hiển thị cho khách"
-        bigint customer_id "ref → customer.customer, index"
+        uuid customer_id "ref → customer.customer, index"
         varchar referral_code "nullable, lấy từ cookie hwin_ref"
         varchar status "PENDING..COMPLETED | CANCELLED | RETURNED, index"
         varchar payment_method "COD | BANK_QR"
@@ -227,9 +227,9 @@ erDiagram
     }
 
     order_item {
-        bigint id PK
-        bigint order_id FK
-        bigint product_id "ref → catalog.product (ID, không FK)"
+        uuid id PK
+        uuid order_id FK
+        uuid product_id "ref → catalog.product (ID, không FK)"
         varchar product_name "snapshot"
         varchar product_slug "snapshot"
         varchar image_url "snapshot"
@@ -239,11 +239,11 @@ erDiagram
     }
 
     order_status_history {
-        bigint id PK
-        bigint order_id FK
+        uuid id PK
+        uuid order_id FK
         varchar from_status
         varchar to_status
-        bigint actor_id "ref → identity.user_account, nullable với job"
+        uuid actor_id "ref → identity.user_account, nullable với job"
         varchar note
         timestamptz created_at
     }
@@ -275,7 +275,7 @@ erDiagram
     customer ||--o{ customer_product_stat : "read model"
 
     customer {
-        bigint id PK "= identity.user_account.id (ID, không FK)"
+        uuid id PK "= identity.user_account.id (ID, không FK)"
         varchar phone UK "snapshot từ UserRegistered"
         varchar full_name
         bigint version
@@ -284,8 +284,8 @@ erDiagram
     }
 
     customer_address {
-        bigint id PK
-        bigint customer_id FK "index"
+        uuid id PK
+        uuid customer_id FK "index"
         varchar recipient_name
         varchar recipient_phone
         varchar province
@@ -297,7 +297,7 @@ erDiagram
     }
 
     customer_stats {
-        bigint customer_id PK, FK
+        uuid customer_id PK, FK
         int total_orders "không tính CANCELLED/RETURNED"
         bigint total_spent
         timestamptz first_order_at
@@ -306,8 +306,8 @@ erDiagram
     }
 
     customer_product_stat {
-        bigint customer_id PK, FK
-        bigint product_id PK "ref → catalog.product (ID, không FK)"
+        uuid customer_id PK, FK
+        uuid product_id PK "ref → catalog.product (ID, không FK)"
         int total_quantity
         int order_count
         timestamptz last_ordered_at
@@ -345,8 +345,8 @@ erDiagram
     affiliate ||--o{ payout : "rút tiền"
 
     affiliate {
-        bigint id PK
-        bigint user_id UK "ref → identity.user_account (ID, không FK)"
+        uuid id PK
+        uuid user_id UK "ref → identity.user_account (ID, không FK)"
         varchar phone "snapshot, dùng chống tự giới thiệu"
         varchar full_name
         varchar referral_code UK "A-Z0-9, 6-10 ký tự"
@@ -358,7 +358,7 @@ erDiagram
         varchar bank_account_holder_enc "BankAccount – AES-GCM base64"
         varchar bank_account_no_last4 "hiển thị ****1234"
         timestamptz bank_changed_at "khóa rút 48h"
-        bigint reviewed_by "ref → identity.user_account"
+        uuid reviewed_by "ref → identity.user_account"
         timestamptz reviewed_at
         varchar reject_reason
         bigint version
@@ -367,8 +367,8 @@ erDiagram
     }
 
     referral_click {
-        bigint id PK
-        bigint affiliate_id FK "index"
+        uuid id PK
+        uuid affiliate_id FK "index"
         varchar referral_code
         varchar ip_hash "SHA-256(ip + salt)"
         varchar user_agent
@@ -377,20 +377,20 @@ erDiagram
     }
 
     customer_binding {
-        bigint id PK
-        bigint customer_id UK "ref → customer.customer – GẮN VĨNH VIỄN"
-        bigint affiliate_id FK "index"
-        bigint first_order_id "ref → ordering.orders"
+        uuid id PK
+        uuid customer_id UK "ref → customer.customer – GẮN VĨNH VIỄN"
+        uuid affiliate_id FK "index"
+        uuid first_order_id "ref → ordering.orders"
         varchar referral_code
         timestamptz bound_at
     }
 
     commission {
-        bigint id PK
-        bigint order_id UK "ref → ordering.orders (ID, không FK)"
+        uuid id PK
+        uuid order_id UK "ref → ordering.orders (ID, không FK)"
         varchar order_code
-        bigint affiliate_id FK "index"
-        bigint customer_id "ref → customer.customer"
+        uuid affiliate_id FK "index"
+        uuid customer_id "ref → customer.customer"
         bigint base_amount "subtotal - discount"
         numeric rate "0.10"
         bigint amount "floor(base * rate)"
@@ -404,8 +404,8 @@ erDiagram
     }
 
     payout {
-        bigint id PK
-        bigint affiliate_id FK "index"
+        uuid id PK
+        uuid affiliate_id FK "index"
         bigint amount "CHECK >= min-payout"
         varchar status "REQUESTED | APPROVED | PAID | REJECTED"
         varchar bank_name "snapshot"
@@ -413,7 +413,7 @@ erDiagram
         varchar bank_account_holder_enc "snapshot mã hóa"
         varchar transaction_ref "nhập khi PAID"
         varchar reject_reason
-        bigint processed_by "ref → identity.user_account"
+        uuid processed_by "ref → identity.user_account"
         timestamptz requested_at
         timestamptz approved_at
         timestamptz paid_at
@@ -445,12 +445,12 @@ erDiagram
 ```mermaid
 erDiagram
     audit_log {
-        bigint id PK
+        uuid id PK
         varchar module "ordering | affiliate | ..."
         varchar aggregate_type "Commission, Payout, Order, Affiliate"
         varchar aggregate_id
         varchar action "COMMISSION_CREATED, PAYOUT_PAID, BANK_CHANGED, ORDER_PAID..."
-        bigint actor_id "nullable với job / system"
+        uuid actor_id "nullable với job / system"
         bigint amount "nullable"
         jsonb detail "trạng thái trước/sau (đã che dữ liệu nhạy cảm)"
         timestamptz created_at

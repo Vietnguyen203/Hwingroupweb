@@ -1,5 +1,7 @@
 package com.vietnl.hwin.catalog.repository;
 
+import java.util.UUID;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -10,17 +12,17 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.vietnl.hwin.catalog.entity.Product;
 
-public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
+public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
 
     @EntityGraph(attributePaths = "images")
     Optional<Product> findBySlugAndActiveTrue(String slug);
 
     @EntityGraph(attributePaths = "images")
-    List<Product> findAllByIdIn(Collection<Long> ids);
+    List<Product> findAllByIdIn(Collection<UUID> ids);
 
     boolean existsBySlug(String slug);
 
-    boolean existsBySlugAndIdNot(String slug, Long id);
+    boolean existsBySlugAndIdNot(String slug, UUID id);
 
-    long countByCategoryIdAndActiveTrue(Long categoryId);
+    long countByCategoryIdAndActiveTrue(UUID categoryId);
 }

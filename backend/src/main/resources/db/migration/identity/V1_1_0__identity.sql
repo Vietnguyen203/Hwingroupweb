@@ -1,6 +1,6 @@
 create table identity.user_account
 (
-    id            bigint generated always as identity primary key,
+    id            uuid primary key default gen_random_uuid(),
     phone         varchar(16) unique,
     email         varchar(255) unique,
     password_hash varchar(100),
@@ -15,20 +15,20 @@ create table identity.user_account
 
 create table identity.user_role
 (
-    user_id bigint      not null references identity.user_account (id) on delete cascade,
+    user_id uuid        not null references identity.user_account (id) on delete cascade,
     role    varchar(16) not null check (role in ('CUSTOMER', 'AFFILIATE', 'ADMIN')),
     primary key (user_id, role)
 );
 
 create table identity.refresh_token
 (
-    id             bigint generated always as identity primary key,
-    user_id        bigint       not null references identity.user_account (id) on delete cascade,
+    id             uuid primary key default gen_random_uuid(),
+    user_id        uuid         not null references identity.user_account (id) on delete cascade,
     token_hash     varchar(64)  not null unique,
     family_id      uuid         not null,
     expires_at     timestamptz  not null,
     revoked_at     timestamptz,
-    replaced_by_id bigint,
+    replaced_by_id uuid  ,
     user_agent     varchar(255),
     ip_hash        varchar(64),
     created_at     timestamptz  not null default now()

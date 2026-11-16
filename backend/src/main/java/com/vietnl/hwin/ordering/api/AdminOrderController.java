@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.api;
 
+import java.util.UUID;
+
 import java.time.Instant;
 
 import jakarta.validation.Valid;
@@ -61,38 +63,38 @@ public class AdminOrderController {
     }
 
     @GetMapping("/{id}")
-    public AdminOrderResponse get(@PathVariable Long id) {
+    public AdminOrderResponse get(@PathVariable UUID id) {
         return service.get(id, this::admin);
     }
 
     @PostMapping("/{id}/mark-paid")
-    public AdminOrderResponse markPaid(@PathVariable Long id, @Valid @RequestBody MarkPaidRequest r,
+    public AdminOrderResponse markPaid(@PathVariable UUID id, @Valid @RequestBody MarkPaidRequest r,
                                        @AuthenticationPrincipal AuthPrincipal me) {
         return service.markPaid(id, r.paymentRef(), me.userId(), this::admin);
     }
 
     @PostMapping("/{id}/confirm")
-    public AdminOrderResponse confirm(@PathVariable Long id, @AuthenticationPrincipal AuthPrincipal me) {
+    public AdminOrderResponse confirm(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
         return service.confirm(id, me.userId(), this::admin);
     }
 
     @PostMapping("/{id}/ship")
-    public AdminOrderResponse ship(@PathVariable Long id, @AuthenticationPrincipal AuthPrincipal me) {
+    public AdminOrderResponse ship(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
         return service.ship(id, me.userId(), this::admin);
     }
 
     @PostMapping("/{id}/deliver")
-    public AdminOrderResponse deliver(@PathVariable Long id, @AuthenticationPrincipal AuthPrincipal me) {
+    public AdminOrderResponse deliver(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
         return service.deliver(id, me.userId(), this::admin);
     }
 
     @PostMapping("/{id}/return")
-    public AdminOrderResponse returnOrder(@PathVariable Long id, @AuthenticationPrincipal AuthPrincipal me) {
+    public AdminOrderResponse returnOrder(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
         return service.returnOrder(id, me.userId(), this::admin);
     }
 
     @PostMapping("/{id}/cancel")
-    public AdminOrderResponse cancel(@PathVariable Long id, @Valid @RequestBody(required = false) AdminCancelRequest r,
+    public AdminOrderResponse cancel(@PathVariable UUID id, @Valid @RequestBody(required = false) AdminCancelRequest r,
                                      @AuthenticationPrincipal AuthPrincipal me) {
         return service.cancel(id, r == null ? null : r.reason(), me.userId(), this::admin);
     }

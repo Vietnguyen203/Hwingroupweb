@@ -15,12 +15,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+
+import org.hibernate.annotations.UuidGenerator;
 
 import org.hibernate.annotations.BatchSize;
 
@@ -53,14 +54,15 @@ public class Order extends AggregateRoot<Order> {
     public static final String INVALID_STATE = "INVALID_STATE_TRANSITION";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    private UUID id;
 
     @Column(nullable = false, unique = true)
     private String orderCode;
 
     @Column(nullable = false)
-    private Long customerId;
+    private UUID customerId;
 
     private String referralCode;
 
@@ -128,7 +130,7 @@ public class Order extends AggregateRoot<Order> {
     /**
      * Tạo đơn PENDING. Event OrderPlaced được service phát sau khi lưu (cần ID).
      */
-    public static Order place(Long customerId, String orderCode, List<OrderLine> lines, Money shippingFee,
+    public static Order place(UUID customerId, String orderCode, List<OrderLine> lines, Money shippingFee,
                               Address shippingAddress, PaymentMethod paymentMethod, VatInvoiceInfo vatInvoice,
                               String note, String referralCode, Instant now) {
         if (lines == null || lines.isEmpty()) {
@@ -170,7 +172,7 @@ public class Order extends AggregateRoot<Order> {
     // ------------------------------------------------------------------ thanh toán
 
     /** Admin xác nhận đã nhận chuyển khoản (BANK_QR). */
-    public void markPaid(String paymentRef, Long actorId, Instant now) {
+    public void markPaid(String paymentRef, UUID actorId, Instant now) {
         if (paymentMethod != PaymentMethod.BANK_QR) {
             throw new DomainException("PAYMENT_METHOD_INVALID", "Chỉ xác nhận thanh toán cho đơn chuyển khoản QR");
         }
@@ -185,7 +187,7 @@ public class Order extends AggregateRoot<Order> {
 
     // ------------------------------------------------------------------ vòng đời
 
-    public void confirm(Long actorId, Instant now) {
+    public void confirm(UUID actorId, Instant now) {
         requireStatus(Set.of(OrderStatus.PENDING), "xác nhận");
         if (paymentMethod == PaymentMethod.BANK_QR && paymentStatus != PaymentStatus.PAID) {
             throw new DomainException("PAYMENT_REQUIRED", "Đơn chuyển khoản phải nhận được tiền trước khi xác nhận");
@@ -195,14 +197,14 @@ public class Order extends AggregateRoot<Order> {
         registerEvent(new OrderConfirmed(UUID.randomUUID(), now, id, orderCode));
     }
 
-    public void markShipping(Long actorId, Instant now) {
+    public void markShipping(UUID actorId, Instant now) {
         requireStatus(Set.of(OrderStatus.CONFIRMED), "giao cho vận chuyển");
         transition(OrderStatus.SHIPPING, actorId, null, now);
         this.shippedAt = now;
     }
 
     /** Giao thành công. Đơn COD coi như đã thu tiền. */
-    public void markDelivered(Long actorId, Instant now) {
+    public void markDelivered(UUID actorId, Instant now) {
         requireStatus(Set.of(OrderStatus.SHIPPING), "đánh dấu đã giao");
         transition(OrderStatus.DELIVERED, actorId, null, now);
         this.deliveredAt = now;
@@ -215,7 +217,7 @@ public class Order extends AggregateRoot<Order> {
     /**
      * Hủy đơn. Khách chỉ tự hủy khi PENDING; admin/hệ thống hủy được khi PENDING hoặc CONFIRMED.
      */
-    public void cancel(CancelReason reason, Long actorId, boolean byCustomer, Instant now) {
+    public void cancel(CancelReason reason, UUID actorId, boolean byCustomer, Instant now) {
         Set<OrderStatus> allowed = byCustomer ? Set.of(OrderStatus.PENDING)
                 : Set.of(OrderStatus.PENDING, OrderStatus.CONFIRMED);
         if (!allowed.contains(status)) {
@@ -231,7 +233,7 @@ public class Order extends AggregateRoot<Order> {
     }
 
     /** Trả hàng: chỉ khi DELIVERED và còn trong hạn đổi trả. */
-    public void markReturned(Long actorId, Duration returnWindow, Instant now) {
+    public void markReturned(UUID actorId, Duration returnWindow, Instant now) {
         requireStatus(Set.of(OrderStatus.DELIVERED), "trả hàng");
         if (now.isAfter(deliveredAt.plus(returnWindow))) {
             throw new DomainException("RETURN_WINDOW_EXPIRED", "Đã quá hạn đổi trả " + returnWindow.toDays() + " ngày");
@@ -278,7 +280,7 @@ public class Order extends AggregateRoot<Order> {
         }
     }
 
-    private void transition(OrderStatus to, Long actorId, String note, Instant now) {
+    private void transition(OrderStatus to, UUID actorId, String note, Instant now) {
         history.add(new OrderStatusHistory(status, to, actorId, note, now));
         this.status = to;
     }

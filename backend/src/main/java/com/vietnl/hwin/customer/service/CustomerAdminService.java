@@ -1,5 +1,7 @@
 package com.vietnl.hwin.customer.service;
 
+import java.util.UUID;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.Timestamp;
@@ -38,7 +40,7 @@ public class CustomerAdminService {
         this.clock = clock;
     }
 
-    public record CustomerRow(Long id, String phone, String fullName, int totalOrders, long totalSpent,
+    public record CustomerRow(UUID id, String phone, String fullName, int totalOrders, long totalSpent,
                               Instant firstOrderAt, Instant lastOrderAt, Instant createdAt, CustomerSegment segment) {
     }
 
@@ -63,7 +65,7 @@ public class CustomerAdminService {
     }
 
     @Transactional(readOnly = true)
-    public CustomerRow get(Long id) {
+    public CustomerRow get(UUID id) {
         List<CustomerRow> rows = jdbc.query(select() + " where c.id = ?", (rs, i) -> row(rs), id);
         if (rows.isEmpty()) {
             throw new NotFoundException("Không tìm thấy khách hàng");
@@ -150,7 +152,7 @@ public class CustomerAdminService {
     private CustomerRow row(java.sql.ResultSet rs) throws java.sql.SQLException {
         Instant last = instant(rs.getTimestamp("last_order_at"));
         int totalOrders = rs.getInt("total_orders");
-        return new CustomerRow(rs.getLong("id"), new PhoneNumber(rs.getString("phone")).local(),
+        return new CustomerRow(rs.getObject("id", UUID.class), new PhoneNumber(rs.getString("phone")).local(),
                 rs.getString("full_name"), totalOrders, rs.getLong("total_spent"),
                 instant(rs.getTimestamp("first_order_at")), last, instant(rs.getTimestamp("created_at")),
                 segmentOf(totalOrders, last));

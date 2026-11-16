@@ -1,5 +1,7 @@
 package com.vietnl.hwin.catalog.service;
 
+import java.util.UUID;
+
 import org.springframework.modulith.NamedInterface;
 
 /**
@@ -7,7 +9,7 @@ import org.springframework.modulith.NamedInterface;
  * Giá tính bằng VND.
  */
 @NamedInterface("query")
-public record ProductSnapshot(Long id, String name, String slug, String imageUrl, long price, int stock,
+public record ProductSnapshot(UUID id, String name, String slug, String imageUrl, long price, int stock,
                               boolean active) {
 
     public boolean isPurchasable() {

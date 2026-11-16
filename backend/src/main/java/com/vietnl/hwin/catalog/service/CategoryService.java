@@ -1,5 +1,7 @@
 package com.vietnl.hwin.catalog.service;
 
+import java.util.UUID;
+
 import java.util.List;
 import java.util.function.Function;
 
@@ -50,7 +52,7 @@ public class CategoryService {
     }
 
     @Transactional
-    public Category update(Long id, String name, String slug, String iconUrl, int sortOrder, boolean active) {
+    public Category update(UUID id, String name, String slug, String iconUrl, int sortOrder, boolean active) {
         Category c = get(id);
         c.update(name, slug, iconUrl, sortOrder);
         if (categories.existsBySlugAndIdNot(c.getSlug(), id)) {
@@ -66,7 +68,7 @@ public class CategoryService {
 
     /** Ẩn danh mục; chặn nếu còn sản phẩm đang bán. */
     @Transactional
-    public void deactivate(Long id) {
+    public void deactivate(UUID id) {
         deactivate(get(id));
     }
 
@@ -77,7 +79,7 @@ public class CategoryService {
         c.deactivate();
     }
 
-    private Category get(Long id) {
+    private Category get(UUID id) {
         return categories.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy danh mục"));
     }
 }

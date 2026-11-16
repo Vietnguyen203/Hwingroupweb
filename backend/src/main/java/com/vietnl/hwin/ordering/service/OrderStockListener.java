@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.service;
 
+import java.util.UUID;
+
 import java.time.Clock;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -39,7 +41,7 @@ public class OrderStockListener {
 
     @ApplicationModuleListener
     void on(OrderPlaced event) {
-        Map<Long, Integer> quantities = new LinkedHashMap<>();
+        Map<UUID, Integer> quantities = new LinkedHashMap<>();
         event.items().forEach(i -> quantities.merge(i.productId(), i.quantity(), Integer::sum));
         try {
             inventory.deductForOrder(event.orderId(), quantities);

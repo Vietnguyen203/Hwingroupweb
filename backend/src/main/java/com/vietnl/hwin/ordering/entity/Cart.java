@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.entity;
 
+import java.util.UUID;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,12 +14,13 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+
+import org.hibernate.annotations.UuidGenerator;
 
 import com.vietnl.hwin.common.domain.AggregateRoot;
 import com.vietnl.hwin.common.exception.DomainException;
@@ -39,25 +42,26 @@ public class Cart extends AggregateRoot<Cart> {
     public static final int MAX_LINES = 50;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
+    private UUID id;
 
     @Column(nullable = false, unique = true)
-    private Long userId;
+    private UUID userId;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "cart_id", nullable = false)
     @OrderBy("addedAt ASC")
     private List<CartItem> items = new ArrayList<>();
 
-    public static Cart createFor(Long userId) {
+    public static Cart createFor(UUID userId) {
         Cart c = new Cart();
         c.userId = userId;
         return c;
     }
 
     /** Thêm sản phẩm (cộng dồn nếu đã có), giới hạn 99. */
-    public void add(Long productId, int quantity, Instant now) {
+    public void add(UUID productId, int quantity, Instant now) {
         requirePositive(quantity);
         Optional<CartItem> existing = find(productId);
         if (existing.isPresent()) {
@@ -70,18 +74,18 @@ public class Cart extends AggregateRoot<Cart> {
         items.add(new CartItem(productId, Math.min(MAX_QUANTITY, quantity), now));
     }
 
-    public void changeQuantity(Long productId, int quantity) {
+    public void changeQuantity(UUID productId, int quantity) {
         requirePositive(quantity);
         find(productId).orElseThrow(() -> new DomainException("CART_ITEM_NOT_FOUND", "Sản phẩm không có trong giỏ"))
                 .changeQuantity(Math.min(MAX_QUANTITY, quantity));
     }
 
-    public void remove(Long productId) {
+    public void remove(UUID productId) {
         items.removeIf(i -> i.getProductId().equals(productId));
     }
 
     /** Gộp giỏ localStorage (khách chưa đăng nhập) vào giỏ server sau khi đăng nhập. */
-    public void merge(Map<Long, Integer> lines, Instant now) {
+    public void merge(Map<UUID, Integer> lines, Instant now) {
         lines.forEach((productId, qty) -> {
             if (qty != null && qty > 0) {
                 add(productId, qty, now);
@@ -90,7 +94,7 @@ public class Cart extends AggregateRoot<Cart> {
     }
 
     /** Xóa các sản phẩm đã đặt hàng. */
-    public void removeProducts(Collection<Long> productIds) {
+    public void removeProducts(Collection<UUID> productIds) {
         items.removeIf(i -> productIds.contains(i.getProductId()));
     }
 
@@ -102,7 +106,7 @@ public class Cart extends AggregateRoot<Cart> {
         return Collections.unmodifiableList(items);
     }
 
-    private Optional<CartItem> find(Long productId) {
+    private Optional<CartItem> find(UUID productId) {
         return items.stream().filter(i -> i.getProductId().equals(productId)).findFirst();
     }
 

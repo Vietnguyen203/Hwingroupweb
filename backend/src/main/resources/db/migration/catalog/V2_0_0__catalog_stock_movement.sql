@@ -2,9 +2,9 @@
 -- khi listener chạy lại.
 create table catalog.stock_movement
 (
-    id         bigint generated always as identity primary key,
-    product_id bigint      not null references catalog.product (id),
-    order_id   bigint      not null, -- ref -> ordering.orders (ID, không FK)
+    id         uuid primary key default gen_random_uuid(),
+    product_id uuid        not null references catalog.product (id),
+    order_id   uuid        not null, -- ref -> ordering.orders (ID, không FK)
     type       varchar(16) not null check (type in ('DEDUCT', 'RESTORE')),
     quantity   integer     not null check (quantity > 0),
     created_at timestamptz not null default now(),

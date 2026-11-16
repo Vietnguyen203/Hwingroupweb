@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.service;
 
+import java.util.UUID;
+
 import java.time.Clock;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -35,18 +37,18 @@ public class CartService {
     }
 
     @Transactional(readOnly = true)
-    public CartView view(Long userId) {
+    public CartView view(UUID userId) {
         return carts.findByUserId(userId).map(c -> pricing.price(quantities(c)))
                 .orElseGet(() -> pricing.price(Map.of()));
     }
 
     /** Tính giá giỏ của khách chưa đăng nhập (giỏ localStorage) – không lưu gì. */
-    public CartView quote(Map<Long, Integer> quantities) {
+    public CartView quote(Map<UUID, Integer> quantities) {
         return pricing.price(quantities);
     }
 
     @Transactional
-    public CartView addItem(Long userId, Long productId, int quantity) {
+    public CartView addItem(UUID userId, UUID productId, int quantity) {
         requireProductExists(productId);
         Cart cart = loadOrCreate(userId);
         cart.add(productId, quantity, clock.instant());
@@ -54,14 +56,14 @@ public class CartService {
     }
 
     @Transactional
-    public CartView changeQuantity(Long userId, Long productId, int quantity) {
+    public CartView changeQuantity(UUID userId, UUID productId, int quantity) {
         Cart cart = loadOrCreate(userId);
         cart.changeQuantity(productId, quantity);
         return pricing.price(quantities(carts.save(cart)));
     }
 
     @Transactional
-    public CartView remove(Long userId, Long productId) {
+    public CartView remove(UUID userId, UUID productId) {
         Cart cart = loadOrCreate(userId);
         cart.remove(productId);
         return pricing.price(quantities(carts.save(cart)));
@@ -69,9 +71,9 @@ public class CartService {
 
     /** Gộp giỏ localStorage vào giỏ server sau khi đăng nhập (bỏ qua sản phẩm không tồn tại). */
     @Transactional
-    public CartView merge(Long userId, Map<Long, Integer> lines) {
+    public CartView merge(UUID userId, Map<UUID, Integer> lines) {
         Cart cart = loadOrCreate(userId);
-        Map<Long, Integer> existing = new LinkedHashMap<>();
+        Map<UUID, Integer> existing = new LinkedHashMap<>();
         products.findSnapshots(lines.keySet()).forEach(p -> existing.put(p.id(), lines.get(p.id())));
         cart.merge(existing, clock.instant());
         return pricing.price(quantities(carts.save(cart)));
@@ -79,7 +81,7 @@ public class CartService {
 
     /** Dùng cho "Mua lại": thêm nhiều sản phẩm vào giỏ (productId -> số lượng). */
     @Transactional
-    public void addItems(Long userId, Map<Long, Integer> lines) {
+    public void addItems(UUID userId, Map<UUID, Integer> lines) {
         Cart cart = loadOrCreate(userId);
         cart.merge(lines, clock.instant());
         carts.save(cart);
@@ -87,28 +89,28 @@ public class CartService {
 
     /** Xóa sản phẩm đã đặt khỏi giỏ (gọi từ listener OrderPlaced). */
     @Transactional
-    public void removeProducts(Long userId, Collection<Long> productIds) {
+    public void removeProducts(UUID userId, Collection<UUID> productIds) {
         carts.findByUserId(userId).ifPresent(cart -> cart.removeProducts(productIds));
     }
 
     /** productId -> số lượng của giỏ hiện tại (giữ thứ tự thêm). */
     @Transactional(readOnly = true)
-    public Map<Long, Integer> quantitiesOf(Long userId) {
+    public Map<UUID, Integer> quantitiesOf(UUID userId) {
         return carts.findByUserId(userId).map(CartService::quantities).orElseGet(Map::of);
     }
 
-    private Cart loadOrCreate(Long userId) {
+    private Cart loadOrCreate(UUID userId) {
         return carts.findByUserId(userId).orElseGet(() -> carts.save(Cart.createFor(userId)));
     }
 
-    private void requireProductExists(Long productId) {
+    private void requireProductExists(UUID productId) {
         if (products.findSnapshot(productId).isEmpty()) {
             throw new DomainException("PRODUCT_NOT_FOUND", "Sản phẩm không tồn tại");
         }
     }
 
-    private static Map<Long, Integer> quantities(Cart cart) {
-        Map<Long, Integer> map = new LinkedHashMap<>();
+    private static Map<UUID, Integer> quantities(Cart cart) {
+        Map<UUID, Integer> map = new LinkedHashMap<>();
         for (CartItem i : cart.getItems()) {
             map.put(i.getProductId(), i.getQuantity());
         }

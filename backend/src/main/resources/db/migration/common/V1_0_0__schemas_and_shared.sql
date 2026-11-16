@@ -34,12 +34,12 @@ create index idx_event_publication_incomplete on public.event_publication (compl
 -- Nhật ký kiểm toán: chỉ ghi thêm
 create table audit.audit_log
 (
-    id             bigint generated always as identity primary key,
+    id             uuid primary key default gen_random_uuid(),
     module         varchar(32)  not null,
     aggregate_type varchar(64)  not null,
     aggregate_id   varchar(64)  not null,
     action         varchar(64)  not null,
-    actor_id       bigint,
+    actor_id       uuid  ,
     amount         bigint,
     detail         jsonb        not null default '{}'::jsonb,
     created_at     timestamptz  not null default now()
