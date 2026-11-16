@@ -1,0 +1,296 @@
+package com.vietnl.hwin.ordering.entity;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.Table;
+
+import org.hibernate.annotations.BatchSize;
+
+import com.vietnl.hwin.common.domain.Address;
+import com.vietnl.hwin.common.domain.AggregateRoot;
+import com.vietnl.hwin.common.domain.Money;
+import com.vietnl.hwin.common.exception.DomainException;
+import com.vietnl.hwin.ordering.entity.OrderEnums.CancelReason;
+import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
+import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentStatus;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+/**
+ * Aggregate root: đơn hàng. Mọi quy tắc chuyển trạng thái nằm ở đây; vi phạm -> DomainException.
+ * <pre>
+ * PENDING -> CONFIRMED -> SHIPPING -> DELIVERED -> COMPLETED
+ * PENDING|CONFIRMED -> CANCELLED      DELIVERED (trong hạn đổi trả) -> RETURNED
+ * </pre>
+ * Giá luôn do backend tính từ catalog (xem PlaceOrderService), không nhận từ client.
+ */
+@Entity
+@Table(name = "orders", schema = "ordering")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Order extends AggregateRoot<Order> {
+
+    public static final String INVALID_STATE = "INVALID_STATE_TRANSITION";
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String orderCode;
+
+    @Column(nullable = false)
+    private Long customerId;
+
+    private String referralCode;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentMethod paymentMethod;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentStatus paymentStatus;
+
+    @Column(nullable = false)
+    private Money subtotal;
+
+    @Column(nullable = false)
+    private Money discount;
+
+    @Column(nullable = false)
+    private Money shippingFee;
+
+    @Column(nullable = false)
+    private Money total;
+
+    @Embedded
+    private Address shippingAddress;
+
+    private String note;
+
+    private boolean vatRequested;
+
+    @Embedded
+    private VatInvoiceInfo vatInvoice;
+
+    @Enumerated(EnumType.STRING)
+    private CancelReason cancelReason;
+
+    private String paymentRef;
+
+    @Column(nullable = false)
+    private Instant placedAt;
+    private Instant confirmedAt;
+    private Instant shippedAt;
+    private Instant deliveredAt;
+    private Instant completedAt;
+    private Instant cancelledAt;
+    private Instant returnedAt;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "order_id", nullable = false)
+    @BatchSize(size = 50)
+    private List<OrderItem> items = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "order_id", nullable = false)
+    @OrderBy("createdAt ASC")
+    @BatchSize(size = 50)
+    private List<OrderStatusHistory> history = new ArrayList<>();
+
+    // ------------------------------------------------------------------ tạo đơn
+
+    /**
+     * Tạo đơn PENDING. Event OrderPlaced được service phát sau khi lưu (cần ID).
+     */
+    public static Order place(Long customerId, String orderCode, List<OrderLine> lines, Money shippingFee,
+                              Address shippingAddress, PaymentMethod paymentMethod, VatInvoiceInfo vatInvoice,
+                              String note, String referralCode, Instant now) {
+        if (lines == null || lines.isEmpty()) {
+            throw new DomainException("CART_EMPTY", "Giỏ hàng đang trống");
+        }
+        if (shippingAddress == null) {
+            throw new DomainException("ADDRESS_INVALID", "Thiếu địa chỉ giao hàng");
+        }
+        if (paymentMethod == null) {
+            throw new DomainException("PAYMENT_METHOD_REQUIRED", "Chưa chọn phương thức thanh toán");
+        }
+        Order o = new Order();
+        o.customerId = customerId;
+        o.orderCode = orderCode;
+        lines.forEach(l -> o.items.add(new OrderItem(l)));
+        o.subtotal = o.items.stream().map(OrderItem::getLineTotal).reduce(Money.ZERO, Money::plus);
+        o.discount = Money.ZERO; // demo chưa có voucher
+        o.shippingFee = shippingFee;
+        o.total = o.subtotal.minus(o.discount).plus(shippingFee);
+        o.shippingAddress = shippingAddress;
+        o.paymentMethod = paymentMethod;
+        o.paymentStatus = PaymentStatus.UNPAID;
+        o.vatInvoice = vatInvoice;
+        o.vatRequested = vatInvoice != null;
+        o.note = note == null || note.isBlank() ? null : note.trim();
+        o.referralCode = referralCode;
+        o.placedAt = now;
+        o.status = OrderStatus.PENDING;
+        o.history.add(new OrderStatusHistory(null, OrderStatus.PENDING, customerId, "Đặt hàng", now));
+        return o;
+    }
+
+    /** Event tạo đơn – gọi sau khi đã lưu để có ID. */
+    public OrderPlaced placedEvent() {
+        return new OrderPlaced(UUID.randomUUID(), placedAt, id, orderCode, customerId, referralCode, itemSnapshots(),
+                subtotal.amount(), discount.amount(), shippingFee.amount(), total.amount());
+    }
+
+    // ------------------------------------------------------------------ thanh toán
+
+    /** Admin xác nhận đã nhận chuyển khoản (BANK_QR). */
+    public void markPaid(String paymentRef, Long actorId, Instant now) {
+        if (paymentMethod != PaymentMethod.BANK_QR) {
+            throw new DomainException("PAYMENT_METHOD_INVALID", "Chỉ xác nhận thanh toán cho đơn chuyển khoản QR");
+        }
+        if (paymentStatus == PaymentStatus.PAID) {
+            throw new DomainException("ALREADY_PAID", "Đơn đã được xác nhận thanh toán");
+        }
+        requireStatus(Set.of(OrderStatus.PENDING, OrderStatus.CONFIRMED), "xác nhận thanh toán");
+        this.paymentStatus = PaymentStatus.PAID;
+        this.paymentRef = paymentRef == null || paymentRef.isBlank() ? null : paymentRef.trim();
+        history.add(new OrderStatusHistory(status, status, actorId, "Đã nhận thanh toán " + nullToEmpty(this.paymentRef), now));
+    }
+
+    // ------------------------------------------------------------------ vòng đời
+
+    public void confirm(Long actorId, Instant now) {
+        requireStatus(Set.of(OrderStatus.PENDING), "xác nhận");
+        if (paymentMethod == PaymentMethod.BANK_QR && paymentStatus != PaymentStatus.PAID) {
+            throw new DomainException("PAYMENT_REQUIRED", "Đơn chuyển khoản phải nhận được tiền trước khi xác nhận");
+        }
+        transition(OrderStatus.CONFIRMED, actorId, null, now);
+        this.confirmedAt = now;
+        registerEvent(new OrderConfirmed(UUID.randomUUID(), now, id, orderCode));
+    }
+
+    public void markShipping(Long actorId, Instant now) {
+        requireStatus(Set.of(OrderStatus.CONFIRMED), "giao cho vận chuyển");
+        transition(OrderStatus.SHIPPING, actorId, null, now);
+        this.shippedAt = now;
+    }
+
+    /** Giao thành công. Đơn COD coi như đã thu tiền. */
+    public void markDelivered(Long actorId, Instant now) {
+        requireStatus(Set.of(OrderStatus.SHIPPING), "đánh dấu đã giao");
+        transition(OrderStatus.DELIVERED, actorId, null, now);
+        this.deliveredAt = now;
+        if (paymentMethod == PaymentMethod.COD) {
+            this.paymentStatus = PaymentStatus.PAID;
+        }
+        registerEvent(new OrderDelivered(UUID.randomUUID(), now, id, orderCode, now));
+    }
+
+    /**
+     * Hủy đơn. Khách chỉ tự hủy khi PENDING; admin/hệ thống hủy được khi PENDING hoặc CONFIRMED.
+     */
+    public void cancel(CancelReason reason, Long actorId, boolean byCustomer, Instant now) {
+        Set<OrderStatus> allowed = byCustomer ? Set.of(OrderStatus.PENDING)
+                : Set.of(OrderStatus.PENDING, OrderStatus.CONFIRMED);
+        if (!allowed.contains(status)) {
+            throw new DomainException(INVALID_STATE, byCustomer
+                    ? "Đơn đã được xác nhận, vui lòng liên hệ shop để hủy"
+                    : "Không thể hủy đơn ở trạng thái " + status);
+        }
+        transition(OrderStatus.CANCELLED, actorId, "Hủy: " + reason, now);
+        this.cancelReason = reason;
+        this.cancelledAt = now;
+        registerEvent(new OrderCancelled(UUID.randomUUID(), now, id, orderCode, customerId, itemSnapshots(),
+                total.amount(), reason.name()));
+    }
+
+    /** Trả hàng: chỉ khi DELIVERED và còn trong hạn đổi trả. */
+    public void markReturned(Long actorId, Duration returnWindow, Instant now) {
+        requireStatus(Set.of(OrderStatus.DELIVERED), "trả hàng");
+        if (now.isAfter(deliveredAt.plus(returnWindow))) {
+            throw new DomainException("RETURN_WINDOW_EXPIRED", "Đã quá hạn đổi trả " + returnWindow.toDays() + " ngày");
+        }
+        transition(OrderStatus.RETURNED, actorId, null, now);
+        this.returnedAt = now;
+        registerEvent(new OrderReturned(UUID.randomUUID(), now, id, orderCode, customerId, itemSnapshots(),
+                total.amount()));
+    }
+
+    /** Hoàn tất khi đã hết hạn đổi trả (job gọi). */
+    public void complete(Duration returnWindow, Instant now) {
+        requireStatus(Set.of(OrderStatus.DELIVERED), "hoàn tất");
+        if (!now.isAfter(deliveredAt.plus(returnWindow))) {
+            throw new DomainException("RETURN_WINDOW_OPEN", "Chưa hết hạn đổi trả");
+        }
+        transition(OrderStatus.COMPLETED, null, "Hết hạn đổi trả", now);
+        this.completedAt = now;
+        registerEvent(new OrderCompleted(UUID.randomUUID(), now, id, orderCode));
+    }
+
+    public boolean isCancellableByCustomer() {
+        return status == OrderStatus.PENDING;
+    }
+
+    public boolean isAwaitingTransfer() {
+        return paymentMethod == PaymentMethod.BANK_QR && paymentStatus == PaymentStatus.UNPAID
+                && (status == OrderStatus.PENDING || status == OrderStatus.CONFIRMED);
+    }
+
+    public List<OrderItem> getItems() {
+        return Collections.unmodifiableList(items);
+    }
+
+    public List<OrderStatusHistory> getHistory() {
+        return Collections.unmodifiableList(history);
+    }
+
+    // ------------------------------------------------------------------ nội bộ
+
+    private void requireStatus(Set<OrderStatus> allowed, String action) {
+        if (!allowed.contains(status)) {
+            throw new DomainException(INVALID_STATE, "Không thể " + action + " khi đơn đang ở trạng thái " + status);
+        }
+    }
+
+    private void transition(OrderStatus to, Long actorId, String note, Instant now) {
+        history.add(new OrderStatusHistory(status, to, actorId, note, now));
+        this.status = to;
+    }
+
+    private List<OrderItemSnapshot> itemSnapshots() {
+        return items.stream()
+                .map(i -> new OrderItemSnapshot(i.getProductId(), i.getProductName(), i.getQuantity(),
+                        i.getUnitPrice().amount()))
+                .toList();
+    }
+
+    private static String nullToEmpty(String s) {
+        return s == null ? "" : "(" + s + ")";
+    }
+}

@@ -1,5 +1,7 @@
 # 02 – Mô hình dữ liệu (ERD)
 
+> Sơ đồ quan hệ ở mức thiết kế. **Danh sách cột chính xác (sinh từ DB thật) xem [06-database.md](06-database.md).**
+
 ## Quy ước chung
 
 - Mỗi bounded context một **schema PostgreSQL**: `identity`, `catalog`, `ordering`, `customer`, `affiliate`; thêm `audit` (do `common` quản lý) và `public` (bảng `event_publication` của Spring Modulith, bảng lịch sử Flyway).
@@ -322,7 +324,7 @@ erDiagram
 
 | Ràng buộc / index | Mục đích |
 |---|---|
-| `uq_customer_address_default (customer_id) WHERE is_default` | Tối đa 1 địa chỉ mặc định |
+| (quy tắc trong aggregate `Customer`) | Đúng 1 địa chỉ mặc định – không dùng partial unique index vì Hibernate flush UPDATE theo thứ tự không xác định |
 | `processed_event (event_id, listener)` | Listener cập nhật read model **idempotent** khi event được phát lại |
 | Phân nhóm (`NEW` / `LOYAL` / `DORMANT`) | Tính lúc truy vấn từ `customer_stats` + ngưỡng `hwin.customer.*`, không lưu |
 

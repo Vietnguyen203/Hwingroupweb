@@ -1,0 +1,503 @@
+# 06 – Database (sinh tự động)
+
+> **Không sửa tay file này.** Sinh từ database đang chạy bằng `python docs/tools/gen_db_doc.py`.
+> Mô tả bảng/cột lấy từ `COMMENT` trong DB (migration `V2_9_0__table_comments.sql`) – xem được trong DBeaver.
+
+## Quy ước
+
+- Mỗi bounded context một **schema**; **không có foreign key xuyên schema** – cột tham chiếu module khác chỉ lưu ID.
+- Tiền: `bigint` VND. Thời gian: `timestamptz` (UTC). Aggregate root có `version` (optimistic locking), `created_at`, `updated_at`.
+- Migration Flyway đặt theo module: `backend/src/main/resources/db/migration/<module>/V<chặng>_<thứ tự>_<lần sửa>__<mô tả>.sql`.
+  Không sửa migration đã chạy – muốn đổi cấu trúc thì thêm file mới với version lớn hơn.
+
+## Tổng quan
+
+| Schema | Bảng | Mô tả |
+|---|---|---|
+| `identity` | [`refresh_token`](#identityrefresh_token) | Refresh token (lưu hash SHA-256). Xoay vòng mỗi lần dùng; dùng lại token đã thu hồi -> thu hồi cả family |
+| `identity` | [`user_account`](#identityuser_account) | Tài khoản. Khách/CTV định danh bằng SĐT (đăng nhập OTP); admin bằng email/tên đăng nhập + mật khẩu BCrypt |
+| `identity` | [`user_role`](#identityuser_role) | Vai trò của tài khoản (nhiều-nhiều): CUSTOMER \| AFFILIATE \| ADMIN |
+| `catalog` | [`category`](#catalogcategory) | Danh mục sản phẩm (menu icon trang chủ) |
+| `catalog` | [`product`](#catalogproduct) | Sản phẩm – không có biến thể (1 sản phẩm = 1 giá). Tiền tính bằng VND |
+| `catalog` | [`product_image`](#catalogproduct_image) | Ảnh sản phẩm (thuộc aggregate Product) |
+| `catalog` | [`stock_movement`](#catalogstock_movement) | Nhật ký trừ/hoàn kho theo đơn. Unique (order_id, product_id, type) giúp xử lý event idempotent |
+| `ordering` | [`cart`](#orderingcart) | Giỏ hàng lưu server – mỗi user một giỏ |
+| `ordering` | [`cart_item`](#orderingcart_item) | Dòng giỏ hàng: chỉ productId + số lượng, giá luôn lấy mới từ catalog |
+| `ordering` | [`order_item`](#orderingorder_item) | Dòng đơn – chụp lại tên và giá tại thời điểm đặt |
+| `ordering` | [`order_status_history`](#orderingorder_status_history) | Lịch sử chuyển trạng thái đơn (ai, lúc nào, ghi chú) |
+| `ordering` | [`orders`](#orderingorders) | Đơn hàng (aggregate root). Vòng đời: PENDING > CONFIRMED > SHIPPING > DELIVERED > COMPLETED; CANCELLED; RETURNED |
+| `customer` | [`customer`](#customercustomer) | Hồ sơ khách. id = identity.user_account.id (tạo khi nhận event UserRegistered) |
+| `customer` | [`customer_address`](#customercustomer_address) | Sổ địa chỉ (tối đa 10, đúng 1 địa chỉ mặc định) |
+| `customer` | [`customer_product_stat`](#customercustomer_product_stat) | Read model: khách đã mua sản phẩm nào bao nhiêu – "Sản phẩm bạn hay mua" |
+| `customer` | [`customer_stats`](#customercustomer_stats) | Read model: thống kê mua hàng, cập nhật từ event ordering (không tính đơn hủy/trả) |
+| `customer` | [`processed_event`](#customerprocessed_event) | Event đã xử lý theo từng listener – chống cập nhật trùng khi event phát lại |
+| `audit` | [`audit_log`](#auditaudit_log) | Nhật ký thay đổi liên quan tới tiền. Chỉ INSERT – trigger chặn UPDATE/DELETE |
+| `public` | [`event_publication`](#publicevent_publication) | Spring Modulith: event nội bộ giữa các module; completion_date null = chưa xử lý xong (sẽ phát lại) |
+| `affiliate` | – | Bounded context affiliate: cộng tác viên, hoa hồng, rút tiền (Chặng 3) – chưa có bảng |
+
+## Schema `identity`
+
+Bounded context identity: tài khoản, vai trò, phiên đăng nhập
+
+### identity.refresh_token
+
+Refresh token (lưu hash SHA-256). Xoay vòng mỗi lần dùng; dùng lại token đã thu hồi -> thu hồi cả family
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `bigint` |  | identity |  |
+| user_id | `bigint` |  |  |  |
+| token_hash | `character varying(64)` |  |  | SHA-256 của token – không lưu token gốc |
+| family_id | `uuid` |  |  | Chuỗi token sinh ra từ cùng một lần đăng nhập |
+| expires_at | `timestamp with time zone` |  |  |  |
+| revoked_at | `timestamp with time zone` | ✓ |  |  |
+| replaced_by_id | `bigint` | ✓ |  | Token kế tiếp sau khi xoay vòng |
+| user_agent | `character varying(255)` | ✓ |  |  |
+| ip_hash | `character varying(64)` | ✓ |  | SHA-256 của IP – không lưu IP gốc |
+| created_at | `timestamp with time zone` |  | now() |  |
+
+Ràng buộc:
+
+- `refresh_token_user_id_fkey` – FOREIGN KEY `FOREIGN KEY (user_id) REFERENCES identity.user_account(id) ON DELETE CASCADE`
+- `refresh_token_token_hash_key` – UNIQUE `UNIQUE (token_hash)`
+
+Index:
+
+- `idx_refresh_token_family` – `btree (family_id)`
+- `idx_refresh_token_user` – `btree (user_id)`
+
+### identity.user_account
+
+Tài khoản. Khách/CTV định danh bằng SĐT (đăng nhập OTP); admin bằng email/tên đăng nhập + mật khẩu BCrypt
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `bigint` |  | identity |  |
+| phone | `character varying(16)` | ✓ |  | SĐT chuẩn hóa E.164 (+84xxxxxxxxx); null với admin |
+| email | `character varying(255)` | ✓ |  | Email hoặc tên đăng nhập của admin |
+| password_hash | `character varying(100)` | ✓ |  | BCrypt – chỉ admin có |
+| full_name | `character varying(100)` | ✓ |  |  |
+| status | `character varying(16)` |  |  | ACTIVE \| LOCKED |
+| last_login_at | `timestamp with time zone` | ✓ |  |  |
+| version | `bigint` |  | 0 | Optimistic locking |
+| created_at | `timestamp with time zone` |  | now() |  |
+| updated_at | `timestamp with time zone` |  | now() |  |
+
+Ràng buộc:
+
+- `ck_user_account_identifier` – CHECK `CHECK (((phone IS NOT NULL) OR (email IS NOT NULL)))`
+- `user_account_status_check` – CHECK `CHECK (((status)::text = ANY ((ARRAY['ACTIVE'::character varying, 'LOCKED'::character varying])::text[])))`
+- `user_account_email_key` – UNIQUE `UNIQUE (email)`
+- `user_account_phone_key` – UNIQUE `UNIQUE (phone)`
+
+### identity.user_role
+
+Vai trò của tài khoản (nhiều-nhiều): CUSTOMER \| AFFILIATE \| ADMIN
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **user_id** 🔑 | `bigint` |  |  |  |
+| **role** 🔑 | `character varying(16)` |  |  |  |
+
+Ràng buộc:
+
+- `user_role_role_check` – CHECK `CHECK (((role)::text = ANY ((ARRAY['CUSTOMER'::character varying, 'AFFILIATE'::character varying, 'ADMIN'::character varying])::text[])))`
+- `user_role_user_id_fkey` – FOREIGN KEY `FOREIGN KEY (user_id) REFERENCES identity.user_account(id) ON DELETE CASCADE`
+
+## Schema `catalog`
+
+Bounded context catalog: danh mục, sản phẩm, tồn kho
+
+### catalog.category
+
+Danh mục sản phẩm (menu icon trang chủ)
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `bigint` |  | identity |  |
+| name | `character varying(100)` |  |  |  |
+| slug | `character varying(120)` |  |  |  |
+| icon_url | `character varying(500)` | ✓ |  |  |
+| sort_order | `integer` |  | 0 |  |
+| active | `boolean` |  | true | false = ẩn (không xóa cứng) |
+| version | `bigint` |  | 0 |  |
+| created_at | `timestamp with time zone` |  | now() |  |
+| updated_at | `timestamp with time zone` |  | now() |  |
+
+Ràng buộc:
+
+- `category_slug_key` – UNIQUE `UNIQUE (slug)`
+
+### catalog.product
+
+Sản phẩm – không có biến thể (1 sản phẩm = 1 giá). Tiền tính bằng VND
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `bigint` |  | identity |  |
+| category_id | `bigint` |  |  | Danh mục (cùng schema – có FK) |
+| name | `character varying(200)` |  |  |  |
+| slug | `character varying(220)` |  |  |  |
+| price | `bigint` |  |  | Giá bán (VND) |
+| compare_at_price | `bigint` | ✓ |  | Giá gốc để gạch ngang; null nếu không giảm giá |
+| short_description | `character varying(500)` | ✓ |  |  |
+| description | `text` | ✓ |  |  |
+| unit | `character varying(50)` | ✓ |  |  |
+| stock | `integer` |  | 0 | Tồn kho hiện tại – trừ khi đặt hàng, hoàn khi hủy/trả |
+| active | `boolean` |  | true |  |
+| bestseller | `boolean` |  | false | Cờ hiển thị khối Bán chạy |
+| sold_count | `integer` |  | 0 | Số lượng đã bán – dùng sắp xếp "bán chạy" |
+| manufacturer | `character varying(200)` | ✓ |  | Nhà sản xuất (NSX) |
+| shelf_life | `character varying(100)` | ✓ |  | Hạn sử dụng / thời hạn sử dụng |
+| storage_instructions | `character varying(1000)` | ✓ |  | Hướng dẫn bảo quản |
+| declaration_number | `character varying(100)` | ✓ |  | Số giấy tự công bố sản phẩm |
+| food_safety_cert_number | `character varying(100)` | ✓ |  | Số giấy chứng nhận cơ sở đủ điều kiện ATTP |
+| food_safety_cert_url | `character varying(500)` | ✓ |  |  |
+| search_text | `text` | ✓ | _generated_ | Tự sinh: f_unaccent(lower(tên + mô tả ngắn)) – tìm kiếm không dấu |
+| version | `bigint` |  | 0 |  |
+| created_at | `timestamp with time zone` |  | now() |  |
+| updated_at | `timestamp with time zone` |  | now() |  |
+
+Ràng buộc:
+
+- `product_compare_at_price_check` – CHECK `CHECK (((compare_at_price IS NULL) OR (compare_at_price >= 0)))`
+- `product_price_check` – CHECK `CHECK ((price >= 0))`
+- `product_stock_check` – CHECK `CHECK ((stock >= 0))`
+- `product_category_id_fkey` – FOREIGN KEY `FOREIGN KEY (category_id) REFERENCES catalog.category(id)`
+- `product_slug_key` – UNIQUE `UNIQUE (slug)`
+
+Index:
+
+- `idx_product_bestseller` – `btree (bestseller) WHERE active`
+- `idx_product_category_active` – `btree (category_id, active)`
+- `idx_product_search_trgm` – `gin (search_text gin_trgm_ops)`
+
+### catalog.product_image
+
+Ảnh sản phẩm (thuộc aggregate Product)
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `bigint` |  | identity |  |
+| product_id | `bigint` |  |  |  |
+| url | `character varying(500)` |  |  |  |
+| sort_order | `integer` |  | 0 |  |
+
+Ràng buộc:
+
+- `product_image_product_id_fkey` – FOREIGN KEY `FOREIGN KEY (product_id) REFERENCES catalog.product(id) ON DELETE CASCADE`
+
+Index:
+
+- `idx_product_image_product` – `btree (product_id)`
+
+### catalog.stock_movement
+
+Nhật ký trừ/hoàn kho theo đơn. Unique (order_id, product_id, type) giúp xử lý event idempotent
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `bigint` |  | identity |  |
+| product_id | `bigint` |  |  |  |
+| order_id | `bigint` |  |  | ID đơn bên ordering.orders – chỉ lưu ID, không FK xuyên schema |
+| type | `character varying(16)` |  |  | DEDUCT (trừ khi đặt) \| RESTORE (hoàn khi hủy/trả) |
+| quantity | `integer` |  |  |  |
+| created_at | `timestamp with time zone` |  | now() |  |
+
+Ràng buộc:
+
+- `stock_movement_quantity_check` – CHECK `CHECK ((quantity > 0))`
+- `stock_movement_type_check` – CHECK `CHECK (((type)::text = ANY ((ARRAY['DEDUCT'::character varying, 'RESTORE'::character varying])::text[])))`
+- `stock_movement_product_id_fkey` – FOREIGN KEY `FOREIGN KEY (product_id) REFERENCES catalog.product(id)`
+- `uq_stock_movement` – UNIQUE `UNIQUE (order_id, product_id, type)`
+
+Index:
+
+- `idx_stock_movement_order` – `btree (order_id)`
+
+## Schema `ordering`
+
+Bounded context ordering: giỏ hàng, đơn hàng
+
+### ordering.cart
+
+Giỏ hàng lưu server – mỗi user một giỏ
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `bigint` |  | identity |  |
+| user_id | `bigint` |  |  | ID tài khoản (identity) – không FK xuyên schema |
+| version | `bigint` |  | 0 |  |
+| created_at | `timestamp with time zone` |  | now() |  |
+| updated_at | `timestamp with time zone` |  | now() |  |
+
+Ràng buộc:
+
+- `cart_user_id_key` – UNIQUE `UNIQUE (user_id)`
+
+### ordering.cart_item
+
+Dòng giỏ hàng: chỉ productId + số lượng, giá luôn lấy mới từ catalog
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `bigint` |  | identity |  |
+| cart_id | `bigint` |  |  |  |
+| product_id | `bigint` |  |  |  |
+| quantity | `integer` |  |  |  |
+| added_at | `timestamp with time zone` |  | now() |  |
+
+Ràng buộc:
+
+- `cart_item_quantity_check` – CHECK `CHECK (((quantity >= 1) AND (quantity <= 99)))`
+- `cart_item_cart_id_fkey` – FOREIGN KEY `FOREIGN KEY (cart_id) REFERENCES ordering.cart(id) ON DELETE CASCADE`
+- `uq_cart_item` – UNIQUE `UNIQUE (cart_id, product_id)`
+
+### ordering.order_item
+
+Dòng đơn – chụp lại tên và giá tại thời điểm đặt
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `bigint` |  | identity |  |
+| order_id | `bigint` |  |  |  |
+| product_id | `bigint` |  |  | ID sản phẩm bên catalog – không FK xuyên schema |
+| product_name | `character varying(200)` |  |  |  |
+| product_slug | `character varying(220)` |  |  |  |
+| image_url | `character varying(500)` | ✓ |  |  |
+| unit_price | `bigint` |  |  |  |
+| quantity | `integer` |  |  |  |
+| line_total | `bigint` |  |  |  |
+
+Ràng buộc:
+
+- `order_item_line_total_check` – CHECK `CHECK ((line_total >= 0))`
+- `order_item_quantity_check` – CHECK `CHECK ((quantity > 0))`
+- `order_item_unit_price_check` – CHECK `CHECK ((unit_price >= 0))`
+- `order_item_order_id_fkey` – FOREIGN KEY `FOREIGN KEY (order_id) REFERENCES ordering.orders(id) ON DELETE CASCADE`
+
+Index:
+
+- `idx_order_item_order` – `btree (order_id)`
+
+### ordering.order_status_history
+
+Lịch sử chuyển trạng thái đơn (ai, lúc nào, ghi chú)
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `bigint` |  | identity |  |
+| order_id | `bigint` |  |  |  |
+| from_status | `character varying(16)` | ✓ |  |  |
+| to_status | `character varying(16)` |  |  |  |
+| actor_id | `bigint` | ✓ |  | Người thực hiện (id tài khoản); null = hệ thống/job |
+| note | `character varying(255)` | ✓ |  |  |
+| created_at | `timestamp with time zone` |  | now() |  |
+
+Ràng buộc:
+
+- `order_status_history_order_id_fkey` – FOREIGN KEY `FOREIGN KEY (order_id) REFERENCES ordering.orders(id) ON DELETE CASCADE`
+
+Index:
+
+- `idx_order_status_history_order` – `btree (order_id)`
+
+### ordering.orders
+
+Đơn hàng (aggregate root). Vòng đời: PENDING > CONFIRMED > SHIPPING > DELIVERED > COMPLETED; CANCELLED; RETURNED
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `bigint` |  | identity |  |
+| order_code | `character varying(20)` |  |  | Mã đơn hiển thị cho khách: HW + yyMMdd + 4 ký tự ngẫu nhiên |
+| customer_id | `bigint` |  |  | ID khách (= id tài khoản) – không FK xuyên schema |
+| referral_code | `character varying(16)` | ✓ |  | Mã CTV đọc từ cookie hwin_ref lúc đặt hàng |
+| status | `character varying(16)` |  |  |  |
+| payment_method | `character varying(16)` |  |  | COD \| BANK_QR (chuyển khoản VietQR, admin xác nhận) |
+| payment_status | `character varying(16)` |  |  | UNPAID \| PAID (COD tự PAID khi giao thành công) |
+| subtotal | `bigint` |  |  | Tạm tính = Σ đơn giá x số lượng (VND) |
+| discount | `bigint` |  | 0 | Giảm giá – demo luôn 0 |
+| shipping_fee | `bigint` |  |  |  |
+| total | `bigint` |  |  | Tổng thanh toán = subtotal - discount + shipping_fee |
+| recipient_name | `character varying(100)` |  |  | Địa chỉ giao (bản chụp lúc đặt, không phụ thuộc sổ địa chỉ) |
+| recipient_phone | `character varying(16)` |  |  |  |
+| province | `character varying(100)` |  |  |  |
+| district | `character varying(100)` |  |  |  |
+| ward | `character varying(100)` |  |  |  |
+| street | `character varying(255)` |  |  |  |
+| note | `character varying(500)` | ✓ |  |  |
+| vat_requested | `boolean` |  | false | Khách có yêu cầu xuất hóa đơn VAT |
+| vat_company_name | `character varying(255)` | ✓ |  |  |
+| vat_tax_code | `character varying(20)` | ✓ |  |  |
+| vat_address | `character varying(500)` | ✓ |  |  |
+| vat_email | `character varying(255)` | ✓ |  |  |
+| cancel_reason | `character varying(32)` | ✓ |  |  |
+| payment_ref | `character varying(100)` | ✓ |  | Mã giao dịch chuyển khoản admin nhập khi xác nhận đã nhận tiền |
+| placed_at | `timestamp with time zone` |  |  |  |
+| confirmed_at | `timestamp with time zone` | ✓ |  |  |
+| shipped_at | `timestamp with time zone` | ✓ |  |  |
+| delivered_at | `timestamp with time zone` | ✓ |  |  |
+| completed_at | `timestamp with time zone` | ✓ |  |  |
+| cancelled_at | `timestamp with time zone` | ✓ |  |  |
+| returned_at | `timestamp with time zone` | ✓ |  |  |
+| version | `bigint` |  | 0 |  |
+| created_at | `timestamp with time zone` |  | now() |  |
+| updated_at | `timestamp with time zone` |  | now() |  |
+
+Ràng buộc:
+
+- `ck_orders_total` – CHECK `CHECK ((total = ((subtotal - discount) + shipping_fee)))`
+- `orders_discount_check` – CHECK `CHECK ((discount >= 0))`
+- `orders_payment_method_check` – CHECK `CHECK (((payment_method)::text = ANY ((ARRAY['COD'::character varying, 'BANK_QR'::character varying])::text[])))`
+- `orders_payment_status_check` – CHECK `CHECK (((payment_status)::text = ANY ((ARRAY['UNPAID'::character varying, 'PAID'::character varying])::text[])))`
+- `orders_shipping_fee_check` – CHECK `CHECK ((shipping_fee >= 0))`
+- `orders_status_check` – CHECK `CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'CONFIRMED'::character varying, 'SHIPPING'::character varying, 'DELIVERED'::character varying, 'COMPLETED'::character varying, 'CANCELLED'::character varying, 'RETURNED'::character varying])::text[])))`
+- `orders_subtotal_check` – CHECK `CHECK ((subtotal >= 0))`
+- `orders_total_check` – CHECK `CHECK ((total >= 0))`
+- `orders_order_code_key` – UNIQUE `UNIQUE (order_code)`
+
+Index:
+
+- `idx_orders_customer` – `btree (customer_id, placed_at DESC)`
+- `idx_orders_status` – `btree (status, placed_at)`
+
+## Schema `customer`
+
+Bounded context customer: hồ sơ khách, sổ địa chỉ, thống kê (read model)
+
+### customer.customer
+
+Hồ sơ khách. id = identity.user_account.id (tạo khi nhận event UserRegistered)
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `bigint` |  |  |  |
+| phone | `character varying(16)` |  |  |  |
+| full_name | `character varying(100)` | ✓ |  |  |
+| version | `bigint` |  | 0 |  |
+| created_at | `timestamp with time zone` |  | now() |  |
+| updated_at | `timestamp with time zone` |  | now() |  |
+
+Ràng buộc:
+
+- `customer_phone_key` – UNIQUE `UNIQUE (phone)`
+
+### customer.customer_address
+
+Sổ địa chỉ (tối đa 10, đúng 1 địa chỉ mặc định)
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `bigint` |  | identity |  |
+| customer_id | `bigint` |  |  |  |
+| recipient_name | `character varying(100)` |  |  |  |
+| recipient_phone | `character varying(16)` |  |  |  |
+| province | `character varying(100)` |  |  |  |
+| district | `character varying(100)` |  |  |  |
+| ward | `character varying(100)` |  |  |  |
+| street | `character varying(255)` |  |  |  |
+| is_default | `boolean` |  | false |  |
+| created_at | `timestamp with time zone` |  | now() |  |
+
+Ràng buộc:
+
+- `customer_address_customer_id_fkey` – FOREIGN KEY `FOREIGN KEY (customer_id) REFERENCES customer.customer(id) ON DELETE CASCADE`
+
+Index:
+
+- `idx_customer_address_customer` – `btree (customer_id)`
+
+### customer.customer_product_stat
+
+Read model: khách đã mua sản phẩm nào bao nhiêu – "Sản phẩm bạn hay mua"
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **customer_id** 🔑 | `bigint` |  |  |  |
+| **product_id** 🔑 | `bigint` |  |  |  |
+| total_quantity | `integer` |  | 0 |  |
+| order_count | `integer` |  | 0 |  |
+| last_ordered_at | `timestamp with time zone` | ✓ |  |  |
+
+Ràng buộc:
+
+- `customer_product_stat_customer_id_fkey` – FOREIGN KEY `FOREIGN KEY (customer_id) REFERENCES customer.customer(id) ON DELETE CASCADE`
+
+### customer.customer_stats
+
+Read model: thống kê mua hàng, cập nhật từ event ordering (không tính đơn hủy/trả)
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **customer_id** 🔑 | `bigint` |  |  |  |
+| total_orders | `integer` |  | 0 |  |
+| total_spent | `bigint` |  | 0 |  |
+| first_order_at | `timestamp with time zone` | ✓ |  |  |
+| last_order_at | `timestamp with time zone` | ✓ |  | Dùng phân nhóm "lâu chưa quay lại" |
+| updated_at | `timestamp with time zone` |  | now() |  |
+
+Ràng buộc:
+
+- `customer_stats_customer_id_fkey` – FOREIGN KEY `FOREIGN KEY (customer_id) REFERENCES customer.customer(id) ON DELETE CASCADE`
+
+Index:
+
+- `idx_customer_stats_last_order` – `btree (last_order_at)`
+
+### customer.processed_event
+
+Event đã xử lý theo từng listener – chống cập nhật trùng khi event phát lại
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **event_id** 🔑 | `uuid` |  |  |  |
+| **listener** 🔑 | `character varying(100)` |  |  |  |
+| processed_at | `timestamp with time zone` |  | now() |  |
+
+## Schema `audit`
+
+Nhật ký kiểm toán dùng chung (append-only)
+
+### audit.audit_log
+
+Nhật ký thay đổi liên quan tới tiền. Chỉ INSERT – trigger chặn UPDATE/DELETE
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `bigint` |  | identity |  |
+| module | `character varying(32)` |  |  |  |
+| aggregate_type | `character varying(64)` |  |  |  |
+| aggregate_id | `character varying(64)` |  |  |  |
+| action | `character varying(64)` |  |  |  |
+| actor_id | `bigint` | ✓ |  |  |
+| amount | `bigint` | ✓ |  |  |
+| detail | `jsonb` |  | '{}'::jsonb |  |
+| created_at | `timestamp with time zone` |  | now() |  |
+
+Index:
+
+- `idx_audit_log_aggregate` – `btree (aggregate_type, aggregate_id)`
+
+## Schema `public`
+
+standard public schema
+
+### public.event_publication
+
+Spring Modulith: event nội bộ giữa các module; completion_date null = chưa xử lý xong (sẽ phát lại)
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `uuid` |  |  |  |
+| listener_id | `character varying(512)` |  |  |  |
+| event_type | `character varying(512)` |  |  |  |
+| serialized_event | `text` |  |  |  |
+| publication_date | `timestamp with time zone` |  |  |  |
+| completion_date | `timestamp with time zone` | ✓ |  |  |
+| last_resubmission_date | `timestamp with time zone` | ✓ |  |  |
+| completion_attempts | `integer` |  | 0 |  |
+| status | `character varying(32)` | ✓ |  |  |
+
+Index:
+
+- `idx_event_publication_incomplete` – `btree (completion_date) WHERE (completion_date IS NULL)`
