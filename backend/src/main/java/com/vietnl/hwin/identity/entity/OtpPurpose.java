@@ -5,5 +5,7 @@ public enum OtpPurpose {
     /** Đăng nhập / tạo tài khoản bằng SĐT. */
     LOGIN,
     /** CTV đổi tài khoản ngân hàng. */
-    BANK_CHANGE
+    BANK_CHANGE,
+    /** Bước 2 đăng nhập quản trị (sau khi nhập đúng mật khẩu). */
+    ADMIN_LOGIN
 }

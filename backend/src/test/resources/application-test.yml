@@ -1,5 +1,8 @@
 # Cấu hình cho test (Testcontainers cung cấp Postgres/Redis). Giá trị chỉ dùng cho test.
 hwin:
+  admin-seed:          # test không tạo admin seed (bỏ qua giá trị trong .env của máy dev)
+    email: ""
+    password: ""
   security:
     jwt-secret: test-only-secret-0123456789abcdef-0123456789
     cookie-secure: false

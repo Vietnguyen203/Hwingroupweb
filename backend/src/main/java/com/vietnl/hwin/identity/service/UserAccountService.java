@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vietnl.hwin.common.domain.PhoneNumber;
+import com.vietnl.hwin.common.exception.DomainException;
 import com.vietnl.hwin.common.exception.NotFoundException;
 import com.vietnl.hwin.identity.entity.UserAccount;
 import com.vietnl.hwin.identity.entity.UserRegistered;
@@ -41,6 +42,10 @@ public class UserAccountService {
     public UserAccount loginByPhone(PhoneNumber phone) {
         Instant now = clock.instant();
         UserAccount user = users.findByPhone(phone).orElse(null);
+        if (user != null && user.isAdmin()) {
+            // Không cho tài khoản quản trị vào bằng OTP khách (bỏ qua bước mật khẩu)
+            throw new DomainException("ADMIN_USE_ADMIN_LOGIN", "Tài khoản quản trị phải đăng nhập tại trang quản trị");
+        }
         if (user == null) {
             user = users.save(UserAccount.registerCustomer(phone));
             events.publishEvent(UserRegistered.of(user.getId(), phone.value(), now));

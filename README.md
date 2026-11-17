@@ -19,7 +19,7 @@ Tài liệu database đầy đủ (sinh tự động từ DB): [`docs/06-databas
 | 0 | Thiết kế (`docs/`) | Xong |
 | 1 | Nền tảng, identity (OTP + JWT), catalog, frontend: trang chủ / danh mục / chi tiết / tìm kiếm | Xong |
 | 2 | ordering + customer: giỏ server, thanh toán kèm OTP, đơn hàng, Mua lại, địa chỉ | Backend xong (Postman 90 request đạt); frontend chưa |
-| 3 | affiliate, trang CTV, trang admin, test domain | Backend xong (43 test, Postman 280 kiểm tra đạt); frontend CTV / admin chưa |
+| 3 | affiliate, trang CTV, trang admin, test domain | Backend xong (49 test đạt); frontend CTV / admin chưa |
 
 ## Yêu cầu
 
@@ -59,7 +59,7 @@ Mở http://localhost:3100 (nên bật chế độ điện thoại trong DevTool
 
 | Vai trò | Đăng nhập | Dữ liệu sẵn có |
 |---|---|---|
-| Admin | `admin` / `admin` | – |
+| Admin (dev) | `admin` / `admin` – **miễn OTP, chỉ có ở profile dev** | – |
 | CTV đã duyệt | SĐT `0901000001` (mã giới thiệu `HWINDEMO`) | 12 click, 1 khách đã gắn, hoa hồng 31.000 đã duyệt + 11.500 đang chờ |
 | Khách 1 | SĐT `0901000002` | Đã gắn với CTV, 2 đơn (`HWDEMO0001` đã giao, `HWDEMO0002` đã xác nhận) |
 | Khách 2 | SĐT `0901000003` | 1 đơn chuyển khoản chờ thanh toán (`HWDEMO0003`), 1 đơn đã hủy (`HWDEMO0004`) |
@@ -108,7 +108,10 @@ cd ..\frontend; npm run build; npm run lint
 - **Vai trò AFFILIATE** cấp qua event khi admin duyệt; có hiệu lực từ access token kế tiếp (`POST /api/auth/refresh` hoặc đăng nhập lại).
 - **Số dư CTV** được tính (hoa hồng APPROVED − rút tiền chưa bị từ chối), không lưu cột số dư → từ chối rút tiền tự trả tiền về. Mỗi CTV tối đa 1 yêu cầu rút đang mở (unique index).
 - **Ngân hàng CTV** mã hóa AES-256-GCM (khóa `AFFILIATE_BANK_KEY`); CTV chỉ thấy 4 số cuối; admin xem bản giải mã khi chi trả (ghi audit). Lần thiết lập đầu không khóa rút, các lần đổi sau khóa 48 giờ.
-- **Đăng nhập admin**: chống dò mật khẩu bằng cách chỉ đếm lần **sai** (5 lần / 10 phút / IP).
+- **Đăng nhập admin 2 bước**: mọi tài khoản role ADMIN phải nhập mật khẩu rồi OTP gửi tới SĐT của admin. Miễn OTP gắn theo **tài khoản** (cột `otp_exempt`), chỉ tài khoản dev `admin`/`admin` có và chỉ ở profile dev.
+- **Admin ở môi trường thật**: backend **từ chối khởi động** nếu `ADMIN_PASSWORD` yếu (< 12 ký tự, thiếu chữ/số, chứa "admin"), thiếu `ADMIN_PHONE`, bật miễn OTP, hoặc trong DB còn tài khoản miễn OTP.
+- **Tài khoản admin không đăng nhập được bằng OTP khách** (`ADMIN_USE_ADMIN_LOGIN`) – tránh bỏ qua bước mật khẩu.
+- **Chống dò mật khẩu admin**: chỉ đếm lần đăng nhập **sai** (5 lần / 10 phút / IP).
 - **Chỉ ở profile dev**: dữ liệu mẫu (`db/demo`), `GET /api/dev/otp/latest` (lấy OTP cho Postman/test), chạy job duyệt hoa hồng / hủy đơn quá hạn với thời điểm giả lập (`asOf`), nới giới hạn để chạy Postman nhiều lần (OTP theo IP: 50, đặt hàng: 30 đơn / 10 phút).
 - **Ảnh VietQR** sinh theo cấu hình `BANK_QR_*` trong `.env` (mặc định là tài khoản giả).
 - **Jackson 3** (Spring Boot 4) mặc định báo lỗi khi JSON thiếu field `boolean`/`int` – đã tắt (`spring.jackson.deserialization.fail-on-null-for-primitives=false`), field thiếu nhận giá trị mặc định.

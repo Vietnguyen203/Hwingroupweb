@@ -65,6 +65,9 @@ public class UserAccount extends AggregateRoot<UserAccount> {
 
     private Instant lastLoginAt;
 
+    /** Đăng nhập admin không cần OTP – CHỈ tài khoản dev admin/admin (gắn theo tài khoản, không theo role). */
+    private boolean otpExempt;
+
     /** Tạo tài khoản khách khi đăng nhập OTP lần đầu. */
     public static UserAccount registerCustomer(PhoneNumber phone) {
         UserAccount u = new UserAccount();
@@ -74,8 +77,32 @@ public class UserAccount extends AggregateRoot<UserAccount> {
         return u;
     }
 
-    /** Tạo tài khoản quản trị (seed). {@code email} là email hoặc tên đăng nhập (ví dụ "admin"). */
-    public static UserAccount createAdmin(String email, String passwordHash, String fullName) {
+    /**
+     * Tạo tài khoản quản trị – luôn đăng nhập 2 bước (mật khẩu + OTP), nên bắt buộc có SĐT nhận OTP.
+     * {@code email} là email hoặc tên đăng nhập.
+     */
+    public static UserAccount createAdmin(String email, String passwordHash, String fullName, PhoneNumber phone) {
+        if (phone == null) {
+            throw new DomainException("ADMIN_PHONE_REQUIRED", "Admin cần số điện thoại để nhận OTP đăng nhập");
+        }
+        UserAccount u = newAdmin(email, passwordHash, fullName);
+        u.phone = phone;
+        return u;
+    }
+
+    /** Tài khoản dev admin/admin: miễn OTP. Chỉ AdminSeeder gọi ở profile dev. */
+    public static UserAccount createDevAdmin(String email, String passwordHash, String fullName) {
+        UserAccount u = newAdmin(email, passwordHash, fullName);
+        u.otpExempt = true;
+        return u;
+    }
+
+    /** Bật miễn OTP cho tài khoản dev đã có (chỉ AdminSeeder gọi ở profile dev). */
+    public void markDevOtpExempt() {
+        this.otpExempt = true;
+    }
+
+    private static UserAccount newAdmin(String email, String passwordHash, String fullName) {
         if (email == null || email.isBlank() || passwordHash == null) {
             throw new DomainException("ADMIN_INVALID", "Admin cần email/tên đăng nhập và mật khẩu");
         }

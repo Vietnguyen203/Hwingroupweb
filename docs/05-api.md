@@ -22,7 +22,10 @@
 | POST | `/api/auth/refresh` | cookie `hwin_rt` | Xoay vòng refresh token, set cookie mới |
 | POST | `/api/auth/logout` | auth | Thu hồi refresh token hiện tại, xóa cookie |
 | GET | `/api/auth/me` | auth | `{id, phone (che), fullName, roles}` – frontend & proxy.ts dùng |
-| POST | `/api/admin/auth/login` | public | `{email, password}` → cookie JWT (role ADMIN). Rate limit 5/10 phút/IP |
+| POST | `/api/admin/auth/login` | public | Bước 1: `{email, password}`. Tài khoản thường → `{otpRequired: true, challengeId}` (OTP gửi tới SĐT admin); riêng tài khoản dev `admin` miễn OTP → cookie JWT ngay. Chỉ đếm lần sai: 5/10 phút/IP |
+| POST | `/api/admin/auth/login/verify` | public | Bước 2: `{challengeId, otp}` → cookie JWT |
+| GET | `/api/admin/admins` | ADMIN | Danh sách tài khoản quản trị |
+| POST | `/api/admin/admins` | ADMIN | Tạo admin `{email, password, fullName, phone}` – mật khẩu ≥ 12 ký tự có chữ + số, SĐT bắt buộc; luôn đăng nhập 2 bước |
 
 ## catalog
 

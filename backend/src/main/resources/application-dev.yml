@@ -3,10 +3,16 @@ spring:
   flyway:
     # dev: nạp thêm dữ liệu mẫu (1 CTV đã duyệt + đơn hàng mẫu) – xem db/demo/V9_0_0__demo_data.sql
     locations: classpath:db/migration,classpath:db/demo
+    # Dữ liệu mẫu dùng version 9.x -> migration thật thêm sau (version nhỏ hơn) vẫn được chạy
+    out-of-order: true
   datasource:
     password: ${DB_PASSWORD:hwin_dev}
 
 hwin:
+  admin-seed:                    # dev: tài khoản admin/admin MIỄN OTP (chỉ tồn tại ở dev)
+    email: ${ADMIN_EMAIL:admin}
+    password: ${ADMIN_PASSWORD:admin}
+    otp-exempt: true
   security:
     cookie-secure: ${COOKIE_SECURE:false}
   otp:

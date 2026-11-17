@@ -34,6 +34,27 @@ public final class AuthDtos {
             @NotBlank @Size(max = 100) String password) {
     }
 
+    /**
+     * Kết quả bước 1 đăng nhập admin. otpRequired=false -> đã đăng nhập (user có dữ liệu);
+     * otpRequired=true -> gửi challengeId + OTP tới /api/admin/auth/login/verify.
+     */
+    public record AdminLoginResponse(boolean otpRequired, String challengeId, String phoneMasked,
+                                     long expiresInSeconds, MeResponse user) {
+    }
+
+    public record AdminOtpVerifyRequest(
+            @NotBlank @Size(max = 64) String challengeId,
+            @NotBlank @Pattern(regexp = "^\\d{6}$", message = "OTP gồm 6 chữ số") String otp) {
+    }
+
+    /** Tạo tài khoản quản trị – mật khẩu mạnh + SĐT nhận OTP là bắt buộc. */
+    public record CreateAdminRequest(
+            @NotBlank @Size(max = 255) String email,
+            @NotBlank @Size(max = 100) String password,
+            @Size(max = 100) String fullName,
+            @NotBlank @Pattern(regexp = "^[0-9+ .\\-]{9,16}$", message = "Số điện thoại không hợp lệ") String phone) {
+    }
+
     /** Thông tin người dùng hiện tại. SĐT luôn được che. */
     public record MeResponse(UUID id, String phoneMasked, String email, String fullName, Set<String> roles) {
     }

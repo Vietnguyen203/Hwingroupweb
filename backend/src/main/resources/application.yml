@@ -77,10 +77,12 @@ hwin:
     send-window: 10m
     pepper: ${OTP_PEPPER}
     log-code: false
-  admin-seed:
+  admin-seed:                    # admin đầu tiên – môi trường thật: mật khẩu mạnh + SĐT nhận OTP (bắt buộc)
     email: ${ADMIN_EMAIL:}
     password: ${ADMIN_PASSWORD:}
+    phone: ${ADMIN_PHONE:}
     full-name: Quản trị viên
+    otp-exempt: false            # true chỉ được phép ở profile dev
   storage:
     local-dir: ${STORAGE_DIR:./uploads}
     public-path: /uploads/

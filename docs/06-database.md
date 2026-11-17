@@ -86,6 +86,7 @@ Tài khoản. Khách/CTV định danh bằng SĐT (đăng nhập OTP); admin b�
 | version | `bigint` |  | 0 | Optimistic locking |
 | created_at | `timestamp with time zone` |  | now() |  |
 | updated_at | `timestamp with time zone` |  | now() |  |
+| otp_exempt | `boolean` |  | false | true = đăng nhập admin không cần OTP. CHỈ dành cho tài khoản dev admin/admin; môi trường thật không cho phép |
 
 Ràng buộc:
 
