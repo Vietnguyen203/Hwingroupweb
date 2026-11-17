@@ -15,6 +15,8 @@ import com.vietnl.hwin.common.domain.EmailAddress;
 import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.common.exception.DomainException;
 import com.vietnl.hwin.common.exception.NotFoundException;
+import com.vietnl.hwin.identity.entity.OtpChannel;
+import com.vietnl.hwin.identity.entity.OtpTarget;
 import com.vietnl.hwin.identity.entity.UserAccount;
 import com.vietnl.hwin.identity.entity.UserRegistered;
 import com.vietnl.hwin.identity.repository.UserAccountRepository;
@@ -35,8 +37,49 @@ public class UserAccountService {
         this.clock = clock;
     }
 
+    /** Tài khoản khách / CTV theo SĐT hoặc email. */
+    @Transactional(readOnly = true)
+    public java.util.Optional<UserAccount> find(OtpTarget target) {
+        return target.channel() == OtpChannel.SMS
+                ? users.findByPhone(new PhoneNumber(target.value()))
+                : users.findByEmail(target.value());
+    }
+
+    /** Đăng nhập tài khoản ĐÃ CÓ (không tự tạo). */
+    @Transactional
+    public UserAccount login(OtpTarget target) {
+        UserAccount user = find(target).orElseThrow(() -> new DomainException("ACCOUNT_NOT_FOUND",
+                "Chưa có tài khoản với " + label(target) + " này, vui lòng đăng ký"));
+        ensureNotAdmin(user);
+        user.recordLogin(clock.instant());
+        return user;
+    }
+
+    /** Đăng ký tài khoản khách MỚI; đã có thì báo lỗi. Phát UserRegistered để module customer tạo hồ sơ. */
+    @Transactional
+    public UserAccount register(OtpTarget target, String fullName) {
+        if (find(target).isPresent()) {
+            throw new DomainException("ACCOUNT_EXISTS", label(target) + " này đã có tài khoản, vui lòng đăng nhập");
+        }
+        Instant now = clock.instant();
+        boolean sms = target.channel() == OtpChannel.SMS;
+        UserAccount user = sms ? UserAccount.registerCustomer(new PhoneNumber(target.value()))
+                : UserAccount.registerCustomer(new EmailAddress(target.value()));
+        user.rename(fullName);
+        user = users.save(user);
+        events.publishEvent(UserRegistered.of(user.getId(), sms ? target.value() : null, sms ? null : target.value(), now));
+        user.recordLogin(now);
+        log.info("Đăng ký tài khoản mới {}", target.masked());
+        return user;
+    }
+
+    private static String label(OtpTarget target) {
+        return target.channel() == OtpChannel.SMS ? "Số điện thoại" : "Email";
+    }
+
     /**
-     * Tìm tài khoản theo SĐT, chưa có thì tạo mới (CUSTOMER) và phát UserRegistered.
+     * Dùng cho test / dữ liệu mẫu: tìm theo SĐT, chưa có thì tạo (CUSTOMER) và phát UserRegistered.
+     * Luồng thật dùng {@link #login} / {@link #register}.
      * Đồng thời ghi nhận lần đăng nhập.
      */
     @Transactional

@@ -27,7 +27,7 @@ Không cần thao tác tay:
 | Folder | Nội dung |
 |---|---|
 | 01. Hệ thống – kiểm tra backend | Health check |
-| 02. Đăng nhập / đăng ký (khách, CTV, admin) | Chưa đăng nhập bị 401; khách + CTV đăng nhập bằng SĐT + OTP (SĐT mới tự tạo tài khoản); admin/admin (dev, miễn OTP) |
+| 02. Đăng nhập / đăng ký (khách, CTV, admin) | Chưa đăng nhập bị 401; khách đăng ký bằng email và bằng SĐT (OTP + họ tên), đăng ký trùng bị chặn, đăng nhập tài khoản chưa có bị chặn, đăng nhập lại; CTV đăng ký tài khoản; admin/admin (dev, miễn OTP) |
 | 03. Khách – xem sản phẩm | Danh mục, tìm không dấu, lọc, bán chạy, chi tiết, tính giá giỏ |
 | 04. Khách – giỏ hàng | Gộp giỏ, thêm / sửa / xóa, lỗi |
 | 05. Khách – đặt hàng & đơn của tôi | COD, idempotencyKey, trừ kho, BANK_QR + VAT, tự hủy, lọc đơn |

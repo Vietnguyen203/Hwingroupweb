@@ -134,7 +134,7 @@
           ]
         },
         {
-          "name": "Khách (email): gửi OTP qua email",
+          "name": "Khách (email): đăng ký – gửi OTP",
           "request": {
             "method": "POST",
             "header": [
@@ -157,7 +157,7 @@
             "description": "Sinh email ngẫu nhiên. Dev: email thật được gửi tới Mailpit – xem thư tại http://localhost:18025",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{customerEmail}}\"\n}",
+              "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"purpose\": \"REGISTER\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -191,7 +191,7 @@
           ]
         },
         {
-          "name": "Khách (email): nhập OTP → đăng nhập (email mới thì tự tạo tài khoản)",
+          "name": "Khách (email): đăng ký – nhập OTP + họ tên → tạo tài khoản",
           "request": {
             "method": "POST",
             "header": [
@@ -201,21 +201,20 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/auth/otp/verify",
+              "raw": "{{baseUrl}}/api/auth/register",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "auth",
-                "otp",
-                "verify"
+                "register"
               ]
             },
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"otp\": \"{{customerEmailOtp}}\"\n}",
+              "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"otp\": \"{{customerEmailOtp}}\",\n  \"fullName\": \"Khách Email\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -231,7 +230,7 @@
                 "exec": [
                   "// Tự lấy OTP vừa gửi (endpoint chỉ có ở profile dev)",
                   "const v = pm.collectionVariables.get('customerEmail');",
-                  "pm.sendRequest(pm.variables.get('baseUrl') + '/api/dev/otp/latest?purpose=LOGIN&email=' + encodeURIComponent(v), (err, res) => {",
+                  "pm.sendRequest(pm.variables.get('baseUrl') + '/api/dev/otp/latest?purpose=REGISTER&email=' + encodeURIComponent(v), (err, res) => {",
                   "  pm.collectionVariables.set('customerEmailOtp', res.json().code);",
                   "});"
                 ]
@@ -242,10 +241,55 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
-                  "const me = pm.response.json();",
-                  "pm.test('Có role CUSTOMER', () => pm.expect(me.roles).to.include('CUSTOMER'));",
-                  "pm.test('Đúng email, chưa có SĐT', () => { pm.expect(me.email).to.eql(pm.collectionVariables.get('customerEmail')); pm.expect(me.phoneMasked).to.be.null; });"
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Có role CUSTOMER', () => pm.expect(pm.response.json().roles).to.include('CUSTOMER'));",
+                  "pm.test('Đặt cookie hwin_at', () => pm.expect(pm.cookies.has('hwin_at')).to.be.true);",
+                  "pm.test('Đúng email, chưa có SĐT', () => { const me = pm.response.json(); pm.expect(me.email).to.eql(pm.collectionVariables.get('customerEmail')); pm.expect(me.phoneMasked).to.be.null; pm.expect(me.fullName).to.eql('Khách Email'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách (email): đăng ký lại cùng email → 422 ACCOUNT_EXISTS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "otp"
+              ]
+            },
+            "description": "Sinh email ngẫu nhiên. Dev: email thật được gửi tới Mailpit – xem thư tại http://localhost:18025",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"purpose\": \"REGISTER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                  "pm.test('code = ACCOUNT_EXISTS', () => pm.expect(pm.response.json().code).to.eql('ACCOUNT_EXISTS'));"
                 ]
               }
             }
@@ -287,7 +331,7 @@
           ]
         },
         {
-          "name": "Khách (SĐT): gửi OTP (SĐT ngẫu nhiên)",
+          "name": "Khách (SĐT): đăng nhập khi chưa có tài khoản → 422 ACCOUNT_NOT_FOUND",
           "request": {
             "method": "POST",
             "header": [
@@ -310,7 +354,7 @@
             "description": "Sinh ngẫu nhiên SĐT khách + SĐT CTV cho lần chạy này. OTP được tự lấy ở bước xác thực (profile dev).",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"{{customerPhone}}\"\n}",
+              "raw": "{\n  \"phone\": \"{{customerPhone}}\",\n  \"purpose\": \"LOGIN\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -335,15 +379,15 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('HTTP 202', () => pm.response.to.have.status(202));",
-                  "pm.test('Gửi qua SMS (dev: giả lập)', () => pm.expect(pm.response.json().channel).to.eql('SMS'));"
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                  "pm.test('code = ACCOUNT_NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('ACCOUNT_NOT_FOUND'));"
                 ]
               }
             }
           ]
         },
         {
-          "name": "Khách (SĐT): nhập OTP sai → 422",
+          "name": "Khách (SĐT): đăng ký – gửi OTP",
           "request": {
             "method": "POST",
             "header": [
@@ -353,21 +397,65 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/auth/otp/verify",
+              "raw": "{{baseUrl}}/api/auth/otp",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "auth",
-                "otp",
-                "verify"
+                "otp"
+              ]
+            },
+            "description": "Sinh ngẫu nhiên SĐT khách + SĐT CTV cho lần chạy này. OTP được tự lấy ở bước xác thực (profile dev).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{customerPhone}}\",\n  \"purpose\": \"REGISTER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 202', () => pm.response.to.have.status(202));",
+                  "pm.test('Gửi qua SMS (dev: giả lập)', () => pm.expect(pm.response.json().channel).to.eql('SMS'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách (SĐT): đăng ký – OTP sai → 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
               ]
             },
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"{{customerPhone}}\",\n  \"otp\": \"000000\"\n}",
+              "raw": "{\n  \"phone\": \"{{customerPhone}}\",\n  \"otp\": \"000000\",\n  \"fullName\": \"Khách SĐT\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -388,7 +476,110 @@
           ]
         },
         {
-          "name": "Khách (SĐT): nhập OTP đúng → đăng nhập (SĐT mới thì tự tạo tài khoản)",
+          "name": "Khách (SĐT): đăng ký – OTP đúng → tạo tài khoản",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{customerPhone}}\",\n  \"otp\": \"{{customerOtp}}\",\n  \"fullName\": \"Khách SĐT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Tự lấy OTP vừa gửi (endpoint chỉ có ở profile dev)",
+                  "const v = pm.collectionVariables.get('customerPhone');",
+                  "pm.sendRequest(pm.variables.get('baseUrl') + '/api/dev/otp/latest?purpose=REGISTER&phone=' + encodeURIComponent(v), (err, res) => {",
+                  "  pm.collectionVariables.set('customerOtp', res.json().code);",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Có role CUSTOMER', () => pm.expect(pm.response.json().roles).to.include('CUSTOMER'));",
+                  "pm.test('Đặt cookie hwin_at', () => pm.expect(pm.cookies.has('hwin_at')).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách (SĐT): đăng nhập – gửi OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "otp"
+              ]
+            },
+            "description": "Sinh ngẫu nhiên SĐT khách + SĐT CTV cho lần chạy này. OTP được tự lấy ở bước xác thực (profile dev).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{customerPhone}}\",\n  \"purpose\": \"LOGIN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 202', () => pm.response.to.have.status(202));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách (SĐT): đăng nhập – OTP đúng",
           "request": {
             "method": "POST",
             "header": [
@@ -427,8 +618,8 @@
                 "type": "text/javascript",
                 "exec": [
                   "// Tự lấy OTP vừa gửi (endpoint chỉ có ở profile dev)",
-                  "const phone = pm.collectionVariables.get('customerPhone');",
-                  "pm.sendRequest(pm.variables.get('baseUrl') + '/api/dev/otp/latest?purpose=LOGIN&phone=' + phone, (err, res) => {",
+                  "const v = pm.collectionVariables.get('customerPhone');",
+                  "pm.sendRequest(pm.variables.get('baseUrl') + '/api/dev/otp/latest?purpose=LOGIN&phone=' + encodeURIComponent(v), (err, res) => {",
                   "  pm.collectionVariables.set('customerOtp', res.json().code);",
                   "});"
                 ]
@@ -440,8 +631,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
-                  "pm.test('Có role CUSTOMER', () => pm.expect(pm.response.json().roles).to.include('CUSTOMER'));",
-                  "pm.test('Đặt cookie hwin_at', () => pm.expect(pm.cookies.has('hwin_at')).to.be.true);"
+                  "pm.test('Tên đã đăng ký', () => pm.expect(pm.response.json().fullName).to.eql('Khách SĐT'));"
                 ]
               }
             }
@@ -509,7 +699,7 @@
           ]
         },
         {
-          "name": "CTV: gửi OTP",
+          "name": "CTV: đăng ký tài khoản – gửi OTP",
           "request": {
             "method": "POST",
             "header": [
@@ -532,7 +722,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"{{affPhone}}\"\n}",
+              "raw": "{\n  \"phone\": \"{{affPhone}}\",\n  \"purpose\": \"REGISTER\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -553,7 +743,7 @@
           ]
         },
         {
-          "name": "CTV: nhập OTP → đăng nhập",
+          "name": "CTV: đăng ký tài khoản – OTP đúng",
           "request": {
             "method": "POST",
             "header": [
@@ -563,21 +753,20 @@
               }
             ],
             "url": {
-              "raw": "{{ctvUrl}}/api/auth/otp/verify",
+              "raw": "{{ctvUrl}}/api/auth/register",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
                 "auth",
-                "otp",
-                "verify"
+                "register"
               ]
             },
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"{{affPhone}}\",\n  \"otp\": \"{{ctvOtp}}\"\n}",
+              "raw": "{\n  \"phone\": \"{{affPhone}}\",\n  \"otp\": \"{{ctvOtp}}\",\n  \"fullName\": \"CTV Postman\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -593,7 +782,7 @@
                 "exec": [
                   "// Tự lấy OTP vừa gửi (endpoint chỉ có ở profile dev)",
                   "const phone = pm.collectionVariables.get('affPhone');",
-                  "pm.sendRequest(pm.variables.get('baseUrl') + '/api/dev/otp/latest?purpose=LOGIN&phone=' + phone, (err, res) => {",
+                  "pm.sendRequest(pm.variables.get('baseUrl') + '/api/dev/otp/latest?purpose=REGISTER&phone=' + phone, (err, res) => {",
                   "  pm.collectionVariables.set('ctvOtp', res.json().code);",
                   "});"
                 ]
@@ -604,7 +793,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));"
                 ]
               }
             }
@@ -658,7 +847,7 @@
           ]
         }
       ],
-      "description": "Khách và CTV: đăng nhập = đăng ký, nhập SĐT (OTP qua SMS – dev giả lập) HOẶC email (OTP qua email – dev xem tại Mailpit http://localhost:18025). Admin: email + mật khẩu (admin thật cần thêm OTP – xem folder 15)."
+      "description": "Đăng ký và đăng nhập TÁCH RIÊNG. Khách / CTV dùng email (OTP qua email – dev xem tại Mailpit http://localhost:18025) hoặc SĐT (OTP qua SMS – dev giả lập). POST /api/auth/otp với purpose REGISTER (tài khoản phải chưa có) hoặc LOGIN (phải có sẵn). Admin: email + mật khẩu (admin thật cần thêm OTP – xem folder 15)."
     },
     {
       "name": "03. Khách – xem sản phẩm",
@@ -6797,7 +6986,7 @@
           ]
         },
         {
-          "name": "Gửi OTP khách tới SĐT của admin",
+          "name": "Gửi OTP đăng nhập khách tới SĐT của admin → 422 (không gửi OTP)",
           "request": {
             "method": "POST",
             "header": [
@@ -6820,7 +7009,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"{{newAdminPhone}}\"\n}",
+              "raw": "{\n  \"phone\": \"{{newAdminPhone}}\",\n  \"purpose\": \"LOGIN\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6829,64 +7018,6 @@
             }
           },
           "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('HTTP 202', () => pm.response.to.have.status(202));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Admin không được đăng nhập bằng OTP khách → 422",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{ctvUrl}}/api/auth/otp/verify",
-              "host": [
-                "{{ctvUrl}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "otp",
-                "verify"
-              ]
-            },
-            "description": "",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"phone\": \"{{newAdminPhone}}\",\n  \"otp\": \"{{adminCustomerOtp}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "// Tự lấy OTP vừa gửi (endpoint chỉ có ở profile dev)",
-                  "const phone = pm.collectionVariables.get('newAdminPhone');",
-                  "pm.sendRequest(pm.variables.get('baseUrl') + '/api/dev/otp/latest?purpose=LOGIN&phone=' + phone, (err, res) => {",
-                  "  pm.collectionVariables.set('adminCustomerOtp', res.json().code);",
-                  "});"
-                ]
-              }
-            },
             {
               "listen": "test",
               "script": {

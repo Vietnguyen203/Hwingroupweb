@@ -21,6 +21,7 @@ import com.vietnl.hwin.identity.api.dto.AuthDtos.MeResponse;
 import com.vietnl.hwin.identity.api.dto.AuthDtos.OtpRequest;
 import com.vietnl.hwin.identity.api.dto.AuthDtos.OtpSentResponse;
 import com.vietnl.hwin.identity.api.dto.AuthDtos.OtpVerifyRequest;
+import com.vietnl.hwin.identity.api.dto.AuthDtos.RegisterRequest;
 import com.vietnl.hwin.identity.api.mapper.UserMapper;
 import com.vietnl.hwin.identity.service.AuthService;
 import com.vietnl.hwin.identity.service.IssuedTokens;
@@ -28,7 +29,7 @@ import com.vietnl.hwin.identity.service.UserAccountService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-/** Đăng nhập khách / CTV bằng SĐT hoặc email + OTP, làm mới và thu hồi phiên. */
+/** Đăng ký / đăng nhập khách, CTV bằng SĐT hoặc email + OTP; làm mới và thu hồi phiên. */
 @Tag(name = "identity")
 @RestController
 @RequestMapping("/api/auth")
@@ -50,7 +51,7 @@ public class AuthController {
     @PostMapping("/otp")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public OtpSentResponse sendOtp(@Valid @RequestBody OtpRequest body, HttpServletRequest request) {
-        var sent = authService.requestLoginOtp(body.phone(), body.email(), ClientInfo.from(request));
+        var sent = authService.requestOtp(body.phone(), body.email(), body.register(), ClientInfo.from(request));
         return new OtpSentResponse(sent.channel().name(), sent.sentTo(), sent.expiresInSeconds());
     }
 
@@ -58,6 +59,16 @@ public class AuthController {
     public MeResponse verifyOtp(@Valid @RequestBody OtpVerifyRequest body, HttpServletRequest request,
                                 HttpServletResponse response) {
         IssuedTokens tokens = authService.loginWithOtp(body.phone(), body.email(), body.otp(),
+                ClientInfo.from(request));
+        cookies.write(response, tokens.accessToken(), tokens.refreshToken());
+        return mapper.toMe(userAccountService.get(tokens.userId()));
+    }
+
+    @PostMapping("/register")
+    @ResponseStatus(HttpStatus.CREATED)
+    public MeResponse register(@Valid @RequestBody RegisterRequest body, HttpServletRequest request,
+                               HttpServletResponse response) {
+        IssuedTokens tokens = authService.registerWithOtp(body.phone(), body.email(), body.otp(), body.fullName(),
                 ClientInfo.from(request));
         cookies.write(response, tokens.accessToken(), tokens.refreshToken());
         return mapper.toMe(userAccountService.get(tokens.userId()));

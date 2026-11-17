@@ -17,10 +17,11 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
      */
     @Modifying
     @Query(value = """
-            insert into customer.customer (id, phone, email) values (:id, :phone, :email)
+            insert into customer.customer (id, phone, email, full_name) values (:id, :phone, :email, :fullName)
             on conflict (id) do nothing
             """, nativeQuery = true)
-    int insertIfAbsent(@Param("id") UUID id, @Param("phone") String phone, @Param("email") String email);
+    int insertIfAbsent(@Param("id") UUID id, @Param("phone") String phone, @Param("email") String email,
+                       @Param("fullName") String fullName);
 
     /** Tạo dòng thống kê rỗng nếu chưa có (idempotent). */
     @Modifying

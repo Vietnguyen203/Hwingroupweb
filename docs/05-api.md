@@ -17,8 +17,9 @@
 
 | Method | Path | Quyền | Mô tả |
 |---|---|---|---|
-| POST | `/api/auth/otp` | public | Gửi OTP đăng nhập: `{phone}` (SMS – hiện giả lập, chỉ dev) **hoặc** `{email}` (email thật). Trả `{channel, sentTo, expiresInSeconds}`. Rate limit 3/10 phút theo nơi nhận và IP |
-| POST | `/api/auth/otp/verify` | public | `{phone, otp}` hoặc `{email, otp}` → tạo tài khoản nếu chưa có, set cookie JWT |
+| POST | `/api/auth/otp` | public | Gửi OTP: `{phone}` (SMS – hiện giả lập, chỉ dev) **hoặc** `{email}` (email thật), `purpose`: `LOGIN` (mặc định – tài khoản phải có, không thì `ACCOUNT_NOT_FOUND`) \| `REGISTER` (phải chưa có, không thì `ACCOUNT_EXISTS`). Trả `{channel, sentTo, expiresInSeconds}`. Rate limit 3/10 phút theo nơi nhận và IP; kiểm tra tài khoản 20 lần/10 phút/IP |
+| POST | `/api/auth/otp/verify` | public | Đăng nhập: `{phone\|email, otp}` (OTP purpose LOGIN) → set cookie JWT |
+| POST | `/api/auth/register` | public | Đăng ký: `{phone\|email, otp, fullName}` (OTP purpose REGISTER) → tạo tài khoản CUSTOMER, set cookie JWT (201) |
 | POST | `/api/auth/refresh` | cookie `hwin_rt` | Xoay vòng refresh token, set cookie mới |
 | POST | `/api/auth/logout` | auth | Thu hồi refresh token hiện tại, xóa cookie |
 | GET | `/api/auth/me` | auth | `{id, phone (che), fullName, roles}` – frontend & proxy.ts dùng |

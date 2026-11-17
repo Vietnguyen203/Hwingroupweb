@@ -16,10 +16,18 @@ public final class AuthDtos {
     private AuthDtos() {
     }
 
-    /** Đăng nhập khách / CTV: nhập SĐT (OTP qua SMS) HOẶC email (OTP qua email). */
+    /**
+     * Gửi OTP: nhập SĐT (OTP qua SMS) HOẶC email (OTP qua email).
+     * {@code purpose}: LOGIN (mặc định – tài khoản phải có sẵn) | REGISTER (tài khoản phải chưa có).
+     */
     public record OtpRequest(
             @Pattern(regexp = "^[0-9+ .\\-]{9,16}$", message = "Số điện thoại không hợp lệ") String phone,
-            @Email(message = "Email không hợp lệ") @Size(max = 255) String email) {
+            @Email(message = "Email không hợp lệ") @Size(max = 255) String email,
+            @Pattern(regexp = "LOGIN|REGISTER", message = "purpose phải là LOGIN hoặc REGISTER") String purpose) {
+
+        public boolean register() {
+            return "REGISTER".equals(purpose);
+        }
 
         @AssertTrue(message = "Nhập số điện thoại hoặc email (chỉ một trong hai)")
         public boolean isOneContact() {
@@ -35,6 +43,19 @@ public final class AuthDtos {
             @Pattern(regexp = "^[0-9+ .\\-]{9,16}$", message = "Số điện thoại không hợp lệ") String phone,
             @Email(message = "Email không hợp lệ") @Size(max = 255) String email,
             @NotBlank @Pattern(regexp = "^\\d{6}$", message = "OTP gồm 6 chữ số") String otp) {
+
+        @AssertTrue(message = "Nhập số điện thoại hoặc email (chỉ một trong hai)")
+        public boolean isOneContact() {
+            return isBlank(phone) != isBlank(email);
+        }
+    }
+
+    /** Đăng ký: SĐT hoặc email + OTP (purpose REGISTER) + họ tên. */
+    public record RegisterRequest(
+            @Pattern(regexp = "^[0-9+ .\\-]{9,16}$", message = "Số điện thoại không hợp lệ") String phone,
+            @Email(message = "Email không hợp lệ") @Size(max = 255) String email,
+            @NotBlank @Pattern(regexp = "^\\d{6}$", message = "OTP gồm 6 chữ số") String otp,
+            @NotBlank(message = "Vui lòng nhập họ tên") @Size(max = 100) String fullName) {
 
         @AssertTrue(message = "Nhập số điện thoại hoặc email (chỉ một trong hai)")
         public boolean isOneContact() {

@@ -12,7 +12,7 @@ export function SiteFooter() {
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-lg font-bold uppercase">Đăng ký cộng tác viên HWIN</p>
-            <p className="text-sm text-white/80">Chia sẻ link – nhận hoa hồng 10% trên mỗi đơn hàng thành công</p>
+            <p className="text-sm text-white/80">Phát triển cùng HWIN</p>
           </div>
           <form action="/ctv" method="get" className="flex w-full max-w-md gap-2">
             <input name="phone" type="tel" inputMode="numeric" placeholder="Số điện thoại của bạn" maxLength={15}
@@ -42,9 +42,9 @@ export function SiteFooter() {
           <div>
             <p className="mb-3 font-semibold text-white uppercase">Công ty CP Tập đoàn HWIN</p>
             <ul className="space-y-2">
-              <li className="flex gap-2"><MapPin className="mt-0.5 size-4 shrink-0" />Địa chỉ: (cập nhật sau)</li>
-              <li className="flex gap-2"><Phone className="mt-0.5 size-4 shrink-0" />Hotline: <a href={`tel:${siteConfig.hotline}`} className="text-white">{siteConfig.hotline}</a></li>
-              <li className="flex gap-2"><Mail className="mt-0.5 size-4 shrink-0" />Email: (cập nhật sau)</li>
+              <li className="flex gap-2"><MapPin className="mt-0.5 size-4 shrink-0" />Địa chỉ: Khu đô thị The Manor Central Park, Phường Định Công, TP Hà Nội</li>
+              <li className="flex gap-2"><Phone className="mt-0.5 size-4 shrink-0" />Hotline: 0961 008 971 <a href={`tel:${siteConfig.hotline}`} className="text-white">{siteConfig.hotline}</a></li>
+              <li className="flex gap-2"><Mail className="mt-0.5 size-4 shrink-0" />Email: CeoHwinGroup@gmail.com</li>
             </ul>
           </div>
         </div>

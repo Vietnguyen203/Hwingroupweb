@@ -92,7 +92,7 @@ cd ..\frontend; npm run build; npm run lint
 - **CSRF**: tắt CSRF token vì cookie `SameSite=Lax` + CORS chỉ cho domain frontend.
 - **Cookie Secure**: bật ở mọi profile trừ `dev` (`COOKIE_SECURE=false`) để chạy được trên `http://localhost`.
 - **Refresh token** cookie có `Path=/api/auth` → chỉ gửi kèm API xác thực. Khi access token hết hạn, trang đăng nhập gọi `/api/auth/refresh` trước.
-- **Đăng nhập OTP lần đầu** tự tạo tài khoản `CUSTOMER` và phát event `UserRegistered` (module customer sẽ nghe ở Chặng 2).
+- **Đăng ký và đăng nhập tách riêng** (`/register`, `/login`): đăng ký cần họ tên + OTP, tài khoản đã có thì báo `ACCOUNT_EXISTS`; đăng nhập tài khoản chưa có báo `ACCOUNT_NOT_FOUND`. Việc báo trước "đã có / chưa có tài khoản" làm lộ email/SĐT nào đã đăng ký – chấp nhận vì dễ dùng, giới hạn 20 lần kiểm tra / 10 phút / IP. Đăng ký xong phát event `UserRegistered` để module customer tạo hồ sơ (kèm họ tên).
 - **NSX / HSD** hiểu là `manufacturer` (nhà sản xuất) và `shelfLife` (thời hạn sử dụng) ở mức sản phẩm, không quản lý theo lô.
 - **Tìm kiếm không dấu**: cột sinh tự động `search_text = f_unaccent(lower(tên + mô tả ngắn))` + index GIN trigram; từ khóa luôn bind tham số.
 - **Ảnh mẫu** là SVG trong `frontend/public/sample/`; ảnh admin upload lưu `backend/uploads/` và phục vụ qua `/uploads/**`.

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Mail, Smartphone } from "lucide-react";
@@ -8,7 +9,7 @@ import { ArrowLeft, Mail, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMe } from "@/hooks/use-me";
-import { api, errorMessage } from "@/lib/api";
+import { api, ApiError, errorMessage } from "@/lib/api";
 import type { OtpSent } from "@/lib/account";
 import { cn } from "@/lib/utils";
 
@@ -21,10 +22,12 @@ function safeNext(next: string | null) {
 }
 
 /**
- * Đăng nhập = đăng ký cho khách / CTV: nhập email HOẶC SĐT -> nhận OTP 6 số -> xác thực.
+ * Form đăng nhập / đăng ký (2 trang riêng) cho khách / CTV: email HOẶC SĐT -> OTP 6 số.
+ * - login: tài khoản phải có sẵn; register: tài khoản phải chưa có, nhập thêm họ tên.
  * Email gửi thật; SMS hiện là giả lập (chỉ dev).
  */
-export function LoginForm() {
+export function AuthForm({ mode }: { mode: "login" | "register" }) {
+  const isRegister = mode === "register";
   const router = useRouter();
   const next = safeNext(useSearchParams().get("next"));
   const queryClient = useQueryClient();
@@ -32,6 +35,8 @@ export function LoginForm() {
 
   const [channel, setChannel] = useState<Channel>("email");
   const [contact, setContact] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [errorCode, setErrorCode] = useState<string | undefined>();
   const [sent, setSent] = useState<OtpSent | null>(null);
   const [otp, setOtp] = useState("");
   const [cooldown, setCooldown] = useState(0);
@@ -56,11 +61,12 @@ export function LoginForm() {
     setBusy(true);
     setError(null);
     try {
-      setSent(await api<OtpSent>("/api/auth/otp", { method: "POST", body: body() }));
+      setSent(await api<OtpSent>("/api/auth/otp", { method: "POST", body: { ...body(), purpose: isRegister ? "REGISTER" : "LOGIN" } }));
       setOtp("");
       setCooldown(RESEND_SECONDS);
     } catch (err) {
       setError(errorMessage(err));
+      setErrorCode(err instanceof ApiError ? err.code : undefined);
     } finally {
       setBusy(false);
     }
@@ -71,7 +77,9 @@ export function LoginForm() {
     setBusy(true);
     setError(null);
     try {
-      const user = await api("/api/auth/otp/verify", { method: "POST", body: { ...body(), otp } });
+      const user = isRegister
+        ? await api("/api/auth/register", { method: "POST", body: { ...body(), otp, fullName: fullName.trim() } })
+        : await api("/api/auth/otp/verify", { method: "POST", body: { ...body(), otp } });
       queryClient.setQueryData(["me"], user);
       router.replace(next);
     } catch (err) {
@@ -83,7 +91,7 @@ export function LoginForm() {
   const tab = (c: Channel, label: string, Icon: typeof Mail) => (
     <button
       type="button"
-      onClick={() => { setChannel(c); setContact(""); setError(null); }}
+      onClick={() => { setChannel(c); setContact(""); setError(null); setErrorCode(undefined); }}
       className={cn("flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-medium",
         channel === c ? "bg-white text-brand shadow-sm" : "text-neutral-600")}
     >
@@ -94,8 +102,10 @@ export function LoginForm() {
   return (
     <div className="mx-auto w-full max-w-md px-3 py-6 md:py-12">
       <div className="rounded-2xl bg-white p-5 shadow-sm md:p-7">
-        <h1 className="text-xl font-bold text-brand">Đăng nhập / Đăng ký</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Chưa có tài khoản sẽ được tạo tự động.</p>
+        <h1 className="text-xl font-bold text-brand">{isRegister ? "Đăng ký tài khoản" : "Đăng nhập"}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {isRegister ? "Dùng email hoặc số điện thoại, xác thực bằng mã OTP." : "Nhận mã OTP qua email hoặc số điện thoại đã đăng ký."}
+        </p>
 
         {!sent ? (
           <form onSubmit={sendOtp} className="mt-5 space-y-4">
@@ -103,10 +113,17 @@ export function LoginForm() {
               {tab("email", "Email", Mail)}
               {tab("phone", "Số điện thoại", Smartphone)}
             </div>
+            {isRegister && (
+              <label className="block space-y-1.5">
+                <span className="text-sm font-medium">Họ và tên</span>
+                <Input required maxLength={100} autoComplete="name" placeholder="Nguyễn Văn A"
+                       value={fullName} onChange={(e) => setFullName(e.target.value)} className="h-11" />
+              </label>
+            )}
             <label className="block space-y-1.5">
               <span className="text-sm font-medium">{channel === "email" ? "Email" : "Số điện thoại"}</span>
               <Input
-                autoFocus
+                autoFocus={!isRegister}
                 required
                 type={channel === "email" ? "email" : "tel"}
                 inputMode={channel === "email" ? "email" : "tel"}
@@ -120,8 +137,14 @@ export function LoginForm() {
             {channel === "phone" && (
               <p className="text-xs text-amber-700">Gửi OTP qua SMS đang chạy thử – nếu không nhận được mã, hãy dùng email.</p>
             )}
-            {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" disabled={busy || !contact.trim()} className="h-11 w-full text-base">
+            {error && (
+              <p role="alert" className="text-sm text-destructive">
+                {error}{" "}
+                {errorCode === "ACCOUNT_NOT_FOUND" && <Link href={`/register?next=${encodeURIComponent(next)}`} className="font-semibold text-brand-link">Đăng ký ngay</Link>}
+                {errorCode === "ACCOUNT_EXISTS" && <Link href={`/login?next=${encodeURIComponent(next)}`} className="font-semibold text-brand-link">Đăng nhập</Link>}
+              </p>
+            )}
+            <Button type="submit" disabled={busy || !contact.trim() || (isRegister && !fullName.trim())} className="h-11 w-full text-base">
               {busy ? "Đang gửi..." : "Nhận mã OTP"}
             </Button>
           </form>
@@ -146,7 +169,7 @@ export function LoginForm() {
             />
             {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
             <Button type="submit" disabled={busy || otp.length !== 6} className="h-11 w-full text-base">
-              {busy ? "Đang xác thực..." : "Đăng nhập"}
+              {busy ? "Đang xác thực..." : isRegister ? "Tạo tài khoản" : "Đăng nhập"}
             </Button>
             <button
               type="button"
@@ -158,6 +181,12 @@ export function LoginForm() {
             </button>
           </form>
         )}
+        <p className="mt-5 border-t pt-4 text-center text-sm text-muted-foreground">
+          {isRegister ? "Đã có tài khoản? " : "Chưa có tài khoản? "}
+          <Link href={`${isRegister ? "/login" : "/register"}?next=${encodeURIComponent(next)}`} className="font-semibold text-brand-link">
+            {isRegister ? "Đăng nhập" : "Đăng ký"}
+          </Link>
+        </p>
       </div>
     </div>
   );

@@ -25,14 +25,13 @@ import com.vietnl.hwin.identity.entity.OtpTarget;
 import com.vietnl.hwin.identity.entity.UserAccount;
 import com.vietnl.hwin.identity.service.AuthService;
 import com.vietnl.hwin.identity.service.AuthService.OtpDispatch;
-import com.vietnl.hwin.identity.service.IssuedTokens;
 import com.vietnl.hwin.identity.service.OtpProperties;
 import com.vietnl.hwin.identity.service.UserAccountService;
 import com.vietnl.hwin.identity.service.integration.DevOtpInbox;
 import com.vietnl.hwin.identity.service.integration.SimulatedSmsOtpSender;
 
 /**
- * Đăng nhập bằng email HOẶC SĐT: OTP gửi tới đúng nơi khách đã nhập; tài khoản email chưa có SĐT.
+ * Đăng ký / đăng nhập (tách riêng) bằng email HOẶC SĐT: OTP gửi tới đúng nơi khách đã nhập; tài khoản email chưa có SĐT.
  */
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
@@ -53,55 +52,79 @@ class EmailLoginTests {
         return inbox.latest(OtpTarget.email(EmailAddress.of(email)), purpose).orElseThrow();
     }
 
-    private UUID loginByEmail(String email, String ip) {
-        auth.requestLoginOtp(null, email, client(ip));
-        IssuedTokens tokens = auth.loginWithOtp(null, email, otp(email, OtpPurpose.LOGIN), client(ip));
-        return tokens.userId();
+    private UUID registerByEmail(String email, String ip) {
+        auth.requestOtp(null, email, true, client(ip));
+        return auth.registerWithOtp(null, email, otp(email, OtpPurpose.REGISTER), "Khách Email", client(ip)).userId();
     }
 
     @Test
-    void emailLoginCreatesAccountWithoutPhone() {
-        OtpDispatch sent = auth.requestLoginOtp(null, "  Khach.Email@Gmail.com ", client("10.1.0.1"));
+    void registerByEmailThenLogin() {
+        OtpDispatch sent = auth.requestOtp(null, "  Khach.Email@Gmail.com ", true, client("10.1.0.1"));
         assertThat(sent.channel()).isEqualTo(OtpChannel.EMAIL);
         assertThat(sent.sentTo()).isEqualTo("kh******@gmail.com");
 
-        String code = otp("khach.email@gmail.com", OtpPurpose.LOGIN);
-        UUID userId = auth.loginWithOtp(null, "KHACH.EMAIL@gmail.com", code, client("10.1.0.1")).userId();
+        String code = otp("khach.email@gmail.com", OtpPurpose.REGISTER);
+        UUID userId = auth.registerWithOtp(null, "KHACH.EMAIL@gmail.com", code, "Nguyễn Văn Email", client("10.1.0.1")).userId();
         UserAccount user = users.get(userId);
         assertThat(user.getEmail()).isEqualTo("khach.email@gmail.com");
         assertThat(user.getPhone()).isNull();
+        assertThat(user.getFullName()).isEqualTo("Nguyễn Văn Email");
 
-        // hồ sơ khách tạo được dù không có SĐT
+        // hồ sơ khách tạo được dù không có SĐT, mang theo họ tên
         customers.ensureCustomer(userId);
         Profile profile = customers.profile(userId, p -> p);
         assertThat(profile.customer().getEmail()).isEqualTo("khach.email@gmail.com");
         assertThat(profile.customer().getPhone()).isNull();
+        assertThat(profile.customer().getFullName()).isEqualTo("Nguyễn Văn Email");
 
         // đăng nhập lại cùng email -> cùng tài khoản
-        assertThat(loginByEmail("khach.email@gmail.com", "10.1.0.2")).isEqualTo(userId);
+        auth.requestOtp(null, "khach.email@gmail.com", false, client("10.1.0.2"));
+        assertThat(auth.loginWithOtp(null, "khach.email@gmail.com", otp("khach.email@gmail.com", OtpPurpose.LOGIN),
+                client("10.1.0.2")).userId()).isEqualTo(userId);
+
+        // đăng ký lại -> báo đã có tài khoản
+        assertThatThrownBy(() -> auth.requestOtp(null, "khach.email@gmail.com", true, client("10.1.0.2")))
+                .hasFieldOrPropertyWithValue("code", "ACCOUNT_EXISTS");
+    }
+
+    @Test
+    void loginRequiresExistingAccount() {
+        assertThatThrownBy(() -> auth.requestOtp(null, "chua-co@hwin.vn", false, client("10.1.0.6")))
+                .hasFieldOrPropertyWithValue("code", "ACCOUNT_NOT_FOUND");
+        assertThatThrownBy(() -> auth.requestOtp("0955000009", null, false, client("10.1.0.6")))
+                .hasFieldOrPropertyWithValue("code", "ACCOUNT_NOT_FOUND");
+        assertThat(inbox.latest(OtpTarget.email(EmailAddress.of("chua-co@hwin.vn")), OtpPurpose.LOGIN)).isEmpty();
+    }
+
+    @Test
+    void registerOtpCannotBeUsedToLogin() {
+        auth.requestOtp(null, "tach@hwin.vn", true, client("10.1.0.7"));
+        String code = otp("tach@hwin.vn", OtpPurpose.REGISTER);
+        assertThatThrownBy(() -> auth.loginWithOtp(null, "tach@hwin.vn", code, client("10.1.0.7")))
+                .hasFieldOrPropertyWithValue("code", "OTP_EXPIRED");
     }
 
     @Test
     void phoneOrEmailButNotBoth() {
-        assertThatThrownBy(() -> auth.requestLoginOtp("0955000001", "a@hwin.vn", client("10.1.0.3")))
+        assertThatThrownBy(() -> auth.requestOtp("0955000001", "a@hwin.vn", true, client("10.1.0.3")))
                 .hasFieldOrPropertyWithValue("code", "CONTACT_REQUIRED");
-        assertThatThrownBy(() -> auth.requestLoginOtp(null, " ", client("10.1.0.3")))
+        assertThatThrownBy(() -> auth.requestOtp(null, " ", true, client("10.1.0.3")))
                 .hasFieldOrPropertyWithValue("code", "CONTACT_REQUIRED");
-        assertThatThrownBy(() -> auth.requestLoginOtp(null, "khong-phai-email", client("10.1.0.3")))
+        assertThatThrownBy(() -> auth.requestOtp(null, "khong-phai-email", true, client("10.1.0.3")))
                 .hasFieldOrPropertyWithValue("code", "EMAIL_INVALID");
     }
 
     @Test
     void otpForEmailDoesNotWorkForAnotherEmail() {
-        auth.requestLoginOtp(null, "mot@hwin.vn", client("10.1.0.4"));
-        String code = otp("mot@hwin.vn", OtpPurpose.LOGIN);
-        assertThatThrownBy(() -> auth.loginWithOtp(null, "hai@hwin.vn", code, client("10.1.0.4")))
+        auth.requestOtp(null, "mot@hwin.vn", true, client("10.1.0.4"));
+        String code = otp("mot@hwin.vn", OtpPurpose.REGISTER);
+        assertThatThrownBy(() -> auth.registerWithOtp(null, "hai@hwin.vn", code, "Hai", client("10.1.0.4")))
                 .hasFieldOrPropertyWithValue("code", "OTP_EXPIRED");
     }
 
     @Test
     void emailAccountMustGivePhoneToBecomeCtvAndGetsBankOtpByEmail() {
-        UUID userId = loginByEmail("ctv.email@gmail.com", "10.1.0.5");
+        UUID userId = registerByEmail("ctv.email@gmail.com", "10.1.0.5");
         assertThatThrownBy(() -> affiliates.register(userId, "CTV Email", null, null, null, a -> a))
                 .hasFieldOrPropertyWithValue("code", "PHONE_REQUIRED");
 

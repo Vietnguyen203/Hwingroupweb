@@ -1,4 +1,7 @@
 # Cấu hình cho test (Testcontainers cung cấp Postgres/Redis). Giá trị chỉ dùng cho test.
+spring:
+  mail:
+    host: ""         # test KHÔNG gửi email thật (bỏ qua MAIL_HOST trong .env của máy dev) – mã lấy từ hộp thư dev
 hwin:
   admin-seed:          # test không tạo admin seed (bỏ qua giá trị trong .env của máy dev)
     email: ""

@@ -77,6 +77,7 @@ public class EmailOtpSender implements OtpSender {
     private static String purposeText(OtpPurpose purpose) {
         return switch (purpose) {
             case LOGIN -> "đăng nhập";
+            case REGISTER -> "đăng ký tài khoản";
             case BANK_CHANGE -> "đổi tài khoản ngân hàng nhận hoa hồng";
             case ADMIN_LOGIN -> "đăng nhập trang quản trị";
         };

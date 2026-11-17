@@ -34,6 +34,6 @@ public class UserQueryService {
     @Transactional(readOnly = true)
     public Optional<UserContact> findContact(UUID userId) {
         return users.findById(userId).map(u -> new UserContact(u.getPhone(),
-                EmailAddress.isValid(u.getEmail()) ? EmailAddress.of(u.getEmail()) : null));
+                EmailAddress.isValid(u.getEmail()) ? EmailAddress.of(u.getEmail()) : null, u.getFullName()));
     }
 }

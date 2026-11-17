@@ -55,8 +55,9 @@ public class CustomerService {
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản"));
         Customer c = Customer.register(userId, contact.phone(),
                 contact.email() == null ? null : contact.email().value()); // kiểm tra bất biến
+        c.rename(contact.fullName());
         int created = customers.insertIfAbsent(c.getId(), c.getPhone() == null ? null : c.getPhone().value(),
-                c.getEmail());
+                c.getEmail(), c.getFullName());
         customers.insertStatsIfAbsent(userId);
         if (created == 1) {
             log.info("Tạo hồ sơ khách {}", contact.masked());

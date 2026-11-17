@@ -10,7 +10,7 @@ import com.vietnl.hwin.common.domain.PhoneNumber;
  * Tài khoản khách có SĐT, email hoặc cả hai (ít nhất một).
  */
 @NamedInterface("services")
-public record UserContact(PhoneNumber phone, EmailAddress email) {
+public record UserContact(PhoneNumber phone, EmailAddress email, String fullName) {
 
     /** Dạng che để hiển thị: ưu tiên SĐT, không có thì email. */
     public String masked() {

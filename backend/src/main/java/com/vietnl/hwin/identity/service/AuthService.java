@@ -7,8 +7,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.vietnl.hwin.common.domain.EmailAddress;
-import com.vietnl.hwin.common.domain.PhoneNumber;
+import com.vietnl.hwin.common.exception.DomainException;
 import com.vietnl.hwin.common.exception.TooManyRequestsException;
 import com.vietnl.hwin.common.exception.UnauthorizedException;
 import com.vietnl.hwin.common.ratelimit.RateLimiter;
@@ -28,6 +27,7 @@ import com.vietnl.hwin.identity.repository.UserAccountRepository;
 public class AuthService {
 
     private static final int ADMIN_LOGIN_LIMIT = 5;
+    private static final int LOOKUP_LIMIT = 20;
     private static final String CHALLENGE_PREFIX = "admin-login-challenge:";
     private static final Duration ADMIN_LOGIN_WINDOW = Duration.ofMinutes(10);
 
@@ -51,21 +51,44 @@ public class AuthService {
         this.redis = redis;
     }
 
-    /** Gửi OTP đăng nhập tới SĐT (SMS) hoặc email – đúng nơi khách đã nhập. */
-    public OtpDispatch requestLoginOtp(String rawPhone, String rawEmail, ClientInfo client) {
+    /**
+     * Gửi OTP tới SĐT (SMS) hoặc email – đúng nơi khách đã nhập.
+     * {@code register=false} (đăng nhập): tài khoản phải tồn tại; {@code register=true}: phải CHƯA tồn tại.
+     * Kiểm tra trước khi gửi để báo ngay "chưa có tài khoản / đã có tài khoản" (giới hạn 20 lần / 10 phút / IP
+     * để hạn chế dò tài khoản).
+     */
+    public OtpDispatch requestOtp(String rawPhone, String rawEmail, boolean register, ClientInfo client) {
         OtpTarget target = OtpTarget.of(rawPhone, rawEmail);
-        long ttl = otpService.send(target, OtpPurpose.LOGIN, client.ipHash());
+        if (!rateLimiter.tryAcquire("rl:auth-lookup:" + client.ipHash(), LOOKUP_LIMIT, ADMIN_LOGIN_WINDOW)) {
+            throw new TooManyRequestsException("RATE_LIMITED", "Bạn thao tác quá nhiều lần, vui lòng thử lại sau ít phút");
+        }
+        var existing = userAccountService.find(target);
+        if (register && existing.isPresent()) {
+            throw new DomainException("ACCOUNT_EXISTS", "Tài khoản đã tồn tại, vui lòng đăng nhập");
+        }
+        if (!register) {
+            UserAccount user = existing.orElseThrow(() ->
+                    new DomainException("ACCOUNT_NOT_FOUND", "Chưa có tài khoản, vui lòng đăng ký"));
+            if (user.isAdmin()) {
+                throw new DomainException("ADMIN_USE_ADMIN_LOGIN", "Tài khoản quản trị phải đăng nhập tại trang quản trị");
+            }
+        }
+        long ttl = otpService.send(target, register ? OtpPurpose.REGISTER : OtpPurpose.LOGIN, client.ipHash());
         return new OtpDispatch(target.channel(), target.masked(), ttl);
     }
 
-    /** Đúng OTP -> đăng nhập; chưa có tài khoản thì tạo luôn (dùng ngay trong bước thanh toán). */
+    /** Đăng nhập tài khoản đã có bằng OTP. */
     public IssuedTokens loginWithOtp(String rawPhone, String rawEmail, String otp, ClientInfo client) {
         OtpTarget target = OtpTarget.of(rawPhone, rawEmail);
         otpService.verify(target, OtpPurpose.LOGIN, otp);
-        UserAccount user = target.channel() == OtpChannel.SMS
-                ? userAccountService.loginByPhone(new PhoneNumber(target.value()))
-                : userAccountService.loginByEmail(new EmailAddress(target.value()));
-        return tokenService.issue(user, client);
+        return tokenService.issue(userAccountService.login(target), client);
+    }
+
+    /** Đăng ký tài khoản mới bằng OTP rồi đăng nhập luôn. */
+    public IssuedTokens registerWithOtp(String rawPhone, String rawEmail, String otp, String fullName, ClientInfo client) {
+        OtpTarget target = OtpTarget.of(rawPhone, rawEmail);
+        otpService.verify(target, OtpPurpose.REGISTER, otp);
+        return tokenService.issue(userAccountService.register(target, fullName), client);
     }
 
     /** OTP đã gửi: kênh, nơi nhận (đã che), thời gian hiệu lực (giây). */
