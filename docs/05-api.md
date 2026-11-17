@@ -149,13 +149,14 @@
 
 | Route | Render | Quyền (proxy.ts) |
 |---|---|---|
-| `/`, `/danh-muc/[slug]`, `/san-pham/[slug]`, `/tim-kiem` | SSR | public |
+| `/`, `/danh-muc`, `/danh-muc/[slug]`, `/san-pham/[slug]`, `/tim-kiem` | SSR | public |
 | `/gio-hang` | CSR | public |
-| `/thanh-toan` | CSR (từng bước) | public → bắt buộc OTP trong luồng |
-| `/order/success/[code]` | SSR | CUSTOMER |
-| `/tai-khoan`, `/tai-khoan/don-hang`, `/tai-khoan/don-hang/[code]`, `/tai-khoan/addresses` | CSR | CUSTOMER |
-| `/ctv`, `/ctv/dang-ky`, `/ctv/bank`, `/ctv/payouts` | CSR | auth (`/ctv/dang-ky`), AFFILIATE (còn lại) |
-| `/admin/login` | CSR | public |
-| `/admin/**` | CSR | ADMIN |
+| `/thanh-toan` | CSR | cần đăng nhập (chuyển `/dang-nhap?next=/thanh-toan`) |
+| `/dang-nhap`, `/dang-ky` | CSR | public |
+| `/tai-khoan`, `/tai-khoan/don-hang`, `/tai-khoan/don-hang/[code]` | CSR | đăng nhập (kiểm ở client) |
+| `/ctv` | CSR | public (giới thiệu) / dashboard khi là CTV đã duyệt |
+| `/ctv/dang-ky` | CSR | đăng nhập |
+| `/admin/login` | CSR | public (đăng nhập 2 bước) |
+| `/admin/orders`, `/admin/orders/[id]`, `/admin/products`, `/admin/customers`, `/admin/affiliates`, `/admin/commissions`, `/admin/payouts` | CSR | ADMIN |
 
 `src/proxy.ts` (Next.js 16 đổi tên `middleware.ts` thành `proxy.ts`) đọc cookie `hwin_at`, giải mã payload JWT (chỉ để điều hướng UX – backend vẫn là nơi kiểm quyền thật) và chuyển hướng về đăng nhập nếu thiếu role.

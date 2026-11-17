@@ -1,19 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, CircleCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useQueryParam } from "@/hooks/use-query-param";
 import { api, ApiError, errorMessage } from "@/lib/api";
 import { formatDateTime, ORDER_STATUS, PAYMENT_METHOD, type OrderDetailResponse } from "@/lib/account";
 import { formatVnd } from "@/lib/format";
 
 /** Chi tiết một đơn của khách; đơn PENDING có nút hủy. */
-export function OrderDetailView() {
-  const { code } = useParams<{ code: string }>();
-  const placed = useSearchParams().get("placed") === "1";
+export function OrderDetailView({ code }: { code: string }) {
+  const placed = useQueryParam("placed") === "1";
   const qc = useQueryClient();
   const order = useQuery({
     queryKey: ["order", code],

@@ -18,8 +18,8 @@ Tài liệu database đầy đủ (sinh tự động từ DB): [`docs/06-databas
 |---|---|---|
 | 0 | Thiết kế (`docs/`) | Xong |
 | 1 | Nền tảng, identity (OTP + JWT), catalog, frontend: trang chủ / danh mục / chi tiết / tìm kiếm | Xong |
-| 2 | ordering + customer: giỏ server, thanh toán kèm OTP, đơn hàng, Mua lại, địa chỉ | Backend xong (Postman 90 request đạt); frontend chưa |
-| 3 | affiliate, trang CTV, trang admin, test domain | Backend xong (49 test đạt); frontend CTV / admin chưa |
+| 2 | ordering + customer: giỏ server, thanh toán kèm OTP, đơn hàng, Mua lại, địa chỉ | Xong (backend + frontend) |
+| 3 | affiliate, trang CTV, trang admin, test domain | Xong (backend + frontend CTV / admin) |
 
 ## Yêu cầu
 

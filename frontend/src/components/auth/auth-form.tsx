@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Mail, Smartphone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMe } from "@/hooks/use-me";
+import { useQueryParam } from "@/hooks/use-query-param";
 import { api, ApiError, errorMessage } from "@/lib/api";
 import type { OtpSentResponse } from "@/lib/account";
 import { cn } from "@/lib/utils";
@@ -29,7 +30,7 @@ function safeNext(next: string | null) {
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const isRegister = mode === "register";
   const router = useRouter();
-  const next = safeNext(useSearchParams().get("next"));
+  const next = safeNext(useQueryParam("next"));
   const queryClient = useQueryClient();
   const me = useMe();
 

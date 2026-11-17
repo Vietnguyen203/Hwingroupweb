@@ -9,10 +9,11 @@ export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const isAdmin = pathname.startsWith("/admin");
   const loginPath = isAdmin ? "/admin/login" : "/dang-nhap";
-  if (pathname === loginPath) return NextResponse.next();
+  // /ctv là trang giới thiệu công khai (dashboard CTV hiển thị ở đây khi đã đăng nhập)
+  if (pathname === loginPath || pathname === "/ctv") return NextResponse.next();
 
   const roles = readRoles(request.cookies.get("hwin_at")?.value);
-  const required = isAdmin ? "ADMIN" : pathname.startsWith("/ctv/dang-ky") || pathname === "/ctv" ? null : "AFFILIATE";
+  const required = isAdmin ? "ADMIN" : null; // trang CTV khác chỉ cần đăng nhập; quyền AFFILIATE do backend kiểm tra
   const loggedIn = roles !== null;
 
   if (!loggedIn || (required && !roles.includes(required))) {

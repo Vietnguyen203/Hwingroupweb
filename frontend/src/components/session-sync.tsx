@@ -17,8 +17,10 @@ export function SessionSync() {
 
   useEffect(() => {
     if (me.isPending) return;
-    syncCartForUser(me.data?.id ?? null).catch(() => undefined);
-  }, [me.isPending, me.data?.id]);
+    // giỏ hàng chỉ dành cho khách (admin không có vai trò CUSTOMER)
+    const customerId = me.data?.roles.includes("CUSTOMER") ? me.data.id : null;
+    syncCartForUser(customerId).catch(() => undefined);
+  }, [me.isPending, me.data]);
 
   useEffect(() => {
     if (!ref || !/^[A-Za-z0-9_-]{3,32}$/.test(ref)) return;
