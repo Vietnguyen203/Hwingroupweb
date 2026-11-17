@@ -22,6 +22,8 @@ public class AuthCookies {
 
     public static final String ACCESS = "hwin_at";
     public static final String REFRESH = "hwin_rt";
+    /** "Ghi nhớ đăng nhập": token thiết bị tin cậy (30 ngày), chỉ gửi kèm các API /api/auth. */
+    public static final String TRUSTED_DEVICE = "hwin_td";
     private static final String REFRESH_PATH = "/api/auth";
 
     private final SecurityProperties props;
@@ -33,6 +35,10 @@ public class AuthCookies {
     public void write(HttpServletResponse response, String accessToken, String refreshToken) {
         add(response, build(ACCESS, accessToken, "/", props.accessTokenTtl()));
         add(response, build(REFRESH, refreshToken, REFRESH_PATH, props.refreshTokenTtl()));
+    }
+
+    public void writeTrustedDevice(HttpServletResponse response, String token, long maxAgeSeconds) {
+        add(response, build(TRUSTED_DEVICE, token, REFRESH_PATH, Duration.ofSeconds(maxAgeSeconds)));
     }
 
     public void clear(HttpServletResponse response) {

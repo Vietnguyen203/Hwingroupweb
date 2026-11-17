@@ -15,6 +15,8 @@ import com.vietnl.hwin.identity.entity.UserAccount;
 public interface UserMapper {
 
     @Mapping(target = "phoneMasked", source = "phone")
+    @Mapping(target = "citizenIdMasked", expression = "java(user.citizenIdMasked())")
+    @Mapping(target = "hasPassword", expression = "java(user.hasPassword())")
     MeResponse toMe(UserAccount user);
 
     default String maskPhone(PhoneNumber phone) {

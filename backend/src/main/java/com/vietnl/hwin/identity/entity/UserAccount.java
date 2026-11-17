@@ -67,6 +67,18 @@ public class UserAccount extends AggregateRoot<UserAccount> {
 
     private Instant lastLoginAt;
 
+    /** Ngày sinh (khách hàng) – luôn ở quá khứ. */
+    private java.time.LocalDate dateOfBirth;
+
+    private String address;
+
+    /** CCCD: chỉ lưu bản mã hóa AES-GCM + HMAC (kiểm tra trùng) + 4 số cuối (hiển thị). */
+    private String citizenIdEncrypted;
+
+    private String citizenIdHash;
+
+    private String citizenIdLast4;
+
     /** Đăng nhập admin không cần OTP – CHỈ tài khoản dev admin/admin (gắn theo tài khoản, không theo role). */
     private boolean otpExempt;
 
@@ -82,6 +94,47 @@ public class UserAccount extends AggregateRoot<UserAccount> {
         UserAccount u = newCustomer();
         u.email = email.value();
         return u;
+    }
+
+    /**
+     * Đăng ký khách đầy đủ thông tin: SĐT hoặc email (đã xác minh OTP), họ tên, ngày sinh (quá khứ), địa chỉ,
+     * CCCD (đã mã hóa ở service), mật khẩu (đã băm).
+     */
+    public static UserAccount registerCustomer(PhoneNumber phone, EmailAddress email, String fullName,
+                                               java.time.LocalDate dateOfBirth, String address, String citizenIdEncrypted,
+                                               String citizenIdHash, String citizenIdLast4, String passwordHash,
+                                               java.time.LocalDate today) {
+        if (dateOfBirth == null || !dateOfBirth.isBefore(today)) {
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.DATE_OF_BIRTH_INVALID);
+        }
+        UserAccount u = newCustomer();
+        u.phone = phone;
+        u.email = email == null ? null : email.value();
+        u.rename(fullName);
+        u.dateOfBirth = dateOfBirth;
+        u.address = address == null ? null : address.trim();
+        u.citizenIdEncrypted = citizenIdEncrypted;
+        u.citizenIdHash = citizenIdHash;
+        u.citizenIdLast4 = citizenIdLast4;
+        u.passwordHash = passwordHash;
+        return u;
+    }
+
+    /** Thêm SĐT (đã xác minh OTP) cho tài khoản đăng ký bằng email – SĐT dùng được làm tên đăng nhập. */
+    public void addPhone(PhoneNumber newPhone) {
+        if (this.phone != null) {
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PHONE_ALREADY_SET);
+        }
+        this.phone = newPhone;
+    }
+
+    /** CCCD đã che: ********1234. */
+    public String citizenIdMasked() {
+        return citizenIdLast4 == null ? null : "********" + citizenIdLast4;
+    }
+
+    public boolean hasPassword() {
+        return passwordHash != null;
     }
 
     private static UserAccount newCustomer() {

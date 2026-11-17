@@ -84,6 +84,11 @@ hwin:
     cors-origins: ${FRONTEND_ORIGIN:http://localhost:3100}
   mail:
     from: ${MAIL_FROM:Hwin Food <no-reply@hwin.vn>}
+  identity:
+    pii-encryption-key: ${IDENTITY_PII_KEY}   # AES 32 byte base64 – mã hóa CCCD
+    trusted-device-ttl: 30d                  # "Ghi nhớ đăng nhập": không hỏi OTP lại trong 30 ngày
+    login-fail-limit: 5
+    login-fail-window: 15m
   otp:
     ttl: 5m
     max-attempts: 5

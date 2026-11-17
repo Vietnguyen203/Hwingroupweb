@@ -6,6 +6,8 @@ public enum OtpPurpose {
     LOGIN,
     /** Đăng ký tài khoản khách mới (SĐT hoặc email). */
     REGISTER,
+    /** Thêm SĐT vào tài khoản đăng ký bằng email. */
+    ADD_PHONE,
     /** CTV đổi tài khoản ngân hàng. */
     BANK_CHANGE,
     /** Bước 2 đăng nhập quản trị (sau khi nhập đúng mật khẩu). */

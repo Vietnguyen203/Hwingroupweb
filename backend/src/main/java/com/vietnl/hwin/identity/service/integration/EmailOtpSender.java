@@ -80,6 +80,7 @@ public class EmailOtpSender implements OtpSender {
         return switch (purpose) {
             case LOGIN -> "đăng nhập";
             case REGISTER -> "đăng ký tài khoản";
+            case ADD_PHONE -> "thêm số điện thoại";
             case BANK_CHANGE -> "đổi tài khoản ngân hàng nhận hoa hồng";
             case ADMIN_LOGIN -> "đăng nhập trang quản trị";
         };

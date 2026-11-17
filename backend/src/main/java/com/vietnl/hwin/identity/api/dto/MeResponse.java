@@ -1,16 +1,15 @@
 package com.vietnl.hwin.identity.api.dto;
 
-import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
+import java.time.LocalDate;
 import java.util.Set;
 import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** Thông tin người dùng hiện tại. SĐT luôn được che. */
+/** Thông tin người dùng hiện tại. SĐT và CCCD luôn được che. */
 @Data
 @Builder
 @NoArgsConstructor
@@ -21,5 +20,9 @@ public class MeResponse {
     private String phoneMasked;
     private String email;
     private String fullName;
+    private LocalDate dateOfBirth;
+    private String address;
+    private String citizenIdMasked;
+    private boolean hasPassword;
     private Set<String> roles;
 }

@@ -1,44 +1,34 @@
 package com.vietnl.hwin.identity.api.dto;
 
 import com.vietnl.hwin.common.validation.LengthValidator;
+import com.vietnl.hwin.common.validation.ValidationPatterns;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
-import java.util.Set;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Gửi OTP: nhập SĐT (OTP qua SMS) HOẶC email (OTP qua email).
- * {@code purpose}: LOGIN (mặc định – tài khoản phải có sẵn) | REGISTER (tài khoản phải chưa có).
- */
+/** Gửi OTP xác minh khi ĐĂNG KÝ: nhập SĐT (OTP qua SMS) HOẶC email (OTP qua email). Tài khoản phải chưa có. */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class SendOtpRequest {
 
-    @Pattern(regexp = "^[0-9+ .\\-]{9,16}$", message = "Số điện thoại không hợp lệ")
+    @Pattern(regexp = ValidationPatterns.PHONE, message = "Số điện thoại không hợp lệ")
     private String phone;
     @Email(message = "Email không hợp lệ")
     @LengthValidator(max = 255, field = "Email")
     private String email;
-    @Pattern(regexp = "LOGIN|REGISTER", message = "purpose phải là LOGIN hoặc REGISTER")
-    private String purpose;
-
-    public boolean register() {
-    return "REGISTER".equals(purpose);
-    }
 
     @AssertTrue(message = "Nhập số điện thoại hoặc email (chỉ một trong hai)")
     public boolean isOneContact() {
-    return isBlank(phone) != isBlank(email);
+        return isBlank(phone) != isBlank(email);
     }
 
     private static boolean isBlank(String s) {
-    return s == null || s.isBlank();
+        return s == null || s.isBlank();
     }
 }

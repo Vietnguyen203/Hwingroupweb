@@ -1,5 +1,9 @@
 package com.vietnl.hwin.identity.service;
 
+import com.vietnl.hwin.identity.service.config.IdentityProperties;
+import com.vietnl.hwin.identity.service.model.LoginResult;
+import com.vietnl.hwin.identity.service.model.RegisterAccountCommand;
+
 import com.vietnl.hwin.identity.service.model.IssuedTokens;
 import com.vietnl.hwin.identity.service.model.AdminLoginResult;
 import com.vietnl.hwin.identity.service.model.SendOtpResult;
@@ -33,6 +37,7 @@ public class AuthService {
     private static final int ADMIN_LOGIN_LIMIT = 5;
     private static final int LOOKUP_LIMIT = 20;
     private static final String CHALLENGE_PREFIX = "admin-login-challenge:";
+    private static final String LOGIN_CHALLENGE_PREFIX = "login-challenge:";
     private static final Duration ADMIN_LOGIN_WINDOW = Duration.ofMinutes(10);
 
     private final OtpService otpService;
@@ -42,10 +47,12 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final RateLimiter rateLimiter;
     private final StringRedisTemplate redis;
+    private final TrustedDeviceService trustedDevices;
+    private final IdentityProperties identity;
 
     public AuthService(OtpService otpService, UserAccountService userAccountService, TokenService tokenService,
                        UserAccountRepository users, PasswordEncoder passwordEncoder, RateLimiter rateLimiter,
-                       StringRedisTemplate redis) {
+                       StringRedisTemplate redis, TrustedDeviceService trustedDevices, IdentityProperties identity) {
         this.otpService = otpService;
         this.userAccountService = userAccountService;
         this.tokenService = tokenService;
@@ -53,48 +60,89 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
         this.rateLimiter = rateLimiter;
         this.redis = redis;
+        this.trustedDevices = trustedDevices;
+        this.identity = identity;
     }
 
-    /**
-     * Gửi OTP tới SĐT (SMS) hoặc email – đúng nơi khách đã nhập.
-     * {@code register=false} (đăng nhập): tài khoản phải tồn tại; {@code register=true}: phải CHƯA tồn tại.
-     * Kiểm tra trước khi gửi để báo ngay "chưa có tài khoản / đã có tài khoản" (giới hạn 20 lần / 10 phút / IP
-     * để hạn chế dò tài khoản).
-     */
-    public SendOtpResult requestOtp(String rawPhone, String rawEmail, boolean register, ClientInfo client) {
+    /** Gửi OTP xác minh khi đăng ký (SĐT hoặc email chưa có tài khoản). */
+    public SendOtpResult requestRegisterOtp(String rawPhone, String rawEmail, ClientInfo client) {
         OtpTarget target = OtpTarget.of(rawPhone, rawEmail);
         if (!rateLimiter.tryAcquire("rl:auth-lookup:" + client.ipHash(), LOOKUP_LIMIT, ADMIN_LOGIN_WINDOW)) {
             throw new ResponseException(HttpStatus.TOO_MANY_REQUESTS, CommonErrorMessage.RATE_LIMITED);
         }
-        var existing = userAccountService.find(target);
-        if (register && existing.isPresent()) {
+        if (userAccountService.find(target).isPresent()) {
             throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ACCOUNT_EXISTS);
         }
-        if (!register) {
-            UserAccount user = existing.orElseThrow(() ->
-                    new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ACCOUNT_NOT_FOUND));
-            if (user.isAdmin()) {
-                throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ADMIN_USE_ADMIN_LOGIN);
-            }
-        }
-        long ttl = otpService.send(target, register ? OtpPurpose.REGISTER : OtpPurpose.LOGIN, client.ipHash());
+        long ttl = otpService.send(target, OtpPurpose.REGISTER, client.ipHash());
         return new SendOtpResult(target.channel(), target.masked(), ttl);
     }
 
-    /** Đăng nhập tài khoản đã có bằng OTP. */
-    public IssuedTokens loginWithOtp(String rawPhone, String rawEmail, String otp, ClientInfo client) {
-        OtpTarget target = OtpTarget.of(rawPhone, rawEmail);
-        otpService.verify(target, OtpPurpose.LOGIN, otp);
-        return tokenService.issue(userAccountService.login(target), client);
-    }
-
     /** Đăng ký tài khoản mới bằng OTP rồi đăng nhập luôn. */
-    public IssuedTokens registerWithOtp(String rawPhone, String rawEmail, String otp, String fullName, ClientInfo client) {
+    public IssuedTokens registerWithOtp(String rawPhone, String rawEmail, String otp, RegisterAccountCommand cmd,
+                                        ClientInfo client) {
         OtpTarget target = OtpTarget.of(rawPhone, rawEmail);
         otpService.verify(target, OtpPurpose.REGISTER, otp);
-        return tokenService.issue(userAccountService.register(target, fullName), client);
+        return tokenService.issue(userAccountService.register(target, cmd), client);
     }
 
+    /**
+     * Đăng nhập khách / CTV bước 1: tên đăng nhập (email hoặc SĐT) + mật khẩu.
+     * - Thiết bị đã được "ghi nhớ" (cookie hwin_td còn hạn, đúng tài khoản) -> đăng nhập luôn.
+     * - Còn lại -> gửi OTP tới đúng nơi đã nhập (email / SĐT), trả challengeId cho bước 2.
+     * Sai mật khẩu: tối đa 5 lần / 15 phút theo IP và theo tài khoản (không tiết lộ tài khoản có tồn tại không).
+     */
+    public LoginResult login(String identifier, String password, String trustedDeviceToken, ClientInfo client) {
+        OtpTarget target = identifier != null && identifier.contains("@")
+                ? OtpTarget.of(null, identifier) : OtpTarget.of(identifier, null);
+        String ipKey = "rl:login-fail:ip:" + client.ipHash();
+        String accountKey = "rl:login-fail:acc:" + target.key();
+        if (rateLimiter.isExhausted(ipKey, identity.loginFailLimit()) || rateLimiter.isExhausted(accountKey, identity.loginFailLimit())) {
+            throw new ResponseException(HttpStatus.TOO_MANY_REQUESTS, ExceptionMessage.LOGIN_LOCKED,
+                    java.util.Map.of("minutes", String.valueOf(identity.loginFailWindow().toMinutes())));
+        }
+        UserAccount user = userAccountService.find(target).orElse(null);
+        if (user != null && user.isAdmin()) {
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ADMIN_USE_ADMIN_LOGIN);
+        }
+        if (user != null && !user.hasPassword()) {
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PASSWORD_NOT_SET);
+        }
+        if (user == null || !passwordEncoder.matches(password, user.getPasswordHash())) {
+            rateLimiter.hit(ipKey, identity.loginFailWindow());
+            rateLimiter.hit(accountKey, identity.loginFailWindow());
+            throw new ResponseException(HttpStatus.UNAUTHORIZED, ExceptionMessage.INVALID_LOGIN);
+        }
+        user.ensureActive();
+        if (trustedDevices.isTrusted(trustedDeviceToken, user.getId())) {
+            userAccountService.recordLogin(user.getId());
+            return LoginResult.loggedIn(tokenService.issue(user, client), null);
+        }
+        long ttl = otpService.send(target, OtpPurpose.LOGIN, client.ipHash());
+        String challengeId = Hashing.randomToken(24);
+        redis.opsForValue().set(LOGIN_CHALLENGE_PREFIX + challengeId, user.getId() + "|" + target.channel() + "|" + target.value(),
+                Duration.ofSeconds(ttl));
+        return LoginResult.otpRequired(challengeId, target.masked(), ttl);
+    }
+
+    /** Đăng nhập bước 2: OTP đúng -> cấp phiên; rememberDevice -> ghi nhớ thiết bị 30 ngày (không hỏi OTP lại). */
+    public LoginResult verifyLoginOtp(String challengeId, String otp, boolean rememberDevice, ClientInfo client) {
+        String value = challengeId == null ? null : redis.opsForValue().get(LOGIN_CHALLENGE_PREFIX + challengeId);
+        if (value == null) {
+            throw new ResponseException(HttpStatus.UNAUTHORIZED, ExceptionMessage.CHALLENGE_EXPIRED);
+        }
+        String[] parts = value.split("\\|", 3);
+        OtpTarget target = new OtpTarget(OtpChannel.valueOf(parts[1]), parts[2]);
+        otpService.verify(target, OtpPurpose.LOGIN, otp);
+        redis.delete(LOGIN_CHALLENGE_PREFIX + challengeId);
+        UUID userId = UUID.fromString(parts[0]);
+        userAccountService.recordLogin(userId);
+        String trusted = rememberDevice ? trustedDevices.remember(userId) : null;
+        return LoginResult.loggedIn(tokenService.issue(userAccountService.get(userId), client), trusted);
+    }
+
+    public long trustedDeviceTtlSeconds() {
+        return trustedDevices.ttlSeconds();
+    }
 
     /**
      * Bước 1 đăng nhập admin: kiểm tra mật khẩu.

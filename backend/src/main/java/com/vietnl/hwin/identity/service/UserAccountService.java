@@ -1,5 +1,15 @@
 package com.vietnl.hwin.identity.service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import com.vietnl.hwin.identity.entity.CitizenId;
+import com.vietnl.hwin.identity.entity.OtpPurpose;
+import com.vietnl.hwin.identity.entity.event.UserPhoneAddedEvent;
+import com.vietnl.hwin.identity.service.integration.PiiCrypto;
+import com.vietnl.hwin.identity.service.model.RegisterAccountCommand;
+import com.vietnl.hwin.identity.service.model.SendOtpResult;
+
 import com.vietnl.hwin.identity.entity.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -32,7 +42,46 @@ public class UserAccountService {
     private final ApplicationEventPublisher events;
     private final Clock clock;
 
-    public UserAccountService(UserAccountRepository users, ApplicationEventPublisher events, Clock clock) {
+    private static final ZoneId VN = ZoneId.of("Asia/Ho_Chi_Minh");
+
+    private final PiiCrypto pii;
+    private final PasswordEncoder passwordEncoder;
+    private final OtpService otpService;
+
+    /** Gửi OTP tới SĐT muốn thêm (SĐT chưa thuộc tài khoản nào). */
+    public SendOtpResult requestAddPhoneOtp(UUID userId, String rawPhone, String ipHash) {
+        PhoneNumber phone = PhoneNumber.of(rawPhone);
+        if (get(userId).getPhone() != null) {
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PHONE_ALREADY_SET);
+        }
+        if (users.findByPhone(phone).isPresent()) {
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PHONE_IN_USE);
+        }
+        OtpTarget target = OtpTarget.phone(phone);
+        long ttl = otpService.send(target, OtpPurpose.ADD_PHONE, ipHash);
+        return new SendOtpResult(target.channel(), target.masked(), ttl);
+    }
+
+    /** Xác minh OTP rồi gắn SĐT vào tài khoản; phát UserPhoneAddedEvent cho module customer. */
+    @Transactional
+    public UserAccount addPhone(UUID userId, String rawPhone, String otp) {
+        PhoneNumber phone = PhoneNumber.of(rawPhone);
+        otpService.verify(OtpTarget.phone(phone), OtpPurpose.ADD_PHONE, otp);
+        if (users.findByPhone(phone).isPresent()) {
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PHONE_IN_USE);
+        }
+        UserAccount user = get(userId);
+        user.addPhone(phone);
+        events.publishEvent(UserPhoneAddedEvent.of(userId, phone.value(), clock.instant()));
+        log.info("Tài khoản {} thêm SĐT {}", userId, phone.masked());
+        return user;
+    }
+
+    public UserAccountService(UserAccountRepository users, ApplicationEventPublisher events, Clock clock, PiiCrypto pii,
+                              PasswordEncoder passwordEncoder, OtpService otpService) {
+        this.pii = pii;
+        this.passwordEncoder = passwordEncoder;
+        this.otpService = otpService;
         this.users = users;
         this.events = events;
         this.clock = clock;
@@ -55,17 +104,27 @@ public class UserAccountService {
         return user;
     }
 
-    /** Đăng ký tài khoản khách MỚI; đã có thì báo lỗi. Phát UserRegisteredEvent để module customer tạo hồ sơ. */
+    /**
+     * Đăng ký tài khoản khách MỚI (đủ thông tin + mật khẩu); trùng SĐT / email / CCCD thì báo lỗi.
+     * Phát UserRegisteredEvent để module customer tạo hồ sơ.
+     */
     @Transactional
-    public UserAccount register(OtpTarget target, String fullName) {
+    public UserAccount register(OtpTarget target, RegisterAccountCommand cmd) {
         if (find(target).isPresent()) {
             throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ACCOUNT_EXISTS);
         }
+        CitizenId cid = CitizenId.of(cmd.citizenId());
+        String cidHash = pii.hash(cid);
+        if (users.existsByCitizenIdHash(cidHash)) {
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.CITIZEN_ID_IN_USE);
+        }
+        PasswordPolicy.validateCustomer(cmd.password(), target.value());
         Instant now = clock.instant();
         boolean sms = target.channel() == OtpChannel.SMS;
-        UserAccount user = sms ? UserAccount.registerCustomer(new PhoneNumber(target.value()))
-                : UserAccount.registerCustomer(new EmailAddress(target.value()));
-        user.rename(fullName);
+        UserAccount user = UserAccount.registerCustomer(
+                sms ? new PhoneNumber(target.value()) : null, sms ? null : new EmailAddress(target.value()),
+                cmd.fullName(), cmd.dateOfBirth(), cmd.address(), pii.encrypt(cid), cidHash, cid.last4(),
+                passwordEncoder.encode(cmd.password()), LocalDate.ofInstant(now, VN));
         user = users.save(user);
         events.publishEvent(UserRegisteredEvent.of(user.getId(), sms ? target.value() : null, sms ? null : target.value(), now));
         user.recordLogin(now);

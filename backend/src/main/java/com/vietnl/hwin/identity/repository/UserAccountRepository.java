@@ -19,6 +19,8 @@ public interface UserAccountRepository extends JpaRepository<UserAccount, UUID> 
 
     boolean existsByEmail(String email);
 
+    boolean existsByCitizenIdHash(String citizenIdHash);
+
     boolean existsByOtpExemptTrue();
 
     List<UserAccount> findByRolesContains(Role role);

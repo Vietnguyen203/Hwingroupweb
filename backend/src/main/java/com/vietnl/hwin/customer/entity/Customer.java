@@ -64,6 +64,13 @@ public class Customer extends AggregateRoot<Customer> {
         return c;
     }
 
+    /** Tài khoản (đăng ký bằng email) vừa thêm SĐT đã xác minh. */
+    public void attachPhone(PhoneNumber newPhone) {
+        if (this.phone == null) {
+            this.phone = newPhone;
+        }
+    }
+
     public void rename(String fullName) {
         if (fullName != null && fullName.trim().length() > 100) {
             throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.NAME_TOO_LONG);

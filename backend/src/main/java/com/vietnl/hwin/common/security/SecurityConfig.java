@@ -49,7 +49,7 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Xác thực
-                        .requestMatchers("/api/auth/otp", "/api/auth/otp/verify", "/api/auth/register", "/api/auth/refresh",
+                        .requestMatchers("/api/auth/otp", "/api/auth/register", "/api/auth/login", "/api/auth/login/verify", "/api/auth/refresh",
                                 "/api/auth/logout", "/api/admin/auth/login", "/api/admin/auth/login/verify").permitAll()
                         // Catalog công khai
                         .requestMatchers(HttpMethod.GET, "/api/categories/**", "/api/products/**").permitAll()
