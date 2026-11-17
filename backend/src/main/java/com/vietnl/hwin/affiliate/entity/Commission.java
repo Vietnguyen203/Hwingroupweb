@@ -1,5 +1,8 @@
 package com.vietnl.hwin.affiliate.entity;
 
+import java.util.Map;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
@@ -17,7 +20,6 @@ import org.hibernate.annotations.UuidGenerator;
 import com.vietnl.hwin.affiliate.entity.AffiliateEnums.CommissionStatus;
 import com.vietnl.hwin.common.domain.AggregateRoot;
 import com.vietnl.hwin.common.domain.Money;
-import com.vietnl.hwin.common.exception.DomainException;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -77,7 +79,7 @@ public class Commission extends AggregateRoot<Commission> {
     public static Commission create(UUID orderId, String orderCode, UUID affiliateId, UUID customerId,
                                     Money subtotal, Money discount, BigDecimal rate) {
         if (rate == null || rate.signum() < 0 || rate.compareTo(BigDecimal.ONE) > 0) {
-            throw new DomainException("COMMISSION_RATE_INVALID", "Tỉ lệ hoa hồng không hợp lệ");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.COMMISSION_RATE_INVALID);
         }
         Commission c = new Commission();
         c.orderId = orderId;
@@ -106,13 +108,15 @@ public class Commission extends AggregateRoot<Commission> {
     /** Duyệt: chỉ khi PENDING và đã tới mốc eligibleAt. */
     public void approve(Instant now) {
         if (status != CommissionStatus.PENDING) {
-            throw new DomainException("INVALID_STATE_TRANSITION", "Chỉ duyệt được hoa hồng đang chờ");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.COMMISSION_NOT_PENDING);
         }
         if (eligibleAt == null) {
-            throw new DomainException("COMMISSION_NOT_ELIGIBLE", "Đơn chưa giao thành công");
+            String reason = "đơn chưa giao thành công";
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.COMMISSION_NOT_ELIGIBLE, Map.of("reason", String.valueOf(reason)));
         }
         if (now.isBefore(eligibleAt)) {
-            throw new DomainException("COMMISSION_NOT_ELIGIBLE", "Chưa hết thời gian giữ hoa hồng");
+            String reason = "chưa hết thời gian giữ hoa hồng";
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.COMMISSION_NOT_ELIGIBLE, Map.of("reason", String.valueOf(reason)));
         }
         this.status = CommissionStatus.APPROVED;
         this.approvedAt = now;
@@ -129,7 +133,7 @@ public class Commission extends AggregateRoot<Commission> {
             return false;
         }
         if (status == CommissionStatus.APPROVED) {
-            throw new DomainException("INVALID_STATE_TRANSITION", "Hoa hồng đã duyệt, không thể hủy");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.COMMISSION_ALREADY_APPROVED);
         }
         this.status = CommissionStatus.CANCELLED;
         this.cancelledAt = now;

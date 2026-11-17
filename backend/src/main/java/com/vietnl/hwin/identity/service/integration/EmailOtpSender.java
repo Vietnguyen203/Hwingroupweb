@@ -1,5 +1,8 @@
 package com.vietnl.hwin.identity.service.integration;
 
+import com.vietnl.hwin.identity.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -10,7 +13,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
 import com.vietnl.hwin.common.domain.EmailAddress;
-import com.vietnl.hwin.common.exception.DomainException;
 import com.vietnl.hwin.identity.entity.OtpChannel;
 import com.vietnl.hwin.identity.entity.OtpPurpose;
 import com.vietnl.hwin.identity.service.OtpProperties;
@@ -70,7 +72,7 @@ public class EmailOtpSender implements OtpSender {
             log.info("Đã gửi OTP {} tới {}", purpose, masked);
         } catch (MailException e) {
             log.warn("Gửi email OTP tới {} thất bại: {}", masked, e.getMessage());
-            throw new DomainException("OTP_SEND_FAILED", "Không gửi được email, vui lòng thử lại sau");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.OTP_SEND_FAILED);
         }
     }
 

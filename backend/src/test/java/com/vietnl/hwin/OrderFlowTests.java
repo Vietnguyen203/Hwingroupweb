@@ -19,7 +19,7 @@ import com.vietnl.hwin.catalog.service.ProductSearchCriteria;
 import com.vietnl.hwin.catalog.service.ProductSearchService;
 import com.vietnl.hwin.common.domain.Address;
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.common.exception.DomainException;
+import com.vietnl.hwin.common.exception.ResponseException;
 import com.vietnl.hwin.customer.service.CustomerService;
 import com.vietnl.hwin.customer.service.ReorderService;
 import com.vietnl.hwin.identity.service.UserAccountService;
@@ -97,7 +97,7 @@ class OrderFlowTests {
         cart.addItem(userId, productId, Math.min(99, stock + 1));
         assertThatThrownBy(() -> placeOrder.place(userId,
                 new PlaceOrderCommand(ADDRESS, PaymentMethod.COD, null, null, null), null, o -> o))
-                .isInstanceOf(DomainException.class).hasFieldOrPropertyWithValue("code", "CART_INVALID");
+                .isInstanceOf(ResponseException.class).hasFieldOrPropertyWithValue("code", "CART_INVALID");
     }
 
     @Test
@@ -107,7 +107,7 @@ class OrderFlowTests {
         cart.addItem(owner, productIdBySlug("ruoc-cha-bong-heo-200g"), 1);
         Order order = placeOrder.place(owner, new PlaceOrderCommand(ADDRESS, PaymentMethod.COD, null, null, null), null, o -> o);
         assertThatThrownBy(() -> reorder.reorder(other, order.getOrderCode()))
-                .hasFieldOrPropertyWithValue("code", "NOT_FOUND");
+                .hasFieldOrPropertyWithValue("code", "ORDER_NOT_FOUND");
     }
 
     private UUID productIdBySlug(String slug) {

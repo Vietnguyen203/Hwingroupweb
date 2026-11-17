@@ -127,7 +127,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
-                  "pm.test('code = VALIDATION_FAILED', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_FAILED'));"
+                  "pm.test('code = VALIDATION_FAILED', () => pm.expect(pm.response.json().messageCode).to.eql('VALIDATION_FAILED'));"
                 ]
               }
             }
@@ -289,7 +289,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = ACCOUNT_EXISTS', () => pm.expect(pm.response.json().code).to.eql('ACCOUNT_EXISTS'));"
+                  "pm.test('code = ACCOUNT_EXISTS', () => pm.expect(pm.response.json().messageCode).to.eql('ACCOUNT_EXISTS'));"
                 ]
               }
             }
@@ -380,7 +380,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = ACCOUNT_NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('ACCOUNT_NOT_FOUND'));"
+                  "pm.test('code = ACCOUNT_NOT_FOUND', () => pm.expect(pm.response.json().messageCode).to.eql('ACCOUNT_NOT_FOUND'));"
                 ]
               }
             }
@@ -1097,7 +1097,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
-                  "pm.test('code = NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('NOT_FOUND'));"
+                  "pm.test('code = PRODUCT_NOT_FOUND', () => pm.expect(pm.response.json().messageCode).to.eql('PRODUCT_NOT_FOUND'));"
                 ]
               }
             }
@@ -1395,7 +1395,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = PRODUCT_NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('PRODUCT_NOT_FOUND'));"
+                  "pm.test('code = PRODUCT_NOT_FOUND', () => pm.expect(pm.response.json().messageCode).to.eql('PRODUCT_NOT_FOUND'));"
                 ]
               }
             }
@@ -1440,7 +1440,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
-                  "pm.test('code = VALIDATION_FAILED', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_FAILED'));"
+                  "pm.test('code = VALIDATION_FAILED', () => pm.expect(pm.response.json().messageCode).to.eql('VALIDATION_FAILED'));"
                 ]
               }
             }
@@ -1626,7 +1626,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
-                  "pm.test('Cùng mã đơn', () => pm.expect(pm.response.json().code).to.eql(pm.collectionVariables.get('codCode')));"
+                  "pm.test('Cùng mã đơn', () => pm.expect(pm.response.json().messageCode).to.eql(pm.collectionVariables.get('codCode')));"
                 ]
               }
             }
@@ -1680,7 +1680,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = CART_EMPTY', () => pm.expect(pm.response.json().code).to.eql('CART_EMPTY'));"
+                  "pm.test('code = CART_EMPTY', () => pm.expect(pm.response.json().messageCode).to.eql('CART_EMPTY'));"
                 ]
               }
             }
@@ -1848,7 +1848,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
-                  "pm.test('code = VALIDATION_FAILED', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_FAILED'));"
+                  "pm.test('code = VALIDATION_FAILED', () => pm.expect(pm.response.json().messageCode).to.eql('VALIDATION_FAILED'));"
                 ]
               }
             }
@@ -1946,7 +1946,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set('cancelCode', pm.response.json().code);"
+                  "pm.collectionVariables.set('cancelCode', pm.response.json().messageCode);"
                 ]
               }
             }
@@ -2010,7 +2010,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = INVALID_STATE_TRANSITION', () => pm.expect(pm.response.json().code).to.eql('INVALID_STATE_TRANSITION'));"
+                  "pm.test('code = CUSTOMER_CANCEL_NOT_ALLOWED', () => pm.expect(pm.response.json().messageCode).to.eql('CUSTOMER_CANCEL_NOT_ALLOWED'));"
                 ]
               }
             }
@@ -2904,7 +2904,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = STOCK_NEGATIVE', () => pm.expect(pm.response.json().code).to.eql('STOCK_NEGATIVE'));"
+                  "pm.test('code = STOCK_NEGATIVE', () => pm.expect(pm.response.json().messageCode).to.eql('STOCK_NEGATIVE'));"
                 ]
               }
             }
@@ -3067,7 +3067,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = COMPARE_PRICE_INVALID', () => pm.expect(pm.response.json().code).to.eql('COMPARE_PRICE_INVALID'));"
+                  "pm.test('code = COMPARE_PRICE_INVALID', () => pm.expect(pm.response.json().messageCode).to.eql('COMPARE_PRICE_INVALID'));"
                 ]
               }
             }
@@ -3190,7 +3190,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = PAYMENT_METHOD_INVALID', () => pm.expect(pm.response.json().code).to.eql('PAYMENT_METHOD_INVALID'));"
+                  "pm.test('code = PAYMENT_METHOD_INVALID', () => pm.expect(pm.response.json().messageCode).to.eql('PAYMENT_METHOD_INVALID'));"
                 ]
               }
             }
@@ -3223,7 +3223,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = INVALID_STATE_TRANSITION', () => pm.expect(pm.response.json().code).to.eql('INVALID_STATE_TRANSITION'));"
+                  "pm.test('code = INVALID_STATE_TRANSITION', () => pm.expect(pm.response.json().messageCode).to.eql('INVALID_STATE_TRANSITION'));"
                 ]
               }
             }
@@ -3370,7 +3370,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = INVALID_STATE_TRANSITION', () => pm.expect(pm.response.json().code).to.eql('INVALID_STATE_TRANSITION'));"
+                  "pm.test('code = INVALID_STATE_TRANSITION', () => pm.expect(pm.response.json().messageCode).to.eql('INVALID_STATE_TRANSITION'));"
                 ]
               }
             }
@@ -3473,7 +3473,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = PAYMENT_REQUIRED', () => pm.expect(pm.response.json().code).to.eql('PAYMENT_REQUIRED'));"
+                  "pm.test('code = PAYMENT_REQUIRED', () => pm.expect(pm.response.json().messageCode).to.eql('PAYMENT_REQUIRED'));"
                 ]
               }
             }
@@ -3896,7 +3896,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
-                  "pm.test('code = VALIDATION_FAILED', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_FAILED'));"
+                  "pm.test('code = VALIDATION_FAILED', () => pm.expect(pm.response.json().messageCode).to.eql('VALIDATION_FAILED'));"
                 ]
               }
             }
@@ -3988,7 +3988,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = ALREADY_REGISTERED', () => pm.expect(pm.response.json().code).to.eql('ALREADY_REGISTERED'));"
+                  "pm.test('code = ALREADY_REGISTERED', () => pm.expect(pm.response.json().messageCode).to.eql('ALREADY_REGISTERED'));"
                 ]
               }
             }
@@ -4134,7 +4134,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = INVALID_STATE_TRANSITION', () => pm.expect(pm.response.json().code).to.eql('INVALID_STATE_TRANSITION'));"
+                  "pm.test('code = AFFILIATE_INVALID_STATE', () => pm.expect(pm.response.json().messageCode).to.eql('AFFILIATE_INVALID_STATE'));"
                 ]
               }
             }
@@ -4333,7 +4333,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = BANK_ACCOUNT_REQUIRED', () => pm.expect(pm.response.json().code).to.eql('BANK_ACCOUNT_REQUIRED'));"
+                  "pm.test('code = BANK_ACCOUNT_REQUIRED', () => pm.expect(pm.response.json().messageCode).to.eql('BANK_ACCOUNT_REQUIRED'));"
                 ]
               }
             }
@@ -4513,7 +4513,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = INSUFFICIENT_BALANCE', () => pm.expect(pm.response.json().code).to.eql('INSUFFICIENT_BALANCE'));"
+                  "pm.test('code = INSUFFICIENT_BALANCE', () => pm.expect(pm.response.json().messageCode).to.eql('INSUFFICIENT_BALANCE'));"
                 ]
               }
             }
@@ -4558,7 +4558,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = PAYOUT_BELOW_MINIMUM', () => pm.expect(pm.response.json().code).to.eql('PAYOUT_BELOW_MINIMUM'));"
+                  "pm.test('code = PAYOUT_BELOW_MINIMUM', () => pm.expect(pm.response.json().messageCode).to.eql('PAYOUT_BELOW_MINIMUM'));"
                 ]
               }
             }
@@ -4832,7 +4832,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set('refOrderCode', pm.response.json().code);",
+                  "pm.collectionVariables.set('refOrderCode', pm.response.json().messageCode);",
                   "pm.collectionVariables.set('refOrderSubtotal', pm.response.json().subtotal);"
                 ]
               }
@@ -5415,7 +5415,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = INSUFFICIENT_BALANCE', () => pm.expect(pm.response.json().code).to.eql('INSUFFICIENT_BALANCE'));"
+                  "pm.test('code = INSUFFICIENT_BALANCE', () => pm.expect(pm.response.json().messageCode).to.eql('INSUFFICIENT_BALANCE'));"
                 ]
               }
             }
@@ -5506,7 +5506,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Bị chặn', () => pm.expect(pm.response.code).to.be.oneOf([422]));",
-                  "pm.test('PAYOUT_OPEN hoặc không đủ số dư', () => pm.expect(['PAYOUT_OPEN','INSUFFICIENT_BALANCE']).to.include(pm.response.json().code));"
+                  "pm.test('PAYOUT_OPEN hoặc không đủ số dư', () => pm.expect(['PAYOUT_OPEN','INSUFFICIENT_BALANCE']).to.include(pm.response.json().messageCode));"
                 ]
               }
             }
@@ -5655,7 +5655,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = INVALID_STATE_TRANSITION', () => pm.expect(pm.response.json().code).to.eql('INVALID_STATE_TRANSITION'));"
+                  "pm.test('code = INVALID_STATE_TRANSITION', () => pm.expect(pm.response.json().messageCode).to.eql('INVALID_STATE_TRANSITION'));"
                 ]
               }
             }
@@ -6010,7 +6010,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set('timeoutCode', pm.response.json().code);"
+                  "pm.collectionVariables.set('timeoutCode', pm.response.json().messageCode);"
                 ]
               }
             }
@@ -6559,7 +6559,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = WEAK_PASSWORD', () => pm.expect(pm.response.json().code).to.eql('WEAK_PASSWORD'));"
+                  "pm.test('code = WEAK_PASSWORD', () => pm.expect(pm.response.json().messageCode).to.eql('WEAK_PASSWORD'));"
                 ]
               }
             }
@@ -6604,7 +6604,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = ADMIN_CONTACT_REQUIRED', () => pm.expect(pm.response.json().code).to.eql('ADMIN_CONTACT_REQUIRED'));"
+                  "pm.test('code = ADMIN_CONTACT_REQUIRED', () => pm.expect(pm.response.json().messageCode).to.eql('ADMIN_CONTACT_REQUIRED'));"
                 ]
               }
             }
@@ -6979,7 +6979,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 401', () => pm.response.to.have.status(401));",
-                  "pm.test('code = CHALLENGE_EXPIRED', () => pm.expect(pm.response.json().code).to.eql('CHALLENGE_EXPIRED'));"
+                  "pm.test('code = CHALLENGE_EXPIRED', () => pm.expect(pm.response.json().messageCode).to.eql('CHALLENGE_EXPIRED'));"
                 ]
               }
             }
@@ -7024,7 +7024,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = ADMIN_USE_ADMIN_LOGIN', () => pm.expect(pm.response.json().code).to.eql('ADMIN_USE_ADMIN_LOGIN'));"
+                  "pm.test('code = ADMIN_USE_ADMIN_LOGIN', () => pm.expect(pm.response.json().messageCode).to.eql('ADMIN_USE_ADMIN_LOGIN'));"
                 ]
               }
             }

@@ -1,5 +1,8 @@
 package com.vietnl.hwin.customer.service;
 
+import com.vietnl.hwin.customer.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import java.io.IOException;
@@ -17,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.common.exception.NotFoundException;
 import com.vietnl.hwin.customer.entity.CustomerSegment;
 
 /**
@@ -68,7 +70,7 @@ public class CustomerAdminService {
     public CustomerRow get(UUID id) {
         List<CustomerRow> rows = jdbc.query(select() + " where c.id = ?", (rs, i) -> row(rs), id);
         if (rows.isEmpty()) {
-            throw new NotFoundException("Không tìm thấy khách hàng");
+            throw new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.CUSTOMER_NOT_FOUND);
         }
         return rows.get(0);
     }

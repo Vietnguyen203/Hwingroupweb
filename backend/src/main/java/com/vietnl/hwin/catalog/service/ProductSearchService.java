@@ -1,5 +1,8 @@
 package com.vietnl.hwin.catalog.service;
 
+import com.vietnl.hwin.catalog.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import java.util.ArrayList;
@@ -20,7 +23,6 @@ import com.vietnl.hwin.catalog.entity.Category;
 import com.vietnl.hwin.catalog.entity.Product;
 import com.vietnl.hwin.catalog.repository.CategoryRepository;
 import com.vietnl.hwin.catalog.repository.ProductRepository;
-import com.vietnl.hwin.common.exception.NotFoundException;
 import com.vietnl.hwin.common.util.TextNormalizer;
 
 /**
@@ -74,7 +76,7 @@ public class ProductSearchService {
     @Transactional(readOnly = true)
     public <T> T getActiveBySlug(String slug, Function<Product, T> mapper) {
         return products.findBySlugAndActiveTrue(slug).map(mapper)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm"));
+                .orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.PRODUCT_NOT_FOUND));
     }
 
     private static Sort toSort(ProductSearchCriteria c) {

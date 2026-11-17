@@ -1,5 +1,7 @@
 package com.vietnl.hwin.identity.entity;
 
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import java.time.Instant;
@@ -24,7 +26,6 @@ import org.hibernate.annotations.UuidGenerator;
 import com.vietnl.hwin.common.domain.AggregateRoot;
 import com.vietnl.hwin.common.domain.EmailAddress;
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.common.exception.DomainException;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -101,7 +102,7 @@ public class UserAccount extends AggregateRoot<UserAccount> {
         if (phone != null) {
             return OtpTarget.phone(phone);
         }
-        throw new DomainException("NO_OTP_CONTACT", "Tài khoản chưa có email hoặc số điện thoại để nhận OTP");
+        throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.NO_OTP_CONTACT);
     }
 
     /**
@@ -110,8 +111,7 @@ public class UserAccount extends AggregateRoot<UserAccount> {
      */
     public static UserAccount createAdmin(String email, String passwordHash, String fullName, PhoneNumber phone) {
         if (phone == null && !EmailAddress.isValid(email)) {
-            throw new DomainException("ADMIN_CONTACT_REQUIRED",
-                    "Admin cần email thật hoặc số điện thoại để nhận OTP đăng nhập");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ADMIN_CONTACT_REQUIRED);
         }
         UserAccount u = newAdmin(email, passwordHash, fullName);
         u.phone = phone;
@@ -132,7 +132,7 @@ public class UserAccount extends AggregateRoot<UserAccount> {
 
     private static UserAccount newAdmin(String email, String passwordHash, String fullName) {
         if (email == null || email.isBlank() || passwordHash == null) {
-            throw new DomainException("ADMIN_INVALID", "Admin cần email/tên đăng nhập và mật khẩu");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ADMIN_INVALID);
         }
         UserAccount u = new UserAccount();
         u.email = email.trim().toLowerCase();
@@ -151,7 +151,7 @@ public class UserAccount extends AggregateRoot<UserAccount> {
 
     public void ensureActive() {
         if (status != UserStatus.ACTIVE) {
-            throw new DomainException("USER_LOCKED", "Tài khoản đã bị khóa");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.USER_LOCKED);
         }
     }
 
@@ -161,7 +161,7 @@ public class UserAccount extends AggregateRoot<UserAccount> {
 
     public void revokeRole(Role role) {
         if (role == Role.CUSTOMER) {
-            throw new DomainException("ROLE_REQUIRED", "Không thể gỡ vai trò CUSTOMER");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ROLE_REQUIRED);
         }
         roles.remove(role);
     }

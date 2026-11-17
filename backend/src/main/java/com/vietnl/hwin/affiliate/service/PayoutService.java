@@ -1,5 +1,8 @@
 package com.vietnl.hwin.affiliate.service;
 
+import com.vietnl.hwin.affiliate.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.EnumSet;
@@ -20,8 +23,6 @@ import com.vietnl.hwin.affiliate.repository.CommissionRepository;
 import com.vietnl.hwin.affiliate.repository.PayoutRepository;
 import com.vietnl.hwin.common.audit.AuditLogger;
 import com.vietnl.hwin.common.domain.Money;
-import com.vietnl.hwin.common.exception.DomainException;
-import com.vietnl.hwin.common.exception.NotFoundException;
 
 /**
  * Số dư + rút tiền.
@@ -62,11 +63,11 @@ public class PayoutService {
     @Transactional
     public <T> T request(UUID userId, long amount, Function<Payout, T> mapper) {
         Affiliate a = affiliates.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("Bạn chưa đăng ký cộng tác viên"));
+                .orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.AFFILIATE_NOT_REGISTERED));
         Instant now = clock.instant();
         a.assertCanWithdraw(now, props.bankChangeLock());
         if (payouts.existsByAffiliateIdAndStatusIn(a.getId(), EnumSet.of(PayoutStatus.REQUESTED, PayoutStatus.APPROVED))) {
-            throw new DomainException("PAYOUT_OPEN", "Bạn đang có một yêu cầu rút tiền chưa xử lý xong");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PAYOUT_OPEN);
         }
         Payout p = payouts.saveAndFlush(Payout.request(a.getId(), Money.of(amount), availableBalance(a.getId()),
                 props.minPayoutMoney(), a.getBankAccount(), now));
@@ -77,7 +78,7 @@ public class PayoutService {
     @Transactional(readOnly = true)
     public <T> Page<T> listMine(UUID userId, int page, int size, Function<Payout, T> mapper) {
         Affiliate a = affiliates.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("Bạn chưa đăng ký cộng tác viên"));
+                .orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.AFFILIATE_NOT_REGISTERED));
         return payouts.findByAffiliateId(a.getId(), PageRequest.of(Math.max(page, 0), Math.clamp(size, 1, 50),
                 Sort.by(Sort.Order.desc("requestedAt")))).map(mapper);
     }
@@ -126,7 +127,7 @@ public class PayoutService {
     }
 
     private Payout load(UUID id) {
-        return payouts.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy yêu cầu rút tiền"));
+        return payouts.findById(id).orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.PAYOUT_NOT_FOUND));
     }
 
     public record PayoutWithBank(Payout payout, String accountNo, String accountHolder) {

@@ -1,5 +1,8 @@
 package com.vietnl.hwin.affiliate.entity;
 
+import java.util.Map;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Set;
@@ -19,7 +22,6 @@ import org.hibernate.annotations.UuidGenerator;
 import com.vietnl.hwin.affiliate.entity.AffiliateEnums.AffiliateStatus;
 import com.vietnl.hwin.common.domain.AggregateRoot;
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.common.exception.DomainException;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -141,14 +143,14 @@ public class Affiliate extends AggregateRoot<Affiliate> {
     /** Có được phép rút tiền lúc này không – ném lỗi mô tả lý do nếu không. */
     public void assertCanWithdraw(Instant now, Duration bankChangeLock) {
         if (status != AffiliateStatus.APPROVED) {
-            throw new DomainException("AFFILIATE_NOT_ACTIVE", "Tài khoản CTV không ở trạng thái hoạt động");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.AFFILIATE_NOT_ACTIVE);
         }
         if (bankAccount == null) {
-            throw new DomainException("BANK_ACCOUNT_REQUIRED", "Vui lòng cập nhật tài khoản ngân hàng trước khi rút tiền");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.BANK_ACCOUNT_REQUIRED);
         }
         Instant lockedUntil = withdrawLockedUntil(bankChangeLock);
         if (lockedUntil != null && now.isBefore(lockedUntil)) {
-            throw new DomainException("WITHDRAW_LOCKED", "Vừa đổi tài khoản ngân hàng – được rút tiền sau " + lockedUntil)
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.WITHDRAW_LOCKED, Map.of("lockedUntil", String.valueOf(lockedUntil)))
                     .withDetail("lockedUntil", lockedUntil.toString());
         }
     }
@@ -169,7 +171,7 @@ public class Affiliate extends AggregateRoot<Affiliate> {
 
     private void updateProfile(String fullName, String socialLink, String note) {
         if (fullName == null || fullName.isBlank()) {
-            throw new DomainException("NAME_REQUIRED", "Vui lòng nhập họ tên");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.NAME_REQUIRED);
         }
         this.fullName = fullName.trim();
         this.socialLink = blankToNull(socialLink);
@@ -183,13 +185,13 @@ public class Affiliate extends AggregateRoot<Affiliate> {
 
     private void requireStatus(Set<AffiliateStatus> allowed, String action) {
         if (!allowed.contains(status)) {
-            throw new DomainException(INVALID_STATE, "Không thể " + action + " khi CTV đang ở trạng thái " + status);
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.AFFILIATE_INVALID_STATE, Map.of("action", String.valueOf(action), "status", String.valueOf(status)));
         }
     }
 
     private static String requireReason(String reason) {
         if (reason == null || reason.isBlank()) {
-            throw new DomainException("REASON_REQUIRED", "Vui lòng nhập lý do");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.REASON_REQUIRED);
         }
         return reason.trim();
     }

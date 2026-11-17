@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 import org.junit.jupiter.api.Test;
 
-import com.vietnl.hwin.common.exception.DomainException;
+import com.vietnl.hwin.common.exception.ResponseException;
 
 class ValueObjectTests {
 
@@ -26,14 +26,14 @@ class ValueObjectTests {
 
     @Test
     void phoneNumberRejectsInvalid() {
-        assertThatThrownBy(() -> PhoneNumber.of("012345")).isInstanceOf(DomainException.class);
-        assertThatThrownBy(() -> PhoneNumber.of("0212345678")).isInstanceOf(DomainException.class);
+        assertThatThrownBy(() -> PhoneNumber.of("012345")).isInstanceOf(ResponseException.class);
+        assertThatThrownBy(() -> PhoneNumber.of("0212345678")).isInstanceOf(ResponseException.class);
     }
 
     @Test
     void moneyIsNeverNegative() {
-        assertThatThrownBy(() -> Money.of(-1)).isInstanceOf(DomainException.class);
-        assertThatThrownBy(() -> Money.of(100).minus(Money.of(200))).isInstanceOf(DomainException.class);
+        assertThatThrownBy(() -> Money.of(-1)).isInstanceOf(ResponseException.class);
+        assertThatThrownBy(() -> Money.of(100).minus(Money.of(200))).isInstanceOf(ResponseException.class);
     }
 
     @Test

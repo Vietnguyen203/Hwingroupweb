@@ -1,5 +1,8 @@
 package com.vietnl.hwin.ordering.service;
 
+import com.vietnl.hwin.ordering.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import java.time.Clock;
@@ -12,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vietnl.hwin.catalog.service.ProductQueryService;
-import com.vietnl.hwin.common.exception.DomainException;
 import com.vietnl.hwin.ordering.entity.Cart;
 import com.vietnl.hwin.ordering.entity.CartItem;
 import com.vietnl.hwin.ordering.repository.CartRepository;
@@ -105,7 +107,7 @@ public class CartService {
 
     private void requireProductExists(UUID productId) {
         if (products.findSnapshot(productId).isEmpty()) {
-            throw new DomainException("PRODUCT_NOT_FOUND", "Sản phẩm không tồn tại");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PRODUCT_NOT_FOUND);
         }
     }
 

@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vietnl.hwin.common.domain.EmailAddress;
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.common.exception.DomainException;
+import com.vietnl.hwin.common.exception.ResponseException;
 import com.vietnl.hwin.identity.entity.UserAccount;
 import com.vietnl.hwin.identity.repository.UserAccountRepository;
 
@@ -74,7 +74,7 @@ public class AdminSeeder implements ApplicationRunner {
         } else {
             try {
                 PasswordPolicy.validate(props.password(), login);
-            } catch (DomainException e) {
+            } catch (ResponseException e) {
                 throw new IllegalStateException("ADMIN_PASSWORD không đạt yêu cầu: " + e.getMessage(), e);
             }
             if (isBlank(props.phone()) && !EmailAddress.isValid(login)) {

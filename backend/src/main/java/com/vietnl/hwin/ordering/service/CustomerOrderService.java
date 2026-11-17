@@ -1,5 +1,8 @@
 package com.vietnl.hwin.ordering.service;
 
+import com.vietnl.hwin.ordering.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import java.time.Clock;
@@ -11,7 +14,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vietnl.hwin.common.exception.NotFoundException;
 import com.vietnl.hwin.ordering.entity.Order;
 import com.vietnl.hwin.ordering.entity.OrderEnums.CancelReason;
 import com.vietnl.hwin.ordering.entity.OrderStatus;
@@ -53,6 +55,6 @@ public class CustomerOrderService {
 
     private Order load(UUID customerId, String orderCode) {
         return orders.findByOrderCodeAndCustomerId(orderCode, customerId)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy đơn hàng"));
+                .orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.ORDER_NOT_FOUND));
     }
 }

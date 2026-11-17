@@ -1,5 +1,8 @@
 package com.vietnl.hwin.affiliate.service;
 
+import com.vietnl.hwin.affiliate.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -23,8 +26,6 @@ import com.vietnl.hwin.affiliate.repository.CommissionRepository;
 import com.vietnl.hwin.affiliate.repository.CustomerBindingRepository;
 import com.vietnl.hwin.affiliate.repository.PayoutRepository;
 import com.vietnl.hwin.affiliate.repository.ReferralClickRepository;
-import com.vietnl.hwin.common.exception.DomainException;
-import com.vietnl.hwin.common.exception.NotFoundException;
 import com.vietnl.hwin.identity.service.UserContact;
 import com.vietnl.hwin.identity.service.UserQueryService;
 
@@ -109,9 +110,9 @@ public class AffiliateDashboardService {
 
     private Affiliate loadActive(UUID userId) {
         Affiliate a = affiliates.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("Bạn chưa đăng ký cộng tác viên"));
+                .orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.AFFILIATE_NOT_REGISTERED));
         if (a.getReferralCode() == null) {
-            throw new DomainException("AFFILIATE_NOT_APPROVED", "Tài khoản CTV chưa được duyệt");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.AFFILIATE_NOT_APPROVED);
         }
         return a;
     }

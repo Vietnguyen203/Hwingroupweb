@@ -1,5 +1,8 @@
 package com.vietnl.hwin.identity.service;
 
+import com.vietnl.hwin.identity.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -11,9 +14,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.modulith.NamedInterface;
 import org.springframework.stereotype.Service;
 
-import com.vietnl.hwin.common.exception.DomainException;
-import com.vietnl.hwin.common.exception.NotFoundException;
-import com.vietnl.hwin.common.exception.TooManyRequestsException;
 import com.vietnl.hwin.common.ratelimit.RateLimiter;
 import com.vietnl.hwin.common.util.Hashing;
 import com.vietnl.hwin.identity.entity.OtpChannel;
@@ -59,15 +59,15 @@ public class OtpService {
     public long send(OtpTarget target, OtpPurpose purpose, String ipHash) {
         OtpSender sender = senders.get(target.channel());
         if (sender == null || !sender.available()) {
-            throw new DomainException("OTP_CHANNEL_UNAVAILABLE", target.channel() == OtpChannel.SMS
-                    ? "Hiện chưa gửi được OTP qua SMS, vui lòng dùng email"
-                    : "Hiện chưa gửi được OTP qua email");
+            if (target.channel() == OtpChannel.SMS) {
+                throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.SMS_UNAVAILABLE);
+            }
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.EMAIL_UNAVAILABLE);
         }
         ensureNotLocked(target);
         if (!rateLimiter.tryAcquire("rl:otp:to:" + target.key(), props.sendLimit(), props.sendWindow())
                 || !rateLimiter.tryAcquire("rl:otp:ip:" + ipHash, props.ipSendLimit(), props.sendWindow())) {
-            throw new TooManyRequestsException("OTP_SEND_LIMIT",
-                    "Bạn đã yêu cầu OTP quá nhiều lần, vui lòng thử lại sau ít phút");
+            throw new ResponseException(HttpStatus.TOO_MANY_REQUESTS, ExceptionMessage.OTP_SEND_LIMIT);
         }
         String code = Hashing.randomDigits(6);
         String key = otpKey(target, purpose);
@@ -98,7 +98,7 @@ public class OtpService {
         String key = otpKey(target, purpose);
         Object stored = redis.opsForHash().get(key, FIELD_HASH);
         if (stored == null) {
-            throw new DomainException("OTP_EXPIRED", "Mã OTP đã hết hạn, vui lòng gửi lại");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.OTP_EXPIRED);
         }
         if (code != null && Hashing.constantTimeEquals(stored.toString(), hash(target, purpose, code))) {
             redis.delete(key);
@@ -108,21 +108,18 @@ public class OtpService {
         if (attempts >= props.maxAttempts()) {
             redis.delete(key);
             redis.opsForValue().set(lockKey(target), "1", props.lockDuration());
-            throw new TooManyRequestsException("OTP_LOCKED",
-                    "Nhập sai OTP quá " + props.maxAttempts() + " lần. Vui lòng thử lại sau "
-                            + props.lockDuration().toMinutes() + " phút");
+            throw new ResponseException(HttpStatus.TOO_MANY_REQUESTS, ExceptionMessage.OTP_LOCKED, Map.of("maxAttempts", String.valueOf(props.maxAttempts()), "lockDuration", String.valueOf(props.lockDuration().toMinutes())));
         }
-        throw new DomainException("OTP_INVALID",
-                "Mã OTP không đúng. Còn " + (props.maxAttempts() - attempts) + " lần thử");
+        throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.OTP_INVALID, Map.of("remaining", String.valueOf((props.maxAttempts() - attempts))));
     }
 
     private OtpTarget targetOf(UUID userId) {
-        return users.findById(userId).orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản")).otpTarget();
+        return users.findById(userId).orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.USER_NOT_FOUND)).otpTarget();
     }
 
     private void ensureNotLocked(OtpTarget target) {
         if (Boolean.TRUE.equals(redis.hasKey(lockKey(target)))) {
-            throw new TooManyRequestsException("OTP_LOCKED", "Tạm khóa nhận OTP do nhập sai nhiều lần, vui lòng thử lại sau");
+            throw new ResponseException(HttpStatus.TOO_MANY_REQUESTS, ExceptionMessage.OTP_TEMP_LOCKED);
         }
     }
 

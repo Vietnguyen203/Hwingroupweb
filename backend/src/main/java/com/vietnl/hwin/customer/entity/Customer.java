@@ -1,5 +1,8 @@
 package com.vietnl.hwin.customer.entity;
 
+import java.util.Map;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import java.time.Instant;
@@ -19,8 +22,6 @@ import jakarta.persistence.Table;
 import com.vietnl.hwin.common.domain.Address;
 import com.vietnl.hwin.common.domain.AggregateRoot;
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.common.exception.DomainException;
-import com.vietnl.hwin.common.exception.NotFoundException;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -54,7 +55,7 @@ public class Customer extends AggregateRoot<Customer> {
 
     public static Customer register(UUID userId, PhoneNumber phone, String email) {
         if (phone == null && email == null) {
-            throw new DomainException("CONTACT_REQUIRED", "Khách hàng cần số điện thoại hoặc email");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.CONTACT_REQUIRED);
         }
         Customer c = new Customer();
         c.id = userId;
@@ -65,7 +66,7 @@ public class Customer extends AggregateRoot<Customer> {
 
     public void rename(String fullName) {
         if (fullName != null && fullName.trim().length() > 100) {
-            throw new DomainException("NAME_TOO_LONG", "Họ tên tối đa 100 ký tự");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.NAME_TOO_LONG);
         }
         this.fullName = fullName == null || fullName.isBlank() ? null : fullName.trim();
     }
@@ -73,7 +74,7 @@ public class Customer extends AggregateRoot<Customer> {
     /** Thêm địa chỉ; địa chỉ đầu tiên tự thành mặc định. */
     public CustomerAddress addAddress(Address address, boolean makeDefault, Instant now) {
         if (addresses.size() >= MAX_ADDRESSES) {
-            throw new DomainException("ADDRESS_LIMIT", "Tối đa " + MAX_ADDRESSES + " địa chỉ");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ADDRESS_LIMIT, Map.of("max", String.valueOf(MAX_ADDRESSES)));
         }
         boolean isDefault = makeDefault || addresses.isEmpty();
         if (isDefault) {
@@ -114,6 +115,6 @@ public class Customer extends AggregateRoot<Customer> {
     /** Không tìm thấy -> 404 (không tiết lộ địa chỉ của khách khác – chống IDOR). */
     private CustomerAddress find(UUID addressId) {
         return addresses.stream().filter(a -> a.getId() != null && a.getId().equals(addressId)).findFirst()
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy địa chỉ"));
+                .orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.ADDRESS_NOT_FOUND));
     }
 }

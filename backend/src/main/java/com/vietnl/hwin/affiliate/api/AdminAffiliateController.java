@@ -1,5 +1,8 @@
 package com.vietnl.hwin.affiliate.api;
 
+import com.vietnl.hwin.common.exception.CommonErrorMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -31,7 +34,6 @@ import com.vietnl.hwin.affiliate.service.AffiliateProperties;
 import com.vietnl.hwin.affiliate.service.CommissionApprovalJob;
 import com.vietnl.hwin.affiliate.service.CommissionQueryService;
 import com.vietnl.hwin.affiliate.service.PayoutService;
-import com.vietnl.hwin.common.exception.NotFoundException;
 import com.vietnl.hwin.common.security.AuthPrincipal;
 import com.vietnl.hwin.common.web.PageResponse;
 
@@ -117,7 +119,7 @@ public class AdminAffiliateController {
     public ApprovalJobResponse runApprovalJob(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant asOf) {
         if (asOf != null && !props.simulatedTimeEnabled()) {
-            throw new NotFoundException("Không hỗ trợ giả lập thời điểm ở môi trường này");
+            throw new ResponseException(HttpStatus.NOT_FOUND, CommonErrorMessage.SIMULATED_TIME_DISABLED);
         }
         Instant when = asOf != null ? asOf : Instant.now();
         return new ApprovalJobResponse(when, approvalJob.approveDue(when));

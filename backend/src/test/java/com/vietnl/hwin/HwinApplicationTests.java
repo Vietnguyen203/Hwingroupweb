@@ -14,7 +14,7 @@ import com.vietnl.hwin.catalog.entity.ProductSort;
 import com.vietnl.hwin.catalog.service.ProductSearchCriteria;
 import com.vietnl.hwin.catalog.service.ProductSearchService;
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.common.exception.UnauthorizedException;
+import com.vietnl.hwin.common.exception.ResponseException;
 import com.vietnl.hwin.common.web.ClientInfo;
 import com.vietnl.hwin.identity.entity.UserAccount;
 import com.vietnl.hwin.identity.service.IssuedTokens;
@@ -73,8 +73,8 @@ class HwinApplicationTests {
 
         // Dùng lại token cũ -> bị từ chối và thu hồi cả chuỗi (kể cả token mới)
         assertThatThrownBy(() -> tokenService.rotate(first.refreshToken(), client))
-                .isInstanceOf(UnauthorizedException.class).hasFieldOrPropertyWithValue("code", "REFRESH_REUSED");
+                .isInstanceOf(ResponseException.class).hasFieldOrPropertyWithValue("code", "REFRESH_REUSED");
         assertThatThrownBy(() -> tokenService.rotate(second.refreshToken(), client))
-                .isInstanceOf(UnauthorizedException.class);
+                .isInstanceOf(ResponseException.class);
     }
 }

@@ -1,5 +1,7 @@
 package com.vietnl.hwin.catalog.entity;
 
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -11,7 +13,6 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.UuidGenerator;
 
 import com.vietnl.hwin.common.domain.AggregateRoot;
-import com.vietnl.hwin.common.exception.DomainException;
 import com.vietnl.hwin.common.util.TextNormalizer;
 
 import lombok.AccessLevel;
@@ -51,7 +52,7 @@ public class Category extends AggregateRoot<Category> {
 
     public void update(String name, String slug, String iconUrl, int sortOrder) {
         if (name == null || name.isBlank()) {
-            throw new DomainException("CATEGORY_NAME_REQUIRED", "Tên danh mục không được trống");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.CATEGORY_NAME_REQUIRED);
         }
         this.name = name.trim();
         this.slug = (slug == null || slug.isBlank()) ? TextNormalizer.slugify(name) : TextNormalizer.slugify(slug);

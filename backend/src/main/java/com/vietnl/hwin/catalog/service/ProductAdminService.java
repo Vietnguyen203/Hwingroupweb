@@ -1,5 +1,8 @@
 package com.vietnl.hwin.catalog.service;
 
+import com.vietnl.hwin.catalog.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import java.util.List;
@@ -12,8 +15,6 @@ import com.vietnl.hwin.catalog.entity.Product;
 import com.vietnl.hwin.catalog.entity.ProductDetails;
 import com.vietnl.hwin.catalog.repository.CategoryRepository;
 import com.vietnl.hwin.catalog.repository.ProductRepository;
-import com.vietnl.hwin.common.exception.DomainException;
-import com.vietnl.hwin.common.exception.NotFoundException;
 
 /** Use case quản trị sản phẩm. Service chỉ điều phối, quy tắc nằm trong Product. */
 @Service
@@ -38,7 +39,7 @@ public class ProductAdminService {
         Product p = Product.create(details, stock, imageUrls);
         p.markBestseller(bestseller);
         if (products.existsBySlug(p.getSlug())) {
-            throw new DomainException("SLUG_TAKEN", "Slug sản phẩm đã tồn tại");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PRODUCT_SLUG_TAKEN);
         }
         return products.save(p).getId();
     }
@@ -51,7 +52,7 @@ public class ProductAdminService {
         p.replaceImages(imageUrls);
         p.markBestseller(bestseller);
         if (products.existsBySlugAndIdNot(p.getSlug(), id)) {
-            throw new DomainException("SLUG_TAKEN", "Slug sản phẩm đã tồn tại");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PRODUCT_SLUG_TAKEN);
         }
     }
 
@@ -71,12 +72,12 @@ public class ProductAdminService {
     }
 
     private Product load(UUID id) {
-        return products.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm"));
+        return products.findById(id).orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.PRODUCT_NOT_FOUND));
     }
 
     private void ensureCategoryExists(UUID categoryId) {
         if (categoryId == null || !categories.existsById(categoryId)) {
-            throw new DomainException("CATEGORY_NOT_FOUND", "Danh mục không tồn tại");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.CATEGORY_NOT_EXISTS);
         }
     }
 }

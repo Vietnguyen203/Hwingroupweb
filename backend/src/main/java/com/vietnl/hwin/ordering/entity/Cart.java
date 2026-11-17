@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.entity;
 
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import java.time.Instant;
@@ -23,7 +25,6 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.UuidGenerator;
 
 import com.vietnl.hwin.common.domain.AggregateRoot;
-import com.vietnl.hwin.common.exception.DomainException;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -69,14 +70,14 @@ public class Cart extends AggregateRoot<Cart> {
             return;
         }
         if (items.size() >= MAX_LINES) {
-            throw new DomainException("CART_FULL", "Giỏ hàng tối đa " + MAX_LINES + " sản phẩm");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.CART_FULL, Map.of("max", String.valueOf(MAX_LINES)));
         }
         items.add(new CartItem(productId, Math.min(MAX_QUANTITY, quantity), now));
     }
 
     public void changeQuantity(UUID productId, int quantity) {
         requirePositive(quantity);
-        find(productId).orElseThrow(() -> new DomainException("CART_ITEM_NOT_FOUND", "Sản phẩm không có trong giỏ"))
+        find(productId).orElseThrow(() -> new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.CART_ITEM_NOT_FOUND))
                 .changeQuantity(Math.min(MAX_QUANTITY, quantity));
     }
 
@@ -112,7 +113,7 @@ public class Cart extends AggregateRoot<Cart> {
 
     private static void requirePositive(int quantity) {
         if (quantity <= 0) {
-            throw new DomainException("QUANTITY_INVALID", "Số lượng phải lớn hơn 0");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.QUANTITY_INVALID);
         }
     }
 }

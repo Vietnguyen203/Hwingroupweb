@@ -1,8 +1,10 @@
 package com.vietnl.hwin.common.domain;
 
+import com.vietnl.hwin.common.exception.CommonErrorMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.regex.Pattern;
 
-import com.vietnl.hwin.common.exception.DomainException;
 
 /**
  * Số điện thoại di động Việt Nam, chuẩn hóa về dạng E.164 (+84xxxxxxxxx).
@@ -15,13 +17,13 @@ public record PhoneNumber(String value) {
 
     public PhoneNumber {
         if (value == null || !value.startsWith("+84") || !NATIONAL.matcher(value.substring(3)).matches()) {
-            throw new DomainException("PHONE_INVALID", "Số điện thoại không hợp lệ");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, CommonErrorMessage.PHONE_INVALID);
         }
     }
 
     public static PhoneNumber of(String raw) {
         if (raw == null) {
-            throw new DomainException("PHONE_INVALID", "Số điện thoại không hợp lệ");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, CommonErrorMessage.PHONE_INVALID);
         }
         String digits = raw.replaceAll("[\\s.\\-()]", "");
         String national;

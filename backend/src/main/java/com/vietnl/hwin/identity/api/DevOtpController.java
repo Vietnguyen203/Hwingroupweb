@@ -1,5 +1,8 @@
 package com.vietnl.hwin.identity.api;
 
+import com.vietnl.hwin.identity.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.Map;
 
 import org.springframework.context.annotation.Profile;
@@ -8,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vietnl.hwin.common.exception.NotFoundException;
 import com.vietnl.hwin.identity.entity.OtpPurpose;
 import com.vietnl.hwin.identity.entity.OtpTarget;
 import com.vietnl.hwin.identity.service.integration.DevOtpInbox;
@@ -37,6 +39,6 @@ public class DevOtpController {
                                       @RequestParam(required = false) String email,
                                       @RequestParam(defaultValue = "LOGIN") OtpPurpose purpose) {
         return inbox.latest(OtpTarget.of(phone, email), purpose).map(code -> Map.of("code", code))
-                .orElseThrow(() -> new NotFoundException("Chưa có OTP cho nơi nhận này"));
+                .orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.DEV_OTP_NOT_FOUND));
     }
 }

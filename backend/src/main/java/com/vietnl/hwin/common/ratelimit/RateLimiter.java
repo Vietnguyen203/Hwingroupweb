@@ -1,11 +1,14 @@
 package com.vietnl.hwin.common.ratelimit;
 
+import java.util.Map;
+import com.vietnl.hwin.common.exception.BaseErrorMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.time.Duration;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-import com.vietnl.hwin.common.exception.TooManyRequestsException;
 
 /**
  * Giới hạn tần suất kiểu fixed window bằng Redis INCR + EXPIRE.
@@ -42,9 +45,9 @@ public class RateLimiter {
         }
     }
 
-    public void acquireOrThrow(String key, int limit, Duration window, String message) {
+    public void acquireOrThrow(String key, int limit, Duration window, BaseErrorMessage code) {
         if (!tryAcquire(key, limit, window)) {
-            throw new TooManyRequestsException("RATE_LIMITED", message);
+            throw new ResponseException(HttpStatus.TOO_MANY_REQUESTS, code);
         }
     }
 }

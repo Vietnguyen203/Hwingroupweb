@@ -1,5 +1,8 @@
 package com.vietnl.hwin.ordering.service;
 
+import com.vietnl.hwin.common.exception.ResponseException;
+import com.vietnl.hwin.ordering.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
 import java.util.UUID;
 
 import java.util.ArrayList;
@@ -66,11 +69,10 @@ public class CartPricing {
         CartView view = price(quantities);
         List<CartView.Line> problems = view.lines().stream().filter(l -> !l.available()).toList();
         if (view.lines().isEmpty()) {
-            throw new com.vietnl.hwin.common.exception.DomainException("CART_EMPTY", "Giỏ hàng đang trống");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.CART_EMPTY);
         }
         if (!problems.isEmpty()) {
-            throw new com.vietnl.hwin.common.exception.DomainException("CART_INVALID",
-                    "Một số sản phẩm trong giỏ đã hết hàng hoặc ngừng bán")
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.CART_INVALID)
                     .withDetail("problems", problems.stream()
                             .map(l -> Map.of("productId", l.productId(), "name", l.name(), "problem", l.problem(),
                                     "stock", l.stock()))

@@ -1,5 +1,9 @@
 package com.vietnl.hwin.identity.service;
 
+import com.vietnl.hwin.identity.entity.ExceptionMessage;
+import com.vietnl.hwin.common.exception.CommonErrorMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -7,9 +11,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.vietnl.hwin.common.exception.DomainException;
-import com.vietnl.hwin.common.exception.TooManyRequestsException;
-import com.vietnl.hwin.common.exception.UnauthorizedException;
 import com.vietnl.hwin.common.ratelimit.RateLimiter;
 import com.vietnl.hwin.common.util.Hashing;
 import com.vietnl.hwin.common.web.ClientInfo;
@@ -60,17 +61,17 @@ public class AuthService {
     public OtpDispatch requestOtp(String rawPhone, String rawEmail, boolean register, ClientInfo client) {
         OtpTarget target = OtpTarget.of(rawPhone, rawEmail);
         if (!rateLimiter.tryAcquire("rl:auth-lookup:" + client.ipHash(), LOOKUP_LIMIT, ADMIN_LOGIN_WINDOW)) {
-            throw new TooManyRequestsException("RATE_LIMITED", "Bạn thao tác quá nhiều lần, vui lòng thử lại sau ít phút");
+            throw new ResponseException(HttpStatus.TOO_MANY_REQUESTS, CommonErrorMessage.RATE_LIMITED);
         }
         var existing = userAccountService.find(target);
         if (register && existing.isPresent()) {
-            throw new DomainException("ACCOUNT_EXISTS", "Tài khoản đã tồn tại, vui lòng đăng nhập");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ACCOUNT_EXISTS);
         }
         if (!register) {
             UserAccount user = existing.orElseThrow(() ->
-                    new DomainException("ACCOUNT_NOT_FOUND", "Chưa có tài khoản, vui lòng đăng ký"));
+                    new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ACCOUNT_NOT_FOUND));
             if (user.isAdmin()) {
-                throw new DomainException("ADMIN_USE_ADMIN_LOGIN", "Tài khoản quản trị phải đăng nhập tại trang quản trị");
+                throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ADMIN_USE_ADMIN_LOGIN);
             }
         }
         long ttl = otpService.send(target, register ? OtpPurpose.REGISTER : OtpPurpose.LOGIN, client.ipHash());
@@ -104,7 +105,7 @@ public class AuthService {
         // Chống dò mật khẩu: chỉ đếm lần đăng nhập SAI (5 lần / 10 phút / IP)
         String key = "rl:admin-login-fail:" + client.ipHash();
         if (rateLimiter.isExhausted(key, ADMIN_LOGIN_LIMIT)) {
-            throw new TooManyRequestsException("RATE_LIMITED", "Đăng nhập sai quá nhiều lần, vui lòng thử lại sau 10 phút");
+            throw new ResponseException(HttpStatus.TOO_MANY_REQUESTS, ExceptionMessage.ADMIN_LOGIN_LOCKED);
         }
         UserAccount user = users.findByEmail(email == null ? "" : email.trim().toLowerCase())
                 .filter(UserAccount::isAdmin)
@@ -112,7 +113,7 @@ public class AuthService {
                 .orElse(null);
         if (user == null) {
             rateLimiter.hit(key, ADMIN_LOGIN_WINDOW);
-            throw new UnauthorizedException("BAD_CREDENTIALS", "Tên đăng nhập hoặc mật khẩu không đúng");
+            throw new ResponseException(HttpStatus.UNAUTHORIZED, ExceptionMessage.BAD_CREDENTIALS);
         }
         user.ensureActive();
         if (user.isOtpExempt()) {
@@ -130,7 +131,7 @@ public class AuthService {
     public IssuedTokens verifyAdminOtp(String challengeId, String otp, ClientInfo client) {
         String userId = challengeId == null ? null : redis.opsForValue().get(CHALLENGE_PREFIX + challengeId);
         if (userId == null) {
-            throw new UnauthorizedException("CHALLENGE_EXPIRED", "Phiên đăng nhập đã hết hạn, vui lòng nhập lại mật khẩu");
+            throw new ResponseException(HttpStatus.UNAUTHORIZED, ExceptionMessage.CHALLENGE_EXPIRED);
         }
         UserAccount user = userAccountService.get(UUID.fromString(userId));
         otpService.verify(user.otpTarget(), OtpPurpose.ADMIN_LOGIN, otp);

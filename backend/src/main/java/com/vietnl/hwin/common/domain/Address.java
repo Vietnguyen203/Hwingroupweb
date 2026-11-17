@@ -1,8 +1,11 @@
 package com.vietnl.hwin.common.domain;
 
+import java.util.Map;
+import com.vietnl.hwin.common.exception.CommonErrorMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import jakarta.persistence.Embeddable;
 
-import com.vietnl.hwin.common.exception.DomainException;
 
 /**
  * Value object địa chỉ nhận hàng (bất biến, tự validate).
@@ -20,7 +23,7 @@ public record Address(
     public Address {
         recipientName = require(recipientName, "Tên người nhận", 100);
         if (recipientPhone == null) {
-            throw new DomainException("ADDRESS_INVALID", "Thiếu số điện thoại người nhận");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, CommonErrorMessage.RECIPIENT_PHONE_REQUIRED);
         }
         province = require(province, "Tỉnh/Thành phố", 100);
         district = require(district, "Quận/Huyện", 100);
@@ -34,11 +37,11 @@ public record Address(
 
     private static String require(String value, String label, int max) {
         if (value == null || value.isBlank()) {
-            throw new DomainException("ADDRESS_INVALID", label + " không được trống");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, CommonErrorMessage.FIELD_REQUIRED, Map.of("label", String.valueOf(label)));
         }
         String v = value.trim();
         if (v.length() > max) {
-            throw new DomainException("ADDRESS_INVALID", label + " quá dài");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, CommonErrorMessage.FIELD_TOO_LONG, Map.of("label", String.valueOf(label)));
         }
         return v;
     }

@@ -1,9 +1,10 @@
 package com.vietnl.hwin.affiliate.entity;
 
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.security.SecureRandom;
 import java.util.regex.Pattern;
 
-import com.vietnl.hwin.common.exception.DomainException;
 
 /**
  * Value object: mã giới thiệu của CTV – 6..10 ký tự A-Z, 0-9 (in hoa).
@@ -17,7 +18,7 @@ public record ReferralCode(String value) {
 
     public ReferralCode {
         if (value == null || !FORMAT.matcher(value).matches()) {
-            throw new DomainException("REFERRAL_CODE_INVALID", "Mã giới thiệu không hợp lệ");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.REFERRAL_CODE_INVALID);
         }
     }
 

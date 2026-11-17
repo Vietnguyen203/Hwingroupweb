@@ -1,11 +1,12 @@
 package com.vietnl.hwin.ordering.entity;
 
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.regex.Pattern;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
-import com.vietnl.hwin.common.exception.DomainException;
 
 /**
  * Value object: thông tin xuất hóa đơn VAT điện tử (demo chỉ thu thập, chưa phát hành).
@@ -23,16 +24,16 @@ public record VatInvoiceInfo(
 
     public VatInvoiceInfo {
         if (companyName == null || companyName.isBlank()) {
-            throw new DomainException("VAT_INVALID", "Thiếu tên công ty xuất hóa đơn");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.VAT_COMPANY_REQUIRED);
         }
         if (taxCode == null || !TAX_CODE.matcher(taxCode.trim()).matches()) {
-            throw new DomainException("VAT_INVALID", "Mã số thuế không hợp lệ");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.VAT_TAX_CODE_INVALID);
         }
         if (address == null || address.isBlank()) {
-            throw new DomainException("VAT_INVALID", "Thiếu địa chỉ công ty");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.VAT_ADDRESS_REQUIRED);
         }
         if (email == null || !EMAIL.matcher(email.trim()).matches()) {
-            throw new DomainException("VAT_INVALID", "Email nhận hóa đơn không hợp lệ");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.VAT_EMAIL_INVALID);
         }
         companyName = companyName.trim();
         taxCode = taxCode.trim();

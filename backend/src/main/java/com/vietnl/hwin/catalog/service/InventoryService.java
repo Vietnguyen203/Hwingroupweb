@@ -1,5 +1,8 @@
 package com.vietnl.hwin.catalog.service;
 
+import com.vietnl.hwin.catalog.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import java.util.List;
@@ -13,7 +16,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vietnl.hwin.catalog.repository.InventoryRepository;
-import com.vietnl.hwin.common.exception.DomainException;
 
 /**
  * Service công bố: trừ / hoàn tồn kho theo đơn hàng. Được gọi từ listener của ordering
@@ -40,7 +42,7 @@ public class InventoryService {
      * Trừ kho cho cả đơn (tất cả hoặc không gì cả).
      *
      * @param quantities productId -> số lượng
-     * @throws DomainException mã {@link #OUT_OF_STOCK} nếu một sản phẩm không đủ hàng
+     * @throws ResponseException mã {@link #OUT_OF_STOCK} nếu một sản phẩm không đủ hàng
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deductForOrder(UUID orderId, Map<UUID, Integer> quantities) {
@@ -49,7 +51,7 @@ public class InventoryService {
                 return; // đã trừ trước đó (event phát lại)
             }
             if (inventory.deduct(productId, qty) == 0) {
-                throw new DomainException(OUT_OF_STOCK, "Sản phẩm đã hết hàng").withDetail("productId", productId);
+                throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.OUT_OF_STOCK).withDetail("productId", productId);
             }
         });
         log.debug("Đã trừ kho cho đơn {}", orderId);

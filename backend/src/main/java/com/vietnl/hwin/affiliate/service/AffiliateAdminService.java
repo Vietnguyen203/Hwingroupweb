@@ -1,5 +1,8 @@
 package com.vietnl.hwin.affiliate.service;
 
+import com.vietnl.hwin.affiliate.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +24,6 @@ import com.vietnl.hwin.affiliate.entity.ReferralCode;
 import com.vietnl.hwin.affiliate.repository.AffiliateRepository;
 import com.vietnl.hwin.common.audit.AuditLogger;
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.common.exception.NotFoundException;
 
 /** Admin duyệt / từ chối / tạm khóa / mở khóa CTV. */
 @Service
@@ -110,6 +112,6 @@ public class AffiliateAdminService {
     }
 
     private Affiliate load(UUID id) {
-        return affiliates.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy CTV"));
+        return affiliates.findById(id).orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.AFFILIATE_NOT_FOUND));
     }
 }

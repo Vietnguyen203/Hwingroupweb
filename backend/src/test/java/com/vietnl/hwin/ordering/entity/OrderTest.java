@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import com.vietnl.hwin.common.domain.Address;
 import com.vietnl.hwin.common.domain.Money;
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.common.exception.DomainException;
+import com.vietnl.hwin.common.exception.ResponseException;
 import com.vietnl.hwin.ordering.entity.OrderEnums.CancelReason;
 import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
 import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentStatus;
@@ -51,7 +51,7 @@ class OrderTest {
     @Test
     void emptyCartCannotBePlaced() {
         assertThatThrownBy(() -> Order.place(CUSTOMER, "X", List.of(), Money.ZERO, ADDRESS, PaymentMethod.COD, null, null,
-                null, T0)).isInstanceOf(DomainException.class).hasFieldOrPropertyWithValue("code", "CART_EMPTY");
+                null, T0)).isInstanceOf(ResponseException.class).hasFieldOrPropertyWithValue("code", "CART_EMPTY");
     }
 
     @Test
@@ -86,7 +86,7 @@ class OrderTest {
         Order o = newOrder(PaymentMethod.COD);
         o.confirm(ADMIN, T0);
         assertThatThrownBy(() -> o.cancel(CancelReason.CUSTOMER_REQUEST, CUSTOMER, true, T0))
-                .hasFieldOrPropertyWithValue("code", Order.INVALID_STATE);
+                .hasFieldOrPropertyWithValue("code", "CUSTOMER_CANCEL_NOT_ALLOWED");
         // admin vẫn hủy được khi CONFIRMED
         o.cancel(CancelReason.ADMIN, ADMIN, false, T0);
         assertThat(o.getStatus()).isEqualTo(OrderStatus.CANCELLED);
@@ -97,7 +97,7 @@ class OrderTest {
         Order o = newOrder(PaymentMethod.COD);
         o.confirm(ADMIN, T0);
         o.markShipping(ADMIN, T0);
-        assertThatThrownBy(() -> o.cancel(CancelReason.ADMIN, ADMIN, false, T0)).isInstanceOf(DomainException.class);
+        assertThatThrownBy(() -> o.cancel(CancelReason.ADMIN, ADMIN, false, T0)).isInstanceOf(ResponseException.class);
     }
 
     @Test

@@ -38,8 +38,9 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
   if (!res.ok) {
     const p = await res.json().catch(() => ({}));
     const fieldErrors = Array.isArray(p.errors) ? p.errors : [];
-    const message = fieldErrors[0]?.message ?? p.detail ?? "Có lỗi xảy ra, vui lòng thử lại";
-    throw new ApiError(res.status, p.code, message, fieldErrors);
+    // Định dạng lỗi backend: { messageCode, message, errors: [{ field, message }], details }
+    const message = fieldErrors[0]?.message ?? p.message ?? "Có lỗi xảy ra, vui lòng thử lại";
+    throw new ApiError(res.status, p.messageCode, message, fieldErrors);
   }
   return (res.status === 204 ? undefined : await res.json()) as T;
 }

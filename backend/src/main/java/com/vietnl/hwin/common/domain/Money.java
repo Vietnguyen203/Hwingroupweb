@@ -1,9 +1,11 @@
 package com.vietnl.hwin.common.domain;
 
+import com.vietnl.hwin.common.exception.CommonErrorMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import com.vietnl.hwin.common.exception.DomainException;
 
 /**
  * Value object tiền VND (số nguyên đồng, không âm, bất biến).
@@ -15,7 +17,7 @@ public record Money(long amount) implements Comparable<Money> {
 
     public Money {
         if (amount < 0) {
-            throw new DomainException("MONEY_NEGATIVE", "Số tiền không được âm");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, CommonErrorMessage.MONEY_NEGATIVE);
         }
     }
 
@@ -27,14 +29,14 @@ public record Money(long amount) implements Comparable<Money> {
         return new Money(Math.addExact(amount, other.amount));
     }
 
-    /** Trừ tiền; kết quả âm sẽ ném DomainException. */
+    /** Trừ tiền; kết quả âm sẽ ném ResponseException. */
     public Money minus(Money other) {
         return new Money(amount - other.amount);
     }
 
     public Money times(int quantity) {
         if (quantity < 0) {
-            throw new DomainException("QUANTITY_NEGATIVE", "Số lượng không được âm");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, CommonErrorMessage.QUANTITY_NEGATIVE);
         }
         return new Money(Math.multiplyExact(amount, quantity));
     }

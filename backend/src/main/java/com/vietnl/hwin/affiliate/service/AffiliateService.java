@@ -1,5 +1,9 @@
 package com.vietnl.hwin.affiliate.service;
 
+import java.util.Map;
+import com.vietnl.hwin.affiliate.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
@@ -14,8 +18,6 @@ import com.vietnl.hwin.affiliate.entity.BankAccount;
 import com.vietnl.hwin.affiliate.repository.AffiliateRepository;
 import com.vietnl.hwin.common.audit.AuditLogger;
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.common.exception.DomainException;
-import com.vietnl.hwin.common.exception.NotFoundException;
 import com.vietnl.hwin.identity.service.OtpService;
 import com.vietnl.hwin.identity.service.UserQueryService;
 
@@ -54,7 +56,7 @@ public class AffiliateService {
         if (a == null) {
             PhoneNumber phone = users.findPhone(userId).orElseGet(() -> {
                 if (rawPhone == null || rawPhone.isBlank()) {
-                    throw new DomainException("PHONE_REQUIRED", "Vui lòng nhập số điện thoại liên hệ để đăng ký CTV");
+                    throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PHONE_REQUIRED);
                 }
                 return PhoneNumber.of(rawPhone);
             });
@@ -62,7 +64,7 @@ public class AffiliateService {
         } else if (a.getStatus() == AffiliateStatus.REJECTED) {
             a.reapply(fullName, socialLink, note);
         } else {
-            throw new DomainException("ALREADY_REGISTERED", "Bạn đã đăng ký CTV (trạng thái " + a.getStatus() + ")");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ALREADY_REGISTERED, Map.of("status", String.valueOf(a.getStatus())));
         }
         return mapper.apply(a);
     }
@@ -96,6 +98,6 @@ public class AffiliateService {
 
     Affiliate load(UUID userId) {
         return affiliates.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("Bạn chưa đăng ký cộng tác viên"));
+                .orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.AFFILIATE_NOT_REGISTERED));
     }
 }

@@ -1,5 +1,8 @@
 package com.vietnl.hwin.ordering.entity;
 
+import java.util.Map;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -28,7 +31,6 @@ import org.hibernate.annotations.BatchSize;
 import com.vietnl.hwin.common.domain.Address;
 import com.vietnl.hwin.common.domain.AggregateRoot;
 import com.vietnl.hwin.common.domain.Money;
-import com.vietnl.hwin.common.exception.DomainException;
 import com.vietnl.hwin.ordering.entity.OrderEnums.CancelReason;
 import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
 import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentStatus;
@@ -38,7 +40,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * Aggregate root: đơn hàng. Mọi quy tắc chuyển trạng thái nằm ở đây; vi phạm -> DomainException.
+ * Aggregate root: đơn hàng. Mọi quy tắc chuyển trạng thái nằm ở đây; vi phạm -> ResponseException.
  * <pre>
  * PENDING -> CONFIRMED -> SHIPPING -> DELIVERED -> COMPLETED
  * PENDING|CONFIRMED -> CANCELLED      DELIVERED (trong hạn đổi trả) -> RETURNED
@@ -134,13 +136,13 @@ public class Order extends AggregateRoot<Order> {
                               Address shippingAddress, PaymentMethod paymentMethod, VatInvoiceInfo vatInvoice,
                               String note, String referralCode, Instant now) {
         if (lines == null || lines.isEmpty()) {
-            throw new DomainException("CART_EMPTY", "Giỏ hàng đang trống");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.CART_EMPTY);
         }
         if (shippingAddress == null) {
-            throw new DomainException("ADDRESS_INVALID", "Thiếu địa chỉ giao hàng");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ADDRESS_INVALID);
         }
         if (paymentMethod == null) {
-            throw new DomainException("PAYMENT_METHOD_REQUIRED", "Chưa chọn phương thức thanh toán");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PAYMENT_METHOD_REQUIRED);
         }
         Order o = new Order();
         o.customerId = customerId;
@@ -174,10 +176,10 @@ public class Order extends AggregateRoot<Order> {
     /** Admin xác nhận đã nhận chuyển khoản (BANK_QR). */
     public void markPaid(String paymentRef, UUID actorId, Instant now) {
         if (paymentMethod != PaymentMethod.BANK_QR) {
-            throw new DomainException("PAYMENT_METHOD_INVALID", "Chỉ xác nhận thanh toán cho đơn chuyển khoản QR");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PAYMENT_METHOD_INVALID);
         }
         if (paymentStatus == PaymentStatus.PAID) {
-            throw new DomainException("ALREADY_PAID", "Đơn đã được xác nhận thanh toán");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ALREADY_PAID);
         }
         requireStatus(Set.of(OrderStatus.PENDING, OrderStatus.CONFIRMED), "xác nhận thanh toán");
         this.paymentStatus = PaymentStatus.PAID;
@@ -190,7 +192,7 @@ public class Order extends AggregateRoot<Order> {
     public void confirm(UUID actorId, Instant now) {
         requireStatus(Set.of(OrderStatus.PENDING), "xác nhận");
         if (paymentMethod == PaymentMethod.BANK_QR && paymentStatus != PaymentStatus.PAID) {
-            throw new DomainException("PAYMENT_REQUIRED", "Đơn chuyển khoản phải nhận được tiền trước khi xác nhận");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PAYMENT_REQUIRED);
         }
         transition(OrderStatus.CONFIRMED, actorId, null, now);
         this.confirmedAt = now;
@@ -221,9 +223,11 @@ public class Order extends AggregateRoot<Order> {
         Set<OrderStatus> allowed = byCustomer ? Set.of(OrderStatus.PENDING)
                 : Set.of(OrderStatus.PENDING, OrderStatus.CONFIRMED);
         if (!allowed.contains(status)) {
-            throw new DomainException(INVALID_STATE, byCustomer
-                    ? "Đơn đã được xác nhận, vui lòng liên hệ shop để hủy"
-                    : "Không thể hủy đơn ở trạng thái " + status);
+            if (byCustomer) {
+                throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.CUSTOMER_CANCEL_NOT_ALLOWED);
+            }
+            String action = "hủy";
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.INVALID_STATE_TRANSITION, Map.of("action", String.valueOf(action), "status", String.valueOf(status)));
         }
         transition(OrderStatus.CANCELLED, actorId, "Hủy: " + reason, now);
         this.cancelReason = reason;
@@ -236,7 +240,7 @@ public class Order extends AggregateRoot<Order> {
     public void markReturned(UUID actorId, Duration returnWindow, Instant now) {
         requireStatus(Set.of(OrderStatus.DELIVERED), "trả hàng");
         if (now.isAfter(deliveredAt.plus(returnWindow))) {
-            throw new DomainException("RETURN_WINDOW_EXPIRED", "Đã quá hạn đổi trả " + returnWindow.toDays() + " ngày");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.RETURN_WINDOW_EXPIRED, Map.of("days", String.valueOf(returnWindow.toDays())));
         }
         transition(OrderStatus.RETURNED, actorId, null, now);
         this.returnedAt = now;
@@ -248,7 +252,7 @@ public class Order extends AggregateRoot<Order> {
     public void complete(Duration returnWindow, Instant now) {
         requireStatus(Set.of(OrderStatus.DELIVERED), "hoàn tất");
         if (!now.isAfter(deliveredAt.plus(returnWindow))) {
-            throw new DomainException("RETURN_WINDOW_OPEN", "Chưa hết hạn đổi trả");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.RETURN_WINDOW_OPEN);
         }
         transition(OrderStatus.COMPLETED, null, "Hết hạn đổi trả", now);
         this.completedAt = now;
@@ -276,7 +280,7 @@ public class Order extends AggregateRoot<Order> {
 
     private void requireStatus(Set<OrderStatus> allowed, String action) {
         if (!allowed.contains(status)) {
-            throw new DomainException(INVALID_STATE, "Không thể " + action + " khi đơn đang ở trạng thái " + status);
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.INVALID_STATE_TRANSITION, Map.of("action", String.valueOf(action), "status", String.valueOf(status)));
         }
     }
 

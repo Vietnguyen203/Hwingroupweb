@@ -1,5 +1,8 @@
 package com.vietnl.hwin.ordering.api;
 
+import com.vietnl.hwin.common.exception.CommonErrorMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import java.time.Instant;
@@ -17,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vietnl.hwin.common.exception.NotFoundException;
 import com.vietnl.hwin.common.security.AuthPrincipal;
 import com.vietnl.hwin.common.web.PageResponse;
 import com.vietnl.hwin.ordering.api.dto.OrderingDtos.AdminCancelRequest;
@@ -79,7 +81,7 @@ public class AdminOrderController {
     public Map<String, Object> runPaymentTimeoutJob(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant asOf) {
         if (asOf != null && !props.simulatedTimeEnabled()) {
-            throw new NotFoundException("Không hỗ trợ giả lập thời điểm ở môi trường này");
+            throw new ResponseException(HttpStatus.NOT_FOUND, CommonErrorMessage.SIMULATED_TIME_DISABLED);
         }
         Instant when = asOf != null ? asOf : Instant.now();
         return Map.of("asOf", when.toString(), "cancelled", paymentTimeoutJob.cancelOverdue(when));

@@ -1,5 +1,8 @@
 package com.vietnl.hwin.identity.service;
 
+import com.vietnl.hwin.identity.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
@@ -7,7 +10,6 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vietnl.hwin.common.exception.UnauthorizedException;
 import com.vietnl.hwin.common.security.JwtService;
 import com.vietnl.hwin.common.security.SecurityProperties;
 import com.vietnl.hwin.common.util.Hashing;
@@ -52,20 +54,20 @@ public class TokenService {
      * Xoay vòng: token cũ bị thu hồi, cấp token mới cùng family.
      * Token đã thu hồi mà bị dùng lại -> thu hồi cả family (nghi bị đánh cắp).
      */
-    @Transactional(noRollbackFor = UnauthorizedException.class)
+    @Transactional(noRollbackFor = ResponseException.class)
     public IssuedTokens rotate(String rawRefreshToken, ClientInfo client) {
         Instant now = clock.instant();
         RefreshToken current = refreshTokens.findByTokenHash(Hashing.sha256Hex(rawRefreshToken))
-                .orElseThrow(() -> new UnauthorizedException("REFRESH_INVALID", "Phiên đăng nhập không hợp lệ"));
+                .orElseThrow(() -> new ResponseException(HttpStatus.UNAUTHORIZED, ExceptionMessage.REFRESH_INVALID));
         if (current.isRevoked()) {
             refreshTokens.revokeFamily(current.getFamilyId(), now);
-            throw new UnauthorizedException("REFRESH_REUSED", "Phiên đăng nhập đã hết hiệu lực, vui lòng đăng nhập lại");
+            throw new ResponseException(HttpStatus.UNAUTHORIZED, ExceptionMessage.REFRESH_REUSED);
         }
         if (current.isExpired(now)) {
-            throw new UnauthorizedException("REFRESH_EXPIRED", "Phiên đăng nhập đã hết hạn");
+            throw new ResponseException(HttpStatus.UNAUTHORIZED, ExceptionMessage.REFRESH_EXPIRED);
         }
         UserAccount user = users.findById(current.getUserId())
-                .orElseThrow(() -> new UnauthorizedException("REFRESH_INVALID", "Phiên đăng nhập không hợp lệ"));
+                .orElseThrow(() -> new ResponseException(HttpStatus.UNAUTHORIZED, ExceptionMessage.REFRESH_INVALID));
         user.ensureActive();
 
         String raw = Hashing.randomToken(32);

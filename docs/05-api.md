@@ -8,7 +8,10 @@
 - `me` / `ctv` = tài nguyên của chính user trong JWT → **không bao giờ nhận userId từ client** (chống IDOR). Tài nguyên có mã (đơn hàng) luôn lọc thêm `customerId = currentUser`, không khớp trả **404**.
 - Endpoint admin có tiền tố `/api/admin/**` và nằm trong module sở hữu dữ liệu.
 - Phân trang: `?page=0&size=20&sort=field,dir` → `{content, page, size, totalElements, totalPages}`.
-- Lỗi chuẩn (RFC 9457 ProblemDetail): `{type, title, status, code, detail, errors?[]}`; `code` ví dụ `OTP_INVALID`, `OUT_OF_STOCK`, `INVALID_STATE_TRANSITION`, `PAYOUT_BELOW_MINIMUM`.
+- Lỗi chuẩn `ErrorResponse` (theo `ai/skills/spring-boot-core`): `{traceId, timestamp, status, statusCode, messageCode, message, path, method, errors?[{field, message, rejectedValue?}], details?}`.
+  - `messageCode`: mã ổn định cho frontend, ví dụ `OTP_INVALID`, `ACCOUNT_NOT_FOUND`, `CART_INVALID`; `message`: câu tiếng Việt hiển thị luôn được.
+  - Code ném `ResponseException(HttpStatus, XxxErrorMessage)`; mã + câu thông báo khai báo ở enum `ExceptionMessage` của từng module (`<module>/entity/ExceptionMessage.java`), lỗi dùng chung ở `common/exception/CommonErrorMessage.java`. Placeholder `#key#` trong câu được thay bằng dữ liệu truyền kèm.
+  - HTTP: 400 dữ liệu sai (`VALIDATION_FAILED`), 401 chưa đăng nhập, 403 không đủ quyền, 404 không tìm thấy, 409 trùng / sửa đồng thời, 422 vi phạm nghiệp vụ, 429 quá giới hạn, 500 lỗi hệ thống (không lộ stack trace, tra log bằng `traceId`).
 - Swagger UI: `/swagger-ui.html` (springdoc), chỉ bật ở profile `dev`.
 
 ---

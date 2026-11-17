@@ -1,5 +1,8 @@
 package com.vietnl.hwin.identity.service;
 
+import com.vietnl.hwin.identity.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -11,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.common.exception.DomainException;
 import com.vietnl.hwin.identity.entity.Role;
 import com.vietnl.hwin.identity.entity.UserAccount;
 import com.vietnl.hwin.identity.repository.UserAccountRepository;
@@ -40,10 +42,10 @@ public class AdminAccountService {
         PasswordPolicy.validate(password, login);
         PhoneNumber phone = rawPhone == null || rawPhone.isBlank() ? null : PhoneNumber.of(rawPhone);
         if (users.existsByEmail(login)) {
-            throw new DomainException("EMAIL_IN_USE", "Email / tên đăng nhập đã được dùng");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.EMAIL_IN_USE);
         }
         if (phone != null && users.findByPhone(phone).isPresent()) {
-            throw new DomainException("PHONE_IN_USE", "Số điện thoại đã gắn với tài khoản khác");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PHONE_IN_USE);
         }
         UserAccount admin = users.save(UserAccount.createAdmin(login, passwordEncoder.encode(password), fullName, phone));
         log.info("Admin {} tạo tài khoản quản trị {}", createdBy, login);

@@ -1,5 +1,11 @@
 package com.vietnl.hwin.common.security;
 
+import org.springframework.http.HttpStatus;
+import tools.jackson.databind.json.JsonMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import com.vietnl.hwin.common.exception.CommonErrorMessage;
+import com.vietnl.hwin.common.exception.GlobalExceptionHandler;
+
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -70,9 +76,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint((req, res, ex) ->
-                                writeError(res, HttpServletResponse.SC_UNAUTHORIZED, "UNAUTHORIZED", "Vui lòng đăng nhập"))
+                                writeError(req, res, HttpStatus.UNAUTHORIZED, CommonErrorMessage.UNAUTHORIZED))
                         .accessDeniedHandler((req, res, ex) ->
-                                writeError(res, HttpServletResponse.SC_FORBIDDEN, "FORBIDDEN", "Bạn không có quyền truy cập")))
+                                writeError(req, res, HttpStatus.FORBIDDEN, CommonErrorMessage.FORBIDDEN)))
                 .addFilterBefore(new JwtCookieAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
@@ -102,11 +108,15 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    private static void writeError(HttpServletResponse res, int status, String code, String detail)
-            throws java.io.IOException {
-        res.setStatus(status);
+    private static final JsonMapper JSON = JsonMapper.builder().build();
+
+    /** 401 / 403 do Spring Security trả – cùng định dạng ErrorResponse với GlobalExceptionHandler. */
+    private static void writeError(HttpServletRequest req, HttpServletResponse res, HttpStatus status,
+                                   CommonErrorMessage code) throws java.io.IOException {
+        res.setStatus(status.value());
         res.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        res.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
-        res.getWriter().write("{\"status\":" + status + ",\"code\":\"" + code + "\",\"detail\":\"" + detail + "\"}");
+        res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        res.getWriter().write(JSON.writeValueAsString(
+                GlobalExceptionHandler.of(status, code, null, req.getRequestURI(), req.getMethod(), null, null)));
     }
 }

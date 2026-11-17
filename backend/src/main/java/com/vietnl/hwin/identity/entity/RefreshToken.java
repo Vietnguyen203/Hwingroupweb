@@ -1,5 +1,7 @@
 package com.vietnl.hwin.identity.entity;
 
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -13,7 +15,6 @@ import org.hibernate.annotations.UuidGenerator;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.vietnl.hwin.common.exception.DomainException;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -82,7 +83,7 @@ public class RefreshToken {
     /** Đánh dấu đã được thay bằng token mới (xoay vòng). */
     public void rotatedTo(UUID newTokenId, Instant now) {
         if (isRevoked()) {
-            throw new DomainException("REFRESH_REVOKED", "Refresh token đã bị thu hồi");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.REFRESH_REVOKED);
         }
         this.replacedById = newTokenId;
         this.revokedAt = now;

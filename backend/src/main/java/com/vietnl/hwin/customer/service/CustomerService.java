@@ -1,5 +1,8 @@
 package com.vietnl.hwin.customer.service;
 
+import com.vietnl.hwin.customer.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import java.time.Clock;
@@ -12,7 +15,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vietnl.hwin.common.domain.Address;
-import com.vietnl.hwin.common.exception.NotFoundException;
 import com.vietnl.hwin.customer.entity.Customer;
 import com.vietnl.hwin.customer.entity.CustomerAddress;
 import com.vietnl.hwin.customer.entity.CustomerStats;
@@ -52,7 +54,7 @@ public class CustomerService {
             return;
         }
         UserContact contact = users.findContact(userId)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản"));
+                .orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.USER_NOT_FOUND));
         Customer c = Customer.register(userId, contact.phone(),
                 contact.email() == null ? null : contact.email().value()); // kiểm tra bất biến
         c.rename(contact.fullName());
@@ -108,7 +110,7 @@ public class CustomerService {
 
     private Customer load(UUID customerId) {
         ensureCustomer(customerId);
-        return customers.findById(customerId).orElseThrow(() -> new NotFoundException("Không tìm thấy khách hàng"));
+        return customers.findById(customerId).orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.CUSTOMER_NOT_FOUND));
     }
 
     /** Hồ sơ + thống kê để controller map ra DTO. */

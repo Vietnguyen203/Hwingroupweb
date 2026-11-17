@@ -12,7 +12,7 @@ import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Component;
 
 import com.vietnl.hwin.catalog.service.InventoryService;
-import com.vietnl.hwin.common.exception.DomainException;
+import com.vietnl.hwin.common.exception.ResponseException;
 import com.vietnl.hwin.ordering.entity.OrderCancelled;
 import com.vietnl.hwin.ordering.entity.OrderEnums.CancelReason;
 import com.vietnl.hwin.ordering.entity.OrderPlaced;
@@ -45,7 +45,7 @@ public class OrderStockListener {
         event.items().forEach(i -> quantities.merge(i.productId(), i.quantity(), Integer::sum));
         try {
             inventory.deductForOrder(event.orderId(), quantities);
-        } catch (DomainException e) {
+        } catch (ResponseException e) {
             if (!InventoryService.OUT_OF_STOCK.equals(e.getCode())) {
                 throw e;
             }

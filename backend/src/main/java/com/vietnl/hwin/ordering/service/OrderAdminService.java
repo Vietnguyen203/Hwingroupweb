@@ -1,5 +1,8 @@
 package com.vietnl.hwin.ordering.service;
 
+import com.vietnl.hwin.ordering.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import java.time.Clock;
@@ -19,8 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vietnl.hwin.common.audit.AuditLogger;
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.common.exception.DomainException;
-import com.vietnl.hwin.common.exception.NotFoundException;
 import com.vietnl.hwin.ordering.entity.Order;
 import com.vietnl.hwin.ordering.entity.OrderEnums.CancelReason;
 import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
@@ -142,14 +143,14 @@ public class OrderAdminService {
         try {
             r = reason == null ? CancelReason.ADMIN : CancelReason.valueOf(reason);
         } catch (IllegalArgumentException e) {
-            throw new DomainException("CANCEL_REASON_INVALID", "Lý do hủy không hợp lệ");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.CANCEL_REASON_INVALID);
         }
         o.cancel(r, adminId, false, clock.instant());
         return mapper.apply(orders.save(o));
     }
 
     private Order load(UUID id) {
-        return orders.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy đơn hàng"));
+        return orders.findById(id).orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.ORDER_NOT_FOUND));
     }
 
     private static String jsonSafe(String s) {

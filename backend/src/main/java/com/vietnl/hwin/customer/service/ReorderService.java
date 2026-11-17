@@ -1,5 +1,8 @@
 package com.vietnl.hwin.customer.service;
 
+import com.vietnl.hwin.customer.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import java.util.ArrayList;
@@ -13,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import com.vietnl.hwin.catalog.service.ProductQueryService;
 import com.vietnl.hwin.catalog.service.ProductSnapshot;
-import com.vietnl.hwin.common.exception.NotFoundException;
 import com.vietnl.hwin.ordering.service.CartService;
 import com.vietnl.hwin.ordering.service.OrderQueryService;
 
@@ -46,7 +48,7 @@ public class ReorderService {
 
     public Result reorder(UUID customerId, String orderCode) {
         Map<UUID, Integer> items = orders.findItemsForCustomer(orderCode, customerId)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy đơn hàng"));
+                .orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.ORDER_NOT_FOUND));
         Map<UUID, ProductSnapshot> snapshots = products.findSnapshots(items.keySet()).stream()
                 .collect(Collectors.toMap(ProductSnapshot::id, Function.identity()));
 

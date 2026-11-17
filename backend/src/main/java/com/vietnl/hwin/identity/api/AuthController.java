@@ -1,5 +1,7 @@
 package com.vietnl.hwin.identity.api;
 
+import com.vietnl.hwin.identity.entity.ExceptionMessage;
+import com.vietnl.hwin.common.exception.ResponseException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vietnl.hwin.common.exception.UnauthorizedException;
 import com.vietnl.hwin.common.security.AuthCookies;
 import com.vietnl.hwin.common.security.AuthPrincipal;
 import com.vietnl.hwin.common.web.ClientInfo;
@@ -78,11 +79,11 @@ public class AuthController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void refresh(HttpServletRequest request, HttpServletResponse response) {
         String raw = AuthCookies.read(request, AuthCookies.REFRESH)
-                .orElseThrow(() -> new UnauthorizedException("REFRESH_MISSING", "Chưa đăng nhập"));
+                .orElseThrow(() -> new ResponseException(HttpStatus.UNAUTHORIZED, ExceptionMessage.REFRESH_MISSING));
         try {
             IssuedTokens tokens = authService.refresh(raw, ClientInfo.from(request));
             cookies.write(response, tokens.accessToken(), tokens.refreshToken());
-        } catch (UnauthorizedException e) {
+        } catch (ResponseException e) {
             cookies.clear(response);
             throw e;
         }

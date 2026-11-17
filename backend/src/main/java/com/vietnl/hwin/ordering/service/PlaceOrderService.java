@@ -1,5 +1,8 @@
 package com.vietnl.hwin.ordering.service;
 
+import com.vietnl.hwin.ordering.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import java.time.Clock;
@@ -19,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vietnl.hwin.common.domain.Address;
 import com.vietnl.hwin.common.domain.Money;
-import com.vietnl.hwin.common.exception.NotFoundException;
 import com.vietnl.hwin.common.ratelimit.RateLimiter;
 import com.vietnl.hwin.ordering.entity.Order;
 import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
@@ -79,11 +81,11 @@ public class PlaceOrderService {
             String existing = redis.opsForValue().get(idemKey);
             if (existing != null) {
                 return mapper.apply(orders.findByOrderCodeAndCustomerId(existing, customerId)
-                        .orElseThrow(() -> new NotFoundException("Không tìm thấy đơn hàng")));
+                        .orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.ORDER_NOT_FOUND)));
             }
         }
         rateLimiter.acquireOrThrow("rl:place-order:" + customerId, props.placeOrderLimit(), Duration.ofMinutes(10),
-                "Bạn đặt hàng quá nhanh, vui lòng thử lại sau ít phút");
+                ExceptionMessage.PLACE_ORDER_TOO_FAST);
 
         Map<UUID, Integer> cart = cartService.quantitiesOf(customerId);
         List<OrderLine> lines = pricing.toOrderLines(cart);

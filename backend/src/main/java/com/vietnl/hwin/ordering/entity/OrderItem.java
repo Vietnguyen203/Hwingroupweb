@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.entity;
 
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -11,7 +13,6 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.UuidGenerator;
 
 import com.vietnl.hwin.common.domain.Money;
-import com.vietnl.hwin.common.exception.DomainException;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -52,7 +53,7 @@ public class OrderItem {
 
     OrderItem(OrderLine line) {
         if (line.quantity() <= 0) {
-            throw new DomainException("QUANTITY_INVALID", "Số lượng phải lớn hơn 0");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.QUANTITY_INVALID);
         }
         this.productId = line.productId();
         this.productName = line.productName();

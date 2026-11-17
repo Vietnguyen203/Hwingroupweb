@@ -1,5 +1,8 @@
 package com.vietnl.hwin.identity.service;
 
+import com.vietnl.hwin.identity.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import java.time.Clock;
@@ -13,8 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vietnl.hwin.common.domain.EmailAddress;
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.common.exception.DomainException;
-import com.vietnl.hwin.common.exception.NotFoundException;
 import com.vietnl.hwin.identity.entity.OtpChannel;
 import com.vietnl.hwin.identity.entity.OtpTarget;
 import com.vietnl.hwin.identity.entity.UserAccount;
@@ -48,8 +49,7 @@ public class UserAccountService {
     /** Đăng nhập tài khoản ĐÃ CÓ (không tự tạo). */
     @Transactional
     public UserAccount login(OtpTarget target) {
-        UserAccount user = find(target).orElseThrow(() -> new DomainException("ACCOUNT_NOT_FOUND",
-                "Chưa có tài khoản với " + label(target) + " này, vui lòng đăng ký"));
+        UserAccount user = find(target).orElseThrow(() -> new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ACCOUNT_NOT_FOUND));
         ensureNotAdmin(user);
         user.recordLogin(clock.instant());
         return user;
@@ -59,7 +59,7 @@ public class UserAccountService {
     @Transactional
     public UserAccount register(OtpTarget target, String fullName) {
         if (find(target).isPresent()) {
-            throw new DomainException("ACCOUNT_EXISTS", label(target) + " này đã có tài khoản, vui lòng đăng nhập");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ACCOUNT_EXISTS);
         }
         Instant now = clock.instant();
         boolean sms = target.channel() == OtpChannel.SMS;
@@ -71,10 +71,6 @@ public class UserAccountService {
         user.recordLogin(now);
         log.info("Đăng ký tài khoản mới {}", target.masked());
         return user;
-    }
-
-    private static String label(OtpTarget target) {
-        return target.channel() == OtpChannel.SMS ? "Số điện thoại" : "Email";
     }
 
     /**
@@ -114,7 +110,7 @@ public class UserAccountService {
     /** Không cho tài khoản quản trị vào bằng OTP khách (bỏ qua bước mật khẩu). */
     private static void ensureNotAdmin(UserAccount user) {
         if (user != null && user.isAdmin()) {
-            throw new DomainException("ADMIN_USE_ADMIN_LOGIN", "Tài khoản quản trị phải đăng nhập tại trang quản trị");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ADMIN_USE_ADMIN_LOGIN);
         }
     }
 
@@ -125,6 +121,6 @@ public class UserAccountService {
 
     @Transactional(readOnly = true)
     public UserAccount get(UUID userId) {
-        return users.findById(userId).orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản"));
+        return users.findById(userId).orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.USER_NOT_FOUND));
     }
 }

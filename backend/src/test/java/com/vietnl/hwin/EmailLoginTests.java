@@ -15,7 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import com.vietnl.hwin.affiliate.entity.Affiliate;
 import com.vietnl.hwin.affiliate.service.AffiliateService;
 import com.vietnl.hwin.common.domain.EmailAddress;
-import com.vietnl.hwin.common.exception.DomainException;
+import com.vietnl.hwin.common.exception.ResponseException;
 import com.vietnl.hwin.common.web.ClientInfo;
 import com.vietnl.hwin.customer.service.CustomerService;
 import com.vietnl.hwin.customer.service.CustomerService.Profile;
@@ -148,6 +148,6 @@ class EmailLoginTests {
         assertThat(EmailAddress.of(" An.Nguyen@Hwin.VN ").value()).isEqualTo("an.nguyen@hwin.vn");
         assertThat(EmailAddress.of("a@hwin.vn").masked()).isEqualTo("a******@hwin.vn");
         assertThat(EmailAddress.isValid("admin")).isFalse();
-        assertThatThrownBy(() -> EmailAddress.of("a@b")).isInstanceOf(DomainException.class);
+        assertThatThrownBy(() -> EmailAddress.of("a@b")).isInstanceOf(ResponseException.class);
     }
 }

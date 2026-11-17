@@ -1,5 +1,8 @@
 package com.vietnl.hwin.catalog.entity;
 
+import java.util.Map;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import java.util.ArrayList;
@@ -23,7 +26,6 @@ import org.hibernate.annotations.BatchSize;
 
 import com.vietnl.hwin.common.domain.AggregateRoot;
 import com.vietnl.hwin.common.domain.Money;
-import com.vietnl.hwin.common.exception.DomainException;
 import com.vietnl.hwin.common.util.TextNormalizer;
 
 import lombok.AccessLevel;
@@ -100,16 +102,16 @@ public class Product extends AggregateRoot<Product> {
 
     public void updateDetails(ProductDetails d) {
         if (d.name() == null || d.name().isBlank()) {
-            throw new DomainException("PRODUCT_NAME_REQUIRED", "Tên sản phẩm không được trống");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PRODUCT_NAME_REQUIRED);
         }
         if (d.categoryId() == null) {
-            throw new DomainException("PRODUCT_CATEGORY_REQUIRED", "Sản phẩm phải thuộc một danh mục");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PRODUCT_CATEGORY_REQUIRED);
         }
         if (d.price() == null || d.price().isZero()) {
-            throw new DomainException("PRODUCT_PRICE_INVALID", "Giá bán phải lớn hơn 0");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PRODUCT_PRICE_INVALID);
         }
         if (d.compareAtPrice() != null && !d.compareAtPrice().isGreaterThan(d.price())) {
-            throw new DomainException("COMPARE_PRICE_INVALID", "Giá gốc phải lớn hơn giá bán");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.COMPARE_PRICE_INVALID);
         }
         this.categoryId = d.categoryId();
         this.name = d.name().trim();
@@ -125,7 +127,7 @@ public class Product extends AggregateRoot<Product> {
     public void replaceImages(List<String> urls) {
         List<String> clean = urls == null ? List.of() : urls.stream().filter(u -> u != null && !u.isBlank()).toList();
         if (clean.size() > MAX_IMAGES) {
-            throw new DomainException("TOO_MANY_IMAGES", "Tối đa " + MAX_IMAGES + " ảnh mỗi sản phẩm");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.TOO_MANY_IMAGES, Map.of("max", String.valueOf(MAX_IMAGES)));
         }
         images.clear();
         for (int i = 0; i < clean.size(); i++) {
@@ -136,7 +138,7 @@ public class Product extends AggregateRoot<Product> {
     /** Điều chỉnh tồn kho thủ công (nhập hàng / kiểm kê). Không cho âm. */
     public void adjustStock(int delta) {
         if (stock + delta < 0) {
-            throw new DomainException("STOCK_NEGATIVE", "Tồn kho không đủ để điều chỉnh");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.STOCK_NEGATIVE);
         }
         this.stock += delta;
     }

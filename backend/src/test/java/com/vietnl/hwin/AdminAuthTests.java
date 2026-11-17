@@ -13,7 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.vietnl.hwin.common.domain.EmailAddress;
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.common.exception.DomainException;
+import com.vietnl.hwin.common.exception.ResponseException;
 import com.vietnl.hwin.common.web.ClientInfo;
 import com.vietnl.hwin.identity.entity.OtpPurpose;
 import com.vietnl.hwin.identity.entity.OtpTarget;
@@ -113,10 +113,10 @@ class AdminAuthTests {
 
     @Test
     void passwordPolicy() {
-        assertThatThrownBy(() -> PasswordPolicy.validate("short1", "a")).isInstanceOf(DomainException.class);
-        assertThatThrownBy(() -> PasswordPolicy.validate("onlyletterslong", "a")).isInstanceOf(DomainException.class);
-        assertThatThrownBy(() -> PasswordPolicy.validate("myadminpass2026", "a")).isInstanceOf(DomainException.class);
-        assertThatThrownBy(() -> PasswordPolicy.validate("nguyenvana-2026", "nguyenvana@hwin.vn")).isInstanceOf(DomainException.class);
+        assertThatThrownBy(() -> PasswordPolicy.validate("short1", "a")).isInstanceOf(ResponseException.class);
+        assertThatThrownBy(() -> PasswordPolicy.validate("onlyletterslong", "a")).isInstanceOf(ResponseException.class);
+        assertThatThrownBy(() -> PasswordPolicy.validate("myadminpass2026", "a")).isInstanceOf(ResponseException.class);
+        assertThatThrownBy(() -> PasswordPolicy.validate("nguyenvana-2026", "nguyenvana@hwin.vn")).isInstanceOf(ResponseException.class);
         PasswordPolicy.validate(PASSWORD, "ops@hwin.vn");
     }
 }

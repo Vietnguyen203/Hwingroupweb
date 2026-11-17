@@ -1,8 +1,10 @@
 package com.vietnl.hwin.common.domain;
 
+import com.vietnl.hwin.common.exception.CommonErrorMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.regex.Pattern;
 
-import com.vietnl.hwin.common.exception.DomainException;
 
 /**
  * Địa chỉ email, chuẩn hóa về chữ thường, bỏ khoảng trắng hai đầu.
@@ -13,7 +15,7 @@ public record EmailAddress(String value) {
 
     public EmailAddress {
         if (!isValid(value)) {
-            throw new DomainException("EMAIL_INVALID", "Email không hợp lệ");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, CommonErrorMessage.EMAIL_INVALID);
         }
     }
 

@@ -1,8 +1,9 @@
 package com.vietnl.hwin.identity.entity;
 
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import com.vietnl.hwin.common.domain.EmailAddress;
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.common.exception.DomainException;
 
 /**
  * Nơi nhận OTP: một SĐT (kênh SMS) hoặc một email (kênh EMAIL).
@@ -23,7 +24,7 @@ public record OtpTarget(OtpChannel channel, String value) {
         boolean hasPhone = rawPhone != null && !rawPhone.isBlank();
         boolean hasEmail = rawEmail != null && !rawEmail.isBlank();
         if (hasPhone == hasEmail) {
-            throw new DomainException("CONTACT_REQUIRED", "Nhập số điện thoại hoặc email (chỉ một trong hai)");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.CONTACT_REQUIRED);
         }
         return hasPhone ? phone(PhoneNumber.of(rawPhone)) : email(EmailAddress.of(rawEmail));
     }

@@ -17,7 +17,7 @@ import com.vietnl.hwin.affiliate.service.AffiliateProperties;
 import com.vietnl.hwin.affiliate.service.BankAccountCrypto;
 import com.vietnl.hwin.common.domain.Money;
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.common.exception.DomainException;
+import com.vietnl.hwin.common.exception.ResponseException;
 
 /** Unit test quy tắc nghiệp vụ của module affiliate (không cần Spring/DB). */
 class AffiliateDomainTest {
@@ -73,7 +73,7 @@ class AffiliateDomainTest {
                 Money.of(100_000), Money.ZERO, RATE);
         approved.markEligible(T0);
         approved.approve(T0);
-        assertThatThrownBy(() -> approved.cancel(T0)).isInstanceOf(DomainException.class);
+        assertThatThrownBy(() -> approved.cancel(T0)).isInstanceOf(ResponseException.class);
     }
 
     // ------------------------------------------------------------------ rút tiền
@@ -98,7 +98,7 @@ class AffiliateDomainTest {
         assertThatThrownBy(() -> p.markPaid(" ", ADMIN, T0)).hasFieldOrPropertyWithValue("code", "TRANSACTION_REF_REQUIRED");
         p.markPaid("FT123", ADMIN, T0);
         assertThat(p.getStatus()).isEqualTo(PayoutStatus.PAID);
-        assertThatThrownBy(() -> p.reject("x", ADMIN, T0)).isInstanceOf(DomainException.class);
+        assertThatThrownBy(() -> p.reject("x", ADMIN, T0)).isInstanceOf(ResponseException.class);
     }
 
     @Test
@@ -116,7 +116,7 @@ class AffiliateDomainTest {
         Affiliate a = Affiliate.register(UUID.randomUUID(), PhoneNumber.of("0901234567"), "CTV", null, null);
         assertThat(a.canEarn()).isFalse();
         a.reject("Thiếu thông tin", ADMIN, T0);
-        assertThatThrownBy(() -> a.approve(new ReferralCode("ABC12345"), ADMIN, T0)).isInstanceOf(DomainException.class);
+        assertThatThrownBy(() -> a.approve(new ReferralCode("ABC12345"), ADMIN, T0)).isInstanceOf(ResponseException.class);
         a.reapply("CTV", "https://fb.com/ctv", null);
         a.approve(new ReferralCode("ABC12345"), ADMIN, T0);
         assertThat(a.canEarn()).isTrue();

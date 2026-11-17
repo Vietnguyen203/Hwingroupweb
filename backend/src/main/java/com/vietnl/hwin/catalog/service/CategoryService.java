@@ -1,5 +1,8 @@
 package com.vietnl.hwin.catalog.service;
 
+import com.vietnl.hwin.catalog.entity.ExceptionMessage;
+import org.springframework.http.HttpStatus;
+import com.vietnl.hwin.common.exception.ResponseException;
 import java.util.UUID;
 
 import java.util.List;
@@ -11,8 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vietnl.hwin.catalog.entity.Category;
 import com.vietnl.hwin.catalog.repository.CategoryRepository;
 import com.vietnl.hwin.catalog.repository.ProductRepository;
-import com.vietnl.hwin.common.exception.DomainException;
-import com.vietnl.hwin.common.exception.NotFoundException;
 
 /** Use case danh mục: xem công khai + quản trị. */
 @Service
@@ -39,14 +40,14 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public Category getBySlug(String slug) {
         return categories.findBySlug(slug).filter(Category::isActive)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy danh mục"));
+                .orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.CATEGORY_NOT_FOUND));
     }
 
     @Transactional
     public Category create(String name, String slug, String iconUrl, int sortOrder) {
         Category c = Category.create(name, slug, iconUrl, sortOrder);
         if (categories.existsBySlug(c.getSlug())) {
-            throw new DomainException("SLUG_TAKEN", "Slug danh mục đã tồn tại");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.SLUG_TAKEN);
         }
         return categories.save(c);
     }
@@ -56,7 +57,7 @@ public class CategoryService {
         Category c = get(id);
         c.update(name, slug, iconUrl, sortOrder);
         if (categories.existsBySlugAndIdNot(c.getSlug(), id)) {
-            throw new DomainException("SLUG_TAKEN", "Slug danh mục đã tồn tại");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.SLUG_TAKEN);
         }
         if (active) {
             c.activate();
@@ -74,12 +75,12 @@ public class CategoryService {
 
     private void deactivate(Category c) {
         if (products.countByCategoryIdAndActiveTrue(c.getId()) > 0) {
-            throw new DomainException("CATEGORY_IN_USE", "Danh mục còn sản phẩm đang bán, hãy ẩn sản phẩm trước");
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.CATEGORY_IN_USE);
         }
         c.deactivate();
     }
 
     private Category get(UUID id) {
-        return categories.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy danh mục"));
+        return categories.findById(id).orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.CATEGORY_NOT_FOUND));
     }
 }
