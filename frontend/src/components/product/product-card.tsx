@@ -14,34 +14,55 @@ import { AddToCartButton } from "./add-to-cart-button";
 export function ProductCard({ product }: { product: ProductCardResponse }) {
   const hasCompare = product.compareAtPrice != null && product.compareAtPrice > product.price;
   return (
-    <div className="group flex h-full flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(36,60,132,0.15)]">
-      <Link href={`/san-pham/${product.slug}`} className="relative block aspect-square bg-white">
+    <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-sm transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-brand/40 hover:shadow-[0_12px_28px_rgba(36,60,132,0.14)]">
+      <Link href={`/san-pham/${product.slug}`} className="relative block aspect-square overflow-hidden bg-neutral-50">
+        {/* Dải sáng Shimmer sweep khi hover */}
+        <div className="pointer-events-none absolute inset-0 z-10 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 ease-in-out group-hover:translate-x-full" />
+
+        {/* Badge giảm giá nổi bật góc trên ảnh */}
+        {product.discountPercent > 0 && (
+          <span className="animate-pulse-subtle absolute top-2 left-2 z-20 flex items-center rounded-lg bg-gradient-to-r from-red-600 to-amber-500 px-2 py-0.5 text-[11px] font-black tracking-wide text-white shadow-md">
+            -{product.discountPercent}%
+          </span>
+        )}
+
         {product.imageUrl && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={product.imageUrl} alt={product.name} loading="lazy" className="size-full object-cover transition group-hover:scale-[1.03]" />
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            loading="lazy"
+            className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-108"
+          />
         )}
         {!product.inStock && (
-          <span className="absolute inset-0 flex items-center justify-center bg-white/70 text-sm font-semibold text-neutral-700">Hết hàng</span>
+          <span className="absolute inset-0 z-20 flex items-center justify-center bg-white/75 backdrop-blur-[1px] text-sm font-bold text-neutral-600">
+            Hết hàng
+          </span>
         )}
       </Link>
       <div className="flex flex-1 flex-col p-2.5 md:p-3">
-        <Link href={`/san-pham/${product.slug}`}
-              className="line-clamp-2 min-h-10 text-sm leading-5 font-medium text-neutral-900 uppercase hover:text-brand">
+        <Link
+          href={`/san-pham/${product.slug}`}
+          className="line-clamp-2 min-h-10 text-sm font-semibold leading-5 text-neutral-800 uppercase transition-colors duration-200 group-hover:text-brand"
+        >
           {product.name}
         </Link>
         {product.unit && <span className="mt-0.5 text-xs text-muted-foreground">{product.unit}</span>}
-        <div className="mt-1.5 flex min-h-4 items-center gap-1.5 text-xs">
+        <div className="mt-1 flex min-h-4 items-center gap-1.5 text-xs">
           {hasCompare && <span className="text-neutral-400 line-through">{formatVnd(product.compareAtPrice!)}</span>}
-          {product.discountPercent > 0 && (
-            <span className="rounded bg-[#ffd400] px-1 font-bold text-neutral-900">-{product.discountPercent}%</span>
-          )}
         </div>
-        <span className="text-lg font-bold text-brand-red">{formatVnd(product.price)}</span>
+        <span className="text-lg font-black tracking-tight text-brand-red md:text-xl drop-shadow-[0_1px_1px_rgba(230,46,4,0.1)]">
+          {formatVnd(product.price)}
+        </span>
         <div className="mt-auto flex items-center justify-between gap-1 pt-2">
-          <span className={cn("flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold",
-            product.bestseller ? "bg-gradient-to-r from-[#ff5a1f] to-[#ff9a3d] text-white" : "invisible")}>
-            <Flame className="size-3" /> Bán chạy
-          </span>
+          {product.bestseller ? (
+            <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 px-2 py-0.5 text-[11px] font-bold text-white shadow-sm shadow-orange-500/20">
+              <Flame className="size-3 fill-white text-white" /> Bán chạy
+            </span>
+          ) : (
+            <span className="invisible text-[11px]">Ẩn</span>
+          )}
           <AddToCartButton
             disabled={!product.inStock}
             product={{ productId: product.id, slug: product.slug, name: product.name, price: product.price, imageUrl: product.imageUrl }}

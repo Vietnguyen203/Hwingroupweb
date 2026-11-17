@@ -44,14 +44,18 @@
 | GET | `/api/categories` | public | Danh mục active theo `sortOrder` (menu icon) |
 | GET | `/api/products` | public | `?q=&category=slug&sort=NEWEST\|PRICE_ASC\|PRICE_DESC\|BESTSELLER&page=&size=` – tìm không dấu |
 | GET | `/api/products/bestsellers` | public | Sản phẩm cờ `bestseller` (trang chủ) |
-| GET | `/api/products/{slug}` | public | Chi tiết + ảnh + thông tin thực phẩm |
+| GET | `/api/products/{slug}` | public | Chi tiết: thương hiệu, khối lượng, đóng gói, xuất xứ, thành phần, đặc điểm, HDSD, 1–5 ảnh, `soldCount`, thông tin thực phẩm |
+| GET | `/api/product-reviews` | public | `?productId=&page=&page_size=` – đánh giá hiển thị (tên che bớt) |
+| GET | `/api/product-reviews/summary` | public | `?productId=` – điểm trung bình + số đánh giá theo sao |
+| GET | `/api/me/product-reviews/eligibility` | CUSTOMER | `?productId=` – đã nhận hàng chưa, đã đánh giá chưa |
+| POST | `/api/me/product-reviews` | CUSTOMER | `{productId, rating 1–5, comment}` – chỉ khi đã nhận hàng, 1 đánh giá/sản phẩm |
 | GET | `/api/admin/categories` | ADMIN | Tất cả danh mục (kể cả ẩn) |
 | POST | `/api/admin/categories` | ADMIN | Tạo danh mục |
 | PUT | `/api/admin/categories/{id}` | ADMIN | Sửa danh mục |
 | DELETE | `/api/admin/categories/{id}` | ADMIN | Ẩn danh mục (chặn nếu còn sản phẩm active) |
 | GET | `/api/admin/products` | ADMIN | Danh sách + lọc `q, category, active, lowStock` |
 | GET | `/api/admin/products/{id}` | ADMIN | Chi tiết để sửa |
-| POST | `/api/admin/products` | ADMIN | Tạo sản phẩm |
+| POST | `/api/admin/products` | ADMIN | Tạo sản phẩm (bắt buộc `brand, weight, packaging, origin`, `images` 1–5 ảnh) |
 | PUT | `/api/admin/products/{id}` | ADMIN | Sửa sản phẩm (giá, thông tin thực phẩm, ảnh, cờ) |
 | PATCH | `/api/admin/products/{id}/stock` | ADMIN | Điều chỉnh tồn kho `{delta, note}` |
 | PATCH | `/api/admin/products/{id}/active` | ADMIN | Bật/tắt bán |

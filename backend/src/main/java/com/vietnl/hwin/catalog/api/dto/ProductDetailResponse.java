@@ -37,6 +37,7 @@ public class ProductDetailResponse {
     private boolean inStock;
     private int stock;
     private boolean bestseller;
+    private int soldCount;
     private List<String> images;
     private FoodInfoResponse foodInfo;
     private CategoryResponse category;

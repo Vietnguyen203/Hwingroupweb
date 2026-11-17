@@ -32,6 +32,16 @@ export type FoodInfoResponse = {
 };
 
 export type ProductDetailResponse = Omit<ProductCardResponse, "imageUrl"> & {
+  /** Thông tin cơ bản */
+  brand: string | null;
+  weight: string | null;
+  packaging: string | null;
+  origin: string | null;
+  /** Nội dung chi tiết */
+  ingredients: string | null;
+  features: string | null;
+  usageInstructions: string | null;
+  soldCount: number;
   shortDescription: string | null;
   description: string | null;
   stock: number;

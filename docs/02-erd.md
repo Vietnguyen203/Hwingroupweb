@@ -113,6 +113,13 @@ erDiagram
         text short_description
         text description
         varchar unit "gói, hộp, kg..."
+        varchar brand "thương hiệu"
+        varchar weight "khối lượng"
+        varchar packaging "đóng gói"
+        varchar origin "xuất xứ"
+        text ingredients "thành phần"
+        text features "đặc điểm"
+        text usage_instructions "HDSD"
         int stock "CHECK >= 0"
         boolean active "index"
         boolean bestseller "index"
@@ -273,6 +280,7 @@ erDiagram
     customers ||--o{ customer_addresses : "sổ địa chỉ"
     customers ||--|| customer_stats : "read model"
     customers ||--o{ customer_product_stats : "read model"
+    customers ||--o{ product_reviews : "đánh giá"
 
     customers {
         uuid id PK "= identity.user_accounts.id (ID, không FK)"
@@ -303,6 +311,16 @@ erDiagram
         timestamptz first_order_at
         timestamptz last_order_at "index – lọc DORMANT"
         timestamptz updated_at
+    }
+
+    product_reviews {
+        uuid id PK
+        uuid product_id "ref → catalog.products (ID, không FK)"
+        uuid customer_id FK
+        varchar reviewer_name
+        int rating "CHECK 1–5"
+        varchar comment "<= 1000"
+        boolean visible "false = ẩn (kiểm duyệt)"
     }
 
     customer_product_stats {

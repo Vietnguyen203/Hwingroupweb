@@ -5,6 +5,7 @@ import { Check, Minus, Plus, ShoppingCart } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useCart, type CartLine } from "@/stores/cart-store";
+import { cn } from "@/lib/utils";
 
 type Props = {
   product: Omit<CartLine, "quantity">;
@@ -21,6 +22,10 @@ export function AddToCartButton({ product, disabled, variant = "icon" }: Props) 
   const onAdd = () => {
     add(product, variant === "full" ? qty : 1);
     setAdded(true);
+    // Bắn event để Header Cart Button nảy số
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("hwin:cart-added"));
+    }
     setTimeout(() => setAdded(false), 1500);
   };
 
@@ -31,9 +36,12 @@ export function AddToCartButton({ product, disabled, variant = "icon" }: Props) 
         onClick={onAdd}
         disabled={disabled}
         aria-label={disabled ? "Hết hàng" : `Thêm ${product.name} vào giỏ`}
-        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-cta text-white shadow-sm transition hover:brightness-110 active:scale-95 disabled:opacity-40"
+        className={cn(
+          "flex size-9 shrink-0 items-center justify-center rounded-full text-white shadow-sm transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-95 disabled:opacity-40",
+          added ? "bg-emerald-600 scale-105 shadow-emerald-600/30" : "bg-brand-cta hover:bg-red-600 hover:shadow-red-500/25"
+        )}
       >
-        {added ? <Check className="size-4" /> : <ShoppingCart className="size-4" />}
+        {added ? <Check className="size-4 animate-in zoom-in-50 duration-200" /> : <ShoppingCart className="size-4" />}
       </button>
     );
   }

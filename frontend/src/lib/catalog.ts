@@ -2,6 +2,7 @@
 import { cache } from "react";
 
 import { backendUrl } from "./config";
+import type { ProductReviewSummaryResponse } from "./reviews";
 import type { CategoryResponse, PageResponse, ProductCardResponse, ProductDetailResponse, ProductSort } from "./types";
 
 async function get<T>(path: string): Promise<T | null> {
@@ -42,4 +43,14 @@ export async function searchProducts(params: SearchParams): Promise<PageResponse
 
 export async function getProduct(slug: string): Promise<ProductDetailResponse | null> {
   return get<ProductDetailResponse>(`/api/products/${encodeURIComponent(slug)}`);
+}
+
+/** Tổng hợp đánh giá của sản phẩm (điểm trung bình + số lượng); lỗi mạng -> coi như chưa có đánh giá. */
+export async function getReviewSummary(productId: string): Promise<ProductReviewSummaryResponse> {
+  const empty = { average: 0, total: 0, countByRating: {} };
+  try {
+    return (await get<ProductReviewSummaryResponse>(`/api/product-reviews/summary?productId=${productId}`)) ?? empty;
+  } catch {
+    return empty;
+  }
 }

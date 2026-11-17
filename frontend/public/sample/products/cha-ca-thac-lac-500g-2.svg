@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a1c4fd"/><stop offset="1" stop-color="#c2e9fb"/></linearGradient></defs>
+<rect width="600" height="600" fill="url(#g)"/>
+<circle cx="300" cy="260" r="170" fill="#ffffff" fill-opacity="0.35"/>
+<text x="300" y="330" font-size="190" text-anchor="middle">🐟</text>
+<rect x="40" y="480" width="520" height="80" rx="40" fill="#ffffff" fill-opacity="0.9"/>
+<text x="300" y="532" font-family="Arial, sans-serif" font-size="36" font-weight="700" fill="#333" text-anchor="middle">Chả cá thác lác – ảnh 2</text>
+</svg>

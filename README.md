@@ -93,6 +93,9 @@ cd ..\frontend; npm run build; npm run lint
 
 ## Giả định
 
+- Đánh giá sản phẩm: chỉ khách đã nhận hàng (đơn DELIVERED/COMPLETED) được đánh giá, mỗi sản phẩm 1 lần; cờ `visible` để ẩn đánh giá (chưa có màn hình duyệt).
+- Sản phẩm có 1–5 ảnh; "Mua ngay" thêm vào giỏ rồi chuyển sang giỏ hàng.
+
 - **Khóa chính là UUID v7** (sinh bởi Hibernate `@UuidGenerator(style = VERSION_7)`): có thứ tự theo thời gian nên index gọn, không đoán được số bản ghi, sau này tách microservice không lo trùng id. Database cũng mặc định sinh UUID v7 cho mọi cột `id` (hàm `public.uuid_generate_v7()` – Postgres 17 chưa có `uuidv7()` sẵn).
 - **Cổng**: backend 8088, frontend 3100, Postgres 15432, Redis 16379 – tránh trùng các dịch vụ đã chạy sẵn trên máy dev (8080, 3000, 5432, 6379 đang bận).
 - **Next.js 16** đổi tên `middleware.ts` thành `proxy.ts`; file chặn quyền nằm ở `frontend/src/proxy.ts`.
