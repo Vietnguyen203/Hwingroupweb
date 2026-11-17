@@ -21,7 +21,7 @@
 **Trong phạm vi**
 
 - Web khách: trang chủ, danh mục, chi tiết sản phẩm, tìm kiếm không dấu, giỏ hàng, thanh toán kèm OTP, trang cảm ơn kèm QR, tài khoản (đơn của tôi, Mua lại, địa chỉ).
-- Trang CTV `/ctv`: đăng ký, dashboard, thông tin ngân hàng, yêu cầu rút tiền.
+- Trang CTV `/affiliate`: đăng ký, dashboard, thông tin ngân hàng, yêu cầu rút tiền.
 - Trang admin `/admin`: danh mục, sản phẩm, đơn hàng, khách hàng (lọc + CSV), duyệt CTV, duyệt / chi trả rút tiền.
 - Thanh toán: **COD** và **BANK_QR** (ảnh VietQR, admin xác nhận đã nhận tiền).
 - Thu thập thông tin xuất hóa đơn VAT (không phát hành hóa đơn thật).
@@ -137,9 +137,9 @@ flowchart TB
 
     subgraph FE[Next.js App Router - frontend]
         SSR["Trang khách SSR<br/>/, /c/slug, /p/slug, /search, /cart, /checkout, /account"]
-        CTV["/ctv - CSR"]
+        CTV["/affiliate - CSR"]
         ADM["/admin - CSR"]
-        MW["proxy.ts (middleware Next 16)<br/>chặn /admin, /ctv theo role<br/>đọc ?ref"]
+        MW["proxy.ts (middleware Next 16)<br/>chặn /admin, /affiliate theo role<br/>đọc ?ref"]
         RW["rewrites /api/* → backend<br/>cookie cùng origin"]
     end
 
@@ -305,7 +305,7 @@ Tất cả event là `record` bất biến, kế thừa `DomainEvent` (`eventId`
 |---|---|
 | Giá luôn tính ở backend từ `ProductQueryService`, không tin client | `PlaceOrderService` + `Order.place()` |
 | `total = subtotal − discount + shippingFee`; `Money` không âm | `Order`, `Money` |
-| Phí ship cố định `hwin.ordering.shipping-fee` (mặc định 30.000đ) | `PricingPolicy` |
+| Phí ship cố định `hwin.ordering.shipping-fee` (mặc định 30.000đ); miễn phí khi tạm tính ≥ `hwin.ordering.free-shipping-threshold` (mặc định 500.000đ, `0` = tắt) | `FixedFeeShippingProvider` |
 | Hủy chỉ trước `SHIPPING`; trả hàng chỉ khi `DELIVERED` và trong `return-window-days` (7) | `Order.cancel()`, `Order.markReturned()` |
 | Đơn BANK_QR phải `PAID` trước khi `CONFIRMED`; COD tự `PAID` khi `DELIVERED` | `Order.confirm()`, `Order.markDelivered()` |
 | Hoa hồng = 10% × (subtotal − discount), làm tròn xuống đồng | `Commission.create()` |
@@ -334,6 +334,7 @@ hwin:
     send-window: 10m
   ordering:
     shipping-fee: 30000
+    free-shipping-threshold: 500000   # 0 = tắt miễn phí ship
     return-window-days: 7
     place-order-limit: 5          # số đơn / 10 phút / user
     bank-qr:

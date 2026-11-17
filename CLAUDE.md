@@ -55,5 +55,5 @@
 
 ### Frontend (Next.js)
 - File / thư mục kebab-case; component PascalCase; hook `use-*.ts`; store `*-store.ts`.
-- URL trang khách tiếng Việt không dấu, không viết tắt: `/danh-muc/[slug]`, `/san-pham/[slug]`, `/gio-hang`, `/tim-kiem`, `/thanh-toan`, `/tai-khoan/don-hang`, `/dang-nhap`, `/dang-ky`, `/ctv`, `/admin`.
+- URL trang khách viết tiếng Anh, chữ thường, nối bằng dấu gạch ngang: `/categories/[slug]`, `/products/[slug]`, `/cart`, `/search`, `/checkout`, `/account/orders`, `/login`, `/register`, `/affiliate`, `/affiliate/register`, `/admin`.
 - Type / field khớp đúng tên DTO backend.

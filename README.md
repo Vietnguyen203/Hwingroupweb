@@ -93,8 +93,11 @@ cd ..\frontend; npm run build; npm run lint
 
 ## Giả định
 
-- Đánh giá sản phẩm: chỉ khách đã nhận hàng (đơn DELIVERED/COMPLETED) được đánh giá, mỗi sản phẩm 1 lần; cờ `visible` để ẩn đánh giá (chưa có màn hình duyệt).
+- Phí giao hàng cố định 30.000đ, **miễn phí khi tạm tính từ 500.000đ** (`hwin.ordering.free-shipping-threshold`, đặt `0` để tắt). Giỏ hàng và thanh toán lấy ngưỡng này từ backend (`freeShippingThreshold` trong báo giá) nên banner "miễn phí giao hàng" luôn khớp với số tiền thật.
+
+- Đánh giá sản phẩm: chỉ khách đã nhận hàng (đơn DELIVERED/COMPLETED) được đánh giá, mỗi sản phẩm 1 lần; admin ẩn / hiện đánh giá ở `/admin/reviews` (đánh giá ẩn không hiện trên trang sản phẩm và không tính vào điểm trung bình; khách không viết lại được vì đã có đánh giá).
 - Ảnh CCCD (mặt trước + sau) bắt buộc khi đăng ký CTV; lưu ở thư mục riêng `hwin.storage.private-dir` (env `PRIVATE_STORAGE_DIR`, mặc định `./private-uploads`, ngoài `/uploads` nên không có URL công khai), chỉ ADMIN xem qua API và mỗi lần xem có audit. Production cần mount thư mục này vào ổ bền vững và sao lưu.
+- Giảm giá thêm (`sale_percent`, 0–90%) chỉ ADMIN đặt (cả combo), tính trên giá niêm yết rồi làm tròn xuống đồng: combo 2 chả cá + 1 xúc xích đã trừ 10% là 1.000.000đ, giảm thêm 15% thì khách trả 850.000đ. Giỏ hàng, đặt hàng và hoa hồng CTV đều dùng giá sau giảm; đơn đã đặt giữ giá lúc đặt. Chưa có lịch bắt đầu/kết thúc và chưa có mã giảm giá nhập tay.
 - Sản phẩm có 1–5 ảnh; "Mua ngay" thêm vào giỏ rồi chuyển sang giỏ hàng.
 
 - **Khóa chính là UUID v7** (sinh bởi Hibernate `@UuidGenerator(style = VERSION_7)`): có thứ tự theo thời gian nên index gọn, không đoán được số bản ghi, sau này tách microservice không lo trùng id. Database cũng mặc định sinh UUID v7 cho mọi cột `id` (hàm `public.uuid_generate_v7()` – Postgres 17 chưa có `uuidv7()` sẵn).
@@ -104,7 +107,7 @@ cd ..\frontend; npm run build; npm run lint
 - **CSRF**: tắt CSRF token vì cookie `SameSite=Lax` + CORS chỉ cho domain frontend.
 - **Cookie Secure**: bật ở mọi profile trừ `dev` (`COOKIE_SECURE=false`) để chạy được trên `http://localhost`.
 - **Refresh token** cookie có `Path=/api/auth` → chỉ gửi kèm API xác thực. Khi access token hết hạn, trang đăng nhập gọi `/api/auth/refresh` trước.
-- **Đăng ký và đăng nhập tách riêng** (`/dang-ky`, `/dang-nhap`): đăng ký cần họ tên + OTP, tài khoản đã có thì báo `ACCOUNT_EXISTS`; đăng nhập tài khoản chưa có báo `ACCOUNT_NOT_FOUND`. Việc báo trước "đã có / chưa có tài khoản" làm lộ email/SĐT nào đã đăng ký – chấp nhận vì dễ dùng, giới hạn 20 lần kiểm tra / 10 phút / IP. Đăng ký xong phát event `UserRegisteredEvent` để module customer tạo hồ sơ (kèm họ tên).
+- **Đăng ký và đăng nhập tách riêng** (`/register`, `/login`): đăng ký cần họ tên + OTP, tài khoản đã có thì báo `ACCOUNT_EXISTS`; đăng nhập tài khoản chưa có báo `ACCOUNT_NOT_FOUND`. Việc báo trước "đã có / chưa có tài khoản" làm lộ email/SĐT nào đã đăng ký – chấp nhận vì dễ dùng, giới hạn 20 lần kiểm tra / 10 phút / IP. Đăng ký xong phát event `UserRegisteredEvent` để module customer tạo hồ sơ (kèm họ tên).
 - **NSX / HSD** hiểu là `manufacturer` (nhà sản xuất) và `shelfLife` (thời hạn sử dụng) ở mức sản phẩm, không quản lý theo lô.
 - **Tìm kiếm không dấu**: cột sinh tự động `search_text = f_unaccent(lower(tên + mô tả ngắn))` + index GIN trigram; từ khóa luôn bind tham số.
 - **Ảnh mẫu** là SVG trong `frontend/public/sample/`; ảnh admin upload lưu `backend/uploads/` và phục vụ qua `/uploads/**`.

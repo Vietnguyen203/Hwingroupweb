@@ -15,7 +15,9 @@
           "// (Postman lưu cookie theo host nên 3 phiên không đè nhau)",
           "const base = pm.environment.get('baseUrl') || 'http://localhost:8088';",
           "pm.collectionVariables.set('adminUrl', base.replace('localhost', '127.0.0.1'));",
-          "pm.collectionVariables.set('ctvUrl', base.replace('localhost', '[::1]'));"
+          "pm.collectionVariables.set('ctvUrl', base.replace('localhost', '[::1]'));",
+          "// CCCD 12 chữ số, khác nhau mỗi lần gọi (backend chặn trùng CCCD giữa các tài khoản)",
+          "pm.collectionVariables.set('citizenId', String(Date.now()).slice(1));"
         ]
       }
     }
@@ -215,7 +217,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"otp\": \"{{customerEmailOtp}}\",\n  \"fullName\": \"Khách Email\"\n}",
+              "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"otp\": \"{{customerEmailOtp}}\",\n  \"fullName\": \"Khách Email\",\n  \"dateOfBirth\": \"1995-05-05\",\n  \"address\": \"Hà Nội\",\n  \"citizenId\": \"{{citizenId}}\",\n  \"password\": \"Postman@2026!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -456,7 +458,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"{{customerPhone}}\",\n  \"otp\": \"000000\",\n  \"fullName\": \"Khách SĐT\"\n}",
+              "raw": "{\n  \"phone\": \"{{customerPhone}}\",\n  \"otp\": \"000000\",\n  \"fullName\": \"Khách SĐT\",\n  \"dateOfBirth\": \"1995-05-05\",\n  \"address\": \"Hà Nội\",\n  \"citizenId\": \"{{citizenId}}\",\n  \"password\": \"Postman@2026!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -500,7 +502,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"{{customerPhone}}\",\n  \"otp\": \"{{customerOtp}}\",\n  \"fullName\": \"Khách SĐT\"\n}",
+              "raw": "{\n  \"phone\": \"{{customerPhone}}\",\n  \"otp\": \"{{customerOtp}}\",\n  \"fullName\": \"Khách SĐT\",\n  \"dateOfBirth\": \"1995-05-05\",\n  \"address\": \"Hà Nội\",\n  \"citizenId\": \"{{citizenId}}\",\n  \"password\": \"Postman@2026!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -536,7 +538,7 @@
           ]
         },
         {
-          "name": "Khách (SĐT): đăng nhập – gửi OTP",
+          "name": "Khách (SĐT): đăng nhập – mật khẩu (thiết bị lạ → gửi OTP)",
           "request": {
             "method": "POST",
             "header": [
@@ -546,20 +548,20 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/auth/otp",
+              "raw": "{{baseUrl}}/api/auth/login",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "auth",
-                "otp"
+                "login"
               ]
             },
-            "description": "Sinh ngẫu nhiên SĐT khách + SĐT CTV cho lần chạy này. OTP được tự lấy ở bước xác thực (profile dev).",
+            "description": "Bước 1: tên đăng nhập (SĐT/email) + mật khẩu. Thiết bị chưa được ghi nhớ -> otpRequired=true và gửi OTP; thiết bị đã ghi nhớ 30 ngày -> vào luôn (otpRequired=false, bỏ qua bước nhập OTP).",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"{{customerPhone}}\",\n  \"purpose\": \"LOGIN\"\n}",
+              "raw": "{\n  \"identifier\": \"{{customerPhone}}\",\n  \"password\": \"Postman@2026!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -573,14 +575,17 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('HTTP 202', () => pm.response.to.have.status(202));"
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test('Có OTP hoặc đã vào luôn', () => pm.expect(r.otpRequired ? !!r.challengeId : !!r.user).to.be.true);",
+                  "pm.collectionVariables.set('customerChallengeId', r.challengeId || '');"
                 ]
               }
             }
           ]
         },
         {
-          "name": "Khách (SĐT): đăng nhập – OTP đúng",
+          "name": "Khách (SĐT): đăng nhập – nhập OTP (ghi nhớ 30 ngày)",
           "request": {
             "method": "POST",
             "header": [
@@ -590,21 +595,21 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/auth/otp/verify",
+              "raw": "{{baseUrl}}/api/auth/login/verify",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "auth",
-                "otp",
+                "login",
                 "verify"
               ]
             },
-            "description": "",
+            "description": "Bước 2 (chỉ khi bước 1 trả otpRequired=true; nếu không sẽ tự bỏ qua). rememberDevice=true -> 30 ngày không hỏi OTP lại trên thiết bị này.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"{{customerPhone}}\",\n  \"otp\": \"{{customerOtp}}\"\n}",
+              "raw": "{\n  \"challengeId\": \"{{customerChallengeId}}\",\n  \"otp\": \"{{customerOtp}}\",\n  \"rememberDevice\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -618,6 +623,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
+                  "// Bước 1 đã vào luôn (thiết bị đã ghi nhớ) -> không có OTP để nhập, bỏ qua request này",
+                  "if (!pm.collectionVariables.get('customerChallengeId')) { pm.execution.skipRequest(); }",
                   "// Tự lấy OTP vừa gửi (endpoint chỉ có ở profile dev)",
                   "const v = pm.collectionVariables.get('customerPhone');",
                   "pm.sendRequest(pm.variables.get('baseUrl') + '/api/dev/otp/latest?purpose=LOGIN&phone=' + encodeURIComponent(v), (err, res) => {",
@@ -767,7 +774,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"{{affPhone}}\",\n  \"otp\": \"{{ctvOtp}}\",\n  \"fullName\": \"CTV Postman\"\n}",
+              "raw": "{\n  \"phone\": \"{{affPhone}}\",\n  \"otp\": \"{{ctvOtp}}\",\n  \"fullName\": \"CTV Postman\",\n  \"dateOfBirth\": \"1995-05-05\",\n  \"address\": \"Hà Nội\",\n  \"citizenId\": \"{{citizenId}}\",\n  \"password\": \"Postman@2026!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1115,13 +1122,12 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/me/cart-quotes",
+              "raw": "{{baseUrl}}/api/cart-quotes",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "me",
                 "cart-quotes"
               ]
             },
@@ -2835,6 +2841,148 @@
           ]
         },
         {
+          "name": "Giảm giá thêm 15% cho sản phẩm",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/products/{{newProductId}}/sale",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "products",
+                "{{newProductId}}",
+                "sale"
+              ]
+            },
+            "description": "Chỉ ADMIN. Giảm giá thêm (%) tính trên giá niêm yết, 0–90, 0 = bỏ giảm. VD combo 1.000.000đ giảm thêm 15% -> khách trả 850.000đ.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"salePercent\": 15}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const p = pm.response.json();",
+                  "pm.test('Khách trả = niêm yết x 85%', () => { pm.expect(p.salePercent).to.eql(15); pm.expect(p.effectivePrice).to.eql(Math.floor(p.price * 85 / 100)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Giảm giá 95% → 422 SALE_PERCENT_INVALID",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/products/{{newProductId}}/sale",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "products",
+                "{{newProductId}}",
+                "sale"
+              ]
+            },
+            "description": "Chỉ ADMIN. Giảm giá thêm (%) tính trên giá niêm yết, 0–90, 0 = bỏ giảm. VD combo 1.000.000đ giảm thêm 15% -> khách trả 850.000đ.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"salePercent\": 95}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                  "pm.test('code = SALE_PERCENT_INVALID', () => pm.expect(pm.response.json().messageCode).to.eql('SALE_PERCENT_INVALID'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bỏ giảm giá (0%)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/products/{{newProductId}}/sale",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "products",
+                "{{newProductId}}",
+                "sale"
+              ]
+            },
+            "description": "Chỉ ADMIN. Giảm giá thêm (%) tính trên giá niêm yết, 0–90, 0 = bỏ giảm. VD combo 1.000.000đ giảm thêm 15% -> khách trả 850.000đ.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"salePercent\": 0}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Về giá niêm yết', () => { const p = pm.response.json(); pm.expect(p.salePercent).to.eql(0); pm.expect(p.effectivePrice).to.eql(p.price); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Nhập thêm kho +20",
           "request": {
             "method": "PATCH",
@@ -3833,6 +3981,143 @@
                   "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
                   "pm.test('Là file CSV', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('text/csv'));",
                   "pm.test('Có dòng tiêu đề', () => pm.expect(pm.response.text()).to.include('so_dien_thoai'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Đánh giá – danh sách (lọc theo trạng thái / sao / từ khóa)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/product-reviews?visible=true&page_size=5",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "product-reviews"
+              ],
+              "query": [
+                {
+                  "key": "visible",
+                  "value": "true"
+                },
+                {
+                  "key": "page_size",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Admin thấy cả đánh giá đã ẩn: visible=false. Lọc thêm rating=1..5, q=từ khóa, productId."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const c = pm.response.json().content;",
+                  "pm.test('Có tên sản phẩm + trạng thái', () => { if (c.length) { pm.expect(c[0]).to.have.property('productName'); pm.expect(c[0].visible).to.be.true; } });",
+                  "if (c.length) pm.collectionVariables.set('reviewId', c[0].id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Đánh giá – ẩn khỏi trang sản phẩm",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/product-reviews/{{reviewId}}/visibility",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "product-reviews",
+                "{{reviewId}}",
+                "visibility"
+              ]
+            },
+            "description": "Đánh giá bị ẩn không còn trên trang sản phẩm và không tính vào điểm trung bình.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visible\": false,\n  \"reason\": \"Nội dung không phù hợp\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Đã ẩn', () => pm.expect(pm.response.json().visible).to.be.false);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Đánh giá – hiện lại",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/product-reviews/{{reviewId}}/visibility",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "product-reviews",
+                "{{reviewId}}",
+                "visibility"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visible\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Đã hiện', () => pm.expect(pm.response.json().visible).to.be.true);"
                 ]
               }
             }
@@ -7522,6 +7807,18 @@
     },
     {
       "key": "idCardBackKey",
+      "value": ""
+    },
+    {
+      "key": "citizenId",
+      "value": ""
+    },
+    {
+      "key": "customerChallengeId",
+      "value": ""
+    },
+    {
+      "key": "reviewId",
       "value": ""
     }
   ]

@@ -219,3 +219,18 @@ Mỗi controller một prefix riêng. Các đường dẫn admin giữ nguyên (
 | `stores/cart.ts` | `stores/cart-store.ts` |
 | type `ProductCard`, `ProductDetail`, `Category`, `Page`, `Me`, `Profile`, `Address`, `OrderSummary`, `OrderDetail`, `OtpSent`, `ServerCart` | `ProductCardResponse`, `ProductDetailResponse`, `CategoryResponse`, `PageResponse`, `MeResponse`, `ProfileResponse`, `AddressResponse`, `OrderSummaryResponse`, `OrderDetailResponse`, `OtpSentResponse`, `CartView` (khớp DTO backend) |
 | `docs/08-otp.md` | `docs/08-otp.md` |
+
+## Cập nhật: URL trang khách trở lại tiếng Anh
+
+Quy ước URL tiếng Việt ở trên đã bị bỏ theo yêu cầu: mọi URL (kể cả trang) dùng tiếng Anh.
+
+| Đang dùng (tiếng Việt) | Mới (tiếng Anh) |
+|---|---|
+| `/danh-muc/[slug]` | `/categories/[slug]` |
+| `/san-pham/[slug]` | `/products/[slug]` |
+| `/gio-hang` | `/cart` |
+| `/tim-kiem` | `/search` |
+| `/thanh-toan` | `/checkout` |
+| `/tai-khoan`, `/tai-khoan/don-hang/[code]` | `/account`, `/account/orders/[code]` |
+| `/dang-nhap`, `/dang-ky` | `/login`, `/register` |
+| `/ctv`, `/ctv/dang-ky` | `/affiliate`, `/affiliate/register` |

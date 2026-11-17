@@ -138,7 +138,7 @@ stateDiagram-v2
 
 ```mermaid
 flowchart TD
-    S([Người dùng vào /ctv]) --> L{Đã đăng nhập?}
+    S([Người dùng vào /affiliate]) --> L{Đã đăng nhập?}
     L -- Chưa --> OTP[Đăng nhập SĐT + OTP<br/>tự tạo tài khoản CUSTOMER]
     OTP --> HAS
     L -- Rồi --> HAS{Đã có hồ sơ CTV?}

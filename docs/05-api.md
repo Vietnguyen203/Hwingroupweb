@@ -27,8 +27,9 @@
 | Method | Path | Quyền | Mô tả |
 |---|---|---|---|
 | POST | `/api/auth/otp` | public | Gửi OTP: `{phone}` (SMS – hiện giả lập, chỉ dev) **hoặc** `{email}` (email thật), `purpose`: `LOGIN` (mặc định – tài khoản phải có, không thì `ACCOUNT_NOT_FOUND`) \| `REGISTER` (phải chưa có, không thì `ACCOUNT_EXISTS`). Trả `{channel, sentTo, expiresInSeconds}`. Rate limit 3/10 phút theo nơi nhận và IP; kiểm tra tài khoản 20 lần/10 phút/IP |
-| POST | `/api/auth/otp/verify` | public | Đăng nhập: `{phone\|email, otp}` (OTP purpose LOGIN) → set cookie JWT |
-| POST | `/api/auth/register` | public | Đăng ký: `{phone\|email, otp, fullName}` (OTP purpose REGISTER) → tạo tài khoản CUSTOMER, set cookie JWT (201) |
+| POST | `/api/auth/login` | public | Bước 1: `{identifier (SĐT hoặc email), password}`. Thiết bị lạ → `{otpRequired: true, challengeId, sentTo}` và gửi OTP; thiết bị đã ghi nhớ → `{otpRequired: false, user}` + cookie JWT. Tài khoản admin → `ADMIN_USE_ADMIN_LOGIN` (dùng `/api/admin/auth/login`) |
+| POST | `/api/auth/login/verify` | public | Bước 2: `{challengeId, otp, rememberDevice}` → cookie JWT; `rememberDevice=true` ghi nhớ thiết bị 30 ngày (không hỏi OTP lại) |
+| POST | `/api/auth/register` | public | Đăng ký: `{phone\|email, otp, fullName, dateOfBirth (quá khứ), address, citizenId (12 số), password}` (OTP purpose REGISTER; mật khẩu theo chính sách: 8–64 ký tự, hoa + thường + số + ký tự đặc biệt, không chứa email/SĐT) → tạo tài khoản CUSTOMER, set cookie JWT (201) |
 | POST | `/api/auth/refresh` | cookie `hwin_rt` | Xoay vòng refresh token, set cookie mới |
 | POST | `/api/auth/logout` | auth | Thu hồi refresh token hiện tại, xóa cookie |
 | GET | `/api/auth/me` | auth | `{id, phone (che), fullName, roles}` – frontend & proxy.ts dùng |
@@ -41,13 +42,15 @@
 
 | Method | Path | Quyền | Mô tả |
 |---|---|---|---|
-| GET | `/api/categories` | public | Danh mục active theo `sortOrder` (menu icon) |
+| GET | `/api/categories` | public | Danh mục active theo `sortOrder` (menu icon), kèm `productCount` (số sản phẩm đang bán) – trang chủ ẩn danh mục rỗng |
 | GET | `/api/products` | public | `?q=&category=slug&sort=NEWEST\|PRICE_ASC\|PRICE_DESC\|BESTSELLER&page=&size=` – tìm không dấu |
 | GET | `/api/products/bestsellers` | public | Sản phẩm cờ `bestseller` (trang chủ) |
-| GET | `/api/products/{slug}` | public | Chi tiết: thương hiệu, khối lượng, đóng gói, xuất xứ, thành phần, đặc điểm, HDSD, 1–5 ảnh, `soldCount`, thông tin thực phẩm |
+| GET | `/api/products/{slug}` | public | Giá: `price` (khách thực trả), `basePrice` (niêm yết), `salePercent`, `compareAtPrice`, `discountPercent`. Chi tiết: thương hiệu, khối lượng, đóng gói, xuất xứ, thành phần, đặc điểm, HDSD, 1–5 ảnh, `soldCount`, thông tin thực phẩm |
 | GET | `/api/product-reviews` | public | `?productId=&page=&page_size=` – đánh giá hiển thị (tên che bớt) |
 | GET | `/api/product-reviews/summary` | public | `?productId=` – điểm trung bình + số đánh giá theo sao |
 | GET | `/api/me/product-reviews/eligibility` | CUSTOMER | `?productId=` – đã nhận hàng chưa, đã đánh giá chưa |
+| GET | `/api/admin/product-reviews` | ADMIN | Kiểm duyệt: lọc `visible`, `rating`, `productId`, `q` (nội dung / tên), phân trang; thấy cả đánh giá đã ẩn |
+| PATCH | `/api/admin/product-reviews/{id}/visibility` | ADMIN | `{visible, reason?}` ẩn / hiện đánh giá; ghi audit `REVIEW_HIDDEN` / `REVIEW_SHOWN` |
 | POST | `/api/me/product-reviews` | CUSTOMER | `{productId, rating 1–5, comment}` – chỉ khi đã nhận hàng, 1 đánh giá/sản phẩm |
 | GET | `/api/admin/categories` | ADMIN | Tất cả danh mục (kể cả ẩn) |
 | POST | `/api/admin/categories` | ADMIN | Tạo danh mục |
@@ -58,6 +61,9 @@
 | POST | `/api/admin/products` | ADMIN | Tạo sản phẩm (bắt buộc `brand, weight, packaging, origin`, `images` 1–5 ảnh) |
 | PUT | `/api/admin/products/{id}` | ADMIN | Sửa sản phẩm (giá, thông tin thực phẩm, ảnh, cờ) |
 | PATCH | `/api/admin/products/{id}/stock` | ADMIN | Điều chỉnh tồn kho `{delta, note}` |
+| PATCH | `/api/admin/products/{id}/sale` | ADMIN | Giảm giá thêm `{salePercent}` 0–90 (cả combo), 0 = bỏ; ghi audit `SALE_CHANGED`. Lỗi `SALE_PERCENT_INVALID` |
+| PATCH | `/api/admin/products/{id}/category` | ADMIN | Đổi danh mục `{"categoryId": uuid}` |
+| DELETE | `/api/admin/products/{id}` | ADMIN | Xóa sản phẩm |
 | PATCH | `/api/admin/products/{id}/active` | ADMIN | Bật/tắt bán |
 | POST | `/api/admin/uploads` | ADMIN | Upload ảnh (multipart, ≤ 5MB, jpg/png/webp) → `{url}` |
 | GET | `/uploads/**` | public | File tĩnh từ `LocalStorageService` |
@@ -71,7 +77,9 @@
 | PATCH | `/api/me/cart/items/{productId}` | CUSTOMER | Đổi số lượng |
 | DELETE | `/api/me/cart/items/{productId}` | CUSTOMER | Xóa dòng |
 | POST | `/api/me/cart/merge` | CUSTOMER | Gộp giỏ localStorage `{items:[{productId, quantity}]}` sau đăng nhập |
-| POST | `/api/me/cart-quotes` | public | Tính giá giỏ ẩn danh (giỏ localStorage) – trả subtotal, phí ship, total do backend tính |
+| POST | `/api/cart-quotes` | public | Tính giá giỏ ẩn danh (giỏ localStorage) – trả subtotal, phí ship, total do backend tính |
+| POST | `/api/me/phone/otp` | CUSTOMER | Gửi OTP tới SĐT muốn thêm vào tài khoản `{phone}` |
+| PUT | `/api/me/phone` | CUSTOMER | Thêm SĐT cho tài khoản đăng ký bằng email `{phone, otp}` |
 | GET | `/api/checkout/config` | public | `{shippingFee, paymentMethods}` |
 | POST | `/api/checkout/orders` | CUSTOMER | Đặt hàng `{shippingAddress, paymentMethod, vatInvoice?, note, idempotencyKey}`; ref đọc từ cookie `hwin_ref`. Rate limit 5/10 phút |
 | GET | `/api/me/orders` | CUSTOMER | Đơn của tôi (phân trang, lọc trạng thái) |
@@ -155,13 +163,13 @@
 
 | Route | Render | Quyền (proxy.ts) |
 |---|---|---|
-| `/`, `/danh-muc`, `/danh-muc/[slug]`, `/san-pham/[slug]`, `/tim-kiem` | SSR | public |
-| `/gio-hang` | CSR | public |
-| `/thanh-toan` | CSR | cần đăng nhập (chuyển `/dang-nhap?next=/thanh-toan`) |
-| `/dang-nhap`, `/dang-ky` | CSR | public |
-| `/tai-khoan`, `/tai-khoan/don-hang`, `/tai-khoan/don-hang/[code]` | CSR | đăng nhập (kiểm ở client) |
-| `/ctv` | CSR | public (giới thiệu) / dashboard khi là CTV đã duyệt |
-| `/ctv/dang-ky` | CSR | đăng nhập |
+| `/`, `/categories`, `/categories/[slug]`, `/products/[slug]`, `/search` | SSR | public |
+| `/cart` | CSR | public |
+| `/checkout` | CSR | cần đăng nhập (chuyển `/login?next=/checkout`) |
+| `/login`, `/register` | CSR | public |
+| `/account`, `/account/orders`, `/account/orders/[code]` | CSR | đăng nhập (kiểm ở client) |
+| `/affiliate` | CSR | public (giới thiệu) / dashboard khi là CTV đã duyệt |
+| `/affiliate/register` | CSR | đăng nhập |
 | `/admin/login` | CSR | public (đăng nhập 2 bước) |
 | `/admin/orders`, `/admin/orders/[id]`, `/admin/products`, `/admin/customers`, `/admin/affiliates`, `/admin/commissions`, `/admin/payouts` | CSR | ADMIN |
 

@@ -105,10 +105,12 @@ erDiagram
 
     products {
         uuid id PK
-        uuid category_id FK "index"
+        uuid category_id FK "index, nullable = chưa phân loại; xóa danh mục thì về null"
         varchar name "<= 200"
         varchar slug UK
-        bigint price "CHECK >= 0"
+        bigint price "giá niêm yết, CHECK >= 0"
+        int sale_percent "giảm thêm 0-90%, chỉ ADMIN đặt"
+        bigint effective_price "giá khách trả = price x (100 - sale_percent) / 100"
         bigint compare_at_price "nullable, giá gốc gạch ngang"
         text short_description
         text description
