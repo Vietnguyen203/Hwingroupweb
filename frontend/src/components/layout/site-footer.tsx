@@ -2,7 +2,9 @@ import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import { Commitments } from "@/components/home/commitments";
+import { Logo } from "@/components/brand/logo";
 import { siteConfig } from "@/lib/config";
+import { SocialLinks } from "./social-links";
 
 /** Cuối trang: dải đăng ký CTV (navy) · 4 ô cam kết · footer navy nhiều cột. */
 export function SiteFooter() {
@@ -28,9 +30,11 @@ export function SiteFooter() {
 
       <section className="bg-brand text-sm text-white/85">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <p className="mb-3 text-xl font-black text-white">HWIN</p>
-            <p>Thực phẩm chế biến sẵn – ngon, sạch, rõ nguồn gốc, giao nhanh giữ lạnh đến mọi gia đình Việt.</p>
+          <div className="space-y-4">
+            <Logo tone="light" className="[&_svg]:h-10 [&_span]:text-4xl" />
+            <p className="leading-relaxed">Hệ sinh thái sản phẩm nhập khẩu chính hãng, mang đến cuộc sống chất lượng hơn cho mọi gia đình Việt.</p>
+            <p className="font-bold text-white uppercase">Theo dõi HWIN trên mạng xã hội</p>
+            <SocialLinks />
           </div>
           <FooterCol title="Hỗ trợ khách hàng" links={[
             ["Chính sách đổi trả", "#"], ["Chính sách bảo mật", "#"], ["Hướng dẫn mua hàng", "#"],
