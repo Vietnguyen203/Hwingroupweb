@@ -67,7 +67,8 @@ public class CustomerService {
         }
     }
 
-    @Transactional(readOnly = true)
+    // Không để readOnly: load() có thể phải tạo hồ sơ khách lần đầu (INSERT)
+    @Transactional
     public <T> T profile(UUID customerId, Function<CustomerProfile, T> mapper) {
         Customer c = load(customerId);
         CustomerStats s = stats.findById(customerId).orElse(CustomerStats.empty(customerId, clock.instant()));
@@ -79,7 +80,7 @@ public class CustomerService {
         load(customerId).rename(fullName);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional // không readOnly: load() có thể tạo hồ sơ khách lần đầu
     public <T> java.util.List<T> addresses(UUID customerId, Function<CustomerAddress, T> mapper) {
         return load(customerId).getAddresses().stream().map(mapper).toList();
     }

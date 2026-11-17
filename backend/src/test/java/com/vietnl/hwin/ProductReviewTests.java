@@ -42,6 +42,9 @@ class ProductReviewTests {
     @Autowired OrderAdminService orderAdmin;
     @Autowired ProductSearchService search;
     @Autowired ProductReviewService reviews;
+    @Autowired com.vietnl.hwin.customer.service.CustomerService customerService;
+    @Autowired com.vietnl.hwin.customer.service.ProductReviewAdminService reviewAdmin;
+    @Autowired com.vietnl.hwin.customer.repository.ProductReviewRepository reviewRepo;
 
     private UUID productIdBySlug(String slug) {
         return search.search(new ProductSearchCriteria(null, null, ProductSort.NEWEST, 0, 60, false), p -> p)
@@ -110,5 +113,36 @@ class ProductReviewTests {
         assertThat(s.total()).isZero();
         assertThat(s.average()).isZero();
         assertThat(s.countByRating()).hasSize(5).containsEntry(5, 0L);
+    }
+
+    @Test
+    void adminCanHideAndShowReviewsAndHiddenOnesLeaveTheSummary() {
+        UUID productId = productIdBySlug("gio-thu-500g");
+        UUID admin = UUID.randomUUID();
+        UUID c1 = users.loginByPhone(PhoneNumber.of("0966000011")).getId();
+        UUID c2 = users.loginByPhone(PhoneNumber.of("0966000012")).getId();
+        customerService.ensureCustomer(c1);
+        customerService.ensureCustomer(c2);
+        ProductReview kept = reviewRepo.save(ProductReview.write(productId, c1, "Lê Thị Cúc", 5, "Rất ngon"));
+        ProductReview spam = reviewRepo.save(ProductReview.write(productId, c2, "Spam Bot", 1, "Quảng cáo xấu"));
+        assertThat(reviews.summary(productId).total()).isEqualTo(2);
+
+        reviewAdmin.setVisible(spam.getId(), false, "Quảng cáo", admin, v -> v);
+        ProductReviewSummary s = reviews.summary(productId);
+        assertThat(s.total()).isEqualTo(1);
+        assertThat(s.average()).isEqualTo(5.0);
+        assertThat(reviews.list(productId, 0, 10, x -> x).getContent()).extracting(ProductReview::getId).containsExactly(kept.getId());
+
+        // admin vẫn thấy đánh giá đã ẩn, lọc được theo trạng thái / sao / từ khóa
+        var hidden = reviewAdmin.search(false, null, productId, null, 0, 10, v -> v);
+        assertThat(hidden.getContent()).extracting(v -> v.review().getId()).containsExactly(spam.getId());
+        assertThat(hidden.getContent().get(0).productName()).isNotBlank();
+        assertThat(reviewAdmin.search(null, 1, productId, "quảng", 0, 10, v -> v).getTotalElements()).isEqualTo(1);
+        assertThat(reviewAdmin.search(true, null, productId, null, 0, 10, v -> v).getTotalElements()).isEqualTo(1);
+
+        reviewAdmin.setVisible(spam.getId(), true, null, admin, v -> v);
+        assertThat(reviews.summary(productId).total()).isEqualTo(2);
+        assertThatThrownBy(() -> reviewAdmin.setVisible(UUID.randomUUID(), false, null, admin, v -> v))
+                .hasFieldOrPropertyWithValue("code", "REVIEW_NOT_FOUND");
     }
 }

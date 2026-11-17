@@ -70,6 +70,15 @@ public class ProductReview extends AggregateRoot<ProductReview> {
         return r;
     }
 
+    /** Ẩn khỏi trang sản phẩm và khỏi điểm trung bình (kiểm duyệt). Khách vẫn không viết lại được vì đã có đánh giá. */
+    public void hide() {
+        this.visible = false;
+    }
+
+    public void show() {
+        this.visible = true;
+    }
+
     /** "Trần Văn Bình" -> "Trần V. B." (không lộ họ tên đầy đủ). */
     public String maskedReviewerName() {
         if (ANONYMOUS.equals(reviewerName)) {

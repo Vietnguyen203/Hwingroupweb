@@ -17,7 +17,8 @@ public enum ExceptionMessage implements BaseErrorMessage {
     REVIEW_COMMENT_TOO_LONG("Nội dung đánh giá tối đa #max# ký tự"),
     REVIEW_NOT_PURCHASED("Bạn chỉ có thể đánh giá sản phẩm đã mua và nhận hàng"),
     REVIEW_ALREADY_EXISTS("Bạn đã đánh giá sản phẩm này rồi"),
-    REVIEW_PRODUCT_NOT_FOUND("Không tìm thấy sản phẩm để đánh giá");
+    REVIEW_PRODUCT_NOT_FOUND("Không tìm thấy sản phẩm để đánh giá"),
+    REVIEW_NOT_FOUND("Không tìm thấy đánh giá");
 
     private final String val;
 

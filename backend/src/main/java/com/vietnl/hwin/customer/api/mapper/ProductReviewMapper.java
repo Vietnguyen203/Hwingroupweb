@@ -1,5 +1,7 @@
 package com.vietnl.hwin.customer.api.mapper;
 
+import com.vietnl.hwin.customer.api.dto.AdminProductReviewResponse;
+import com.vietnl.hwin.customer.service.model.AdminReviewView;
 import org.mapstruct.Mapper;
 
 import com.vietnl.hwin.customer.api.dto.ProductReviewResponse;
@@ -15,6 +17,13 @@ public interface ProductReviewMapper {
     default ProductReviewResponse toResponse(ProductReview r) {
         return ProductReviewResponse.builder().id(r.getId()).reviewerName(r.maskedReviewerName()).rating(r.getRating())
                 .comment(r.getComment()).createdAt(r.getCreatedAt()).build();
+    }
+
+    default AdminProductReviewResponse toAdmin(AdminReviewView v) {
+        ProductReview r = v.review();
+        return AdminProductReviewResponse.builder().id(r.getId()).productId(r.getProductId()).productName(v.productName())
+                .productSlug(v.productSlug()).reviewerName(r.getReviewerName()).rating(r.getRating()).comment(r.getComment())
+                .visible(r.isVisible()).createdAt(r.getCreatedAt()).build();
     }
 
     default ProductReviewSummaryResponse toResponse(ProductReviewSummary s) {
