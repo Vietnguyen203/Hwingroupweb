@@ -4,10 +4,10 @@ import org.mapstruct.Mapper;
 
 import com.vietnl.hwin.common.domain.Address;
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.customer.api.dto.CustomerDtos.AddressRequest;
-import com.vietnl.hwin.customer.api.dto.CustomerDtos.AddressResponse;
-import com.vietnl.hwin.customer.api.dto.CustomerDtos.FavoriteProductResponse;
-import com.vietnl.hwin.customer.api.dto.CustomerDtos.ProfileResponse;
+import com.vietnl.hwin.customer.api.requests.AddressRequest;
+import com.vietnl.hwin.customer.api.responses.AddressResponse;
+import com.vietnl.hwin.customer.api.responses.FavoriteProductResponse;
+import com.vietnl.hwin.customer.api.responses.ProfileResponse;
 import com.vietnl.hwin.customer.entity.CustomerAddress;
 import com.vietnl.hwin.customer.service.CustomerService.Profile;
 import com.vietnl.hwin.customer.service.FavoriteProductService.Favorite;
@@ -30,8 +30,8 @@ public interface CustomerMapper {
     }
 
     default Address toAddress(AddressRequest r) {
-        return new Address(r.recipientName(), PhoneNumber.of(r.recipientPhone()), r.province(), r.district(),
-                r.ward(), r.street());
+        return new Address(r.getRecipientName(), PhoneNumber.of(r.getRecipientPhone()), r.getProvince(), r.getDistrict(),
+                r.getWard(), r.getStreet());
     }
 
     default FavoriteProductResponse toFavorite(Favorite f) {

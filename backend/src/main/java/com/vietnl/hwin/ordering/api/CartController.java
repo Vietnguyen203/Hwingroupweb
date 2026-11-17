@@ -1,5 +1,6 @@
 package com.vietnl.hwin.ordering.api;
 
+import org.springframework.http.ResponseEntity;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
@@ -15,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vietnl.hwin.common.security.AuthPrincipal;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.CartItemRequest;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.CartLinesRequest;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.QuantityRequest;
+import com.vietnl.hwin.ordering.api.requests.CartItemRequest;
+import com.vietnl.hwin.ordering.api.requests.CartLinesRequest;
+import com.vietnl.hwin.ordering.api.requests.QuantityRequest;
 import com.vietnl.hwin.ordering.api.mapper.OrderingMapper;
 import com.vietnl.hwin.ordering.service.CartService;
 import com.vietnl.hwin.ordering.service.CartView;
@@ -39,35 +40,35 @@ public class CartController {
     }
 
     @GetMapping
-    public CartView get(@AuthenticationPrincipal AuthPrincipal me) {
-        return cartService.view(me.userId());
+    public ResponseEntity<CartView> get(@AuthenticationPrincipal AuthPrincipal me) {
+        return ResponseEntity.ok(cartService.view(me.userId()));
     }
 
     @PostMapping("/items")
-    public CartView add(@AuthenticationPrincipal AuthPrincipal me, @Valid @RequestBody CartItemRequest r) {
-        return cartService.addItem(me.userId(), r.productId(), r.quantity());
+    public ResponseEntity<CartView> add(@AuthenticationPrincipal AuthPrincipal me, @Valid @RequestBody CartItemRequest r) {
+        return ResponseEntity.ok(cartService.addItem(me.userId(), r.getProductId(), r.getQuantity()));
     }
 
     @PatchMapping("/items/{productId}")
-    public CartView changeQuantity(@AuthenticationPrincipal AuthPrincipal me, @PathVariable UUID productId,
+    public ResponseEntity<CartView> changeQuantity(@AuthenticationPrincipal AuthPrincipal me, @PathVariable UUID productId,
                                    @Valid @RequestBody QuantityRequest r) {
-        return cartService.changeQuantity(me.userId(), productId, r.quantity());
+        return ResponseEntity.ok(cartService.changeQuantity(me.userId(), productId, r.getQuantity()));
     }
 
     @DeleteMapping("/items/{productId}")
-    public CartView remove(@AuthenticationPrincipal AuthPrincipal me, @PathVariable UUID productId) {
-        return cartService.remove(me.userId(), productId);
+    public ResponseEntity<CartView> remove(@AuthenticationPrincipal AuthPrincipal me, @PathVariable UUID productId) {
+        return ResponseEntity.ok(cartService.remove(me.userId(), productId));
     }
 
     /** Gộp giỏ localStorage vào giỏ server ngay sau khi đăng nhập. */
     @PostMapping("/merge")
-    public CartView merge(@AuthenticationPrincipal AuthPrincipal me, @Valid @RequestBody CartLinesRequest r) {
-        return cartService.merge(me.userId(), mapper.toQuantities(r.items()));
+    public ResponseEntity<CartView> merge(@AuthenticationPrincipal AuthPrincipal me, @Valid @RequestBody CartLinesRequest r) {
+        return ResponseEntity.ok(cartService.merge(me.userId(), mapper.toQuantities(r.getItems())));
     }
 
     /** Công khai: tính giá giỏ localStorage của khách chưa đăng nhập (giá luôn do backend tính). */
     @PostMapping("/quote")
-    public CartView quote(@Valid @RequestBody CartLinesRequest r) {
-        return cartService.quote(mapper.toQuantities(r.items()));
+    public ResponseEntity<CartView> quote(@Valid @RequestBody CartLinesRequest r) {
+        return ResponseEntity.ok(cartService.quote(mapper.toQuantities(r.getItems())));
     }
 }

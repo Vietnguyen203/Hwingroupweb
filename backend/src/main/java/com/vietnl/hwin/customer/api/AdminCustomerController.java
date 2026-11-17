@@ -1,5 +1,6 @@
 package com.vietnl.hwin.customer.api;
 
+import org.springframework.http.ResponseEntity;
 import com.vietnl.hwin.common.web.PageResponse;
 import java.util.UUID;
 
@@ -37,17 +38,17 @@ public class AdminCustomerController {
 
     /** @param segment NEW | LOYAL | DORMANT */
     @GetMapping
-    public PageResponse<CustomerRow> list(@RequestParam(required = false) String q,
+    public ResponseEntity<PageResponse<CustomerRow>> list(@RequestParam(required = false) String q,
                      @RequestParam(required = false) CustomerSegment segment,
                      @RequestParam(name = "page", defaultValue = "1") int pageNo,
                      @RequestParam(name = "page_size", defaultValue = "20") int size) {
         int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
-        return service.search(q, segment, page, size);
+        return ResponseEntity.ok(service.search(q, segment, page, size));
     }
 
     @GetMapping("/{id}")
-    public CustomerRow get(@PathVariable UUID id) {
-        return service.get(id);
+    public ResponseEntity<CustomerRow> get(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.get(id));
     }
 
     @GetMapping("/export.csv")

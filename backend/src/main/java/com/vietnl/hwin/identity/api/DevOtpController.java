@@ -1,5 +1,6 @@
 package com.vietnl.hwin.identity.api;
 
+import org.springframework.http.ResponseEntity;
 import com.vietnl.hwin.identity.entity.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -35,10 +36,10 @@ public class DevOtpController {
 
     /** Truyền {@code phone} hoặc {@code email}. @param purpose LOGIN | BANK_CHANGE | ADMIN_LOGIN */
     @GetMapping("/latest")
-    public Map<String, String> latest(@RequestParam(required = false) String phone,
+    public ResponseEntity<Map<String, String>> latest(@RequestParam(required = false) String phone,
                                       @RequestParam(required = false) String email,
                                       @RequestParam(defaultValue = "LOGIN") OtpPurpose purpose) {
-        return inbox.latest(OtpTarget.of(phone, email), purpose).map(code -> Map.of("code", code))
-                .orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.DEV_OTP_NOT_FOUND));
+        return ResponseEntity.ok(inbox.latest(OtpTarget.of(phone, email), purpose).map(code -> Map.of("code", code))
+                .orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.DEV_OTP_NOT_FOUND)));
     }
 }

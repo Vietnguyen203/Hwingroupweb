@@ -1,5 +1,6 @@
 package com.vietnl.hwin.ordering.api;
 
+import org.springframework.http.ResponseEntity;
 import com.vietnl.hwin.common.exception.CommonErrorMessage;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -22,10 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vietnl.hwin.common.security.AuthPrincipal;
 import com.vietnl.hwin.common.web.PageResponse;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.AdminCancelRequest;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.AdminOrderResponse;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.AdminOrderRow;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.MarkPaidRequest;
+import com.vietnl.hwin.ordering.api.requests.AdminCancelRequest;
+import com.vietnl.hwin.ordering.api.responses.AdminOrderResponse;
+import com.vietnl.hwin.ordering.api.responses.AdminOrderRow;
+import com.vietnl.hwin.ordering.api.requests.MarkPaidRequest;
 import com.vietnl.hwin.ordering.api.mapper.OrderingMapper;
 import com.vietnl.hwin.ordering.entity.Order;
 import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
@@ -61,7 +62,7 @@ public class AdminOrderController {
     }
 
     @GetMapping
-    public PageResponse<AdminOrderRow> list(@RequestParam(required = false) OrderStatus status,
+    public ResponseEntity<PageResponse<AdminOrderRow>> list(@RequestParam(required = false) OrderStatus status,
                                             @RequestParam(required = false) PaymentMethod paymentMethod,
                                             @RequestParam(required = false) PaymentStatus paymentStatus,
                                             @RequestParam(required = false) String q,
@@ -71,7 +72,7 @@ public class AdminOrderController {
                                             @RequestParam(name = "page_size", defaultValue = "20") int size) {
         int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
         var filter = new OrderFilter(status, paymentMethod, paymentStatus, q, from, to, page, size);
-        return PageResponse.of(service.search(filter, mapper::toRow), x -> x);
+        return ResponseEntity.ok(PageResponse.of(service.search(filter, mapper::toRow), x -> x));
     }
 
     /**
@@ -79,50 +80,50 @@ public class AdminOrderController {
      * hwin.ordering.simulated-time-enabled=true (profile dev).
      */
     @PostMapping("/run-payment-timeout-job")
-    public Map<String, Object> runPaymentTimeoutJob(
+    public ResponseEntity<Map<String, Object>> runPaymentTimeoutJob(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant asOf) {
         if (asOf != null && !props.simulatedTimeEnabled()) {
             throw new ResponseException(HttpStatus.NOT_FOUND, CommonErrorMessage.SIMULATED_TIME_DISABLED);
         }
         Instant when = asOf != null ? asOf : Instant.now();
-        return Map.of("asOf", when.toString(), "cancelled", paymentTimeoutJob.cancelOverdue(when));
+        return ResponseEntity.ok(Map.of("asOf", when.toString(), "cancelled", paymentTimeoutJob.cancelOverdue(when)));
     }
 
     @GetMapping("/{id}")
-    public AdminOrderResponse get(@PathVariable UUID id) {
-        return service.get(id, this::admin);
+    public ResponseEntity<AdminOrderResponse> get(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.get(id, this::admin));
     }
 
     @PostMapping("/{id}/mark-paid")
-    public AdminOrderResponse markPaid(@PathVariable UUID id, @Valid @RequestBody MarkPaidRequest r,
+    public ResponseEntity<AdminOrderResponse> markPaid(@PathVariable UUID id, @Valid @RequestBody MarkPaidRequest r,
                                        @AuthenticationPrincipal AuthPrincipal me) {
-        return service.markPaid(id, r.paymentRef(), me.userId(), this::admin);
+        return ResponseEntity.ok(service.markPaid(id, r.getPaymentRef(), me.userId(), this::admin));
     }
 
     @PostMapping("/{id}/confirm")
-    public AdminOrderResponse confirm(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
-        return service.confirm(id, me.userId(), this::admin);
+    public ResponseEntity<AdminOrderResponse> confirm(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
+        return ResponseEntity.ok(service.confirm(id, me.userId(), this::admin));
     }
 
     @PostMapping("/{id}/ship")
-    public AdminOrderResponse ship(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
-        return service.ship(id, me.userId(), this::admin);
+    public ResponseEntity<AdminOrderResponse> ship(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
+        return ResponseEntity.ok(service.ship(id, me.userId(), this::admin));
     }
 
     @PostMapping("/{id}/deliver")
-    public AdminOrderResponse deliver(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
-        return service.deliver(id, me.userId(), this::admin);
+    public ResponseEntity<AdminOrderResponse> deliver(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
+        return ResponseEntity.ok(service.deliver(id, me.userId(), this::admin));
     }
 
     @PostMapping("/{id}/return")
-    public AdminOrderResponse returnOrder(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
-        return service.returnOrder(id, me.userId(), this::admin);
+    public ResponseEntity<AdminOrderResponse> returnOrder(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
+        return ResponseEntity.ok(service.returnOrder(id, me.userId(), this::admin));
     }
 
     @PostMapping("/{id}/cancel")
-    public AdminOrderResponse cancel(@PathVariable UUID id, @Valid @RequestBody(required = false) AdminCancelRequest r,
+    public ResponseEntity<AdminOrderResponse> cancel(@PathVariable UUID id, @Valid @RequestBody(required = false) AdminCancelRequest r,
                                      @AuthenticationPrincipal AuthPrincipal me) {
-        return service.cancel(id, r == null ? null : r.reason(), me.userId(), this::admin);
+        return ResponseEntity.ok(service.cancel(id, r == null ? null : r.getReason(), me.userId(), this::admin));
     }
 
     private AdminOrderResponse admin(Order o) {

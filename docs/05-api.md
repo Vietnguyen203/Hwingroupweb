@@ -8,6 +8,11 @@
 - `me` / `ctv` = tài nguyên của chính user trong JWT → **không bao giờ nhận userId từ client** (chống IDOR). Tài nguyên có mã (đơn hàng) luôn lọc thêm `customerId = currentUser`, không khớp trả **404**.
 - Endpoint admin có tiền tố `/api/admin/**` và nằm trong module sở hữu dữ liệu.
 - Phân trang: `?page=0&size=20&sort=field,dir` → `{content, page, size, totalElements, totalPages}`.
+- Cách viết API (theo `ai/skills/spring-boot-core`, áp dụng có chọn lọc):
+  - Controller trả `ResponseEntity<T>` (`ok`, `status(CREATED)`, `status(ACCEPTED)`, `noContent()`); controller chỉ gọi service, không chứa nghiệp vụ.
+  - DTO là class Lombok `@Data @Builder @NoArgsConstructor @AllArgsConstructor`: request ở `<module>/api/requests/XxxRequest`, response ở `<module>/api/responses/XxxResponse`.
+  - Validate bằng `@NotBlankValidator(field = "Tên")`, `@NotNullValidator`, `@LengthValidator(max, field)` (`common/validation`) – thông báo tiếng Việt tự sinh theo tên trường; nhóm `OnCreate` cho trường chỉ bắt buộc khi tạo mới. Các ràng buộc khác dùng Jakarta (`@Pattern`, `@Email`, `@Min`...).
+  - KHÔNG dùng `IBaseApi` / CRUD chung: nghiệp vụ đi qua aggregate (DDD) bằng từng lệnh riêng (`confirm`, `ship`, `approve`...). Enum lưu dạng chữ (không TINYINT).
 - Danh sách phân trang: tham số `page` (bắt đầu từ **1**), `page_size`; trả `PageResponse {content, page, pageSize, totalElements, totalPages}`.
 - Lỗi chuẩn `ErrorResponse` (theo `ai/skills/spring-boot-core`): `{traceId, timestamp, status, statusCode, messageCode, message, path, method, errors?[{field, message, rejectedValue?}], details?}`.
   - `messageCode`: mã ổn định cho frontend, ví dụ `OTP_INVALID`, `ACCOUNT_NOT_FOUND`, `CART_INVALID`; `message`: câu tiếng Việt hiển thị luôn được.

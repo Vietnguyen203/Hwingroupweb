@@ -1,5 +1,6 @@
 package com.vietnl.hwin.catalog.api;
 
+import org.springframework.http.ResponseEntity;
 import java.util.UUID;
 
 import java.io.IOException;
@@ -18,15 +19,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.vietnl.hwin.catalog.api.dto.CatalogDtos.ActiveRequest;
-import com.vietnl.hwin.catalog.api.dto.CatalogDtos.AdminProductResponse;
-import com.vietnl.hwin.catalog.api.dto.CatalogDtos.ProductUpsertRequest;
-import com.vietnl.hwin.catalog.api.dto.CatalogDtos.StockAdjustRequest;
-import com.vietnl.hwin.catalog.api.dto.CatalogDtos.UploadResponse;
+import com.vietnl.hwin.catalog.api.requests.ActiveRequest;
+import com.vietnl.hwin.catalog.api.responses.AdminProductResponse;
+import com.vietnl.hwin.catalog.api.requests.ProductUpsertRequest;
+import com.vietnl.hwin.catalog.api.requests.StockAdjustRequest;
+import com.vietnl.hwin.catalog.api.responses.UploadResponse;
 import com.vietnl.hwin.catalog.api.mapper.CatalogMapper;
 import com.vietnl.hwin.catalog.entity.ProductSort;
 import com.vietnl.hwin.catalog.service.ProductAdminService;
@@ -57,49 +57,47 @@ public class AdminProductController {
     }
 
     @GetMapping("/products")
-    public PageResponse<AdminProductResponse> list(@RequestParam(required = false) String q,
+    public ResponseEntity<PageResponse<AdminProductResponse>> list(@RequestParam(required = false) String q,
                                                    @RequestParam(required = false) String category,
                                                    @RequestParam(name = "page", defaultValue = "1") int pageNo,
                                                    @RequestParam(name = "page_size", defaultValue = "20") int size) {
         int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
         var criteria = new ProductSearchCriteria(q, category, ProductSort.NEWEST, page, size, false);
-        return PageResponse.of(searchService.search(criteria, mapper::toAdmin), x -> x);
+        return ResponseEntity.ok(PageResponse.of(searchService.search(criteria, mapper::toAdmin), x -> x));
     }
 
     @GetMapping("/products/{id}")
-    public AdminProductResponse get(@PathVariable UUID id) {
-        return adminService.get(id, mapper::toAdmin);
+    public ResponseEntity<AdminProductResponse> get(@PathVariable UUID id) {
+        return ResponseEntity.ok(adminService.get(id, mapper::toAdmin));
     }
 
     @PostMapping("/products")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Map<String, UUID> create(@Valid @RequestBody ProductUpsertRequest r) {
-        UUID id = adminService.create(mapper.toDetails(r), r.initialStock() == null ? 0 : r.initialStock(),
-                r.images(), r.bestseller());
-        return Map.of("id", id);
+    public ResponseEntity<Map<String, UUID>> create(@Valid @RequestBody ProductUpsertRequest r) {
+        UUID id = adminService.create(mapper.toDetails(r), r.getInitialStock() == null ? 0 : r.getInitialStock(),
+                r.getImages(), r.isBestseller());
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("id", id));
     }
 
     @PutMapping("/products/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void update(@PathVariable UUID id, @Valid @RequestBody ProductUpsertRequest r) {
-        adminService.update(id, mapper.toDetails(r), r.images(), r.bestseller());
+    public ResponseEntity<Void> update(@PathVariable UUID id, @Valid @RequestBody ProductUpsertRequest r) {
+        adminService.update(id, mapper.toDetails(r), r.getImages(), r.isBestseller());
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/products/{id}/stock")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void adjustStock(@PathVariable UUID id, @Valid @RequestBody StockAdjustRequest r) {
-        adminService.adjustStock(id, r.delta());
+    public ResponseEntity<Void> adjustStock(@PathVariable UUID id, @Valid @RequestBody StockAdjustRequest r) {
+        adminService.adjustStock(id, r.getDelta());
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/products/{id}/active")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void setActive(@PathVariable UUID id, @RequestBody ActiveRequest r) {
-        adminService.setActive(id, r.active());
+    public ResponseEntity<Void> setActive(@PathVariable UUID id, @RequestBody ActiveRequest r) {
+        adminService.setActive(id, r.isActive());
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping(value = "/uploads", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @ResponseStatus(HttpStatus.CREATED)
-    public UploadResponse upload(@RequestPart("file") MultipartFile file) throws IOException {
-        return new UploadResponse(storage.store(file.getInputStream(), file.getSize(), file.getContentType()));
+    public ResponseEntity<UploadResponse> upload(@RequestPart("file") MultipartFile file) throws IOException {
+        return ResponseEntity.status(HttpStatus.CREATED).body(new UploadResponse(storage.store(file.getInputStream(), file.getSize(), file.getContentType())));
     }
 }

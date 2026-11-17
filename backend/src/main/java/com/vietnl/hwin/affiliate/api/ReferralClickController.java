@@ -1,5 +1,6 @@
 package com.vietnl.hwin.affiliate.api;
 
+import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -10,10 +11,9 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.ClickRequest;
+import com.vietnl.hwin.affiliate.api.requests.ClickRequest;
 import com.vietnl.hwin.affiliate.service.AffiliateProperties;
 import com.vietnl.hwin.affiliate.service.ReferralClickService;
 import com.vietnl.hwin.common.security.SecurityProperties;
@@ -44,9 +44,8 @@ public class ReferralClickController {
     }
 
     @PostMapping("/clicks")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void click(@Valid @RequestBody ClickRequest body, HttpServletRequest request, HttpServletResponse response) {
-        clicks.record(body.code(), body.landingPath(), ClientInfo.from(request)).ifPresent(result ->
+    public ResponseEntity<Void> click(@Valid @RequestBody ClickRequest body, HttpServletRequest request, HttpServletResponse response) {
+        clicks.record(body.getCode(), body.getLandingPath(), ClientInfo.from(request)).ifPresent(result ->
                 response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from(REF_COOKIE, result.referralCode())
                         .httpOnly(true)
                         .secure(security.cookieSecure())
@@ -54,5 +53,6 @@ public class ReferralClickController {
                         .path("/")
                         .maxAge(props.refCookieMaxAge())
                         .build().toString()));
+        return ResponseEntity.noContent().build();
     }
 }

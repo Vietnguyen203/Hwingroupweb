@@ -4,12 +4,12 @@ import java.time.Duration;
 
 import org.mapstruct.Mapper;
 
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.AdminAffiliateResponse;
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.AdminCommissionResponse;
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.AdminPayoutResponse;
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.AffiliateResponse;
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.CommissionResponse;
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.PayoutResponse;
+import com.vietnl.hwin.affiliate.api.responses.AdminAffiliateResponse;
+import com.vietnl.hwin.affiliate.api.responses.AdminCommissionResponse;
+import com.vietnl.hwin.affiliate.api.responses.AdminPayoutResponse;
+import com.vietnl.hwin.affiliate.api.responses.AffiliateResponse;
+import com.vietnl.hwin.affiliate.api.responses.CommissionResponse;
+import com.vietnl.hwin.affiliate.api.responses.PayoutResponse;
 import com.vietnl.hwin.affiliate.entity.Affiliate;
 import com.vietnl.hwin.affiliate.entity.BankAccount;
 import com.vietnl.hwin.affiliate.entity.Commission;

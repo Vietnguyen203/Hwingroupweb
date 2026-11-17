@@ -1,5 +1,6 @@
 package com.vietnl.hwin.ordering.api;
 
+import org.springframework.http.ResponseEntity;
 import java.util.Arrays;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,14 +12,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vietnl.hwin.common.security.AuthCookies;
 import com.vietnl.hwin.common.security.AuthPrincipal;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.CheckoutConfigResponse;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.OrderDetailResponse;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.PlaceOrderRequest;
+import com.vietnl.hwin.ordering.api.responses.CheckoutConfigResponse;
+import com.vietnl.hwin.ordering.api.responses.OrderDetailResponse;
+import com.vietnl.hwin.ordering.api.requests.PlaceOrderRequest;
 import com.vietnl.hwin.ordering.api.mapper.OrderingMapper;
 import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
 import com.vietnl.hwin.ordering.service.OrderingProperties;
@@ -51,20 +51,19 @@ public class CheckoutController {
     }
 
     @GetMapping("/config")
-    public CheckoutConfigResponse config() {
-        return new CheckoutConfigResponse(props.shippingFee(),
-                Arrays.stream(PaymentMethod.values()).map(Enum::name).toList());
+    public ResponseEntity<CheckoutConfigResponse> config() {
+        return ResponseEntity.ok(new CheckoutConfigResponse(props.shippingFee(),
+                Arrays.stream(PaymentMethod.values()).map(Enum::name).toList()));
     }
 
     /** Đặt hàng. Giá tính lại ở backend; mã CTV đọc từ cookie hwin_ref (client không tự gửi). */
     @PostMapping("/orders")
-    @ResponseStatus(HttpStatus.CREATED)
-    public OrderDetailResponse place(@AuthenticationPrincipal AuthPrincipal me, @Valid @RequestBody PlaceOrderRequest r,
+    public ResponseEntity<OrderDetailResponse> place(@AuthenticationPrincipal AuthPrincipal me, @Valid @RequestBody PlaceOrderRequest r,
                                      HttpServletRequest request) {
         String ref = AuthCookies.read(request, REF_COOKIE).orElse(null);
-        PlaceOrderCommand cmd = new PlaceOrderCommand(mapper.toAddress(r.shippingAddress()), r.paymentMethod(),
-                mapper.toVat(r.vatInvoice()), r.note(), r.idempotencyKey());
-        return placeOrderService.place(me.userId(), cmd, ref, order -> mapper.toDetail(order,
-                paymentGateway.instructionFor(order.getOrderCode(), order.getTotal(), order.getPaymentMethod())));
+        PlaceOrderCommand cmd = new PlaceOrderCommand(mapper.toAddress(r.getShippingAddress()), r.getPaymentMethod(),
+                mapper.toVat(r.getVatInvoice()), r.getNote(), r.getIdempotencyKey());
+        return ResponseEntity.status(HttpStatus.CREATED).body(placeOrderService.place(me.userId(), cmd, ref, order -> mapper.toDetail(order,
+                paymentGateway.instructionFor(order.getOrderCode(), order.getTotal(), order.getPaymentMethod()))));
     }
 }

@@ -1,5 +1,6 @@
 package com.vietnl.hwin.common.audit;
 
+import org.springframework.http.ResponseEntity;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class AuditLogController {
      * @param action        ví dụ ORDER_PAID, COMMISSION_APPROVED, PAYOUT_PAID, BANK_CHANGED, BANK_VIEWED
      */
     @GetMapping
-    public PageResponse<AuditLogResponse> list(@RequestParam(required = false) String module,
+    public ResponseEntity<PageResponse<AuditLogResponse>> list(@RequestParam(required = false) String module,
                                                @RequestParam(required = false) String aggregateType,
                                                @RequestParam(required = false) String aggregateId,
                                                @RequestParam(required = false) String action,
@@ -84,7 +85,7 @@ public class AuditLogController {
                         rs.getTimestamp("created_at").toInstant()),
                 pageArgs.toArray());
         long t = total == null ? 0 : total;
-        return new PageResponse<>(rows, p + 1, s, t, (int) Math.ceil((double) t / s));
+        return ResponseEntity.ok(new PageResponse<>(rows, p + 1, s, t, (int) Math.ceil((double) t / s)));
     }
 
     private static void filter(StringBuilder where, List<Object> args, String column, String value) {

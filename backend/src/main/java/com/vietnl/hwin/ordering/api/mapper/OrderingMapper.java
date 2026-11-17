@@ -10,18 +10,18 @@ import org.mapstruct.Mapper;
 import com.vietnl.hwin.common.domain.Address;
 import com.vietnl.hwin.common.domain.Money;
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.AddressDto;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.AddressResponse;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.AdminOrderResponse;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.AdminOrderRow;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.CartItemRequest;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.HistoryResponse;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.OrderDetailResponse;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.OrderItemResponse;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.OrderSummaryResponse;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.PaymentInstructionResponse;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.VatInvoiceDto;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.VatInvoiceResponse;
+import com.vietnl.hwin.ordering.api.requests.AddressRequest;
+import com.vietnl.hwin.ordering.api.responses.AddressResponse;
+import com.vietnl.hwin.ordering.api.responses.AdminOrderResponse;
+import com.vietnl.hwin.ordering.api.responses.AdminOrderRow;
+import com.vietnl.hwin.ordering.api.requests.CartItemRequest;
+import com.vietnl.hwin.ordering.api.responses.HistoryResponse;
+import com.vietnl.hwin.ordering.api.responses.OrderDetailResponse;
+import com.vietnl.hwin.ordering.api.responses.OrderItemResponse;
+import com.vietnl.hwin.ordering.api.responses.OrderSummaryResponse;
+import com.vietnl.hwin.ordering.api.responses.PaymentInstructionResponse;
+import com.vietnl.hwin.ordering.api.requests.VatInvoiceRequest;
+import com.vietnl.hwin.ordering.api.responses.VatInvoiceResponse;
 import com.vietnl.hwin.ordering.entity.Order;
 import com.vietnl.hwin.ordering.entity.OrderItem;
 import com.vietnl.hwin.ordering.entity.OrderStatusHistory;
@@ -43,13 +43,13 @@ public interface OrderingMapper {
                 a.district(), a.ward(), a.street(), a.fullText());
     }
 
-    default Address toAddress(AddressDto d) {
-        return new Address(d.recipientName(), PhoneNumber.of(d.recipientPhone()), d.province(), d.district(),
-                d.ward(), d.street());
+    default Address toAddress(AddressRequest d) {
+        return new Address(d.getRecipientName(), PhoneNumber.of(d.getRecipientPhone()), d.getProvince(), d.getDistrict(),
+                d.getWard(), d.getStreet());
     }
 
-    default VatInvoiceInfo toVat(VatInvoiceDto d) {
-        return d == null ? null : new VatInvoiceInfo(d.companyName(), d.taxCode(), d.address(), d.email());
+    default VatInvoiceInfo toVat(VatInvoiceRequest d) {
+        return d == null ? null : new VatInvoiceInfo(d.getCompanyName(), d.getTaxCode(), d.getAddress(), d.getEmail());
     }
 
     default OrderSummaryResponse toSummary(Order o) {
@@ -91,7 +91,7 @@ public interface OrderingMapper {
 
     default Map<UUID, Integer> toQuantities(List<CartItemRequest> items) {
         java.util.LinkedHashMap<UUID, Integer> map = new java.util.LinkedHashMap<>();
-        items.forEach(i -> map.merge(i.productId(), i.quantity(), Integer::sum));
+        items.forEach(i -> map.merge(i.getProductId(), i.getQuantity(), Integer::sum));
         return map;
     }
 

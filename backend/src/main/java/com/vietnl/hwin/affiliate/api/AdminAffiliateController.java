@@ -1,5 +1,6 @@
 package com.vietnl.hwin.affiliate.api;
 
+import org.springframework.http.ResponseEntity;
 import com.vietnl.hwin.common.exception.CommonErrorMessage;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -18,13 +19,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.AdminAffiliateResponse;
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.AdminCommissionResponse;
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.AdminPayoutResponse;
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.ApprovalJobResponse;
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.PayRequest;
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.PayoutResponse;
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.ReasonRequest;
+import com.vietnl.hwin.affiliate.api.responses.AdminAffiliateResponse;
+import com.vietnl.hwin.affiliate.api.responses.AdminCommissionResponse;
+import com.vietnl.hwin.affiliate.api.responses.AdminPayoutResponse;
+import com.vietnl.hwin.affiliate.api.responses.ApprovalJobResponse;
+import com.vietnl.hwin.affiliate.api.requests.PayRequest;
+import com.vietnl.hwin.affiliate.api.responses.PayoutResponse;
+import com.vietnl.hwin.affiliate.api.requests.ReasonRequest;
 import com.vietnl.hwin.affiliate.api.mapper.AffiliateMapper;
 import com.vietnl.hwin.affiliate.entity.AffiliateEnums.AffiliateStatus;
 import com.vietnl.hwin.affiliate.entity.AffiliateEnums.CommissionStatus;
@@ -66,51 +67,51 @@ public class AdminAffiliateController {
     // ------------------------------------------------------------------ CTV
 
     @GetMapping("/affiliates")
-    public PageResponse<AdminAffiliateResponse> list(@RequestParam(required = false) AffiliateStatus status,
+    public ResponseEntity<PageResponse<AdminAffiliateResponse>> list(@RequestParam(required = false) AffiliateStatus status,
                                                      @RequestParam(required = false) String q,
                                                      @RequestParam(name = "page", defaultValue = "1") int pageNo,
                                                      @RequestParam(name = "page_size", defaultValue = "20") int size) {
         int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
-        return PageResponse.of(affiliates.search(status, q, page, size, mapper::toAdmin), x -> x);
+        return ResponseEntity.ok(PageResponse.of(affiliates.search(status, q, page, size, mapper::toAdmin), x -> x));
     }
 
     @GetMapping("/affiliates/{id}")
-    public AdminAffiliateResponse get(@PathVariable UUID id) {
-        return affiliates.get(id, mapper::toAdmin);
+    public ResponseEntity<AdminAffiliateResponse> get(@PathVariable UUID id) {
+        return ResponseEntity.ok(affiliates.get(id, mapper::toAdmin));
     }
 
     @PostMapping("/affiliates/{id}/approve")
-    public AdminAffiliateResponse approve(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
-        return affiliates.approve(id, me.userId(), mapper::toAdmin);
+    public ResponseEntity<AdminAffiliateResponse> approve(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
+        return ResponseEntity.ok(affiliates.approve(id, me.userId(), mapper::toAdmin));
     }
 
     @PostMapping("/affiliates/{id}/reject")
-    public AdminAffiliateResponse reject(@PathVariable UUID id, @Valid @RequestBody ReasonRequest r,
+    public ResponseEntity<AdminAffiliateResponse> reject(@PathVariable UUID id, @Valid @RequestBody ReasonRequest r,
                                          @AuthenticationPrincipal AuthPrincipal me) {
-        return affiliates.reject(id, r.reason(), me.userId(), mapper::toAdmin);
+        return ResponseEntity.ok(affiliates.reject(id, r.getReason(), me.userId(), mapper::toAdmin));
     }
 
     @PostMapping("/affiliates/{id}/suspend")
-    public AdminAffiliateResponse suspend(@PathVariable UUID id, @Valid @RequestBody ReasonRequest r,
+    public ResponseEntity<AdminAffiliateResponse> suspend(@PathVariable UUID id, @Valid @RequestBody ReasonRequest r,
                                           @AuthenticationPrincipal AuthPrincipal me) {
-        return affiliates.suspend(id, r.reason(), me.userId(), mapper::toAdmin);
+        return ResponseEntity.ok(affiliates.suspend(id, r.getReason(), me.userId(), mapper::toAdmin));
     }
 
     @PostMapping("/affiliates/{id}/reinstate")
-    public AdminAffiliateResponse reinstate(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
-        return affiliates.reinstate(id, me.userId(), mapper::toAdmin);
+    public ResponseEntity<AdminAffiliateResponse> reinstate(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
+        return ResponseEntity.ok(affiliates.reinstate(id, me.userId(), mapper::toAdmin));
     }
 
     // ------------------------------------------------------------------ hoa hồng
 
     @GetMapping("/commissions")
-    public PageResponse<AdminCommissionResponse> commissions(@RequestParam(required = false) CommissionStatus status,
+    public ResponseEntity<PageResponse<AdminCommissionResponse>> commissions(@RequestParam(required = false) CommissionStatus status,
                                                              @RequestParam(required = false) UUID affiliateId,
                                                              @RequestParam(required = false) String orderCode,
                                                              @RequestParam(name = "page", defaultValue = "1") int pageNo,
                                                              @RequestParam(name = "page_size", defaultValue = "20") int size) {
         int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
-        return PageResponse.of(commissionQuery.search(status, affiliateId, orderCode, page, size, mapper::toAdmin), x -> x);
+        return ResponseEntity.ok(PageResponse.of(commissionQuery.search(status, affiliateId, orderCode, page, size, mapper::toAdmin), x -> x));
     }
 
     /**
@@ -118,45 +119,45 @@ public class AdminAffiliateController {
      * hwin.affiliate.simulated-time-enabled=true (profile dev) – để demo không phải chờ 7 ngày.
      */
     @PostMapping("/commissions/run-approval-job")
-    public ApprovalJobResponse runApprovalJob(
+    public ResponseEntity<ApprovalJobResponse> runApprovalJob(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant asOf) {
         if (asOf != null && !props.simulatedTimeEnabled()) {
             throw new ResponseException(HttpStatus.NOT_FOUND, CommonErrorMessage.SIMULATED_TIME_DISABLED);
         }
         Instant when = asOf != null ? asOf : Instant.now();
-        return new ApprovalJobResponse(when, approvalJob.approveDue(when));
+        return ResponseEntity.ok(new ApprovalJobResponse(when, approvalJob.approveDue(when)));
     }
 
     // ------------------------------------------------------------------ rút tiền
 
     @GetMapping("/payouts")
-    public PageResponse<PayoutResponse> payouts(@RequestParam(required = false) PayoutStatus status,
+    public ResponseEntity<PageResponse<PayoutResponse>> payouts(@RequestParam(required = false) PayoutStatus status,
                                                 @RequestParam(name = "page", defaultValue = "1") int pageNo,
                                                 @RequestParam(name = "page_size", defaultValue = "20") int size) {
         int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
-        return PageResponse.of(payouts.search(status, page, size, mapper::toResponse), x -> x);
+        return ResponseEntity.ok(PageResponse.of(payouts.search(status, page, size, mapper::toResponse), x -> x));
     }
 
     /** Chi tiết + số tài khoản đã giải mã (mỗi lần xem ghi audit BANK_VIEWED). */
     @GetMapping("/payouts/{id}")
-    public AdminPayoutResponse payout(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
-        return mapper.toAdmin(payouts.getForAdmin(id, me.userId()));
+    public ResponseEntity<AdminPayoutResponse> payout(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
+        return ResponseEntity.ok(mapper.toAdmin(payouts.getForAdmin(id, me.userId())));
     }
 
     @PostMapping("/payouts/{id}/approve")
-    public PayoutResponse approvePayout(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
-        return payouts.approve(id, me.userId(), mapper::toResponse);
+    public ResponseEntity<PayoutResponse> approvePayout(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
+        return ResponseEntity.ok(payouts.approve(id, me.userId(), mapper::toResponse));
     }
 
     @PostMapping("/payouts/{id}/pay")
-    public PayoutResponse pay(@PathVariable UUID id, @Valid @RequestBody PayRequest r,
+    public ResponseEntity<PayoutResponse> pay(@PathVariable UUID id, @Valid @RequestBody PayRequest r,
                               @AuthenticationPrincipal AuthPrincipal me) {
-        return payouts.markPaid(id, r.transactionRef(), me.userId(), mapper::toResponse);
+        return ResponseEntity.ok(payouts.markPaid(id, r.getTransactionRef(), me.userId(), mapper::toResponse));
     }
 
     @PostMapping("/payouts/{id}/reject")
-    public PayoutResponse rejectPayout(@PathVariable UUID id, @Valid @RequestBody ReasonRequest r,
+    public ResponseEntity<PayoutResponse> rejectPayout(@PathVariable UUID id, @Valid @RequestBody ReasonRequest r,
                                        @AuthenticationPrincipal AuthPrincipal me) {
-        return payouts.reject(id, r.reason(), me.userId(), mapper::toResponse);
+        return ResponseEntity.ok(payouts.reject(id, r.getReason(), me.userId(), mapper::toResponse));
     }
 }

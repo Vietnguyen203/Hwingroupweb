@@ -1,5 +1,6 @@
 package com.vietnl.hwin.identity.api;
 
+import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -10,12 +11,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vietnl.hwin.common.security.AuthPrincipal;
-import com.vietnl.hwin.identity.api.dto.AuthDtos.CreateAdminRequest;
-import com.vietnl.hwin.identity.api.dto.AuthDtos.MeResponse;
+import com.vietnl.hwin.identity.api.requests.CreateAdminRequest;
+import com.vietnl.hwin.identity.api.responses.MeResponse;
 import com.vietnl.hwin.identity.api.mapper.UserMapper;
 import com.vietnl.hwin.identity.service.AdminAccountService;
 
@@ -38,13 +38,12 @@ public class AdminAccountController {
     }
 
     @GetMapping
-    public List<MeResponse> list() {
-        return service.list(mapper::toMe);
+    public ResponseEntity<List<MeResponse>> list() {
+        return ResponseEntity.ok(service.list(mapper::toMe));
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public MeResponse create(@Valid @RequestBody CreateAdminRequest r, @AuthenticationPrincipal AuthPrincipal me) {
-        return service.create(r.email(), r.password(), r.fullName(), r.phone(), me.userId(), mapper::toMe);
+    public ResponseEntity<MeResponse> create(@Valid @RequestBody CreateAdminRequest r, @AuthenticationPrincipal AuthPrincipal me) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(r.getEmail(), r.getPassword(), r.getFullName(), r.getPhone(), me.userId(), mapper::toMe));
     }
 }

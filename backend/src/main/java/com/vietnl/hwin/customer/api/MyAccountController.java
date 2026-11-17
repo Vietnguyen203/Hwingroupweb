@@ -1,5 +1,6 @@
 package com.vietnl.hwin.customer.api;
 
+import org.springframework.http.ResponseEntity;
 import java.util.UUID;
 
 import java.util.List;
@@ -16,15 +17,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vietnl.hwin.common.security.AuthPrincipal;
-import com.vietnl.hwin.customer.api.dto.CustomerDtos.AddressRequest;
-import com.vietnl.hwin.customer.api.dto.CustomerDtos.AddressResponse;
-import com.vietnl.hwin.customer.api.dto.CustomerDtos.FavoriteProductResponse;
-import com.vietnl.hwin.customer.api.dto.CustomerDtos.ProfileResponse;
-import com.vietnl.hwin.customer.api.dto.CustomerDtos.UpdateProfileRequest;
+import com.vietnl.hwin.customer.api.requests.AddressRequest;
+import com.vietnl.hwin.customer.api.responses.AddressResponse;
+import com.vietnl.hwin.customer.api.responses.FavoriteProductResponse;
+import com.vietnl.hwin.customer.api.responses.ProfileResponse;
+import com.vietnl.hwin.customer.api.requests.UpdateProfileRequest;
 import com.vietnl.hwin.customer.api.mapper.CustomerMapper;
 import com.vietnl.hwin.customer.service.CustomerService;
 import com.vietnl.hwin.customer.service.FavoriteProductService;
@@ -55,59 +55,58 @@ public class MyAccountController {
     }
 
     @GetMapping("/profile")
-    public ProfileResponse profile(@AuthenticationPrincipal AuthPrincipal me) {
-        return customers.profile(me.userId(), mapper::toProfile);
+    public ResponseEntity<ProfileResponse> profile(@AuthenticationPrincipal AuthPrincipal me) {
+        return ResponseEntity.ok(customers.profile(me.userId(), mapper::toProfile));
     }
 
     @PutMapping("/profile")
-    public ProfileResponse updateProfile(@AuthenticationPrincipal AuthPrincipal me,
+    public ResponseEntity<ProfileResponse> updateProfile(@AuthenticationPrincipal AuthPrincipal me,
                                          @Valid @RequestBody UpdateProfileRequest r) {
-        customers.rename(me.userId(), r.fullName());
-        return customers.profile(me.userId(), mapper::toProfile);
+        customers.rename(me.userId(), r.getFullName());
+        return ResponseEntity.ok(customers.profile(me.userId(), mapper::toProfile));
     }
 
     @GetMapping("/addresses")
-    public List<AddressResponse> addresses(@AuthenticationPrincipal AuthPrincipal me) {
-        return customers.addresses(me.userId(), mapper::toResponse);
+    public ResponseEntity<List<AddressResponse>> addresses(@AuthenticationPrincipal AuthPrincipal me) {
+        return ResponseEntity.ok(customers.addresses(me.userId(), mapper::toResponse));
     }
 
     @PostMapping("/addresses")
-    @ResponseStatus(HttpStatus.CREATED)
-    public AddressResponse addAddress(@AuthenticationPrincipal AuthPrincipal me, @Valid @RequestBody AddressRequest r) {
-        return customers.addAddress(me.userId(), mapper.toAddress(r), r.makeDefault(), mapper::toResponse);
+    public ResponseEntity<AddressResponse> addAddress(@AuthenticationPrincipal AuthPrincipal me, @Valid @RequestBody AddressRequest r) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(customers.addAddress(me.userId(), mapper.toAddress(r), r.isMakeDefault(), mapper::toResponse));
     }
 
     @PutMapping("/addresses/{id}")
-    public List<AddressResponse> updateAddress(@AuthenticationPrincipal AuthPrincipal me, @PathVariable UUID id,
+    public ResponseEntity<List<AddressResponse>> updateAddress(@AuthenticationPrincipal AuthPrincipal me, @PathVariable UUID id,
                                                @Valid @RequestBody AddressRequest r) {
         customers.updateAddress(me.userId(), id, mapper.toAddress(r));
-        if (r.makeDefault()) {
+        if (r.isMakeDefault()) {
             customers.setDefaultAddress(me.userId(), id);
         }
-        return customers.addresses(me.userId(), mapper::toResponse);
+        return ResponseEntity.ok(customers.addresses(me.userId(), mapper::toResponse));
     }
 
     @PostMapping("/addresses/{id}/default")
-    public List<AddressResponse> setDefault(@AuthenticationPrincipal AuthPrincipal me, @PathVariable UUID id) {
+    public ResponseEntity<List<AddressResponse>> setDefault(@AuthenticationPrincipal AuthPrincipal me, @PathVariable UUID id) {
         customers.setDefaultAddress(me.userId(), id);
-        return customers.addresses(me.userId(), mapper::toResponse);
+        return ResponseEntity.ok(customers.addresses(me.userId(), mapper::toResponse));
     }
 
     @DeleteMapping("/addresses/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteAddress(@AuthenticationPrincipal AuthPrincipal me, @PathVariable UUID id) {
+    public ResponseEntity<Void> deleteAddress(@AuthenticationPrincipal AuthPrincipal me, @PathVariable UUID id) {
         customers.removeAddress(me.userId(), id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/favorite-products")
-    public List<FavoriteProductResponse> favorites(@AuthenticationPrincipal AuthPrincipal me,
+    public ResponseEntity<List<FavoriteProductResponse>> favorites(@AuthenticationPrincipal AuthPrincipal me,
                                                    @RequestParam(defaultValue = "8") int limit) {
-        return favorites.top(me.userId(), limit).stream().map(mapper::toFavorite).toList();
+        return ResponseEntity.ok(favorites.top(me.userId(), limit).stream().map(mapper::toFavorite).toList());
     }
 
     /** Mua lại: chép sản phẩm của đơn cũ vào giỏ, trả về sản phẩm đã thêm / bị bỏ qua. */
     @PostMapping("/orders/{code}/reorder")
-    public ReorderService.Result reorder(@AuthenticationPrincipal AuthPrincipal me, @PathVariable String code) {
-        return reorders.reorder(me.userId(), code);
+    public ResponseEntity<ReorderService.Result> reorder(@AuthenticationPrincipal AuthPrincipal me, @PathVariable String code) {
+        return ResponseEntity.ok(reorders.reorder(me.userId(), code));
     }
 }

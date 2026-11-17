@@ -1,5 +1,6 @@
 package com.vietnl.hwin.catalog.api;
 
+import org.springframework.http.ResponseEntity;
 import java.util.UUID;
 
 import java.util.List;
@@ -14,11 +15,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vietnl.hwin.catalog.api.dto.CatalogDtos.CategoryResponse;
-import com.vietnl.hwin.catalog.api.dto.CatalogDtos.CategoryUpsertRequest;
+import com.vietnl.hwin.catalog.api.responses.CategoryResponse;
+import com.vietnl.hwin.catalog.api.requests.CategoryUpsertRequest;
 import com.vietnl.hwin.catalog.api.mapper.CatalogMapper;
 import com.vietnl.hwin.catalog.service.CategoryService;
 
@@ -39,25 +39,24 @@ public class AdminCategoryController {
     }
 
     @GetMapping
-    public List<CategoryResponse> list() {
-        return categoryService.listAll(mapper::toResponse);
+    public ResponseEntity<List<CategoryResponse>> list() {
+        return ResponseEntity.ok(categoryService.listAll(mapper::toResponse));
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public CategoryResponse create(@Valid @RequestBody CategoryUpsertRequest r) {
-        return mapper.toResponse(categoryService.create(r.name(), r.slug(), r.iconUrl(), r.sortOrder()));
+    public ResponseEntity<CategoryResponse> create(@Valid @RequestBody CategoryUpsertRequest r) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(categoryService.create(r.getName(), r.getSlug(), r.getIconUrl(), r.getSortOrder())));
     }
 
     @PutMapping("/{id}")
-    public CategoryResponse update(@PathVariable UUID id, @Valid @RequestBody CategoryUpsertRequest r) {
-        return mapper.toResponse(categoryService.update(id, r.name(), r.slug(), r.iconUrl(), r.sortOrder(), r.active()));
+    public ResponseEntity<CategoryResponse> update(@PathVariable UUID id, @Valid @RequestBody CategoryUpsertRequest r) {
+        return ResponseEntity.ok(mapper.toResponse(categoryService.update(id, r.getName(), r.getSlug(), r.getIconUrl(), r.getSortOrder(), r.isActive())));
     }
 
     /** Ẩn danh mục (không xóa cứng). */
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deactivate(@PathVariable UUID id) {
+    public ResponseEntity<Void> deactivate(@PathVariable UUID id) {
         categoryService.deactivate(id);
+        return ResponseEntity.noContent().build();
     }
 }

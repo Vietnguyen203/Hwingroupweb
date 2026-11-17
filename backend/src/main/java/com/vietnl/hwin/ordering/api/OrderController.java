@@ -1,5 +1,6 @@
 package com.vietnl.hwin.ordering.api;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vietnl.hwin.common.security.AuthPrincipal;
 import com.vietnl.hwin.common.web.PageResponse;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.OrderDetailResponse;
-import com.vietnl.hwin.ordering.api.dto.OrderingDtos.OrderSummaryResponse;
+import com.vietnl.hwin.ordering.api.responses.OrderDetailResponse;
+import com.vietnl.hwin.ordering.api.responses.OrderSummaryResponse;
 import com.vietnl.hwin.ordering.api.mapper.OrderingMapper;
 import com.vietnl.hwin.ordering.entity.Order;
 import com.vietnl.hwin.ordering.entity.OrderStatus;
@@ -37,22 +38,22 @@ public class OrderController {
     }
 
     @GetMapping
-    public PageResponse<OrderSummaryResponse> list(@AuthenticationPrincipal AuthPrincipal me,
+    public ResponseEntity<PageResponse<OrderSummaryResponse>> list(@AuthenticationPrincipal AuthPrincipal me,
                                                    @RequestParam(required = false) OrderStatus status,
                                                    @RequestParam(name = "page", defaultValue = "1") int pageNo,
                                                    @RequestParam(name = "page_size", defaultValue = "10") int size) {
         int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
-        return PageResponse.of(service.list(me.userId(), status, page, size, mapper::toSummary), x -> x);
+        return ResponseEntity.ok(PageResponse.of(service.list(me.userId(), status, page, size, mapper::toSummary), x -> x));
     }
 
     @GetMapping("/{code}")
-    public OrderDetailResponse get(@AuthenticationPrincipal AuthPrincipal me, @PathVariable String code) {
-        return service.get(me.userId(), code, this::detail);
+    public ResponseEntity<OrderDetailResponse> get(@AuthenticationPrincipal AuthPrincipal me, @PathVariable String code) {
+        return ResponseEntity.ok(service.get(me.userId(), code, this::detail));
     }
 
     @PostMapping("/{code}/cancel")
-    public OrderDetailResponse cancel(@AuthenticationPrincipal AuthPrincipal me, @PathVariable String code) {
-        return service.cancel(me.userId(), code, this::detail);
+    public ResponseEntity<OrderDetailResponse> cancel(@AuthenticationPrincipal AuthPrincipal me, @PathVariable String code) {
+        return ResponseEntity.ok(service.cancel(me.userId(), code, this::detail));
     }
 
     private OrderDetailResponse detail(Order o) {

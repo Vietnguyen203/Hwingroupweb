@@ -5,12 +5,12 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.vietnl.hwin.catalog.api.dto.CatalogDtos.AdminProductResponse;
-import com.vietnl.hwin.catalog.api.dto.CatalogDtos.CategoryResponse;
-import com.vietnl.hwin.catalog.api.dto.CatalogDtos.FoodInfoDto;
-import com.vietnl.hwin.catalog.api.dto.CatalogDtos.ProductCardResponse;
-import com.vietnl.hwin.catalog.api.dto.CatalogDtos.ProductDetailResponse;
-import com.vietnl.hwin.catalog.api.dto.CatalogDtos.ProductUpsertRequest;
+import com.vietnl.hwin.catalog.api.responses.AdminProductResponse;
+import com.vietnl.hwin.catalog.api.responses.CategoryResponse;
+import com.vietnl.hwin.catalog.api.responses.FoodInfoDto;
+import com.vietnl.hwin.catalog.api.responses.ProductCardResponse;
+import com.vietnl.hwin.catalog.api.responses.ProductDetailResponse;
+import com.vietnl.hwin.catalog.api.requests.ProductUpsertRequest;
 import com.vietnl.hwin.catalog.entity.Category;
 import com.vietnl.hwin.catalog.entity.FoodInfo;
 import com.vietnl.hwin.catalog.entity.Product;
@@ -44,9 +44,9 @@ public interface CatalogMapper {
     FoodInfo toFoodInfo(FoodInfoDto dto);
 
     default ProductDetails toDetails(ProductUpsertRequest r) {
-        return new ProductDetails(r.categoryId(), r.name(), r.slug(), Money.of(r.price()),
-                r.compareAtPrice() == null ? null : Money.of(r.compareAtPrice()), r.shortDescription(),
-                r.description(), r.unit(), toFoodInfo(r.foodInfo()));
+        return new ProductDetails(r.getCategoryId(), r.getName(), r.getSlug(), Money.of(r.getPrice()),
+                r.getCompareAtPrice() == null ? null : Money.of(r.getCompareAtPrice()), r.getShortDescription(),
+                r.getDescription(), r.getUnit(), toFoodInfo(r.getFoodInfo()));
     }
 
     default Long moneyToLong(Money money) {

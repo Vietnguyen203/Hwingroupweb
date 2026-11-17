@@ -1,5 +1,6 @@
 package com.vietnl.hwin.affiliate.api;
 
+import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
@@ -11,16 +12,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.AffiliateResponse;
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.BankAccountRequest;
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.CommissionResponse;
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.OtpSentResponse;
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.PayoutRequest;
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.PayoutResponse;
-import com.vietnl.hwin.affiliate.api.dto.AffiliateDtos.RegisterRequest;
+import com.vietnl.hwin.affiliate.api.responses.AffiliateResponse;
+import com.vietnl.hwin.affiliate.api.requests.BankAccountRequest;
+import com.vietnl.hwin.affiliate.api.responses.CommissionResponse;
+import com.vietnl.hwin.affiliate.api.responses.OtpSentResponse;
+import com.vietnl.hwin.affiliate.api.requests.PayoutRequest;
+import com.vietnl.hwin.affiliate.api.responses.PayoutResponse;
+import com.vietnl.hwin.affiliate.api.requests.RegisterRequest;
 import com.vietnl.hwin.affiliate.api.mapper.AffiliateMapper;
 import com.vietnl.hwin.affiliate.service.AffiliateDashboardService;
 import com.vietnl.hwin.affiliate.service.AffiliateDashboardService.BoundCustomer;
@@ -59,68 +59,65 @@ public class CtvController {
     }
 
     @PostMapping("/register")
-    @ResponseStatus(HttpStatus.CREATED)
-    public AffiliateResponse register(@AuthenticationPrincipal AuthPrincipal me, @Valid @RequestBody RegisterRequest r) {
-        return affiliates.register(me.userId(), r.fullName(), r.socialLink(), r.note(), r.phone(),
-                a -> mapper.toResponse(a, props.bankChangeLock()));
+    public ResponseEntity<AffiliateResponse> register(@AuthenticationPrincipal AuthPrincipal me, @Valid @RequestBody RegisterRequest r) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(affiliates.register(me.userId(), r.getFullName(), r.getSocialLink(), r.getNote(), r.getPhone(),
+                a -> mapper.toResponse(a, props.bankChangeLock())));
     }
 
     @GetMapping("/me")
-    public AffiliateResponse me(@AuthenticationPrincipal AuthPrincipal me) {
-        return affiliates.me(me.userId(), a -> mapper.toResponse(a, props.bankChangeLock()));
+    public ResponseEntity<AffiliateResponse> me(@AuthenticationPrincipal AuthPrincipal me) {
+        return ResponseEntity.ok(affiliates.me(me.userId(), a -> mapper.toResponse(a, props.bankChangeLock())));
     }
 
     @GetMapping("/dashboard")
-    public Dashboard dashboard(@AuthenticationPrincipal AuthPrincipal me) {
-        return dashboards.dashboard(me.userId());
+    public ResponseEntity<Dashboard> dashboard(@AuthenticationPrincipal AuthPrincipal me) {
+        return ResponseEntity.ok(dashboards.dashboard(me.userId()));
     }
 
     @GetMapping("/commissions")
-    public PageResponse<CommissionResponse> commissions(@AuthenticationPrincipal AuthPrincipal me,
+    public ResponseEntity<PageResponse<CommissionResponse>> commissions(@AuthenticationPrincipal AuthPrincipal me,
                                                         @RequestParam(name = "page", defaultValue = "1") int pageNo,
                                                         @RequestParam(name = "page_size", defaultValue = "20") int size) {
         int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
-        return PageResponse.of(dashboards.commissions(me.userId(), page, size, mapper::toResponse), x -> x);
+        return ResponseEntity.ok(PageResponse.of(dashboards.commissions(me.userId(), page, size, mapper::toResponse), x -> x));
     }
 
     @GetMapping("/customers")
-    public PageResponse<BoundCustomer> customers(@AuthenticationPrincipal AuthPrincipal me,
+    public ResponseEntity<PageResponse<BoundCustomer>> customers(@AuthenticationPrincipal AuthPrincipal me,
                                                  @RequestParam(name = "page", defaultValue = "1") int pageNo,
                                                  @RequestParam(name = "page_size", defaultValue = "20") int size) {
         int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
-        return PageResponse.of(dashboards.customers(me.userId(), page, size), x -> x);
+        return ResponseEntity.ok(PageResponse.of(dashboards.customers(me.userId(), page, size), x -> x));
     }
 
     @GetMapping("/bank-account")
-    public AffiliateResponse bankAccount(@AuthenticationPrincipal AuthPrincipal me) {
+    public ResponseEntity<AffiliateResponse> bankAccount(@AuthenticationPrincipal AuthPrincipal me) {
         return me(me);
     }
 
     /** Gửi OTP tới SĐT của CTV – bắt buộc trước khi đổi tài khoản ngân hàng. */
     @PostMapping("/bank-account/otp")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public OtpSentResponse bankOtp(@AuthenticationPrincipal AuthPrincipal me, HttpServletRequest request) {
-        return new OtpSentResponse(affiliates.sendBankChangeOtp(me.userId(), ClientInfo.from(request).ipHash()));
+    public ResponseEntity<OtpSentResponse> bankOtp(@AuthenticationPrincipal AuthPrincipal me, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new OtpSentResponse(affiliates.sendBankChangeOtp(me.userId(), ClientInfo.from(request).ipHash())));
     }
 
     @PutMapping("/bank-account")
-    public AffiliateResponse changeBank(@AuthenticationPrincipal AuthPrincipal me,
+    public ResponseEntity<AffiliateResponse> changeBank(@AuthenticationPrincipal AuthPrincipal me,
                                         @Valid @RequestBody BankAccountRequest r) {
-        return affiliates.changeBankAccount(me.userId(), r.bankName(), r.accountNo(), r.accountHolder(), r.otp(),
-                a -> mapper.toResponse(a, props.bankChangeLock()));
+        return ResponseEntity.ok(affiliates.changeBankAccount(me.userId(), r.getBankName(), r.getAccountNo(), r.getAccountHolder(), r.getOtp(),
+                a -> mapper.toResponse(a, props.bankChangeLock())));
     }
 
     @GetMapping("/payouts")
-    public PageResponse<PayoutResponse> payouts(@AuthenticationPrincipal AuthPrincipal me,
+    public ResponseEntity<PageResponse<PayoutResponse>> payouts(@AuthenticationPrincipal AuthPrincipal me,
                                                 @RequestParam(name = "page", defaultValue = "1") int pageNo,
                                                 @RequestParam(name = "page_size", defaultValue = "20") int size) {
         int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
-        return PageResponse.of(payouts.listMine(me.userId(), page, size, mapper::toResponse), x -> x);
+        return ResponseEntity.ok(PageResponse.of(payouts.listMine(me.userId(), page, size, mapper::toResponse), x -> x));
     }
 
     @PostMapping("/payouts")
-    @ResponseStatus(HttpStatus.CREATED)
-    public PayoutResponse requestPayout(@AuthenticationPrincipal AuthPrincipal me, @Valid @RequestBody PayoutRequest r) {
-        return payouts.request(me.userId(), r.amount(), mapper::toResponse);
+    public ResponseEntity<PayoutResponse> requestPayout(@AuthenticationPrincipal AuthPrincipal me, @Valid @RequestBody PayoutRequest r) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(payouts.request(me.userId(), r.getAmount(), mapper::toResponse));
     }
 }
