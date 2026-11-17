@@ -48,6 +48,8 @@ export type OrderDetail = Omit<OrderSummary, "itemCount" | "firstItemName" | "fi
   items: { productId: string; productName: string; productSlug: string; imageUrl: string | null; unitPrice: number; quantity: number; lineTotal: number }[];
   cancelReason: string | null;
   cancellable: boolean;
+  /** Hướng dẫn chuyển khoản – chỉ có khi BANK_QR chưa thanh toán. */
+  payment: { qrImageUrl: string; bankBin: string; accountNo: string; accountName: string; amount: number; transferContent: string } | null;
 };
 
 export type OrderStatus = "PENDING" | "CONFIRMED" | "SHIPPING" | "DELIVERED" | "COMPLETED" | "CANCELLED" | "RETURNED";

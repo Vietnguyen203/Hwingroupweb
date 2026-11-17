@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CircleCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { api, ApiError, errorMessage } from "@/lib/api";
@@ -13,6 +13,7 @@ import { formatVnd } from "@/lib/format";
 /** Chi tiết một đơn của khách; đơn PENDING có nút hủy. */
 export function OrderDetailView() {
   const { code } = useParams<{ code: string }>();
+  const placed = useSearchParams().get("placed") === "1";
   const qc = useQueryClient();
   const order = useQuery({
     queryKey: ["order", code],
@@ -43,6 +44,27 @@ export function OrderDetailView() {
   return (
     <div className="mx-auto max-w-2xl space-y-3 p-3 md:py-6">
       {back}
+      {placed && (
+        <div className="flex items-center gap-2 rounded-2xl bg-green-50 p-4 text-sm text-green-800">
+          <CircleCheck className="size-5 shrink-0" /> Đặt hàng thành công! Chúng tôi sẽ liên hệ xác nhận đơn sớm.
+        </div>
+      )}
+      {o.payment && (
+        <section className="rounded-2xl bg-white p-4 text-sm shadow-sm">
+          <h2 className="mb-2 font-bold text-brand">Chuyển khoản để hoàn tất đơn</h2>
+          <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={o.payment.qrImageUrl} alt="Mã QR chuyển khoản" className="size-48 rounded-lg border" />
+            <dl className="grid flex-1 grid-cols-[auto_1fr] gap-x-3 gap-y-1">
+              <dt className="text-muted-foreground">Số tiền</dt><dd className="font-bold text-brand-red">{formatVnd(o.payment.amount)}</dd>
+              <dt className="text-muted-foreground">Số tài khoản</dt><dd className="font-semibold">{o.payment.accountNo}</dd>
+              <dt className="text-muted-foreground">Chủ tài khoản</dt><dd>{o.payment.accountName}</dd>
+              <dt className="text-muted-foreground">Nội dung</dt><dd className="font-semibold">{o.payment.transferContent}</dd>
+            </dl>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">Ghi đúng nội dung chuyển khoản. Đơn tự hủy nếu chưa nhận được tiền sau 24 giờ.</p>
+        </section>
+      )}
       <section className="rounded-2xl bg-white p-4 shadow-sm">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-bold text-brand">Đơn {o.code}</h1>

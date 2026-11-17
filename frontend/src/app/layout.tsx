@@ -8,6 +8,7 @@ import { FloatingContact } from "@/components/layout/floating-contact";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Providers } from "@/components/providers";
+import { SessionSync } from "@/components/session-sync";
 import { siteConfig } from "@/lib/config";
 
 const font = Roboto({
@@ -38,6 +39,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <FloatingContact />
           <Suspense fallback={<div className="fixed inset-x-0 bottom-0 h-14 border-t bg-white md:hidden" />}>
             <BottomNav />
+          </Suspense>
+          <Suspense fallback={null}>
+            <SessionSync />
           </Suspense>
         </Providers>
       </body>

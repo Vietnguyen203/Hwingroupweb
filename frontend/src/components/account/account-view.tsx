@@ -243,7 +243,7 @@ function AddressesCard() {
       {list.isPending ? (
         <div className="h-16 animate-pulse rounded-lg bg-neutral-100" />
       ) : list.data?.length === 0 && !form ? (
-        <p className="py-2 text-sm text-muted-foreground">Chưa có địa chỉ. Địa chỉ cũng được lưu tự động khi bạn đặt hàng.</p>
+        <p className="py-2 text-sm text-muted-foreground">Chưa có địa chỉ. Bạn có thể lưu địa chỉ khi thanh toán.</p>
       ) : (
         <ul className="space-y-2">
           {list.data?.map((a) => (
