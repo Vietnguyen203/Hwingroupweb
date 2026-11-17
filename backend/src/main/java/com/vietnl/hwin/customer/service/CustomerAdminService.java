@@ -1,5 +1,7 @@
 package com.vietnl.hwin.customer.service;
 
+import com.vietnl.hwin.customer.service.config.CustomerProperties;
+import com.vietnl.hwin.customer.service.model.CustomerSummary;
 import com.vietnl.hwin.common.web.PageResponse;
 import com.vietnl.hwin.customer.entity.ExceptionMessage;
 import org.springframework.http.HttpStatus;
@@ -43,31 +45,28 @@ public class CustomerAdminService {
         this.clock = clock;
     }
 
-    public record CustomerRow(UUID id, String phone, String email, String fullName, int totalOrders, long totalSpent,
-                              Instant firstOrderAt, Instant lastOrderAt, Instant createdAt, CustomerSegment segment) {
-    }
 
 
     @Transactional(readOnly = true)
-    public PageResponse<CustomerRow> search(String q, CustomerSegment segment, int page, int size) {
+    public PageResponse<CustomerSummary> search(String q, CustomerSegment segment, int page, int size) {
         int p = Math.max(page, 0);
         int s = Math.clamp(size, 1, 100);
         List<Object> args = new ArrayList<>();
         String where = where(q, segment, args);
-        Long total = jdbc.queryForObject("select count(*) from customer.customer c "
+        Long total = jdbc.queryForObject("select count(*) from customer.customers c "
                 + "left join customer.customer_stats s on s.customer_id = c.id" + where, Long.class, args.toArray());
         List<Object> pageArgs = new ArrayList<>(args);
         pageArgs.add(s);
         pageArgs.add((long) p * s);
-        List<CustomerRow> rows = jdbc.query(select() + where + " order by c.created_at desc limit ? offset ?",
+        List<CustomerSummary> rows = jdbc.query(select() + where + " order by c.created_at desc limit ? offset ?",
                 (rs, i) -> row(rs), pageArgs.toArray());
         long t = total == null ? 0 : total;
         return new PageResponse<>(rows, p + 1, s, t, (int) Math.ceil((double) t / s));
     }
 
     @Transactional(readOnly = true)
-    public CustomerRow get(UUID id) {
-        List<CustomerRow> rows = jdbc.query(select() + " where c.id = ?", (rs, i) -> row(rs), id);
+    public CustomerSummary get(UUID id) {
+        List<CustomerSummary> rows = jdbc.query(select() + " where c.id = ?", (rs, i) -> row(rs), id);
         if (rows.isEmpty()) {
             throw new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.CUSTOMER_NOT_FOUND);
         }
@@ -79,11 +78,11 @@ public class CustomerAdminService {
     public void exportCsv(String q, CustomerSegment segment, Writer out) throws IOException {
         List<Object> args = new ArrayList<>();
         String where = where(q, segment, args);
-        List<CustomerRow> rows = jdbc.query(select() + where + " order by c.created_at desc limit 10000",
+        List<CustomerSummary> rows = jdbc.query(select() + where + " order by c.created_at desc limit 10000",
                 (rs, i) -> row(rs), args.toArray());
         out.write('﻿');
         out.write("id,so_dien_thoai,email,ho_ten,nhom,tong_don,tong_chi_tieu,don_dau_tien,don_gan_nhat,ngay_tao\n");
-        for (CustomerRow r : rows) {
+        for (CustomerSummary r : rows) {
             out.write(String.join(",", String.valueOf(r.id()), csv(r.phone()), csv(r.email()), csv(r.fullName()),
                     r.segment().name(), String.valueOf(r.totalOrders()), String.valueOf(r.totalSpent()),
                     time(r.firstOrderAt()), time(r.lastOrderAt()), time(r.createdAt())));
@@ -107,7 +106,7 @@ public class CustomerAdminService {
                 select c.id, c.phone, c.email, c.full_name, c.created_at,
                        coalesce(s.total_orders, 0) as total_orders, coalesce(s.total_spent, 0) as total_spent,
                        s.first_order_at, s.last_order_at
-                  from customer.customer c
+                  from customer.customers c
                   left join customer.customer_stats s on s.customer_id = c.id
                 """;
     }
@@ -152,10 +151,10 @@ public class CustomerAdminService {
         return w.toString();
     }
 
-    private CustomerRow row(java.sql.ResultSet rs) throws java.sql.SQLException {
+    private CustomerSummary row(java.sql.ResultSet rs) throws java.sql.SQLException {
         Instant last = instant(rs.getTimestamp("last_order_at"));
         int totalOrders = rs.getInt("total_orders");
-        return new CustomerRow(rs.getObject("id", UUID.class), localPhone(rs.getString("phone")), rs.getString("email"),
+        return new CustomerSummary(rs.getObject("id", UUID.class), localPhone(rs.getString("phone")), rs.getString("email"),
                 rs.getString("full_name"), totalOrders, rs.getLong("total_spent"),
                 instant(rs.getTimestamp("first_order_at")), last, instant(rs.getTimestamp("created_at")),
                 segmentOf(totalOrders, last));

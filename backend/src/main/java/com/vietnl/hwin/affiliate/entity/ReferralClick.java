@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 
 /** Aggregate root (chỉ ghi thêm): một lượt click link CTV đã được tính. */
 @Entity
-@Table(name = "referral_click", schema = "affiliate")
+@Table(name = "referral_clicks", schema = "affiliate")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReferralClick {

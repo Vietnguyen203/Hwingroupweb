@@ -1,5 +1,6 @@
 package com.vietnl.hwin.identity.service;
 
+import com.vietnl.hwin.identity.service.model.IssuedTokens;
 import com.vietnl.hwin.identity.entity.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;

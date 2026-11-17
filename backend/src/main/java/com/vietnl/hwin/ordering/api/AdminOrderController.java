@@ -1,5 +1,6 @@
 package com.vietnl.hwin.ordering.api;
 
+import com.vietnl.hwin.ordering.service.model.OrderFilter;
 import org.springframework.http.ResponseEntity;
 import com.vietnl.hwin.common.exception.CommonErrorMessage;
 import org.springframework.http.HttpStatus;
@@ -23,19 +24,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vietnl.hwin.common.security.AuthPrincipal;
 import com.vietnl.hwin.common.web.PageResponse;
-import com.vietnl.hwin.ordering.api.requests.AdminCancelRequest;
-import com.vietnl.hwin.ordering.api.responses.AdminOrderResponse;
-import com.vietnl.hwin.ordering.api.responses.AdminOrderRow;
-import com.vietnl.hwin.ordering.api.requests.MarkPaidRequest;
-import com.vietnl.hwin.ordering.api.mapper.OrderingMapper;
+import com.vietnl.hwin.ordering.api.dto.CancelOrderRequest;
+import com.vietnl.hwin.ordering.api.dto.AdminOrderResponse;
+import com.vietnl.hwin.ordering.api.dto.AdminOrderSummaryResponse;
+import com.vietnl.hwin.ordering.api.dto.MarkOrderPaidRequest;
+import com.vietnl.hwin.ordering.api.mapper.OrderMapper;
 import com.vietnl.hwin.ordering.entity.Order;
-import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
-import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentStatus;
+import com.vietnl.hwin.ordering.entity.PaymentMethod;
+import com.vietnl.hwin.ordering.entity.PaymentStatus;
 import com.vietnl.hwin.ordering.entity.OrderStatus;
 import com.vietnl.hwin.ordering.service.OrderAdminService;
-import com.vietnl.hwin.ordering.service.OrderAdminService.OrderFilter;
-import com.vietnl.hwin.ordering.service.OrderPaymentTimeoutJob;
-import com.vietnl.hwin.ordering.service.OrderingProperties;
+import com.vietnl.hwin.ordering.service.model.OrderFilter;
+import com.vietnl.hwin.ordering.service.job.OrderPaymentTimeoutJob;
+import com.vietnl.hwin.ordering.service.config.OrderingProperties;
 import com.vietnl.hwin.ordering.service.integration.PaymentGateway;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -48,11 +49,11 @@ public class AdminOrderController {
 
     private final OrderAdminService service;
     private final PaymentGateway paymentGateway;
-    private final OrderingMapper mapper;
+    private final OrderMapper mapper;
     private final OrderPaymentTimeoutJob paymentTimeoutJob;
     private final OrderingProperties props;
 
-    public AdminOrderController(OrderAdminService service, PaymentGateway paymentGateway, OrderingMapper mapper,
+    public AdminOrderController(OrderAdminService service, PaymentGateway paymentGateway, OrderMapper mapper,
                                 OrderPaymentTimeoutJob paymentTimeoutJob, OrderingProperties props) {
         this.service = service;
         this.paymentGateway = paymentGateway;
@@ -62,7 +63,7 @@ public class AdminOrderController {
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<AdminOrderRow>> list(@RequestParam(required = false) OrderStatus status,
+    public ResponseEntity<PageResponse<AdminOrderSummaryResponse>> list(@RequestParam(required = false) OrderStatus status,
                                             @RequestParam(required = false) PaymentMethod paymentMethod,
                                             @RequestParam(required = false) PaymentStatus paymentStatus,
                                             @RequestParam(required = false) String q,
@@ -95,7 +96,7 @@ public class AdminOrderController {
     }
 
     @PostMapping("/{id}/mark-paid")
-    public ResponseEntity<AdminOrderResponse> markPaid(@PathVariable UUID id, @Valid @RequestBody MarkPaidRequest r,
+    public ResponseEntity<AdminOrderResponse> markPaid(@PathVariable UUID id, @Valid @RequestBody MarkOrderPaidRequest r,
                                        @AuthenticationPrincipal AuthPrincipal me) {
         return ResponseEntity.ok(service.markPaid(id, r.getPaymentRef(), me.userId(), this::admin));
     }
@@ -121,7 +122,7 @@ public class AdminOrderController {
     }
 
     @PostMapping("/{id}/cancel")
-    public ResponseEntity<AdminOrderResponse> cancel(@PathVariable UUID id, @Valid @RequestBody(required = false) AdminCancelRequest r,
+    public ResponseEntity<AdminOrderResponse> cancel(@PathVariable UUID id, @Valid @RequestBody(required = false) CancelOrderRequest r,
                                      @AuthenticationPrincipal AuthPrincipal me) {
         return ResponseEntity.ok(service.cancel(id, r == null ? null : r.getReason(), me.userId(), this::admin));
     }

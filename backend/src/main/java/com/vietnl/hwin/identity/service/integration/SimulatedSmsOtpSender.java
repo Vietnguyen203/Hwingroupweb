@@ -7,13 +7,13 @@ import org.springframework.stereotype.Component;
 import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.identity.entity.OtpChannel;
 import com.vietnl.hwin.identity.entity.OtpPurpose;
-import com.vietnl.hwin.identity.service.OtpProperties;
+import com.vietnl.hwin.identity.service.config.OtpProperties;
 
 /**
  * SMS GIẢ LẬP: không gửi tin nhắn thật. Chỉ dùng được khi hwin.otp.log-code=true (dev/test) –
  * mã đã được OtpService in ra log và lưu vào hộp thư dev.
  * Môi trường thật: available() = false -> người dùng được báo dùng email.
- * Kế hoạch thay bằng SMS brandname: docs/07-otp-sms.md.
+ * Kế hoạch thay bằng SMS brandname: docs/08-otp.md.
  */
 @Component
 public class SimulatedSmsOtpSender implements OtpSender {

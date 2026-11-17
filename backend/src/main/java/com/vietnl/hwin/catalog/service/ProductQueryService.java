@@ -1,5 +1,6 @@
 package com.vietnl.hwin.catalog.service;
 
+import com.vietnl.hwin.catalog.service.model.ProductSnapshot;
 import java.util.UUID;
 
 import java.util.Collection;

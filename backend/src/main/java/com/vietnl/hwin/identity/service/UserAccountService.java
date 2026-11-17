@@ -19,7 +19,7 @@ import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.identity.entity.OtpChannel;
 import com.vietnl.hwin.identity.entity.OtpTarget;
 import com.vietnl.hwin.identity.entity.UserAccount;
-import com.vietnl.hwin.identity.entity.UserRegistered;
+import com.vietnl.hwin.identity.entity.event.UserRegisteredEvent;
 import com.vietnl.hwin.identity.repository.UserAccountRepository;
 
 /** Use case nội bộ trên aggregate UserAccount. */
@@ -55,7 +55,7 @@ public class UserAccountService {
         return user;
     }
 
-    /** Đăng ký tài khoản khách MỚI; đã có thì báo lỗi. Phát UserRegistered để module customer tạo hồ sơ. */
+    /** Đăng ký tài khoản khách MỚI; đã có thì báo lỗi. Phát UserRegisteredEvent để module customer tạo hồ sơ. */
     @Transactional
     public UserAccount register(OtpTarget target, String fullName) {
         if (find(target).isPresent()) {
@@ -67,14 +67,14 @@ public class UserAccountService {
                 : UserAccount.registerCustomer(new EmailAddress(target.value()));
         user.rename(fullName);
         user = users.save(user);
-        events.publishEvent(UserRegistered.of(user.getId(), sms ? target.value() : null, sms ? null : target.value(), now));
+        events.publishEvent(UserRegisteredEvent.of(user.getId(), sms ? target.value() : null, sms ? null : target.value(), now));
         user.recordLogin(now);
         log.info("Đăng ký tài khoản mới {}", target.masked());
         return user;
     }
 
     /**
-     * Dùng cho test / dữ liệu mẫu: tìm theo SĐT, chưa có thì tạo (CUSTOMER) và phát UserRegistered.
+     * Dùng cho test / dữ liệu mẫu: tìm theo SĐT, chưa có thì tạo (CUSTOMER) và phát UserRegisteredEvent.
      * Luồng thật dùng {@link #login} / {@link #register}.
      * Đồng thời ghi nhận lần đăng nhập.
      */
@@ -85,7 +85,7 @@ public class UserAccountService {
         ensureNotAdmin(user);
         if (user == null) {
             user = users.save(UserAccount.registerCustomer(phone));
-            events.publishEvent(UserRegistered.of(user.getId(), phone.value(), null, now));
+            events.publishEvent(UserRegisteredEvent.of(user.getId(), phone.value(), null, now));
             log.info("Tạo tài khoản mới cho {}", phone.masked());
         }
         user.recordLogin(now);
@@ -100,7 +100,7 @@ public class UserAccountService {
         ensureNotAdmin(user);
         if (user == null) {
             user = users.save(UserAccount.registerCustomer(email));
-            events.publishEvent(UserRegistered.of(user.getId(), null, email.value(), now));
+            events.publishEvent(UserRegisteredEvent.of(user.getId(), null, email.value(), now));
             log.info("Tạo tài khoản mới cho {}", email.masked());
         }
         user.recordLogin(now);

@@ -1,5 +1,6 @@
 package com.vietnl.hwin.ordering.api;
 
+import com.vietnl.hwin.ordering.service.model.PlaceOrderCommand;
 import org.springframework.http.ResponseEntity;
 import java.util.Arrays;
 
@@ -16,14 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vietnl.hwin.common.security.AuthCookies;
 import com.vietnl.hwin.common.security.AuthPrincipal;
-import com.vietnl.hwin.ordering.api.responses.CheckoutConfigResponse;
-import com.vietnl.hwin.ordering.api.responses.OrderDetailResponse;
-import com.vietnl.hwin.ordering.api.requests.PlaceOrderRequest;
-import com.vietnl.hwin.ordering.api.mapper.OrderingMapper;
-import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
-import com.vietnl.hwin.ordering.service.OrderingProperties;
+import com.vietnl.hwin.ordering.api.dto.CheckoutConfigResponse;
+import com.vietnl.hwin.ordering.api.dto.OrderDetailResponse;
+import com.vietnl.hwin.ordering.api.dto.PlaceOrderRequest;
+import com.vietnl.hwin.ordering.api.mapper.OrderMapper;
+import com.vietnl.hwin.ordering.entity.PaymentMethod;
+import com.vietnl.hwin.ordering.service.config.OrderingProperties;
 import com.vietnl.hwin.ordering.service.PlaceOrderService;
-import com.vietnl.hwin.ordering.service.PlaceOrderService.PlaceOrderCommand;
+import com.vietnl.hwin.ordering.service.model.PlaceOrderCommand;
 import com.vietnl.hwin.ordering.service.integration.PaymentGateway;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,10 +41,10 @@ public class CheckoutController {
     private final PlaceOrderService placeOrderService;
     private final PaymentGateway paymentGateway;
     private final OrderingProperties props;
-    private final OrderingMapper mapper;
+    private final OrderMapper mapper;
 
     public CheckoutController(PlaceOrderService placeOrderService, PaymentGateway paymentGateway,
-                              OrderingProperties props, OrderingMapper mapper) {
+                              OrderingProperties props, OrderMapper mapper) {
         this.placeOrderService = placeOrderService;
         this.paymentGateway = paymentGateway;
         this.props = props;

@@ -1,7 +1,7 @@
 package com.vietnl.hwin.ordering.service.integration;
 
 import com.vietnl.hwin.common.domain.Money;
-import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
+import com.vietnl.hwin.ordering.entity.PaymentMethod;
 
 /**
  * Port thanh toán (VNPay / MoMo sau này). Demo: {@link VietQrPaymentGateway} – chỉ sinh ảnh VietQR,

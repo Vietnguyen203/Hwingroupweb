@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
  * customer_id UNIQUE nên không bao giờ đổi sang CTV khác, kể cả khi khách mở link CTV khác sau này.
  */
 @Entity
-@Table(name = "customer_binding", schema = "affiliate")
+@Table(name = "customer_bindings", schema = "affiliate")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CustomerBinding {

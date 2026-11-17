@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vietnl.hwin.common.security.AuthCookies;
 import com.vietnl.hwin.common.web.ClientInfo;
-import com.vietnl.hwin.identity.api.requests.AdminLoginRequest;
-import com.vietnl.hwin.identity.api.responses.AdminLoginResponse;
-import com.vietnl.hwin.identity.api.requests.AdminOtpVerifyRequest;
-import com.vietnl.hwin.identity.api.responses.MeResponse;
+import com.vietnl.hwin.identity.api.dto.AdminLoginRequest;
+import com.vietnl.hwin.identity.api.dto.AdminLoginResponse;
+import com.vietnl.hwin.identity.api.dto.VerifyAdminOtpRequest;
+import com.vietnl.hwin.identity.api.dto.MeResponse;
 import com.vietnl.hwin.identity.api.mapper.UserMapper;
-import com.vietnl.hwin.identity.service.AdminLoginResult;
+import com.vietnl.hwin.identity.service.model.AdminLoginResult;
 import com.vietnl.hwin.identity.service.AuthService;
-import com.vietnl.hwin.identity.service.IssuedTokens;
+import com.vietnl.hwin.identity.service.model.IssuedTokens;
 import com.vietnl.hwin.identity.service.UserAccountService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -57,7 +57,7 @@ public class AdminAuthController {
 
     /** Bước 2: challengeId + OTP -> cấp phiên đăng nhập. */
     @PostMapping("/login/verify")
-    public ResponseEntity<MeResponse> verify(@Valid @RequestBody AdminOtpVerifyRequest body, HttpServletRequest request,
+    public ResponseEntity<MeResponse> verify(@Valid @RequestBody VerifyAdminOtpRequest body, HttpServletRequest request,
                              HttpServletResponse response) {
         IssuedTokens tokens = authService.verifyAdminOtp(body.getChallengeId(), body.getOtp(), ClientInfo.from(request));
         cookies.write(response, tokens.accessToken(), tokens.refreshToken());

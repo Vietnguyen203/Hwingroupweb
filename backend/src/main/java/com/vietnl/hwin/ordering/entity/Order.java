@@ -1,5 +1,12 @@
 package com.vietnl.hwin.ordering.entity;
 
+import com.vietnl.hwin.ordering.entity.event.OrderPlacedEvent;
+import com.vietnl.hwin.ordering.entity.event.OrderReturnedEvent;
+import com.vietnl.hwin.ordering.entity.event.OrderDeliveredEvent;
+import com.vietnl.hwin.ordering.entity.event.OrderCompletedEvent;
+import com.vietnl.hwin.ordering.entity.event.OrderConfirmedEvent;
+import com.vietnl.hwin.ordering.entity.event.OrderCancelledEvent;
+import com.vietnl.hwin.ordering.entity.event.OrderItemSnapshot;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -31,9 +38,9 @@ import org.hibernate.annotations.BatchSize;
 import com.vietnl.hwin.common.domain.Address;
 import com.vietnl.hwin.common.domain.AggregateRoot;
 import com.vietnl.hwin.common.domain.Money;
-import com.vietnl.hwin.ordering.entity.OrderEnums.CancelReason;
-import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
-import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentStatus;
+import com.vietnl.hwin.ordering.entity.CancelReason;
+import com.vietnl.hwin.ordering.entity.PaymentMethod;
+import com.vietnl.hwin.ordering.entity.PaymentStatus;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -130,9 +137,9 @@ public class Order extends AggregateRoot<Order> {
     // ------------------------------------------------------------------ tạo đơn
 
     /**
-     * Tạo đơn PENDING. Event OrderPlaced được service phát sau khi lưu (cần ID).
+     * Tạo đơn PENDING. Event OrderPlacedEvent được service phát sau khi lưu (cần ID).
      */
-    public static Order place(UUID customerId, String orderCode, List<OrderLine> lines, Money shippingFee,
+    public static Order place(UUID customerId, String orderCode, List<OrderItem> lines, Money shippingFee,
                               Address shippingAddress, PaymentMethod paymentMethod, VatInvoiceInfo vatInvoice,
                               String note, String referralCode, Instant now) {
         if (lines == null || lines.isEmpty()) {
@@ -147,7 +154,7 @@ public class Order extends AggregateRoot<Order> {
         Order o = new Order();
         o.customerId = customerId;
         o.orderCode = orderCode;
-        lines.forEach(l -> o.items.add(new OrderItem(l)));
+        o.items.addAll(lines);
         o.subtotal = o.items.stream().map(OrderItem::getLineTotal).reduce(Money.ZERO, Money::plus);
         o.discount = Money.ZERO; // demo chưa có voucher
         o.shippingFee = shippingFee;
@@ -166,8 +173,8 @@ public class Order extends AggregateRoot<Order> {
     }
 
     /** Event tạo đơn – gọi sau khi đã lưu để có ID. */
-    public OrderPlaced placedEvent() {
-        return new OrderPlaced(UUID.randomUUID(), placedAt, id, orderCode, customerId, referralCode, itemSnapshots(),
+    public OrderPlacedEvent placedEvent() {
+        return new OrderPlacedEvent(UUID.randomUUID(), placedAt, id, orderCode, customerId, referralCode, itemSnapshots(),
                 subtotal.amount(), discount.amount(), shippingFee.amount(), total.amount());
     }
 
@@ -196,7 +203,7 @@ public class Order extends AggregateRoot<Order> {
         }
         transition(OrderStatus.CONFIRMED, actorId, null, now);
         this.confirmedAt = now;
-        registerEvent(new OrderConfirmed(UUID.randomUUID(), now, id, orderCode));
+        registerEvent(new OrderConfirmedEvent(UUID.randomUUID(), now, id, orderCode));
     }
 
     public void markShipping(UUID actorId, Instant now) {
@@ -213,7 +220,7 @@ public class Order extends AggregateRoot<Order> {
         if (paymentMethod == PaymentMethod.COD) {
             this.paymentStatus = PaymentStatus.PAID;
         }
-        registerEvent(new OrderDelivered(UUID.randomUUID(), now, id, orderCode, now));
+        registerEvent(new OrderDeliveredEvent(UUID.randomUUID(), now, id, orderCode, now));
     }
 
     /**
@@ -232,7 +239,7 @@ public class Order extends AggregateRoot<Order> {
         transition(OrderStatus.CANCELLED, actorId, "Hủy: " + reason, now);
         this.cancelReason = reason;
         this.cancelledAt = now;
-        registerEvent(new OrderCancelled(UUID.randomUUID(), now, id, orderCode, customerId, itemSnapshots(),
+        registerEvent(new OrderCancelledEvent(UUID.randomUUID(), now, id, orderCode, customerId, itemSnapshots(),
                 total.amount(), reason.name()));
     }
 
@@ -244,7 +251,7 @@ public class Order extends AggregateRoot<Order> {
         }
         transition(OrderStatus.RETURNED, actorId, null, now);
         this.returnedAt = now;
-        registerEvent(new OrderReturned(UUID.randomUUID(), now, id, orderCode, customerId, itemSnapshots(),
+        registerEvent(new OrderReturnedEvent(UUID.randomUUID(), now, id, orderCode, customerId, itemSnapshots(),
                 total.amount()));
     }
 
@@ -256,7 +263,7 @@ public class Order extends AggregateRoot<Order> {
         }
         transition(OrderStatus.COMPLETED, null, "Hết hạn đổi trả", now);
         this.completedAt = now;
-        registerEvent(new OrderCompleted(UUID.randomUUID(), now, id, orderCode));
+        registerEvent(new OrderCompletedEvent(UUID.randomUUID(), now, id, orderCode));
     }
 
     public boolean isCancellableByCustomer() {

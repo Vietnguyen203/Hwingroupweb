@@ -1,5 +1,6 @@
 package com.vietnl.hwin.customer.api;
 
+import com.vietnl.hwin.customer.service.model.CustomerSummary;
 import org.springframework.http.ResponseEntity;
 import com.vietnl.hwin.common.web.PageResponse;
 import java.util.UUID;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vietnl.hwin.customer.entity.CustomerSegment;
 import com.vietnl.hwin.customer.service.CustomerAdminService;
-import com.vietnl.hwin.customer.service.CustomerAdminService.CustomerRow;
+import com.vietnl.hwin.customer.service.model.CustomerSummary;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -38,7 +39,7 @@ public class AdminCustomerController {
 
     /** @param segment NEW | LOYAL | DORMANT */
     @GetMapping
-    public ResponseEntity<PageResponse<CustomerRow>> list(@RequestParam(required = false) String q,
+    public ResponseEntity<PageResponse<CustomerSummary>> list(@RequestParam(required = false) String q,
                      @RequestParam(required = false) CustomerSegment segment,
                      @RequestParam(name = "page", defaultValue = "1") int pageNo,
                      @RequestParam(name = "page_size", defaultValue = "20") int size) {
@@ -47,7 +48,7 @@ public class AdminCustomerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CustomerRow> get(@PathVariable UUID id) {
+    public ResponseEntity<CustomerSummary> get(@PathVariable UUID id) {
         return ResponseEntity.ok(service.get(id));
     }
 

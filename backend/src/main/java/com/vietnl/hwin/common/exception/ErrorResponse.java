@@ -33,13 +33,4 @@ public class ErrorResponse {
     private List<FieldErrorDetail> errors;
     private Map<String, Object> details;
 
-    /** Lỗi của một trường. {@code rejectedValue} bị ẩn với trường nhạy cảm (mật khẩu, OTP, số tài khoản). */
-    @Data
-    @Builder
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class FieldErrorDetail {
-        private String field;
-        private String message;
-        private Object rejectedValue;
-    }
 }

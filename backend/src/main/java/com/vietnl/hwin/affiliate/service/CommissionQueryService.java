@@ -14,7 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vietnl.hwin.affiliate.entity.AffiliateEnums.CommissionStatus;
+import com.vietnl.hwin.affiliate.entity.CommissionStatus;
 import com.vietnl.hwin.affiliate.entity.Commission;
 import com.vietnl.hwin.affiliate.repository.CommissionRepository;
 

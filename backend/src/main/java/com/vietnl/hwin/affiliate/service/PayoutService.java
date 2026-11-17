@@ -1,5 +1,7 @@
 package com.vietnl.hwin.affiliate.service;
 
+import com.vietnl.hwin.affiliate.service.config.AffiliateProperties;
+import com.vietnl.hwin.affiliate.service.model.PayoutWithBank;
 import com.vietnl.hwin.affiliate.entity.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -16,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vietnl.hwin.affiliate.entity.Affiliate;
-import com.vietnl.hwin.affiliate.entity.AffiliateEnums.PayoutStatus;
+import com.vietnl.hwin.affiliate.entity.PayoutStatus;
 import com.vietnl.hwin.affiliate.entity.Payout;
 import com.vietnl.hwin.affiliate.repository.AffiliateRepository;
 import com.vietnl.hwin.affiliate.repository.CommissionRepository;
@@ -130,6 +132,4 @@ public class PayoutService {
         return payouts.findById(id).orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.PAYOUT_NOT_FOUND));
     }
 
-    public record PayoutWithBank(Payout payout, String accountNo, String accountHolder) {
-    }
 }

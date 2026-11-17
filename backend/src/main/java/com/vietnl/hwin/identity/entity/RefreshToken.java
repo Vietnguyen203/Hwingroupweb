@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
  * nếu token đã bị thu hồi mà vẫn được dùng lại -> nghi bị đánh cắp -> thu hồi cả family.
  */
 @Entity
-@Table(name = "refresh_token", schema = "identity")
+@Table(name = "refresh_tokens", schema = "identity")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RefreshToken {

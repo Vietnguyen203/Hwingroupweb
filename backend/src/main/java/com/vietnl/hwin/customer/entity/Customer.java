@@ -32,7 +32,7 @@ import lombok.NoArgsConstructor;
  * Sổ địa chỉ: tối đa 10 địa chỉ, luôn có đúng 1 địa chỉ mặc định nếu sổ không rỗng.
  */
 @Entity
-@Table(name = "customer", schema = "customer")
+@Table(name = "customers", schema = "customer")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Customer extends AggregateRoot<Customer> {

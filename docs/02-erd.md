@@ -6,7 +6,7 @@
 
 - Mỗi bounded context một **schema PostgreSQL**: `identity`, `catalog`, `ordering`, `customer`, `affiliate`; thêm `audit` (do `common` quản lý) và `public` (bảng `event_publication` của Spring Modulith, bảng lịch sử Flyway).
 - **Không có foreign key xuyên schema.** Cột tham chiếu sang module khác chỉ lưu ID và được đánh dấu `"ref → schema.table (ID, không FK)"` trong sơ đồ.
-- Khóa chính: `uuid` – ứng dụng sinh **UUID v7** (có thứ tự theo thời gian, index B-tree gọn như số tăng dần; không đoán được số lượng bản ghi). DB cũng mặc định sinh UUID v7 (`default public.uuid_generate_v7()`) nên dữ liệu chèn tay bằng SQL cùng định dạng. Riêng `customer.customer.id` **= `identity.user_account.id`** (không tự sinh).
+- Khóa chính: `uuid` – ứng dụng sinh **UUID v7** (có thứ tự theo thời gian, index B-tree gọn như số tăng dần; không đoán được số lượng bản ghi). DB cũng mặc định sinh UUID v7 (`default public.uuid_generate_v7()`) nên dữ liệu chèn tay bằng SQL cùng định dạng. Riêng `customer.customers.id` **= `identity.user_accounts.id`** (không tự sinh).
 - Tiền: `bigint` đơn vị **VND** (value object `Money`), ràng buộc `CHECK (>= 0)`.
 - Thời gian: `timestamptz` (UTC). Mọi bảng có `created_at`, `updated_at`; aggregate root có thêm `version bigint` cho optimistic locking.
 - Enum lưu dạng `varchar` + `CHECK` (dễ đọc, dễ đổi hơn enum PostgreSQL).
@@ -23,10 +23,10 @@
 
 ```mermaid
 erDiagram
-    user_account ||--o{ user_role : "có"
-    user_account ||--o{ refresh_token : "sở hữu"
+    user_accounts ||--o{ user_roles : "có"
+    user_accounts ||--o{ refresh_tokens : "sở hữu"
 
-    user_account {
+    user_accounts {
         uuid id PK
         varchar phone UK "E.164 chuẩn hóa +849xxxxxxxx, nullable với admin"
         varchar email UK "chỉ admin, nullable"
@@ -39,12 +39,12 @@ erDiagram
         timestamptz updated_at
     }
 
-    user_role {
+    user_roles {
         uuid user_id PK, FK
         varchar role PK "CUSTOMER | AFFILIATE | ADMIN"
     }
 
-    refresh_token {
+    refresh_tokens {
         uuid id PK
         uuid user_id FK "index"
         varchar token_hash UK "SHA-256 của token, không lưu token gốc"
@@ -87,11 +87,11 @@ erDiagram
 
 ```mermaid
 erDiagram
-    category ||--o{ product : "chứa"
-    product ||--o{ product_image : "có"
-    product ||--o{ stock_movement : "biến động"
+    categories ||--o{ products : "chứa"
+    products ||--o{ product_images : "có"
+    products ||--o{ stock_movements : "biến động"
 
-    category {
+    categories {
         uuid id PK
         varchar name "<= 100"
         varchar slug UK
@@ -103,7 +103,7 @@ erDiagram
         timestamptz updated_at
     }
 
-    product {
+    products {
         uuid id PK
         uuid category_id FK "index"
         varchar name "<= 200"
@@ -129,14 +129,14 @@ erDiagram
         timestamptz updated_at
     }
 
-    product_image {
+    product_images {
         uuid id PK
         uuid product_id FK "index"
         varchar url
         int sort_order
     }
 
-    stock_movement {
+    stock_movements {
         uuid id PK
         uuid product_id FK
         uuid order_id "ref → ordering.orders (ID, không FK)"
@@ -156,7 +156,7 @@ erDiagram
 | `uq_stock_movement (order_id, product_id, type)` | **Idempotent**: listener chạy lại không trừ/hoàn kho 2 lần |
 | `UPDATE product SET stock = stock - :q WHERE id = :id AND stock >= :q` | Trừ kho nguyên tử, không bán âm |
 
-`stock_movement` thuộc aggregate `Product` (ghi qua `Product`/`InventoryService`), không có repository riêng.
+`stock_movements` thuộc aggregate `Product` (ghi qua `Product`/`InventoryService`), không có repository riêng.
 
 ---
 
@@ -169,21 +169,21 @@ erDiagram
 
 ```mermaid
 erDiagram
-    cart ||--o{ cart_item : "chứa"
-    orders ||--|{ order_item : "gồm"
-    orders ||--o{ order_status_history : "lịch sử"
+    carts ||--o{ cart_items : "chứa"
+    orders ||--|{ order_items : "gồm"
+    orders ||--o{ order_status_histories : "lịch sử"
 
-    cart {
+    carts {
         uuid id PK
-        uuid user_id UK "ref → identity.user_account (ID, không FK)"
+        uuid user_id UK "ref → identity.user_accounts (ID, không FK)"
         bigint version
         timestamptz updated_at
     }
 
-    cart_item {
+    cart_items {
         uuid id PK
         uuid cart_id FK
-        uuid product_id "ref → catalog.product (ID, không FK)"
+        uuid product_id "ref → catalog.products (ID, không FK)"
         int quantity "1..99"
         timestamptz added_at
     }
@@ -191,7 +191,7 @@ erDiagram
     orders {
         uuid id PK
         varchar order_code UK "HW + yyMMdd + 4 ký tự, hiển thị cho khách"
-        uuid customer_id "ref → customer.customer, index"
+        uuid customer_id "ref → customers.customers, index"
         varchar referral_code "nullable, lấy từ cookie hwin_ref"
         varchar status "PENDING..COMPLETED | CANCELLED | RETURNED, index"
         varchar payment_method "COD | BANK_QR"
@@ -226,10 +226,10 @@ erDiagram
         timestamptz updated_at
     }
 
-    order_item {
+    order_items {
         uuid id PK
         uuid order_id FK
-        uuid product_id "ref → catalog.product (ID, không FK)"
+        uuid product_id "ref → catalog.products (ID, không FK)"
         varchar product_name "snapshot"
         varchar product_slug "snapshot"
         varchar image_url "snapshot"
@@ -238,12 +238,12 @@ erDiagram
         bigint line_total
     }
 
-    order_status_history {
+    order_status_histories {
         uuid id PK
         uuid order_id FK
         varchar from_status
         varchar to_status
-        uuid actor_id "ref → identity.user_account, nullable với job"
+        uuid actor_id "ref → identity.user_accounts, nullable với job"
         varchar note
         timestamptz created_at
     }
@@ -270,20 +270,20 @@ erDiagram
 
 ```mermaid
 erDiagram
-    customer ||--o{ customer_address : "sổ địa chỉ"
-    customer ||--|| customer_stats : "read model"
-    customer ||--o{ customer_product_stat : "read model"
+    customers ||--o{ customer_addresses : "sổ địa chỉ"
+    customers ||--|| customer_stats : "read model"
+    customers ||--o{ customer_product_stats : "read model"
 
-    customer {
-        uuid id PK "= identity.user_account.id (ID, không FK)"
-        varchar phone UK "snapshot từ UserRegistered"
+    customers {
+        uuid id PK "= identity.user_accounts.id (ID, không FK)"
+        varchar phone UK "snapshot từ UserRegisteredEvent"
         varchar full_name
         bigint version
         timestamptz created_at
         timestamptz updated_at
     }
 
-    customer_address {
+    customer_addresses {
         uuid id PK
         uuid customer_id FK "index"
         varchar recipient_name
@@ -305,15 +305,15 @@ erDiagram
         timestamptz updated_at
     }
 
-    customer_product_stat {
+    customer_product_stats {
         uuid customer_id PK, FK
-        uuid product_id PK "ref → catalog.product (ID, không FK)"
+        uuid product_id PK "ref → catalog.products (ID, không FK)"
         int total_quantity
         int order_count
         timestamptz last_ordered_at
     }
 
-    processed_event {
+    processed_events {
         uuid event_id PK
         varchar listener PK
         timestamptz processed_at
@@ -325,7 +325,7 @@ erDiagram
 | Ràng buộc / index | Mục đích |
 |---|---|
 | (quy tắc trong aggregate `Customer`) | Đúng 1 địa chỉ mặc định – không dùng partial unique index vì Hibernate flush UPDATE theo thứ tự không xác định |
-| `processed_event (event_id, listener)` | Listener cập nhật read model **idempotent** khi event được phát lại |
+| `processed_events (event_id, listener)` | Listener cập nhật read model **idempotent** khi event được phát lại |
 | Phân nhóm (`NEW` / `LOYAL` / `DORMANT`) | Tính lúc truy vấn từ `customer_stats` + ngưỡng `hwin.customer.*`, không lưu |
 
 ---
@@ -339,14 +339,14 @@ erDiagram
 
 ```mermaid
 erDiagram
-    affiliate ||--o{ referral_click : "nhận click"
-    affiliate ||--o{ customer_binding : "gắn khách"
-    affiliate ||--o{ commission : "hưởng"
-    affiliate ||--o{ payout : "rút tiền"
+    affiliates ||--o{ referral_clicks : "nhận click"
+    affiliates ||--o{ customer_bindings : "gắn khách"
+    affiliates ||--o{ commissions : "hưởng"
+    affiliates ||--o{ payouts : "rút tiền"
 
-    affiliate {
+    affiliates {
         uuid id PK
-        uuid user_id UK "ref → identity.user_account (ID, không FK)"
+        uuid user_id UK "ref → identity.user_accounts (ID, không FK)"
         varchar phone "snapshot, dùng chống tự giới thiệu"
         varchar full_name
         varchar referral_code UK "A-Z0-9, 6-10 ký tự, sinh khi được duyệt"
@@ -358,7 +358,7 @@ erDiagram
         varchar bank_account_holder_enc "BankAccount – AES-GCM base64"
         varchar bank_account_no_last4 "hiển thị ****1234"
         timestamptz bank_changed_at "khóa rút 48h"
-        uuid reviewed_by "ref → identity.user_account"
+        uuid reviewed_by "ref → identity.user_accounts"
         timestamptz reviewed_at
         varchar status_reason "lý do từ chối / tạm khóa"
         bigint version
@@ -366,7 +366,7 @@ erDiagram
         timestamptz updated_at
     }
 
-    referral_click {
+    referral_clicks {
         uuid id PK
         uuid affiliate_id FK "index"
         varchar referral_code
@@ -376,21 +376,21 @@ erDiagram
         timestamptz clicked_at "index"
     }
 
-    customer_binding {
+    customer_bindings {
         uuid id PK
-        uuid customer_id UK "ref → customer.customer – GẮN VĨNH VIỄN"
+        uuid customer_id UK "ref → customers.customers – GẮN VĨNH VIỄN"
         uuid affiliate_id FK "index"
         uuid first_order_id "ref → ordering.orders"
         varchar referral_code
         timestamptz bound_at
     }
 
-    commission {
+    commissions {
         uuid id PK
         uuid order_id UK "ref → ordering.orders (ID, không FK)"
         varchar order_code
         uuid affiliate_id FK "index"
-        uuid customer_id "ref → customer.customer"
+        uuid customer_id "ref → customers.customers"
         bigint base_amount "subtotal - discount"
         numeric rate "0.10"
         bigint amount "floor(base * rate)"
@@ -403,17 +403,17 @@ erDiagram
         timestamptz updated_at
     }
 
-    payout {
+    payouts {
         uuid id PK
         uuid affiliate_id FK "index"
-        bigint amount "CHECK >= min-payout"
+        bigint amount "CHECK >= min-payouts"
         varchar status "REQUESTED | APPROVED | PAID | REJECTED"
         varchar bank_name "snapshot"
         varchar bank_account_no_enc "snapshot mã hóa"
         varchar bank_account_holder_enc "snapshot mã hóa"
         varchar transaction_ref "nhập khi PAID"
         varchar reject_reason
-        uuid processed_by "ref → identity.user_account"
+        uuid processed_by "ref → identity.user_accounts"
         timestamptz requested_at
         timestamptz approved_at
         timestamptz paid_at
@@ -444,9 +444,9 @@ erDiagram
 
 ```mermaid
 erDiagram
-    audit_log {
+    audit_logs {
         uuid id PK
-        varchar module "ordering | affiliate | ..."
+        varchar module "ordering | affiliates | ..."
         varchar aggregate_type "Commission, Payout, Order, Affiliate"
         varchar aggregate_id
         varchar action "COMMISSION_CREATED, PAYOUT_PAID, BANK_CHANGED, ORDER_PAID..."
@@ -468,7 +468,7 @@ erDiagram
 
 </details>
 
-- `audit.audit_log` **chỉ ghi thêm**: trigger `BEFORE UPDATE OR DELETE … RAISE EXCEPTION`, và user ứng dụng chỉ có quyền `INSERT, SELECT`.
+- `audit.audit_logs` **chỉ ghi thêm**: trigger `BEFORE UPDATE OR DELETE … RAISE EXCEPTION`, và user ứng dụng chỉ có quyền `INSERT, SELECT`.
 - `public.event_publication`: bảng chuẩn của Spring Modulith (cột chính xác theo phiên bản Modulith 2.x, tạo bằng Flyway).
 
 ---
@@ -477,13 +477,13 @@ erDiagram
 
 | Cột | Trỏ tới | Tính nhất quán đảm bảo bởi |
 |---|---|---|
-| `ordering.cart.user_id` | `identity.user_account.id` | JWT (chỉ user đã đăng nhập mới có cart) |
-| `ordering.cart_item.product_id`, `order_item.product_id` | `catalog.product.id` | `ProductQueryService` khi thêm/đặt |
-| `ordering.orders.customer_id` | `customer.customer.id` (= userId) | JWT |
-| `catalog.stock_movement.order_id` | `ordering.orders.id` | Event `OrderPlaced/Cancelled/Returned` |
-| `customer.customer.id` | `identity.user_account.id` | Event `UserRegistered` |
-| `customer.customer_product_stat.product_id` | `catalog.product.id` | Event `OrderPlaced` |
-| `affiliate.affiliate.user_id`, `reviewed_by`, `payout.processed_by` | `identity.user_account.id` | JWT |
-| `affiliate.customer_binding.customer_id`, `commission.customer_id` | `customer.customer.id` | Event `OrderPlaced` |
-| `affiliate.commission.order_id`, `customer_binding.first_order_id` | `ordering.orders.id` | Event `OrderPlaced` |
-| `audit.audit_log.aggregate_id`, `actor_id` | nhiều bảng | Ghi bởi service |
+| `ordering.carts.user_id` | `identity.user_accounts.id` | JWT (chỉ user đã đăng nhập mới có cart) |
+| `ordering.cart_items.product_id`, `order_items.product_id` | `catalog.products.id` | `ProductQueryService` khi thêm/đặt |
+| `ordering.orders.customer_id` | `customer.customers.id` (= userId) | JWT |
+| `catalog.stock_movements.order_id` | `ordering.orders.id` | Event `OrderPlacedEvent/Cancelled/Returned` |
+| `customer.customers.id` | `identity.user_accounts.id` | Event `UserRegisteredEvent` |
+| `customer.customer_product_stats.product_id` | `catalog.products.id` | Event `OrderPlacedEvent` |
+| `affiliate.affiliates.user_id`, `reviewed_by`, `payout.processed_by` | `identity.user_accounts.id` | JWT |
+| `affiliate.customer_bindings.customer_id`, `commission.customer_id` | `customer.customers.id` | Event `OrderPlacedEvent` |
+| `affiliate.commissions.order_id`, `customer_bindings.first_order_id` | `ordering.orders.id` | Event `OrderPlacedEvent` |
+| `audit.audit_logs.aggregate_id`, `actor_id` | nhiều bảng | Ghi bởi service |

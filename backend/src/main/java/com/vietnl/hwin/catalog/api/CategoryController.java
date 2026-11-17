@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vietnl.hwin.catalog.api.responses.CategoryResponse;
-import com.vietnl.hwin.catalog.api.mapper.CatalogMapper;
+import com.vietnl.hwin.catalog.api.dto.CategoryResponse;
+import com.vietnl.hwin.catalog.api.mapper.ProductMapper;
 import com.vietnl.hwin.catalog.service.CategoryService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,9 +19,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class CategoryController {
 
     private final CategoryService categoryService;
-    private final CatalogMapper mapper;
+    private final ProductMapper mapper;
 
-    public CategoryController(CategoryService categoryService, CatalogMapper mapper) {
+    public CategoryController(CategoryService categoryService, ProductMapper mapper) {
         this.categoryService = categoryService;
         this.mapper = mapper;
     }

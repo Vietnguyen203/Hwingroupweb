@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.vietnl.hwin.common.domain.Address;
 import com.vietnl.hwin.common.domain.Money;
-import com.vietnl.hwin.ordering.service.OrderingProperties;
+import com.vietnl.hwin.ordering.service.config.OrderingProperties;
 
 /** Implementation giả: phí ship cố định theo cấu hình hwin.ordering.shipping-fee. */
 @Component

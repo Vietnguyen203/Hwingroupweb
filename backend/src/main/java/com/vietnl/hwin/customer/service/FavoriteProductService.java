@@ -1,5 +1,6 @@
 package com.vietnl.hwin.customer.service;
 
+import com.vietnl.hwin.customer.service.model.FavoriteProduct;
 import java.util.UUID;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vietnl.hwin.catalog.service.ProductQueryService;
-import com.vietnl.hwin.catalog.service.ProductSnapshot;
+import com.vietnl.hwin.catalog.service.model.ProductSnapshot;
 import com.vietnl.hwin.customer.entity.CustomerProductStat;
 import com.vietnl.hwin.customer.repository.CustomerProductStatRepository;
 
@@ -28,11 +29,9 @@ public class FavoriteProductService {
         this.products = products;
     }
 
-    public record Favorite(ProductSnapshot product, int totalQuantity, int orderCount) {
-    }
 
     @Transactional(readOnly = true)
-    public List<Favorite> top(UUID customerId, int limit) {
+    public List<FavoriteProduct> top(UUID customerId, int limit) {
         List<CustomerProductStat> stats = productStats.findTop(customerId, PageRequest.of(0, Math.clamp(limit, 1, 20) * 2));
         Map<UUID, ProductSnapshot> snapshots = products.findSnapshots(
                         stats.stream().map(s -> s.getId().productId()).toList()).stream()
@@ -40,7 +39,7 @@ public class FavoriteProductService {
         return stats.stream()
                 .filter(s -> snapshots.containsKey(s.getId().productId()) && snapshots.get(s.getId().productId()).active())
                 .limit(Math.clamp(limit, 1, 20))
-                .map(s -> new Favorite(snapshots.get(s.getId().productId()), s.getTotalQuantity(), s.getOrderCount()))
+                .map(s -> new FavoriteProduct(snapshots.get(s.getId().productId()), s.getTotalQuantity(), s.getOrderCount()))
                 .toList();
     }
 }

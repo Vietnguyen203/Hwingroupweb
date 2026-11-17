@@ -16,13 +16,13 @@ import lombok.NoArgsConstructor;
 
 /** Read model: khách đã mua sản phẩm nào, bao nhiêu – phục vụ "Sản phẩm bạn hay mua". */
 @Entity
-@Table(name = "customer_product_stat", schema = "customer")
+@Table(name = "customer_product_stats", schema = "customer")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CustomerProductStat {
 
     @EmbeddedId
-    private Key id;
+    private CustomerProductStatId id;
 
     private int totalQuantity;
 
@@ -32,7 +32,7 @@ public class CustomerProductStat {
 
     public static CustomerProductStat start(UUID customerId, UUID productId) {
         CustomerProductStat s = new CustomerProductStat();
-        s.id = new Key(customerId, productId);
+        s.id = new CustomerProductStatId(customerId, productId);
         return s;
     }
 
@@ -49,7 +49,4 @@ public class CustomerProductStat {
         orderCount = Math.max(0, orderCount - 1);
     }
 
-    @Embeddable
-    public record Key(UUID customerId, UUID productId) implements Serializable {
-    }
 }

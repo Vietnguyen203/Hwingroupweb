@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.vietnl.hwin.identity.entity.OtpPurpose;
 import com.vietnl.hwin.identity.entity.OtpTarget;
-import com.vietnl.hwin.identity.service.OtpProperties;
+import com.vietnl.hwin.identity.service.config.OtpProperties;
 
 /**
  * "Hộp thư" OTP trong bộ nhớ – CHỈ ghi khi hwin.otp.log-code=true (profile dev/test), để Postman / test tự động

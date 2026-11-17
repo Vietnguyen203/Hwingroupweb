@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import com.vietnl.hwin.common.domain.PhoneNumber;
-import com.vietnl.hwin.identity.api.responses.MeResponse;
+import com.vietnl.hwin.identity.api.dto.MeResponse;
 import com.vietnl.hwin.identity.entity.Role;
 import com.vietnl.hwin.identity.entity.UserAccount;
 

@@ -55,16 +55,16 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/categories/**", "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         // Giỏ ẩn danh tính giá + cấu hình thanh toán
-                        .requestMatchers(HttpMethod.POST, "/api/cart/quote").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/cart-quotes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/checkout/config").permitAll()
                         // Click link CTV (đặt cookie ref) + OTP dev (endpoint chỉ tồn tại ở profile dev)
-                        .requestMatchers(HttpMethod.POST, "/api/affiliate/clicks").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/referral-clicks").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/dev/otp/**").permitAll()
                         // CTV: đăng ký / xem hồ sơ cần đăng nhập; còn lại cần vai trò AFFILIATE
-                        .requestMatchers("/api/ctv/register", "/api/ctv/me").hasRole("CUSTOMER")
-                        .requestMatchers("/api/ctv/**").hasRole("AFFILIATE")
+                        .requestMatchers("/api/affiliates/me").hasRole("CUSTOMER")
+                        .requestMatchers("/api/affiliates/me/**").hasRole("AFFILIATE")
                         // Chức năng của khách đã đăng nhập
-                        .requestMatchers("/api/cart/**", "/api/checkout/**", "/api/orders/**", "/api/me/**")
+                        .requestMatchers("/api/checkout/**", "/api/me/**")
                         .hasRole("CUSTOMER")
                         // Vận hành & tài liệu API (swagger chỉ bật ở profile dev)
                         .requestMatchers("/actuator/health/**", "/v3/api-docs/**", "/swagger-ui/**",

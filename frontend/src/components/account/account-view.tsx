@@ -12,9 +12,9 @@ import { useMe } from "@/hooks/use-me";
 import { api, errorMessage } from "@/lib/api";
 import {
   formatDateTime, ORDER_STATUS,
-  type Address, type AddressInput, type OrderSummary, type Profile,
+  type AddressResponse, type SaveAddressRequest, type OrderSummaryResponse, type ProfileResponse,
 } from "@/lib/account";
-import type { Page } from "@/lib/types";
+import type { PageResponse } from "@/lib/types";
 import { formatVnd } from "@/lib/format";
 
 /** Trang tài khoản khách: hồ sơ, sổ địa chỉ, đơn hàng gần đây, đăng xuất. */
@@ -23,7 +23,7 @@ export function AccountView() {
   const me = useMe();
 
   useEffect(() => {
-    if (me.data === null) router.replace("/login?next=/account");
+    if (me.data === null) router.replace("/dang-nhap?next=/tai-khoan");
   }, [me.data, router]);
 
   if (!me.data) return <div className="m-3 h-64 animate-pulse rounded-2xl bg-neutral-200" />;
@@ -60,11 +60,11 @@ function Card({ title, icon: Icon, action, children }: {
 
 function ProfileCard() {
   const qc = useQueryClient();
-  const profile = useQuery({ queryKey: ["profile"], queryFn: () => api<Profile>("/api/me/profile") });
+  const profile = useQuery({ queryKey: ["profile"], queryFn: () => api<ProfileResponse>("/api/me/profile") });
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
   const save = useMutation({
-    mutationFn: () => api<Profile>("/api/me/profile", { method: "PUT", body: { fullName: name } }),
+    mutationFn: () => api<ProfileResponse>("/api/me/profile", { method: "PUT", body: { fullName: name } }),
     onSuccess: (p) => {
       qc.setQueryData(["profile"], p);
       qc.invalidateQueries({ queryKey: ["me"] });
@@ -135,8 +135,8 @@ function LogoutButton() {
 
 // ------------------------------------------------------------------ đơn hàng
 
-function OrdersCard() {
-  const orders = useQuery({ queryKey: ["orders"], queryFn: () => api<Page<OrderSummary>>("/api/orders?page_size=10") });
+export function OrdersCard({ pageSize = 10 }: { pageSize?: number }) {
+  const orders = useQuery({ queryKey: ["orders", pageSize], queryFn: () => api<PageResponse<OrderSummaryResponse>>(`/api/me/orders?page_size=${pageSize}`) });
   return (
     <Card title="Đơn hàng của tôi" icon={Package}>
       {orders.isPending ? (
@@ -153,7 +153,7 @@ function OrdersCard() {
             const st = ORDER_STATUS[o.status];
             return (
               <li key={o.code}>
-                <Link href={`/account/orders/${o.code}`} className="flex items-center gap-3 py-3">
+                <Link href={`/tai-khoan/don-hang/${o.code}`} className="flex items-center gap-3 py-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   {o.firstItemImage ? <img src={o.firstItemImage} alt="" className="size-14 rounded-lg object-cover" /> : <div className="size-14 rounded-lg bg-neutral-100" />}
                   <div className="min-w-0 flex-1 text-sm">
@@ -182,16 +182,16 @@ function OrdersCard() {
 
 // ------------------------------------------------------------------ sổ địa chỉ
 
-const EMPTY: AddressInput = { recipientName: "", recipientPhone: "", province: "", district: "", ward: "", street: "", makeDefault: false };
+const EMPTY: SaveAddressRequest = { recipientName: "", recipientPhone: "", province: "", district: "", ward: "", street: "", makeDefault: false };
 
 function AddressesCard() {
   const qc = useQueryClient();
-  const list = useQuery({ queryKey: ["addresses"], queryFn: () => api<Address[]>("/api/me/addresses") });
-  const [form, setForm] = useState<AddressInput | null>(null);
+  const list = useQuery({ queryKey: ["addresses"], queryFn: () => api<AddressResponse[]>("/api/me/addresses") });
+  const [form, setForm] = useState<SaveAddressRequest | null>(null);
   const refresh = () => qc.invalidateQueries({ queryKey: ["addresses"] });
 
   const add = useMutation({
-    mutationFn: (a: AddressInput) => api<Address>("/api/me/addresses", { method: "POST", body: a }),
+    mutationFn: (a: SaveAddressRequest) => api<AddressResponse>("/api/me/addresses", { method: "POST", body: a }),
     onSuccess: () => { setForm(null); refresh(); },
   });
   const setDefault = useMutation({
@@ -203,7 +203,7 @@ function AddressesCard() {
     onSuccess: refresh,
   });
 
-  const field = (key: keyof Omit<AddressInput, "makeDefault">, label: string, props: React.ComponentProps<"input"> = {}) => (
+  const field = (key: keyof Omit<SaveAddressRequest, "makeDefault">, label: string, props: React.ComponentProps<"input"> = {}) => (
     <label className="block space-y-1">
       <span className="text-xs font-medium">{label}</span>
       <Input required value={form![key]} onChange={(e) => setForm({ ...form!, [key]: e.target.value })} className="h-10" {...props} />

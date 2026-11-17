@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 
 /** Dòng giỏ hàng – chỉ lưu productId + số lượng; giá luôn lấy mới từ catalog. */
 @Entity
-@Table(name = "cart_item", schema = "ordering")
+@Table(name = "cart_items", schema = "ordering")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CartItem {

@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 
 /** Entity con thuộc aggregate Product – chỉ sửa qua Product. */
 @Entity
-@Table(name = "product_image", schema = "catalog")
+@Table(name = "product_images", schema = "catalog")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductImage {

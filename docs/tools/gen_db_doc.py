@@ -5,6 +5,7 @@ Chạy ở thư mục gốc dự án (Postgres phải đang chạy qua Docker):
     python docs/tools/gen_db_doc.py
 """
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -47,7 +48,7 @@ select json_build_object(
 def query():
     arr = "array[" + ",".join(f"'{s}'" for s in SCHEMAS) + "]::text[]"
     sql = SQL.replace("%(schemas)s", arr)
-    out = subprocess.run(["docker", "exec", "-i", CONTAINER, "psql", "-U", "hwin", "-d", "hwin", "-At", "-c", sql],
+    out = subprocess.run(["docker", "exec", "-i", CONTAINER, "psql", "-U", "hwin", "-d", os.environ.get("HWIN_DOC_DB", "hwin"), "-At", "-c", sql],
                          capture_output=True, text=True, encoding="utf-8", check=True).stdout
     return json.loads(out)
 

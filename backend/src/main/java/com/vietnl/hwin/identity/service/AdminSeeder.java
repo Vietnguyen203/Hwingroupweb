@@ -1,5 +1,6 @@
 package com.vietnl.hwin.identity.service;
 
+import com.vietnl.hwin.identity.service.config.AdminSeedProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -92,10 +93,4 @@ public class AdminSeeder implements ApplicationRunner {
         return s == null || s.isBlank();
     }
 
-    /**
-     * @param otpExempt chỉ được true ở profile dev (tài khoản admin/admin)
-     */
-    @ConfigurationProperties(prefix = "hwin.admin-seed")
-    public record AdminSeedProperties(String email, String password, String fullName, String phone, boolean otpExempt) {
-    }
 }

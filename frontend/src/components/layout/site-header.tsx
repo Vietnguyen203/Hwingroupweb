@@ -24,7 +24,7 @@ export function SiteHeader() {
         </Suspense>
         <Logo />
 
-        <form action="/search" method="get" role="search" className="min-w-0 flex-1 md:max-w-xl">
+        <form action="/tim-kiem" method="get" role="search" className="min-w-0 flex-1 md:max-w-xl">
           <label className="flex h-10 items-center rounded-full bg-neutral-100 pl-3 md:border md:border-neutral-200 md:bg-white">
             <Search className="size-4 shrink-0 text-neutral-500 md:hidden" />
             <input
@@ -74,7 +74,7 @@ async function CategoryNav() {
       <ul className="mx-auto flex max-w-6xl items-center gap-6 overflow-x-auto px-3 text-sm text-neutral-700">
         {categories.map((c) => (
           <li key={c.id} className="shrink-0">
-            <Link href={`/c/${c.slug}`} className="flex items-center gap-1.5 py-2.5 hover:text-brand">
+            <Link href={`/danh-muc/${c.slug}`} className="flex items-center gap-1.5 py-2.5 hover:text-brand">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               {c.iconUrl && <img src={c.iconUrl} alt="" className="size-5" />}
               {c.name}

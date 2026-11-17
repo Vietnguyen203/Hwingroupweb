@@ -11,13 +11,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.vietnl.hwin.catalog.entity.ProductSort;
-import com.vietnl.hwin.catalog.service.ProductSearchCriteria;
+import com.vietnl.hwin.catalog.service.model.ProductSearchCriteria;
 import com.vietnl.hwin.catalog.service.ProductSearchService;
 import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.common.exception.ResponseException;
 import com.vietnl.hwin.common.web.ClientInfo;
 import com.vietnl.hwin.identity.entity.UserAccount;
-import com.vietnl.hwin.identity.service.IssuedTokens;
+import com.vietnl.hwin.identity.service.model.IssuedTokens;
 import com.vietnl.hwin.identity.service.TokenService;
 import com.vietnl.hwin.identity.service.UserAccountService;
 

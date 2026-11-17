@@ -6,7 +6,7 @@ import com.vietnl.hwin.identity.entity.OtpPurpose;
 /**
  * Port gửi OTP theo từng kênh.
  * - EMAIL: {@link EmailOtpSender} gửi thật qua SMTP.
- * - SMS: {@link SimulatedSmsOtpSender} giả lập; sau này thay bằng SMS brandname (xem docs/07-otp-sms.md)
+ * - SMS: {@link SimulatedSmsOtpSender} giả lập; sau này thay bằng SMS brandname (xem docs/08-otp.md)
  *   mà không đổi OtpService.
  */
 public interface OtpSender {

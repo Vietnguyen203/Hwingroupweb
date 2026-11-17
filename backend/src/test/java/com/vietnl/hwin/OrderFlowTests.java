@@ -1,5 +1,7 @@
 package com.vietnl.hwin;
 
+import com.vietnl.hwin.customer.service.model.ReorderResult;
+import com.vietnl.hwin.ordering.service.model.PlaceOrderCommand;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -15,7 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.vietnl.hwin.catalog.entity.ProductSort;
 import com.vietnl.hwin.catalog.service.ProductQueryService;
-import com.vietnl.hwin.catalog.service.ProductSearchCriteria;
+import com.vietnl.hwin.catalog.service.model.ProductSearchCriteria;
 import com.vietnl.hwin.catalog.service.ProductSearchService;
 import com.vietnl.hwin.common.domain.Address;
 import com.vietnl.hwin.common.domain.PhoneNumber;
@@ -24,12 +26,12 @@ import com.vietnl.hwin.customer.service.CustomerService;
 import com.vietnl.hwin.customer.service.ReorderService;
 import com.vietnl.hwin.identity.service.UserAccountService;
 import com.vietnl.hwin.ordering.entity.Order;
-import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
+import com.vietnl.hwin.ordering.entity.PaymentMethod;
 import com.vietnl.hwin.ordering.entity.OrderStatus;
 import com.vietnl.hwin.ordering.service.CartService;
 import com.vietnl.hwin.ordering.service.OrderAdminService;
 import com.vietnl.hwin.ordering.service.PlaceOrderService;
-import com.vietnl.hwin.ordering.service.PlaceOrderService.PlaceOrderCommand;
+import com.vietnl.hwin.ordering.service.model.PlaceOrderCommand;
 
 /**
  * Test tích hợp luồng đặt hàng qua nhiều module (Postgres/Redis thật):
@@ -73,7 +75,7 @@ class OrderFlowTests {
         await(() -> products.findSnapshot(productId).orElseThrow().stock() == stockBefore, "hoàn kho");
         await(() -> customers.profile(userId, p -> p.stats().getTotalOrders()) == 0, "trừ thống kê");
 
-        ReorderService.Result result = reorder.reorder(userId, order.getOrderCode());
+        ReorderResult result = reorder.reorder(userId, order.getOrderCode());
         assertThat(result.added()).singleElement().satisfies(a -> assertThat(a.quantity()).isEqualTo(2));
         assertThat(cart.view(userId).lines()).hasSize(1);
     }

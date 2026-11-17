@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Check, Minus, Plus, ShoppingCart } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { useCart, type CartLine } from "@/stores/cart";
+import { useCart, type CartLine } from "@/stores/cart-store";
 
 type Props = {
   product: Omit<CartLine, "quantity">;

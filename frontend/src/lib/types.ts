@@ -1,6 +1,6 @@
 // Kiểu dữ liệu trả về từ backend (khớp DTO ở backend/.../catalog/api/dto)
 
-export type Category = {
+export type CategoryResponse = {
   id: string;
   name: string;
   slug: string;
@@ -9,7 +9,7 @@ export type Category = {
   active: boolean;
 };
 
-export type ProductCard = {
+export type ProductCardResponse = {
   id: string;
   name: string;
   slug: string;
@@ -22,7 +22,7 @@ export type ProductCard = {
   bestseller: boolean;
 };
 
-export type FoodInfo = {
+export type FoodInfoResponse = {
   manufacturer: string | null;
   shelfLife: string | null;
   storageInstructions: string | null;
@@ -31,17 +31,17 @@ export type FoodInfo = {
   foodSafetyCertUrl: string | null;
 };
 
-export type ProductDetail = Omit<ProductCard, "imageUrl"> & {
+export type ProductDetailResponse = Omit<ProductCardResponse, "imageUrl"> & {
   shortDescription: string | null;
   description: string | null;
   stock: number;
   images: string[];
-  foodInfo: FoodInfo | null;
-  category: Category | null;
+  foodInfo: FoodInfoResponse | null;
+  category: CategoryResponse | null;
 };
 
 /** Kết quả phân trang của API: page bắt đầu từ 1 (tham số request: page, page_size). */
-export type Page<T> = {
+export type PageResponse<T> = {
   content: T[];
   page: number;
   pageSize: number;

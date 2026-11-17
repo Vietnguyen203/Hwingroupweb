@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMe } from "@/hooks/use-me";
 import { api, ApiError, errorMessage } from "@/lib/api";
-import type { OtpSent } from "@/lib/account";
+import type { OtpSentResponse } from "@/lib/account";
 import { cn } from "@/lib/utils";
 
 type Channel = "email" | "phone";
@@ -18,7 +18,7 @@ const RESEND_SECONDS = 60;
 
 /** Chỉ cho chuyển hướng nội bộ (chặn open redirect qua ?next=https://...). */
 function safeNext(next: string | null) {
-  return next && next.startsWith("/") && !next.startsWith("//") ? next : "/account";
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : "/tai-khoan";
 }
 
 /**
@@ -37,7 +37,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [contact, setContact] = useState("");
   const [fullName, setFullName] = useState("");
   const [errorCode, setErrorCode] = useState<string | undefined>();
-  const [sent, setSent] = useState<OtpSent | null>(null);
+  const [sent, setSent] = useState<OtpSentResponse | null>(null);
   const [otp, setOtp] = useState("");
   const [cooldown, setCooldown] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -61,7 +61,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     setBusy(true);
     setError(null);
     try {
-      setSent(await api<OtpSent>("/api/auth/otp", { method: "POST", body: { ...body(), purpose: isRegister ? "REGISTER" : "LOGIN" } }));
+      setSent(await api<OtpSentResponse>("/api/auth/otp", { method: "POST", body: { ...body(), purpose: isRegister ? "REGISTER" : "LOGIN" } }));
       setOtp("");
       setCooldown(RESEND_SECONDS);
     } catch (err) {
@@ -140,8 +140,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             {error && (
               <p role="alert" className="text-sm text-destructive">
                 {error}{" "}
-                {errorCode === "ACCOUNT_NOT_FOUND" && <Link href={`/register?next=${encodeURIComponent(next)}`} className="font-semibold text-brand-link">Đăng ký ngay</Link>}
-                {errorCode === "ACCOUNT_EXISTS" && <Link href={`/login?next=${encodeURIComponent(next)}`} className="font-semibold text-brand-link">Đăng nhập</Link>}
+                {errorCode === "ACCOUNT_NOT_FOUND" && <Link href={`/dang-ky?next=${encodeURIComponent(next)}`} className="font-semibold text-brand-link">Đăng ký ngay</Link>}
+                {errorCode === "ACCOUNT_EXISTS" && <Link href={`/dang-nhap?next=${encodeURIComponent(next)}`} className="font-semibold text-brand-link">Đăng nhập</Link>}
               </p>
             )}
             <Button type="submit" disabled={busy || !contact.trim() || (isRegister && !fullName.trim())} className="h-11 w-full text-base">
@@ -183,7 +183,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         )}
         <p className="mt-5 border-t pt-4 text-center text-sm text-muted-foreground">
           {isRegister ? "Đã có tài khoản? " : "Chưa có tài khoản? "}
-          <Link href={`${isRegister ? "/login" : "/register"}?next=${encodeURIComponent(next)}`} className="font-semibold text-brand-link">
+          <Link href={`${isRegister ? "/dang-nhap" : "/dang-ky"}?next=${encodeURIComponent(next)}`} className="font-semibold text-brand-link">
             {isRegister ? "Đăng nhập" : "Đăng ký"}
           </Link>
         </p>

@@ -22,15 +22,15 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.vietnl.hwin.catalog.api.requests.ActiveRequest;
-import com.vietnl.hwin.catalog.api.responses.AdminProductResponse;
-import com.vietnl.hwin.catalog.api.requests.ProductUpsertRequest;
-import com.vietnl.hwin.catalog.api.requests.StockAdjustRequest;
-import com.vietnl.hwin.catalog.api.responses.UploadResponse;
-import com.vietnl.hwin.catalog.api.mapper.CatalogMapper;
+import com.vietnl.hwin.catalog.api.dto.UpdateProductStatusRequest;
+import com.vietnl.hwin.catalog.api.dto.AdminProductResponse;
+import com.vietnl.hwin.catalog.api.dto.SaveProductRequest;
+import com.vietnl.hwin.catalog.api.dto.AdjustStockRequest;
+import com.vietnl.hwin.catalog.api.dto.ImageUploadResponse;
+import com.vietnl.hwin.catalog.api.mapper.ProductMapper;
 import com.vietnl.hwin.catalog.entity.ProductSort;
 import com.vietnl.hwin.catalog.service.ProductAdminService;
-import com.vietnl.hwin.catalog.service.ProductSearchCriteria;
+import com.vietnl.hwin.catalog.service.model.ProductSearchCriteria;
 import com.vietnl.hwin.catalog.service.ProductSearchService;
 import com.vietnl.hwin.catalog.service.integration.StorageService;
 import com.vietnl.hwin.common.web.PageResponse;
@@ -40,23 +40,20 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 /** Quản trị sản phẩm + upload ảnh. */
 @Tag(name = "catalog-admin")
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/admin/products")
 public class AdminProductController {
 
     private final ProductAdminService adminService;
     private final ProductSearchService searchService;
-    private final StorageService storage;
-    private final CatalogMapper mapper;
+    private final ProductMapper mapper;
 
-    public AdminProductController(ProductAdminService adminService, ProductSearchService searchService,
-                                  StorageService storage, CatalogMapper mapper) {
+    public AdminProductController(ProductAdminService adminService, ProductSearchService searchService, ProductMapper mapper) {
         this.adminService = adminService;
         this.searchService = searchService;
-        this.storage = storage;
         this.mapper = mapper;
     }
 
-    @GetMapping("/products")
+    @GetMapping
     public ResponseEntity<PageResponse<AdminProductResponse>> list(@RequestParam(required = false) String q,
                                                    @RequestParam(required = false) String category,
                                                    @RequestParam(name = "page", defaultValue = "1") int pageNo,
@@ -65,39 +62,29 @@ public class AdminProductController {
         var criteria = new ProductSearchCriteria(q, category, ProductSort.NEWEST, page, size, false);
         return ResponseEntity.ok(PageResponse.of(searchService.search(criteria, mapper::toAdmin), x -> x));
     }
-
-    @GetMapping("/products/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<AdminProductResponse> get(@PathVariable UUID id) {
         return ResponseEntity.ok(adminService.get(id, mapper::toAdmin));
     }
-
-    @PostMapping("/products")
-    public ResponseEntity<Map<String, UUID>> create(@Valid @RequestBody ProductUpsertRequest r) {
+    @PostMapping
+    public ResponseEntity<Map<String, UUID>> create(@Valid @RequestBody SaveProductRequest r) {
         UUID id = adminService.create(mapper.toDetails(r), r.getInitialStock() == null ? 0 : r.getInitialStock(),
                 r.getImages(), r.isBestseller());
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("id", id));
     }
-
-    @PutMapping("/products/{id}")
-    public ResponseEntity<Void> update(@PathVariable UUID id, @Valid @RequestBody ProductUpsertRequest r) {
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> update(@PathVariable UUID id, @Valid @RequestBody SaveProductRequest r) {
         adminService.update(id, mapper.toDetails(r), r.getImages(), r.isBestseller());
         return ResponseEntity.noContent().build();
     }
-
-    @PatchMapping("/products/{id}/stock")
-    public ResponseEntity<Void> adjustStock(@PathVariable UUID id, @Valid @RequestBody StockAdjustRequest r) {
+    @PatchMapping("/{id}/stock")
+    public ResponseEntity<Void> adjustStock(@PathVariable UUID id, @Valid @RequestBody AdjustStockRequest r) {
         adminService.adjustStock(id, r.getDelta());
         return ResponseEntity.noContent().build();
     }
-
-    @PatchMapping("/products/{id}/active")
-    public ResponseEntity<Void> setActive(@PathVariable UUID id, @RequestBody ActiveRequest r) {
+    @PatchMapping("/{id}/active")
+    public ResponseEntity<Void> setActive(@PathVariable UUID id, @RequestBody UpdateProductStatusRequest r) {
         adminService.setActive(id, r.isActive());
         return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping(value = "/uploads", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UploadResponse> upload(@RequestPart("file") MultipartFile file) throws IOException {
-        return ResponseEntity.status(HttpStatus.CREATED).body(new UploadResponse(storage.store(file.getInputStream(), file.getSize(), file.getContentType())));
     }
 }

@@ -37,7 +37,7 @@ import lombok.NoArgsConstructor;
  * Tham chiếu Category bằng ID (aggregate khác).
  */
 @Entity
-@Table(name = "product", schema = "catalog")
+@Table(name = "products", schema = "catalog")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Product extends AggregateRoot<Product> {

@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 
 /** Một địa chỉ trong sổ địa chỉ – thuộc aggregate Customer, chỉ sửa qua Customer. */
 @Entity
-@Table(name = "customer_address", schema = "customer")
+@Table(name = "customer_addresses", schema = "customer")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CustomerAddress {

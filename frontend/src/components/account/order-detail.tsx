@@ -7,7 +7,7 @@ import { ArrowLeft, CircleCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { api, ApiError, errorMessage } from "@/lib/api";
-import { formatDateTime, ORDER_STATUS, PAYMENT_METHOD, type OrderDetail } from "@/lib/account";
+import { formatDateTime, ORDER_STATUS, PAYMENT_METHOD, type OrderDetailResponse } from "@/lib/account";
 import { formatVnd } from "@/lib/format";
 
 /** Chi tiết một đơn của khách; đơn PENDING có nút hủy. */
@@ -17,10 +17,10 @@ export function OrderDetailView() {
   const qc = useQueryClient();
   const order = useQuery({
     queryKey: ["order", code],
-    queryFn: () => api<OrderDetail>(`/api/orders/${encodeURIComponent(code)}`),
+    queryFn: () => api<OrderDetailResponse>(`/api/me/orders/${encodeURIComponent(code)}`),
   });
   const cancel = useMutation({
-    mutationFn: () => api<OrderDetail>(`/api/orders/${encodeURIComponent(code)}/cancel`, { method: "POST" }),
+    mutationFn: () => api<OrderDetailResponse>(`/api/me/orders/${encodeURIComponent(code)}/cancel`, { method: "POST" }),
     onSuccess: (o) => {
       qc.setQueryData(["order", code], o);
       qc.invalidateQueries({ queryKey: ["orders"] });
@@ -28,13 +28,13 @@ export function OrderDetailView() {
   });
 
   const back = (
-    <Link href="/account" className="flex items-center gap-1 text-sm text-brand-link"><ArrowLeft className="size-4" /> Tài khoản</Link>
+    <Link href="/tai-khoan" className="flex items-center gap-1 text-sm text-brand-link"><ArrowLeft className="size-4" /> Tài khoản</Link>
   );
 
   if (order.isPending) return <div className="m-3 h-64 animate-pulse rounded-2xl bg-neutral-200" />;
   if (order.error) {
     const msg = order.error instanceof ApiError && order.error.status === 401
-      ? <>Vui lòng <Link href={`/login?next=/account/orders/${code}`} className="text-brand-link">đăng nhập</Link>.</>
+      ? <>Vui lòng <Link href={`/dang-nhap?next=/tai-khoan/don-hang/${code}`} className="text-brand-link">đăng nhập</Link>.</>
       : errorMessage(order.error);
     return <div className="space-y-3 p-3">{back}<p className="rounded-2xl bg-white p-4 text-sm">{msg}</p></div>;
   }
@@ -88,7 +88,7 @@ export function OrderDetailView() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               {i.imageUrl ? <img src={i.imageUrl} alt="" className="size-14 rounded-lg object-cover" /> : <div className="size-14 rounded-lg bg-neutral-100" />}
               <div className="flex-1">
-                <Link href={`/p/${i.productSlug}`} className="line-clamp-2 font-medium">{i.productName}</Link>
+                <Link href={`/san-pham/${i.productSlug}`} className="line-clamp-2 font-medium">{i.productName}</Link>
                 <p className="text-muted-foreground">{formatVnd(i.unitPrice)} × {i.quantity}</p>
               </div>
               <span className="font-semibold">{formatVnd(i.lineTotal)}</span>

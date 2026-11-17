@@ -1,5 +1,6 @@
 package com.vietnl.hwin.affiliate.service;
 
+import com.vietnl.hwin.affiliate.service.config.AffiliateProperties;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;

@@ -1,5 +1,8 @@
 package com.vietnl.hwin.identity.service;
 
+import com.vietnl.hwin.identity.service.model.IssuedTokens;
+import com.vietnl.hwin.identity.service.model.AdminLoginResult;
+import com.vietnl.hwin.identity.service.model.SendOtpResult;
 import com.vietnl.hwin.identity.entity.ExceptionMessage;
 import com.vietnl.hwin.common.exception.CommonErrorMessage;
 import org.springframework.http.HttpStatus;
@@ -58,7 +61,7 @@ public class AuthService {
      * Kiểm tra trước khi gửi để báo ngay "chưa có tài khoản / đã có tài khoản" (giới hạn 20 lần / 10 phút / IP
      * để hạn chế dò tài khoản).
      */
-    public OtpDispatch requestOtp(String rawPhone, String rawEmail, boolean register, ClientInfo client) {
+    public SendOtpResult requestOtp(String rawPhone, String rawEmail, boolean register, ClientInfo client) {
         OtpTarget target = OtpTarget.of(rawPhone, rawEmail);
         if (!rateLimiter.tryAcquire("rl:auth-lookup:" + client.ipHash(), LOOKUP_LIMIT, ADMIN_LOGIN_WINDOW)) {
             throw new ResponseException(HttpStatus.TOO_MANY_REQUESTS, CommonErrorMessage.RATE_LIMITED);
@@ -75,7 +78,7 @@ public class AuthService {
             }
         }
         long ttl = otpService.send(target, register ? OtpPurpose.REGISTER : OtpPurpose.LOGIN, client.ipHash());
-        return new OtpDispatch(target.channel(), target.masked(), ttl);
+        return new SendOtpResult(target.channel(), target.masked(), ttl);
     }
 
     /** Đăng nhập tài khoản đã có bằng OTP. */
@@ -92,9 +95,6 @@ public class AuthService {
         return tokenService.issue(userAccountService.register(target, fullName), client);
     }
 
-    /** OTP đã gửi: kênh, nơi nhận (đã che), thời gian hiệu lực (giây). */
-    public record OtpDispatch(OtpChannel channel, String sentTo, long expiresInSeconds) {
-    }
 
     /**
      * Bước 1 đăng nhập admin: kiểm tra mật khẩu.

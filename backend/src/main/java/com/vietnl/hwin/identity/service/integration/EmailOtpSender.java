@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import com.vietnl.hwin.common.domain.EmailAddress;
 import com.vietnl.hwin.identity.entity.OtpChannel;
 import com.vietnl.hwin.identity.entity.OtpPurpose;
-import com.vietnl.hwin.identity.service.OtpProperties;
+import com.vietnl.hwin.identity.service.config.OtpProperties;
 
 /**
  * Gửi OTP qua email (SMTP – biến MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, MAIL_FROM).

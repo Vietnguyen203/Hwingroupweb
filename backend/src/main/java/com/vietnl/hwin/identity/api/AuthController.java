@@ -18,14 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vietnl.hwin.common.security.AuthCookies;
 import com.vietnl.hwin.common.security.AuthPrincipal;
 import com.vietnl.hwin.common.web.ClientInfo;
-import com.vietnl.hwin.identity.api.responses.MeResponse;
-import com.vietnl.hwin.identity.api.requests.OtpRequest;
-import com.vietnl.hwin.identity.api.responses.OtpSentResponse;
-import com.vietnl.hwin.identity.api.requests.OtpVerifyRequest;
-import com.vietnl.hwin.identity.api.requests.RegisterRequest;
+import com.vietnl.hwin.identity.api.dto.MeResponse;
+import com.vietnl.hwin.identity.api.dto.SendOtpRequest;
+import com.vietnl.hwin.identity.api.dto.OtpSentResponse;
+import com.vietnl.hwin.identity.api.dto.VerifyOtpRequest;
+import com.vietnl.hwin.identity.api.dto.RegisterAccountRequest;
 import com.vietnl.hwin.identity.api.mapper.UserMapper;
 import com.vietnl.hwin.identity.service.AuthService;
-import com.vietnl.hwin.identity.service.IssuedTokens;
+import com.vietnl.hwin.identity.service.model.IssuedTokens;
 import com.vietnl.hwin.identity.service.UserAccountService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -50,13 +50,13 @@ public class AuthController {
     }
 
     @PostMapping("/otp")
-    public ResponseEntity<OtpSentResponse> sendOtp(@Valid @RequestBody OtpRequest body, HttpServletRequest request) {
+    public ResponseEntity<OtpSentResponse> sendOtp(@Valid @RequestBody SendOtpRequest body, HttpServletRequest request) {
         var sent = authService.requestOtp(body.getPhone(), body.getEmail(), body.register(), ClientInfo.from(request));
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new OtpSentResponse(sent.channel().name(), sent.sentTo(), sent.expiresInSeconds()));
     }
 
     @PostMapping("/otp/verify")
-    public ResponseEntity<MeResponse> verifyOtp(@Valid @RequestBody OtpVerifyRequest body, HttpServletRequest request,
+    public ResponseEntity<MeResponse> verifyOtp(@Valid @RequestBody VerifyOtpRequest body, HttpServletRequest request,
                                 HttpServletResponse response) {
         IssuedTokens tokens = authService.loginWithOtp(body.getPhone(), body.getEmail(), body.getOtp(),
                 ClientInfo.from(request));
@@ -65,7 +65,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<MeResponse> register(@Valid @RequestBody RegisterRequest body, HttpServletRequest request,
+    public ResponseEntity<MeResponse> register(@Valid @RequestBody RegisterAccountRequest body, HttpServletRequest request,
                                HttpServletResponse response) {
         IssuedTokens tokens = authService.registerWithOtp(body.getPhone(), body.getEmail(), body.getOtp(), body.getFullName(),
                 ClientInfo.from(request));

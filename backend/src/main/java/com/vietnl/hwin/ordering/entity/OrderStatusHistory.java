@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 
 /** Lịch sử chuyển trạng thái – thuộc aggregate Order. */
 @Entity
-@Table(name = "order_status_history", schema = "ordering")
+@Table(name = "order_status_histories", schema = "ordering")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderStatusHistory {

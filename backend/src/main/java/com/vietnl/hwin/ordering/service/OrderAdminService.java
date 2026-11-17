@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.service;
 
+import com.vietnl.hwin.ordering.service.config.OrderingProperties;
+import com.vietnl.hwin.ordering.service.model.OrderFilter;
 import com.vietnl.hwin.ordering.entity.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -23,9 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vietnl.hwin.common.audit.AuditLogger;
 import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.ordering.entity.Order;
-import com.vietnl.hwin.ordering.entity.OrderEnums.CancelReason;
-import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
-import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentStatus;
+import com.vietnl.hwin.ordering.entity.CancelReason;
+import com.vietnl.hwin.ordering.entity.PaymentMethod;
+import com.vietnl.hwin.ordering.entity.PaymentStatus;
 import com.vietnl.hwin.ordering.entity.OrderStatus;
 import com.vietnl.hwin.ordering.repository.OrderRepository;
 import com.vietnl.hwin.ordering.service.integration.ShippingProvider;
@@ -51,12 +53,6 @@ public class OrderAdminService {
         this.clock = clock;
     }
 
-    /**
-     * @param q mã đơn (một phần) hoặc SĐT người nhận
-     */
-    public record OrderFilter(OrderStatus status, PaymentMethod paymentMethod, PaymentStatus paymentStatus,
-                              String q, Instant from, Instant to, int page, int size) {
-    }
 
     @Transactional(readOnly = true)
     public <T> Page<T> search(OrderFilter f, Function<Order, T> mapper) {

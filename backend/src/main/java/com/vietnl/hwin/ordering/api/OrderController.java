@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vietnl.hwin.common.security.AuthPrincipal;
 import com.vietnl.hwin.common.web.PageResponse;
-import com.vietnl.hwin.ordering.api.responses.OrderDetailResponse;
-import com.vietnl.hwin.ordering.api.responses.OrderSummaryResponse;
-import com.vietnl.hwin.ordering.api.mapper.OrderingMapper;
+import com.vietnl.hwin.ordering.api.dto.OrderDetailResponse;
+import com.vietnl.hwin.ordering.api.dto.OrderSummaryResponse;
+import com.vietnl.hwin.ordering.api.mapper.OrderMapper;
 import com.vietnl.hwin.ordering.entity.Order;
 import com.vietnl.hwin.ordering.entity.OrderStatus;
 import com.vietnl.hwin.ordering.service.CustomerOrderService;
@@ -24,14 +24,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 /** "Đơn của tôi". Không nhận customerId từ client – luôn lấy từ JWT. */
 @Tag(name = "ordering")
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/api/me/orders")
 public class OrderController {
 
     private final CustomerOrderService service;
     private final PaymentGateway paymentGateway;
-    private final OrderingMapper mapper;
+    private final OrderMapper mapper;
 
-    public OrderController(CustomerOrderService service, PaymentGateway paymentGateway, OrderingMapper mapper) {
+    public OrderController(CustomerOrderService service, PaymentGateway paymentGateway, OrderMapper mapper) {
         this.service = service;
         this.paymentGateway = paymentGateway;
         this.mapper = mapper;

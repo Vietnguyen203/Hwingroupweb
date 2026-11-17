@@ -1,14 +1,14 @@
 import Link from "next/link";
 
-import type { ProductCard as ProductCardType } from "@/lib/types";
+import type { ProductCardResponse as ProductCardType } from "@/lib/types";
 import { AddToCartButton } from "./add-to-cart-button";
 import { Price } from "./price";
 
 /** Thẻ sản phẩm: ảnh vuông, nhãn -x% đỏ, tên 2 dòng, giá gạch + giá đỏ, nút giỏ tròn. */
-export function ProductCard({ product }: { product: ProductCardType }) {
+export function ProductCardResponse({ product }: { product: ProductCardType }) {
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-[0_1px_4px_rgba(0,0,0,0.08)]">
-      <Link href={`/p/${product.slug}`} className="relative block aspect-square bg-neutral-100">
+      <Link href={`/san-pham/${product.slug}`} className="relative block aspect-square bg-neutral-100">
         {product.imageUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={product.imageUrl} alt={product.name} loading="lazy" className="size-full object-cover" />
@@ -28,7 +28,7 @@ export function ProductCard({ product }: { product: ProductCardType }) {
         )}
       </Link>
       <div className="flex flex-1 flex-col p-2.5">
-        <Link href={`/p/${product.slug}`} className="line-clamp-2 min-h-10 text-sm leading-5 font-medium text-neutral-900 uppercase">
+        <Link href={`/san-pham/${product.slug}`} className="line-clamp-2 min-h-10 text-sm leading-5 font-medium text-neutral-900 uppercase">
           {product.name}
         </Link>
         {product.unit && <span className="mt-0.5 text-xs text-muted-foreground">{product.unit}</span>}
@@ -51,7 +51,7 @@ export function ProductGrid({ products }: { products: ProductCardType[] }) {
   return (
     <div className="grid grid-cols-2 gap-2.5 px-3 sm:grid-cols-3 md:grid-cols-4 md:gap-4 md:px-0 lg:grid-cols-5">
       {products.map((p) => (
-        <ProductCard key={p.id} product={p} />
+        <ProductCardResponse key={p.id} product={p} />
       ))}
     </div>
   );

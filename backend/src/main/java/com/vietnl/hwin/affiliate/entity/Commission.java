@@ -17,7 +17,7 @@ import jakarta.persistence.Table;
 
 import org.hibernate.annotations.UuidGenerator;
 
-import com.vietnl.hwin.affiliate.entity.AffiliateEnums.CommissionStatus;
+import com.vietnl.hwin.affiliate.entity.CommissionStatus;
 import com.vietnl.hwin.common.domain.AggregateRoot;
 import com.vietnl.hwin.common.domain.Money;
 
@@ -31,7 +31,7 @@ import lombok.NoArgsConstructor;
  * <pre>PENDING -> APPROVED (đơn đã giao + hold-days) ; PENDING -> CANCELLED (đơn hủy / trả hàng)</pre>
  */
 @Entity
-@Table(name = "commission", schema = "affiliate")
+@Table(name = "commissions", schema = "affiliate")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Commission extends AggregateRoot<Commission> {

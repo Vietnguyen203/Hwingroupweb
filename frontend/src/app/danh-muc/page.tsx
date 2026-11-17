@@ -24,7 +24,7 @@ async function CategoryList() {
     <ul className="divide-y overflow-hidden rounded-xl bg-white">
       {categories.map((c) => (
         <li key={c.id}>
-          <Link href={`/c/${c.slug}`} className="flex items-center gap-3 px-3 py-3">
+          <Link href={`/danh-muc/${c.slug}`} className="flex items-center gap-3 px-3 py-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             {c.iconUrl && <img src={c.iconUrl} alt="" className="size-12 rounded-full" />}
             <span className="flex-1 font-medium">{c.name}</span>

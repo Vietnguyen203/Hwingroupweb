@@ -39,7 +39,7 @@ VNPay/MoMo thật, GHN/GHTK thật, hóa đơn điện tử thật, SMS/Zalo OTP
 | `AFFILIATE` | SĐT + OTP (cùng tài khoản) | Dashboard CTV, link giới thiệu, thông tin ngân hàng, rút tiền |
 | `ADMIN` | Email + mật khẩu (BCrypt) | Toàn quyền quản trị |
 
-Một user có thể **vừa là CUSTOMER vừa là AFFILIATE** (`user_role` là quan hệ nhiều-nhiều). Mọi user đăng nhập bằng OTP đều có `CUSTOMER`; `AFFILIATE` được cấp khi hồ sơ CTV được duyệt.
+Một user có thể **vừa là CUSTOMER vừa là AFFILIATE** (`user_roles` là quan hệ nhiều-nhiều). Mọi user đăng nhập bằng OTP đều có `CUSTOMER`; `AFFILIATE` được cấp khi hồ sơ CTV được duyệt.
 
 ---
 
@@ -96,12 +96,12 @@ flowchart LR
     ORD -- "gọi ProductQueryService<br/>(giá, tên, tồn kho)" --> CAT
     ORD -- "gọi InventoryService<br/>(trừ / hoàn kho, từ listener của ordering)" --> CAT
 
-    CUS -- "nghe UserRegistered" --> ID
-    CUS -- "nghe OrderPlaced / Cancelled / Returned / Delivered" --> ORD
+    CUS -- "nghe UserRegisteredEvent" --> ID
+    CUS -- "nghe OrderPlacedEvent / Cancelled / Returned / Delivered" --> ORD
     CUS -- "gọi OrderQueryService + CartService (Mua lại)" --> ORD
     CUS -- "gọi ProductQueryService" --> CAT
 
-    AFF -- "nghe OrderPlaced / Delivered / Cancelled / Returned" --> ORD
+    AFF -- "nghe OrderPlacedEvent / Delivered / Cancelled / Returned" --> ORD
     AFF -- "gọi UserQueryService (SĐT)<br/>OtpService (đổi ngân hàng)<br/>UserRoleService (cấp AFFILIATE)" --> ID
 
     ID --> SK
@@ -116,9 +116,9 @@ flowchart LR
 | Upstream → Downstream | Kiểu quan hệ | Cơ chế |
 |---|---|---|
 | catalog → ordering | Customer/Supplier | ordering gọi `ProductQueryService`, `InventoryService` |
-| ordering → customer | Published Language (event) + Open Host | customer nghe `OrderPlaced…`, gọi `OrderQueryService`, `CartService` |
-| ordering → affiliate | Published Language (event) | affiliate nghe `OrderPlaced`, `OrderDelivered`, `OrderCancelled`, `OrderReturned` |
-| identity → customer | Published Language (event) | customer nghe `UserRegistered` để tạo `Customer` |
+| ordering → customer | Published Language (event) + Open Host | customer nghe `OrderPlacedEvent…`, gọi `OrderQueryService`, `CartService` |
+| ordering → affiliate | Published Language (event) | affiliate nghe `OrderPlacedEvent`, `OrderDeliveredEvent`, `OrderCancelledEvent`, `OrderReturnedEvent` |
+| identity → customer | Published Language (event) | customer nghe `UserRegisteredEvent` để tạo `Customer` |
 | identity → affiliate | Open Host Service | affiliate gọi `UserQueryService`, `OtpService`, `UserRoleService` |
 | catalog → customer | Open Host Service | customer gọi `ProductQueryService` (Mua lại, sản phẩm hay mua) |
 
@@ -191,7 +191,7 @@ flowchart TB
 
 - **Next.js rewrites `/api/*` sang Spring Boot** → trình duyệt chỉ thấy 1 origin, cookie JWT HttpOnly + SameSite=Lax hoạt động không cần cấu hình cross-site. CORS vẫn bật, chỉ cho `FRONTEND_ORIGIN`. Trang SSR gọi backend trực tiếp qua `BACKEND_INTERNAL_URL` (chuyển tiếp cookie).
 - **Event nội bộ** dùng `ApplicationEventPublisher` + `@ApplicationModuleListener` (async, chạy sau commit, transaction mới). Spring Modulith **Event Publication Registry (JPA)** lưu event chưa xử lý xong để retry khi khởi động lại → không mất event khi listener lỗi. Khi tách microservice chỉ cần externalize event (`@Externalized`) ra Kafka/RabbitMQ.
-- **Mỗi module một schema PostgreSQL**, không FK xuyên schema. Bảng `event_publication` đặt ở schema `public`. Bảng `audit_log` thuộc schema `audit` do `common` quản lý.
+- **Mỗi module một schema PostgreSQL**, không FK xuyên schema. Bảng `event_publication` đặt ở schema `public`. Bảng `audit_logs` thuộc schema `audit` do `common` quản lý.
 - **Flyway** một lần chạy, script đặt theo module: `db/migration/{common,identity,catalog,ordering,customer,affiliate}`.
 
 ---
@@ -215,18 +215,18 @@ com.vietnl.hwin
 │
 ├── identity/
 │   ├── api/             AuthController, AdminAuthController
-│   │   ├── dto/         AuthDtos (OtpRequest, OtpVerifyRequest, AdminLoginRequest, MeResponse)
+│   │   ├── dto/         AuthDtos (SendOtpRequest, VerifyOtpRequest, AdminLoginRequest, MeResponse)
 │   │   └── mapper/      UserMapper
 │   ├── service/         AuthService, UserAccountService, OtpService*, TokenService, UserQueryService*, UserRoleService*,
 │   │   │                OtpProperties, AdminSeeder
 │   │   └── integration/ OtpSender (port), LogOtpSender (dev)
-│   ├── entity/          UserAccount, RefreshToken, Role, UserStatus, OtpPurpose, UserRegistered*  (event)
+│   ├── entity/          UserAccount, RefreshToken, Role, UserStatus, OtpPurpose, UserRegisteredEvent*  (event)
 │   └── repository/      UserAccountRepository, RefreshTokenRepository
 │
 ├── catalog/
 │   ├── api/             CategoryController, ProductController, AdminCategoryController, AdminProductController (kèm upload)
-│   │   ├── dto/         CatalogDtos (CategoryResponse, ProductCardResponse, ProductDetailResponse, ProductUpsertRequest, …)
-│   │   └── mapper/      CatalogMapper
+│   │   ├── dto/         CatalogDtos (CategoryResponse, ProductCardResponse, ProductDetailResponse, SaveProductRequest, …)
+│   │   └── mapper/      ProductMapper
 │   ├── service/         CategoryService, ProductAdminService, ProductSearchService, ProductQueryService*, ProductSnapshot*,
 │   │   │                InventoryService* (Chặng 2)
 │   │   └── integration/ StorageService (port), LocalStorageService
@@ -236,37 +236,37 @@ com.vietnl.hwin
 │
 ├── ordering/
 │   ├── api/             CartController, CheckoutController, OrderController, AdminOrderController
-│   │   ├── dto/         CartResponse, CartItemRequest, MergeCartRequest, PlaceOrderRequest, OrderResponse, …
+│   │   ├── dto/         CartResponse, AddCartItemRequest, MergeCartRequest, PlaceOrderRequest, OrderResponse, …
 │   │   └── mapper/      CartMapper, OrderMapper
 │   ├── service/         CartService*, PlaceOrderService, OrderAdminService, OrderQueryService*,
-│   │   │                OrderStockListener, CartClearListener, OrderAutoCompleteJob, PricingPolicy, OrderCodeGenerator
+│   │   │                OrderStockEventListener, CartClearEventListener, OrderAutoCompleteJob, PricingPolicy, OrderCodeGenerator
 │   │   └── integration/ PaymentGateway, FakePaymentGateway, VietQrService, ShippingProvider, FakeShippingProvider,
 │   │                    EInvoiceProvider, FakeEInvoiceProvider
 │   ├── entity/          Cart, CartItem, Order, OrderItem, ShippingAddress (@Embeddable), VatInvoiceInfo (@Embeddable),
 │   │                    OrderStatus, PaymentMethod, PaymentStatus, CancelReason,
-│   │                    OrderPlaced*, OrderConfirmed*, OrderDelivered*, OrderCancelled*, OrderReturned*, OrderCompleted*
+│   │                    OrderPlacedEvent*, OrderConfirmedEvent*, OrderDeliveredEvent*, OrderCancelledEvent*, OrderReturnedEvent*, OrderCompletedEvent*
 │   └── repository/      CartRepository, OrderRepository
 │
 ├── customer/
 │   ├── api/             MyProfileController, MyAddressController, ReorderController, AdminCustomerController
-│   │   ├── dto/         ProfileResponse, AddressRequest, AddressResponse, ReorderResponse, CustomerRowResponse, …
+│   │   ├── dto/         ProfileResponse, SaveAddressRequest, ShippingAddressResponse, ReorderResponse, CustomerRowResponse, …
 │   │   └── mapper/      CustomerMapper
-│   ├── service/         CustomerService, AddressService, ReorderService, CustomerStatsListener,
-│   │                    CustomerProvisioningListener, FavoriteProductService, CustomerSegmentPolicy, CustomerCsvExporter
+│   ├── service/         CustomerService, AddressService, ReorderService, CustomerStatsEventListener,
+│   │                    CustomerProvisioningEventListener, FavoriteProductService, CustomerSegmentPolicy, CustomerCsvExporter
 │   ├── entity/          Customer, CustomerAddress, CustomerStats (read model), CustomerProductStat (read model), CustomerSegment
 │   └── repository/      CustomerRepository, CustomerStatsRepository*, CustomerProductStatRepository*
 │
 └── affiliate/
     ├── api/             AffiliateController, ReferralClickController, PayoutController, AdminAffiliateController, AdminPayoutController
-    │   ├── dto/         AffiliateRegisterRequest, DashboardResponse, BankAccountRequest, PayoutRequest, …
+    │   ├── dto/         AffiliateRegisterRequest, DashboardResponse, UpdateBankAccountRequest, CreatePayoutRequest, …
     │   └── mapper/      AffiliateMapper, CommissionMapper, PayoutMapper
     ├── service/         AffiliateService, ReferralClickService, AttributionService, CommissionService,
-    │   │                CommissionApprovalJob, PayoutService, BalanceCalculator, AffiliateOrderListener,
-    │   │                AffiliateRoleListener, BankAccountCrypto (AES-GCM)
+    │   │                CommissionApprovalJob, PayoutService, BalanceCalculator, OrderCommissionEventListener,
+    │   │                AffiliateRoleEventListener, BankAccountCrypto (AES-GCM)
     │   └── integration/ (trống – để dành cổng chuyển khoản tự động)
     ├── entity/          Affiliate, ReferralCode (VO), BankAccount (@Embeddable, mã hóa), CustomerBinding, ReferralClick,
     │                    Commission, Payout, AffiliateStatus, CommissionStatus, PayoutStatus,
-    │                    AffiliateApproved*, CommissionApproved, PayoutPaid
+    │                    AffiliateApprovedEvent*, CommissionApproved, PayoutPaid
     └── repository/      AffiliateRepository, CustomerBindingRepository, ReferralClickRepository,
                          CommissionRepository, PayoutRepository
 ```
@@ -281,19 +281,19 @@ Tất cả event là `record` bất biến, kế thừa `DomainEvent` (`eventId`
 
 | Event | Module phát | Payload chính | Module nghe | Hành động |
 |---|---|---|---|---|
-| `UserRegistered` | identity | userId, phone | customer | Tạo `Customer` (id = userId) + `CustomerStats` rỗng |
-| `OrderPlaced` | ordering | orderId, orderCode, customerId, referralCode?, items[productId, name, qty, unitPrice], subtotal, discount, shippingFee, total, placedAt | ordering (`OrderStockListener`) | Gọi `catalog.InventoryService.deduct()`; thiếu hàng → `order.cancel(OUT_OF_STOCK)` |
+| `UserRegisteredEvent` | identity | userId, phone | customer | Tạo `Customer` (id = userId) + `CustomerStats` rỗng |
+| `OrderPlacedEvent` | ordering | orderId, orderCode, customerId, referralCode?, items[productId, name, qty, unitPrice], subtotal, discount, shippingFee, total, placedAt | ordering (`OrderStockEventListener`) | Gọi `catalog.InventoryService.deduct()`; thiếu hàng → `order.cancel(OUT_OF_STOCK)` |
 | | | | affiliate | Xác định CTV (binding cũ hoặc tạo binding mới từ ref), chặn tự giới thiệu, tạo `Commission` PENDING |
 | | | | customer | +1 đơn, +tổng chi tiêu, cập nhật `lastOrderAt`, cộng `CustomerProductStat` |
-| `OrderConfirmed` | ordering | orderId, confirmedAt | (chưa có) | Để sẵn cho ShippingProvider |
-| `OrderDelivered` | ordering | orderId, deliveredAt | affiliate | `commission.markEligible(deliveredAt + holdDays)` |
-| `OrderCancelled` | ordering | orderId, customerId, total, reason | ordering (`OrderStockListener`) | `InventoryService.restore()` (chỉ khi đã trừ) |
+| `OrderConfirmedEvent` | ordering | orderId, confirmedAt | (chưa có) | Để sẵn cho ShippingProvider |
+| `OrderDeliveredEvent` | ordering | orderId, deliveredAt | affiliate | `commission.markEligible(deliveredAt + holdDays)` |
+| `OrderCancelledEvent` | ordering | orderId, customerId, total, reason | ordering (`OrderStockEventListener`) | `InventoryService.restore()` (chỉ khi đã trừ) |
 | | | | affiliate | `commission.cancel()` |
 | | | | customer | −1 đơn, −tổng chi tiêu, trừ `CustomerProductStat` |
-| `OrderReturned` | ordering | orderId, customerId, total | như `OrderCancelled` | Hoàn kho, hủy hoa hồng, trừ thống kê |
-| `OrderCompleted` | ordering | orderId | (chưa có) | Hết hạn đổi trả |
-| `AffiliateApproved` | affiliate | affiliateId, userId | affiliate (`AffiliateRoleListener`) | Gọi `identity.UserRoleService.grant(userId, AFFILIATE)` |
-| `AffiliateSuspended` | affiliate | affiliateId, userId | affiliate | Gỡ role `AFFILIATE` (link ngừng hoạt động) |
+| `OrderReturnedEvent` | ordering | orderId, customerId, total | như `OrderCancelledEvent` | Hoàn kho, hủy hoa hồng, trừ thống kê |
+| `OrderCompletedEvent` | ordering | orderId | (chưa có) | Hết hạn đổi trả |
+| `AffiliateApprovedEvent` | affiliate | affiliateId, userId | affiliate (`AffiliateRoleEventListener`) | Gọi `identity.UserRoleService.grant(userId, AFFILIATE)` |
+| `AffiliateSuspendedEvent` | affiliate | affiliateId, userId | affiliate | Gỡ role `AFFILIATE` (link ngừng hoạt động) |
 | `CommissionApproved` | affiliate | commissionId, affiliateId, amount | (nội bộ) | Ghi audit |
 | `PayoutPaid` | affiliate | payoutId, amount, txnRef | (nội bộ) | Ghi audit |
 
@@ -309,12 +309,12 @@ Tất cả event là `record` bất biến, kế thừa `DomainEvent` (`eventId`
 | Hủy chỉ trước `SHIPPING`; trả hàng chỉ khi `DELIVERED` và trong `return-window-days` (7) | `Order.cancel()`, `Order.markReturned()` |
 | Đơn BANK_QR phải `PAID` trước khi `CONFIRMED`; COD tự `PAID` khi `DELIVERED` | `Order.confirm()`, `Order.markDelivered()` |
 | Hoa hồng = 10% × (subtotal − discount), làm tròn xuống đồng | `Commission.create()` |
-| Gắn khách vĩnh viễn: `customer_binding.customer_id` UNIQUE | `CustomerBinding`, `AttributionService` |
+| Gắn khách vĩnh viễn: `customer_bindings.customer_id` UNIQUE | `CustomerBinding`, `AttributionService` |
 | Chống tự giới thiệu: SĐT khách = SĐT CTV → không binding, không hoa hồng | `AttributionService` (dùng `PhoneNumber.equals`) |
 | Chỉ CTV `APPROVED` có link hoạt động và nhận hoa hồng mới | `Affiliate.canEarn()` |
 | Số dư khả dụng = Σ hoa hồng APPROVED − Σ payout (REQUESTED, APPROVED, PAID) | `BalanceCalculator` |
 | Rút tối thiểu 200.000đ; mỗi CTV tối đa 1 payout đang mở; khóa 48h sau đổi ngân hàng | `Payout.request()`, `Affiliate.assertCanWithdraw()` |
-| Thay đổi liên quan tới tiền → `audit.audit_log` (chỉ INSERT, trigger chặn UPDATE/DELETE) | `AuditLogger` |
+| Thay đổi liên quan tới tiền → `audit.audit_logs` (chỉ INSERT, trigger chặn UPDATE/DELETE) | `AuditLogger` |
 
 ### Cấu hình (application.yml)
 
@@ -363,7 +363,7 @@ hwin:
 
 | Tiếng Việt | Tiếng Anh (code / bảng / API) | Ghi chú |
 |---|---|---|
-| Người dùng / tài khoản | `UserAccount` / `user_account` | Thuộc identity |
+| Người dùng / tài khoản | `UserAccount` / `user_accounts` | Thuộc identity |
 | Vai trò | `Role` (`CUSTOMER`, `AFFILIATE`, `ADMIN`) | |
 | Mã OTP | `Otp` | 6 chữ số, lưu hash trong Redis |
 | Mã làm mới | `RefreshToken` | Xoay vòng, lưu hash trong DB |

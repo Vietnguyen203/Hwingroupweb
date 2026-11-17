@@ -14,36 +14,36 @@
 
 | Schema | Bảng | Mô tả |
 |---|---|---|
-| `identity` | [`refresh_token`](#identityrefresh_token) | Refresh token (lưu hash SHA-256). Xoay vòng mỗi lần dùng; dùng lại token đã thu hồi -> thu hồi cả family |
-| `identity` | [`user_account`](#identityuser_account) | Tài khoản. Khách/CTV định danh bằng SĐT (đăng nhập OTP); admin bằng email/tên đăng nhập + mật khẩu BCrypt |
-| `identity` | [`user_role`](#identityuser_role) | Vai trò của tài khoản (nhiều-nhiều): CUSTOMER \| AFFILIATE \| ADMIN |
-| `catalog` | [`category`](#catalogcategory) | Danh mục sản phẩm (menu icon trang chủ) |
-| `catalog` | [`product`](#catalogproduct) | Sản phẩm – không có biến thể (1 sản phẩm = 1 giá). Tiền tính bằng VND |
-| `catalog` | [`product_image`](#catalogproduct_image) | Ảnh sản phẩm (thuộc aggregate Product) |
-| `catalog` | [`stock_movement`](#catalogstock_movement) | Nhật ký trừ/hoàn kho theo đơn. Unique (order_id, product_id, type) giúp xử lý event idempotent |
-| `ordering` | [`cart`](#orderingcart) | Giỏ hàng lưu server – mỗi user một giỏ |
-| `ordering` | [`cart_item`](#orderingcart_item) | Dòng giỏ hàng: chỉ productId + số lượng, giá luôn lấy mới từ catalog |
-| `ordering` | [`order_item`](#orderingorder_item) | Dòng đơn – chụp lại tên và giá tại thời điểm đặt |
-| `ordering` | [`order_status_history`](#orderingorder_status_history) | Lịch sử chuyển trạng thái đơn (ai, lúc nào, ghi chú) |
+| `identity` | [`refresh_tokens`](#identityrefresh_tokens) | Refresh token (lưu hash SHA-256). Xoay vòng mỗi lần dùng; dùng lại token đã thu hồi -> thu hồi cả family |
+| `identity` | [`user_accounts`](#identityuser_accounts) | Tài khoản. Khách/CTV định danh bằng SĐT (đăng nhập OTP); admin bằng email/tên đăng nhập + mật khẩu BCrypt |
+| `identity` | [`user_roles`](#identityuser_roles) | Vai trò của tài khoản (nhiều-nhiều): CUSTOMER \| AFFILIATE \| ADMIN |
+| `catalog` | [`categories`](#catalogcategories) | Danh mục sản phẩm (menu icon trang chủ) |
+| `catalog` | [`product_images`](#catalogproduct_images) | Ảnh sản phẩm (thuộc aggregate Product) |
+| `catalog` | [`products`](#catalogproducts) | Sản phẩm – không có biến thể (1 sản phẩm = 1 giá). Tiền tính bằng VND |
+| `catalog` | [`stock_movements`](#catalogstock_movements) | Nhật ký trừ/hoàn kho theo đơn. Unique (order_id, product_id, type) giúp xử lý event idempotent |
+| `ordering` | [`cart_items`](#orderingcart_items) | Dòng giỏ hàng: chỉ productId + số lượng, giá luôn lấy mới từ catalog |
+| `ordering` | [`carts`](#orderingcarts) | Giỏ hàng lưu server – mỗi user một giỏ |
+| `ordering` | [`order_items`](#orderingorder_items) | Dòng đơn – chụp lại tên và giá tại thời điểm đặt |
+| `ordering` | [`order_status_histories`](#orderingorder_status_histories) | Lịch sử chuyển trạng thái đơn (ai, lúc nào, ghi chú) |
 | `ordering` | [`orders`](#orderingorders) | Đơn hàng (aggregate root). Vòng đời: PENDING > CONFIRMED > SHIPPING > DELIVERED > COMPLETED; CANCELLED; RETURNED |
-| `customer` | [`customer`](#customercustomer) | Hồ sơ khách. id = identity.user_account.id (tạo khi nhận event UserRegistered) |
-| `customer` | [`customer_address`](#customercustomer_address) | Sổ địa chỉ (tối đa 10, đúng 1 địa chỉ mặc định) |
-| `customer` | [`customer_product_stat`](#customercustomer_product_stat) | Read model: khách đã mua sản phẩm nào bao nhiêu – "Sản phẩm bạn hay mua" |
+| `customer` | [`customer_addresses`](#customercustomer_addresses) | Sổ địa chỉ (tối đa 10, đúng 1 địa chỉ mặc định) |
+| `customer` | [`customer_product_stats`](#customercustomer_product_stats) | Read model: khách đã mua sản phẩm nào bao nhiêu – "Sản phẩm bạn hay mua" |
 | `customer` | [`customer_stats`](#customercustomer_stats) | Read model: thống kê mua hàng, cập nhật từ event ordering (không tính đơn hủy/trả) |
-| `customer` | [`processed_event`](#customerprocessed_event) | Event đã xử lý theo từng listener – chống cập nhật trùng khi event phát lại |
-| `affiliate` | [`affiliate`](#affiliateaffiliate) | Cộng tác viên (CTV). PENDING -> APPROVED / REJECTED; APPROVED <-> SUSPENDED. Chỉ APPROVED có link hoạt động |
-| `affiliate` | [`commission`](#affiliatecommission) | Hoa hồng: rate x (subtotal - discount), không tính phí ship, 1 cấp. PENDING -> APPROVED (giao + 7 ngày) / CANCELLED (hủy, trả hàng) |
-| `affiliate` | [`customer_binding`](#affiliatecustomer_binding) | Gắn khách vĩnh viễn (first-touch): đơn đầu tiên có ref hợp lệ -> mọi đơn sau của khách tính hoa hồng cho CTV này |
-| `affiliate` | [`payout`](#affiliatepayout) | Yêu cầu rút tiền: REQUESTED -> APPROVED -> PAID; REJECTED (tiền tự trở lại số dư). Tối thiểu 200.000đ |
-| `affiliate` | [`referral_click`](#affiliatereferral_click) | Lượt click link CTV. Không đếm trùng cùng IP + mã trong 24 giờ (Redis) |
-| `audit` | [`audit_log`](#auditaudit_log) | Nhật ký thay đổi liên quan tới tiền. Chỉ INSERT – trigger chặn UPDATE/DELETE |
+| `customer` | [`customers`](#customercustomers) | Hồ sơ khách. id = identity.user_accounts.id (tạo khi nhận event UserRegistered) |
+| `customer` | [`processed_events`](#customerprocessed_events) | Event đã xử lý theo từng listener – chống cập nhật trùng khi event phát lại |
+| `affiliate` | [`affiliates`](#affiliateaffiliates) | Cộng tác viên (CTV). PENDING -> APPROVED / REJECTED; APPROVED <-> SUSPENDED. Chỉ APPROVED có link hoạt động |
+| `affiliate` | [`commissions`](#affiliatecommissions) | Hoa hồng: rate x (subtotal - discount), không tính phí ship, 1 cấp. PENDING -> APPROVED (giao + 7 ngày) / CANCELLED (hủy, trả hàng) |
+| `affiliate` | [`customer_bindings`](#affiliatecustomer_bindings) | Gắn khách vĩnh viễn (first-touch): đơn đầu tiên có ref hợp lệ -> mọi đơn sau của khách tính hoa hồng cho CTV này |
+| `affiliate` | [`payouts`](#affiliatepayouts) | Yêu cầu rút tiền: REQUESTED -> APPROVED -> PAID; REJECTED (tiền tự trở lại số dư). Tối thiểu 200.000đ |
+| `affiliate` | [`referral_clicks`](#affiliatereferral_clicks) | Lượt click link CTV. Không đếm trùng cùng IP + mã trong 24 giờ (Redis) |
+| `audit` | [`audit_logs`](#auditaudit_logs) | Nhật ký thay đổi liên quan tới tiền. Chỉ INSERT – trigger chặn UPDATE/DELETE |
 | `public` | [`event_publication`](#publicevent_publication) | Spring Modulith: event nội bộ giữa các module; completion_date null = chưa xử lý xong (sẽ phát lại) |
 
 ## Schema `identity`
 
-Bounded context identity: tài khoản, vai trò, phiên đăng nhập
 
-### identity.refresh_token
+
+### identity.refresh_tokens
 
 Refresh token (lưu hash SHA-256). Xoay vòng mỗi lần dùng; dùng lại token đã thu hồi -> thu hồi cả family
 
@@ -62,15 +62,15 @@ Refresh token (lưu hash SHA-256). Xoay vòng mỗi lần dùng; dùng lại tok
 
 Ràng buộc:
 
-- `refresh_token_user_id_fkey` – FOREIGN KEY `FOREIGN KEY (user_id) REFERENCES identity.user_account(id) ON DELETE CASCADE`
-- `refresh_token_token_hash_key` – UNIQUE `UNIQUE (token_hash)`
+- `refresh_tokens_user_id_fkey` – FOREIGN KEY `FOREIGN KEY (user_id) REFERENCES identity.user_accounts(id) ON DELETE CASCADE`
+- `refresh_tokens_token_hash_key` – UNIQUE `UNIQUE (token_hash)`
 
 Index:
 
 - `idx_refresh_token_family` – `btree (family_id)`
 - `idx_refresh_token_user` – `btree (user_id)`
 
-### identity.user_account
+### identity.user_accounts
 
 Tài khoản. Khách/CTV định danh bằng SĐT (đăng nhập OTP); admin bằng email/tên đăng nhập + mật khẩu BCrypt
 
@@ -91,11 +91,11 @@ Tài khoản. Khách/CTV định danh bằng SĐT (đăng nhập OTP); admin b�
 Ràng buộc:
 
 - `ck_user_account_identifier` – CHECK `CHECK (((phone IS NOT NULL) OR (email IS NOT NULL)))`
-- `user_account_status_check` – CHECK `CHECK (((status)::text = ANY ((ARRAY['ACTIVE'::character varying, 'LOCKED'::character varying])::text[])))`
-- `user_account_email_key` – UNIQUE `UNIQUE (email)`
-- `user_account_phone_key` – UNIQUE `UNIQUE (phone)`
+- `user_accounts_status_check` – CHECK `CHECK (((status)::text = ANY ((ARRAY['ACTIVE'::character varying, 'LOCKED'::character varying])::text[])))`
+- `user_accounts_email_key` – UNIQUE `UNIQUE (email)`
+- `user_accounts_phone_key` – UNIQUE `UNIQUE (phone)`
 
-### identity.user_role
+### identity.user_roles
 
 Vai trò của tài khoản (nhiều-nhiều): CUSTOMER \| AFFILIATE \| ADMIN
 
@@ -106,14 +106,14 @@ Vai trò của tài khoản (nhiều-nhiều): CUSTOMER \| AFFILIATE \| ADMIN
 
 Ràng buộc:
 
-- `user_role_role_check` – CHECK `CHECK (((role)::text = ANY ((ARRAY['CUSTOMER'::character varying, 'AFFILIATE'::character varying, 'ADMIN'::character varying])::text[])))`
-- `user_role_user_id_fkey` – FOREIGN KEY `FOREIGN KEY (user_id) REFERENCES identity.user_account(id) ON DELETE CASCADE`
+- `user_roles_role_check` – CHECK `CHECK (((role)::text = ANY ((ARRAY['CUSTOMER'::character varying, 'AFFILIATE'::character varying, 'ADMIN'::character varying])::text[])))`
+- `user_roles_user_id_fkey` – FOREIGN KEY `FOREIGN KEY (user_id) REFERENCES identity.user_accounts(id) ON DELETE CASCADE`
 
 ## Schema `catalog`
 
-Bounded context catalog: danh mục, sản phẩm, tồn kho
 
-### catalog.category
+
+### catalog.categories
 
 Danh mục sản phẩm (menu icon trang chủ)
 
@@ -131,9 +131,28 @@ Danh mục sản phẩm (menu icon trang chủ)
 
 Ràng buộc:
 
-- `category_slug_key` – UNIQUE `UNIQUE (slug)`
+- `categories_slug_key` – UNIQUE `UNIQUE (slug)`
 
-### catalog.product
+### catalog.product_images
+
+Ảnh sản phẩm (thuộc aggregate Product)
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
+| product_id | `uuid` |  |  |  |
+| url | `character varying(500)` |  |  |  |
+| sort_order | `integer` |  | 0 |  |
+
+Ràng buộc:
+
+- `product_images_product_id_fkey` – FOREIGN KEY `FOREIGN KEY (product_id) REFERENCES catalog.products(id) ON DELETE CASCADE`
+
+Index:
+
+- `idx_product_image_product` – `btree (product_id)`
+
+### catalog.products
 
 Sản phẩm – không có biến thể (1 sản phẩm = 1 giá). Tiền tính bằng VND
 
@@ -165,11 +184,11 @@ Sản phẩm – không có biến thể (1 sản phẩm = 1 giá). Tiền tính
 
 Ràng buộc:
 
-- `product_compare_at_price_check` – CHECK `CHECK (((compare_at_price IS NULL) OR (compare_at_price >= 0)))`
-- `product_price_check` – CHECK `CHECK ((price >= 0))`
-- `product_stock_check` – CHECK `CHECK ((stock >= 0))`
-- `product_category_id_fkey` – FOREIGN KEY `FOREIGN KEY (category_id) REFERENCES catalog.category(id)`
-- `product_slug_key` – UNIQUE `UNIQUE (slug)`
+- `products_compare_at_price_check` – CHECK `CHECK (((compare_at_price IS NULL) OR (compare_at_price >= 0)))`
+- `products_price_check` – CHECK `CHECK ((price >= 0))`
+- `products_stock_check` – CHECK `CHECK ((stock >= 0))`
+- `products_category_id_fkey` – FOREIGN KEY `FOREIGN KEY (category_id) REFERENCES catalog.categories(id)`
+- `products_slug_key` – UNIQUE `UNIQUE (slug)`
 
 Index:
 
@@ -177,26 +196,7 @@ Index:
 - `idx_product_category_active` – `btree (category_id, active)`
 - `idx_product_search_trgm` – `gin (search_text gin_trgm_ops)`
 
-### catalog.product_image
-
-Ảnh sản phẩm (thuộc aggregate Product)
-
-| Cột | Kiểu | Null | Mặc định | Mô tả |
-|---|---|:-:|---|---|
-| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
-| product_id | `uuid` |  |  |  |
-| url | `character varying(500)` |  |  |  |
-| sort_order | `integer` |  | 0 |  |
-
-Ràng buộc:
-
-- `product_image_product_id_fkey` – FOREIGN KEY `FOREIGN KEY (product_id) REFERENCES catalog.product(id) ON DELETE CASCADE`
-
-Index:
-
-- `idx_product_image_product` – `btree (product_id)`
-
-### catalog.stock_movement
+### catalog.stock_movements
 
 Nhật ký trừ/hoàn kho theo đơn. Unique (order_id, product_id, type) giúp xử lý event idempotent
 
@@ -211,9 +211,9 @@ Nhật ký trừ/hoàn kho theo đơn. Unique (order_id, product_id, type) giúp
 
 Ràng buộc:
 
-- `stock_movement_quantity_check` – CHECK `CHECK ((quantity > 0))`
-- `stock_movement_type_check` – CHECK `CHECK (((type)::text = ANY ((ARRAY['DEDUCT'::character varying, 'RESTORE'::character varying])::text[])))`
-- `stock_movement_product_id_fkey` – FOREIGN KEY `FOREIGN KEY (product_id) REFERENCES catalog.product(id)`
+- `stock_movements_quantity_check` – CHECK `CHECK ((quantity > 0))`
+- `stock_movements_type_check` – CHECK `CHECK (((type)::text = ANY ((ARRAY['DEDUCT'::character varying, 'RESTORE'::character varying])::text[])))`
+- `stock_movements_product_id_fkey` – FOREIGN KEY `FOREIGN KEY (product_id) REFERENCES catalog.products(id)`
 - `uq_stock_movement` – UNIQUE `UNIQUE (order_id, product_id, type)`
 
 Index:
@@ -222,25 +222,9 @@ Index:
 
 ## Schema `ordering`
 
-Bounded context ordering: giỏ hàng, đơn hàng
 
-### ordering.cart
 
-Giỏ hàng lưu server – mỗi user một giỏ
-
-| Cột | Kiểu | Null | Mặc định | Mô tả |
-|---|---|:-:|---|---|
-| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
-| user_id | `uuid` |  |  | ID tài khoản (identity) – không FK xuyên schema |
-| version | `bigint` |  | 0 |  |
-| created_at | `timestamp with time zone` |  | now() |  |
-| updated_at | `timestamp with time zone` |  | now() |  |
-
-Ràng buộc:
-
-- `cart_user_id_key` – UNIQUE `UNIQUE (user_id)`
-
-### ordering.cart_item
+### ordering.cart_items
 
 Dòng giỏ hàng: chỉ productId + số lượng, giá luôn lấy mới từ catalog
 
@@ -254,11 +238,27 @@ Dòng giỏ hàng: chỉ productId + số lượng, giá luôn lấy mới từ 
 
 Ràng buộc:
 
-- `cart_item_quantity_check` – CHECK `CHECK (((quantity >= 1) AND (quantity <= 99)))`
-- `cart_item_cart_id_fkey` – FOREIGN KEY `FOREIGN KEY (cart_id) REFERENCES ordering.cart(id) ON DELETE CASCADE`
+- `cart_items_quantity_check` – CHECK `CHECK (((quantity >= 1) AND (quantity <= 99)))`
+- `cart_items_cart_id_fkey` – FOREIGN KEY `FOREIGN KEY (cart_id) REFERENCES ordering.carts(id) ON DELETE CASCADE`
 - `uq_cart_item` – UNIQUE `UNIQUE (cart_id, product_id)`
 
-### ordering.order_item
+### ordering.carts
+
+Giỏ hàng lưu server – mỗi user một giỏ
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `uuid` |  | uuid_generate_v7() |  |
+| user_id | `uuid` |  |  | ID tài khoản (identity) – không FK xuyên schema |
+| version | `bigint` |  | 0 |  |
+| created_at | `timestamp with time zone` |  | now() |  |
+| updated_at | `timestamp with time zone` |  | now() |  |
+
+Ràng buộc:
+
+- `carts_user_id_key` – UNIQUE `UNIQUE (user_id)`
+
+### ordering.order_items
 
 Dòng đơn – chụp lại tên và giá tại thời điểm đặt
 
@@ -276,16 +276,16 @@ Dòng đơn – chụp lại tên và giá tại thời điểm đặt
 
 Ràng buộc:
 
-- `order_item_line_total_check` – CHECK `CHECK ((line_total >= 0))`
-- `order_item_quantity_check` – CHECK `CHECK ((quantity > 0))`
-- `order_item_unit_price_check` – CHECK `CHECK ((unit_price >= 0))`
-- `order_item_order_id_fkey` – FOREIGN KEY `FOREIGN KEY (order_id) REFERENCES ordering.orders(id) ON DELETE CASCADE`
+- `order_items_line_total_check` – CHECK `CHECK ((line_total >= 0))`
+- `order_items_quantity_check` – CHECK `CHECK ((quantity > 0))`
+- `order_items_unit_price_check` – CHECK `CHECK ((unit_price >= 0))`
+- `order_items_order_id_fkey` – FOREIGN KEY `FOREIGN KEY (order_id) REFERENCES ordering.orders(id) ON DELETE CASCADE`
 
 Index:
 
 - `idx_order_item_order` – `btree (order_id)`
 
-### ordering.order_status_history
+### ordering.order_status_histories
 
 Lịch sử chuyển trạng thái đơn (ai, lúc nào, ghi chú)
 
@@ -301,7 +301,7 @@ Lịch sử chuyển trạng thái đơn (ai, lúc nào, ghi chú)
 
 Ràng buộc:
 
-- `order_status_history_order_id_fkey` – FOREIGN KEY `FOREIGN KEY (order_id) REFERENCES ordering.orders(id) ON DELETE CASCADE`
+- `order_status_histories_order_id_fkey` – FOREIGN KEY `FOREIGN KEY (order_id) REFERENCES ordering.orders(id) ON DELETE CASCADE`
 
 Index:
 
@@ -368,26 +368,9 @@ Index:
 
 ## Schema `customer`
 
-Bounded context customer: hồ sơ khách, sổ địa chỉ, thống kê (read model)
 
-### customer.customer
 
-Hồ sơ khách. id = identity.user_account.id (tạo khi nhận event UserRegistered)
-
-| Cột | Kiểu | Null | Mặc định | Mô tả |
-|---|---|:-:|---|---|
-| **id** 🔑 | `uuid` |  |  |  |
-| phone | `character varying(16)` |  |  |  |
-| full_name | `character varying(100)` | ✓ |  |  |
-| version | `bigint` |  | 0 |  |
-| created_at | `timestamp with time zone` |  | now() |  |
-| updated_at | `timestamp with time zone` |  | now() |  |
-
-Ràng buộc:
-
-- `customer_phone_key` – UNIQUE `UNIQUE (phone)`
-
-### customer.customer_address
+### customer.customer_addresses
 
 Sổ địa chỉ (tối đa 10, đúng 1 địa chỉ mặc định)
 
@@ -406,13 +389,13 @@ Sổ địa chỉ (tối đa 10, đúng 1 địa chỉ mặc định)
 
 Ràng buộc:
 
-- `customer_address_customer_id_fkey` – FOREIGN KEY `FOREIGN KEY (customer_id) REFERENCES customer.customer(id) ON DELETE CASCADE`
+- `customer_addresses_customer_id_fkey` – FOREIGN KEY `FOREIGN KEY (customer_id) REFERENCES customer.customers(id) ON DELETE CASCADE`
 
 Index:
 
 - `idx_customer_address_customer` – `btree (customer_id)`
 
-### customer.customer_product_stat
+### customer.customer_product_stats
 
 Read model: khách đã mua sản phẩm nào bao nhiêu – "Sản phẩm bạn hay mua"
 
@@ -426,7 +409,7 @@ Read model: khách đã mua sản phẩm nào bao nhiêu – "Sản phẩm bạn
 
 Ràng buộc:
 
-- `customer_product_stat_customer_id_fkey` – FOREIGN KEY `FOREIGN KEY (customer_id) REFERENCES customer.customer(id) ON DELETE CASCADE`
+- `customer_product_stats_customer_id_fkey` – FOREIGN KEY `FOREIGN KEY (customer_id) REFERENCES customer.customers(id) ON DELETE CASCADE`
 
 ### customer.customer_stats
 
@@ -443,13 +426,33 @@ Read model: thống kê mua hàng, cập nhật từ event ordering (không tín
 
 Ràng buộc:
 
-- `customer_stats_customer_id_fkey` – FOREIGN KEY `FOREIGN KEY (customer_id) REFERENCES customer.customer(id) ON DELETE CASCADE`
+- `customer_stats_customer_id_fkey` – FOREIGN KEY `FOREIGN KEY (customer_id) REFERENCES customer.customers(id) ON DELETE CASCADE`
 
 Index:
 
 - `idx_customer_stats_last_order` – `btree (last_order_at)`
 
-### customer.processed_event
+### customer.customers
+
+Hồ sơ khách. id = identity.user_accounts.id (tạo khi nhận event UserRegistered)
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|:-:|---|---|
+| **id** 🔑 | `uuid` |  |  |  |
+| phone | `character varying(16)` | ✓ |  | SĐT đăng nhập (+84...) – null nếu khách đăng nhập bằng email |
+| full_name | `character varying(100)` | ✓ |  |  |
+| version | `bigint` |  | 0 |  |
+| created_at | `timestamp with time zone` |  | now() |  |
+| updated_at | `timestamp with time zone` |  | now() |  |
+| email | `character varying(255)` | ✓ |  | Email đăng nhập (chữ thường) – null nếu khách đăng nhập bằng SĐT |
+
+Ràng buộc:
+
+- `ck_customer_contact` – CHECK `CHECK (((phone IS NOT NULL) OR (email IS NOT NULL)))`
+- `customers_email_key` – UNIQUE `UNIQUE (email)`
+- `customers_phone_key` – UNIQUE `UNIQUE (phone)`
+
+### customer.processed_events
 
 Event đã xử lý theo từng listener – chống cập nhật trùng khi event phát lại
 
@@ -461,9 +464,9 @@ Event đã xử lý theo từng listener – chống cập nhật trùng khi eve
 
 ## Schema `affiliate`
 
-Bounded context affiliate: cộng tác viên, hoa hồng, rút tiền (Chặng 3)
 
-### affiliate.affiliate
+
+### affiliate.affiliates
 
 Cộng tác viên (CTV). PENDING -> APPROVED / REJECTED; APPROVED <-> SUSPENDED. Chỉ APPROVED có link hoạt động
 
@@ -491,15 +494,15 @@ Cộng tác viên (CTV). PENDING -> APPROVED / REJECTED; APPROVED <-> SUSPENDED.
 
 Ràng buộc:
 
-- `affiliate_status_check` – CHECK `CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying, 'REJECTED'::character varying, 'SUSPENDED'::character varying])::text[])))`
-- `affiliate_referral_code_key` – UNIQUE `UNIQUE (referral_code)`
-- `affiliate_user_id_key` – UNIQUE `UNIQUE (user_id)`
+- `affiliates_status_check` – CHECK `CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying, 'REJECTED'::character varying, 'SUSPENDED'::character varying])::text[])))`
+- `affiliates_referral_code_key` – UNIQUE `UNIQUE (referral_code)`
+- `affiliates_user_id_key` – UNIQUE `UNIQUE (user_id)`
 
 Index:
 
 - `idx_affiliate_status` – `btree (status, created_at DESC)`
 
-### affiliate.commission
+### affiliate.commissions
 
 Hoa hồng: rate x (subtotal - discount), không tính phí ship, 1 cấp. PENDING -> APPROVED (giao + 7 ngày) / CANCELLED (hủy, trả hàng)
 
@@ -523,19 +526,19 @@ Hoa hồng: rate x (subtotal - discount), không tính phí ship, 1 cấp. PENDI
 
 Ràng buộc:
 
-- `commission_amount_check` – CHECK `CHECK ((amount >= 0))`
-- `commission_base_amount_check` – CHECK `CHECK ((base_amount >= 0))`
-- `commission_rate_check` – CHECK `CHECK (((rate >= (0)::numeric) AND (rate <= (1)::numeric)))`
-- `commission_status_check` – CHECK `CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying, 'CANCELLED'::character varying])::text[])))`
-- `commission_affiliate_id_fkey` – FOREIGN KEY `FOREIGN KEY (affiliate_id) REFERENCES affiliate.affiliate(id)`
-- `commission_order_id_key` – UNIQUE `UNIQUE (order_id)`
+- `commissions_amount_check` – CHECK `CHECK ((amount >= 0))`
+- `commissions_base_amount_check` – CHECK `CHECK ((base_amount >= 0))`
+- `commissions_rate_check` – CHECK `CHECK (((rate >= (0)::numeric) AND (rate <= (1)::numeric)))`
+- `commissions_status_check` – CHECK `CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying, 'CANCELLED'::character varying])::text[])))`
+- `commissions_affiliate_id_fkey` – FOREIGN KEY `FOREIGN KEY (affiliate_id) REFERENCES affiliate.affiliates(id)`
+- `commissions_order_id_key` – UNIQUE `UNIQUE (order_id)`
 
 Index:
 
 - `idx_commission_affiliate` – `btree (affiliate_id, created_at DESC)`
 - `idx_commission_status_eligible` – `btree (status, eligible_at)`
 
-### affiliate.customer_binding
+### affiliate.customer_bindings
 
 Gắn khách vĩnh viễn (first-touch): đơn đầu tiên có ref hợp lệ -> mọi đơn sau của khách tính hoa hồng cho CTV này
 
@@ -550,14 +553,14 @@ Gắn khách vĩnh viễn (first-touch): đơn đầu tiên có ref hợp lệ -
 
 Ràng buộc:
 
-- `customer_binding_affiliate_id_fkey` – FOREIGN KEY `FOREIGN KEY (affiliate_id) REFERENCES affiliate.affiliate(id)`
-- `customer_binding_customer_id_key` – UNIQUE `UNIQUE (customer_id)`
+- `customer_bindings_affiliate_id_fkey` – FOREIGN KEY `FOREIGN KEY (affiliate_id) REFERENCES affiliate.affiliates(id)`
+- `customer_bindings_customer_id_key` – UNIQUE `UNIQUE (customer_id)`
 
 Index:
 
 - `idx_customer_binding_affiliate` – `btree (affiliate_id)`
 
-### affiliate.payout
+### affiliate.payouts
 
 Yêu cầu rút tiền: REQUESTED -> APPROVED -> PAID; REJECTED (tiền tự trở lại số dư). Tối thiểu 200.000đ
 
@@ -583,9 +586,9 @@ Yêu cầu rút tiền: REQUESTED -> APPROVED -> PAID; REJECTED (tiền tự tr�
 
 Ràng buộc:
 
-- `payout_amount_check` – CHECK `CHECK ((amount > 0))`
-- `payout_status_check` – CHECK `CHECK (((status)::text = ANY ((ARRAY['REQUESTED'::character varying, 'APPROVED'::character varying, 'PAID'::character varying, 'REJECTED'::character varying])::text[])))`
-- `payout_affiliate_id_fkey` – FOREIGN KEY `FOREIGN KEY (affiliate_id) REFERENCES affiliate.affiliate(id)`
+- `payouts_amount_check` – CHECK `CHECK ((amount > 0))`
+- `payouts_status_check` – CHECK `CHECK (((status)::text = ANY ((ARRAY['REQUESTED'::character varying, 'APPROVED'::character varying, 'PAID'::character varying, 'REJECTED'::character varying])::text[])))`
+- `payouts_affiliate_id_fkey` – FOREIGN KEY `FOREIGN KEY (affiliate_id) REFERENCES affiliate.affiliates(id)`
 
 Index:
 
@@ -593,7 +596,7 @@ Index:
 - `idx_payout_status` – `btree (status, requested_at)`
 - `uq_payout_open` – `btree (affiliate_id) WHERE ((status)::text = ANY ((ARRAY['REQUESTED'::character varying, 'APPROVED'::character varying])::text[]))`
 
-### affiliate.referral_click
+### affiliate.referral_clicks
 
 Lượt click link CTV. Không đếm trùng cùng IP + mã trong 24 giờ (Redis)
 
@@ -609,7 +612,7 @@ Lượt click link CTV. Không đếm trùng cùng IP + mã trong 24 giờ (Redi
 
 Ràng buộc:
 
-- `referral_click_affiliate_id_fkey` – FOREIGN KEY `FOREIGN KEY (affiliate_id) REFERENCES affiliate.affiliate(id)`
+- `referral_clicks_affiliate_id_fkey` – FOREIGN KEY `FOREIGN KEY (affiliate_id) REFERENCES affiliate.affiliates(id)`
 
 Index:
 
@@ -617,9 +620,9 @@ Index:
 
 ## Schema `audit`
 
-Nhật ký kiểm toán dùng chung (append-only)
 
-### audit.audit_log
+
+### audit.audit_logs
 
 Nhật ký thay đổi liên quan tới tiền. Chỉ INSERT – trigger chặn UPDATE/DELETE
 

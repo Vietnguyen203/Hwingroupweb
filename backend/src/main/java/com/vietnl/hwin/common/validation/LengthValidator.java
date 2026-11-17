@@ -16,7 +16,7 @@ import jakarta.validation.Payload;
  * Thông báo tự sinh: "{field} phải có độ dài từ {min} đến {max} ký tự".
  */
 @Documented
-@Constraint(validatedBy = TextConstraints.LengthCheck.class)
+@Constraint(validatedBy = LengthValidatorConstraint.class)
 @Target({FIELD, PARAMETER})
 @Retention(RUNTIME)
 public @interface LengthValidator {

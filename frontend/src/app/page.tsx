@@ -28,17 +28,17 @@ export default function HomePage() {
         <OnSale />
       </Suspense>
 
-      <SectionTitle title="Combo ưu đãi" href="/c/combo" />
+      <SectionTitle title="Combo ưu đãi" href="/danh-muc/combo" />
       <Suspense fallback={<ProductGridSkeleton count={2} />}>
         <Combos />
       </Suspense>
 
-      <SectionTitle title="Bán chạy" href="/search?sort=BESTSELLER" />
+      <SectionTitle title="Bán chạy" href="/tim-kiem?sort=BESTSELLER" />
       <Suspense fallback={<ProductGridSkeleton />}>
         <Bestsellers />
       </Suspense>
 
-      <SectionTitle title="Sản phẩm mới" href="/search" />
+      <SectionTitle title="Sản phẩm mới" href="/tim-kiem" />
       <Suspense fallback={<ProductGridSkeleton />}>
         <Newest />
       </Suspense>

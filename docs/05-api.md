@@ -10,7 +10,7 @@
 - Phân trang: `?page=0&size=20&sort=field,dir` → `{content, page, size, totalElements, totalPages}`.
 - Cách viết API (theo `ai/skills/spring-boot-core`, áp dụng có chọn lọc):
   - Controller trả `ResponseEntity<T>` (`ok`, `status(CREATED)`, `status(ACCEPTED)`, `noContent()`); controller chỉ gọi service, không chứa nghiệp vụ.
-  - DTO là class Lombok `@Data @Builder @NoArgsConstructor @AllArgsConstructor`: request ở `<module>/api/requests/XxxRequest`, response ở `<module>/api/responses/XxxResponse`.
+  - DTO là class Lombok `@Data @Builder @NoArgsConstructor @AllArgsConstructor`: đặt ở `<module>/api/dto/`, tên `<Action><Resource>Request` / `<Resource>Response` (quy ước đặt tên: `CLAUDE.md`).
   - Validate bằng `@NotBlankValidator(field = "Tên")`, `@NotNullValidator`, `@LengthValidator(max, field)` (`common/validation`) – thông báo tiếng Việt tự sinh theo tên trường; nhóm `OnCreate` cho trường chỉ bắt buộc khi tạo mới. Các ràng buộc khác dùng Jakarta (`@Pattern`, `@Email`, `@Min`...).
   - KHÔNG dùng `IBaseApi` / CRUD chung: nghiệp vụ đi qua aggregate (DDD) bằng từng lệnh riêng (`confirm`, `ship`, `approve`...). Enum lưu dạng chữ (không TINYINT).
 - Danh sách phân trang: tham số `page` (bắt đầu từ **1**), `page_size`; trả `PageResponse {content, page, pageSize, totalElements, totalPages}`.
@@ -62,17 +62,17 @@
 
 | Method | Path | Quyền | Mô tả |
 |---|---|---|---|
-| GET | `/api/cart` | CUSTOMER | Giỏ server, giá/tồn kho tính lại từ catalog |
-| POST | `/api/cart/items` | CUSTOMER | Thêm `{productId, quantity}` |
-| PATCH | `/api/cart/items/{productId}` | CUSTOMER | Đổi số lượng |
-| DELETE | `/api/cart/items/{productId}` | CUSTOMER | Xóa dòng |
-| POST | `/api/cart/merge` | CUSTOMER | Gộp giỏ localStorage `{items:[{productId, quantity}]}` sau đăng nhập |
-| POST | `/api/cart/quote` | public | Tính giá giỏ ẩn danh (giỏ localStorage) – trả subtotal, phí ship, total do backend tính |
+| GET | `/api/me/cart` | CUSTOMER | Giỏ server, giá/tồn kho tính lại từ catalog |
+| POST | `/api/me/cart/items` | CUSTOMER | Thêm `{productId, quantity}` |
+| PATCH | `/api/me/cart/items/{productId}` | CUSTOMER | Đổi số lượng |
+| DELETE | `/api/me/cart/items/{productId}` | CUSTOMER | Xóa dòng |
+| POST | `/api/me/cart/merge` | CUSTOMER | Gộp giỏ localStorage `{items:[{productId, quantity}]}` sau đăng nhập |
+| POST | `/api/me/cart-quotes` | public | Tính giá giỏ ẩn danh (giỏ localStorage) – trả subtotal, phí ship, total do backend tính |
 | GET | `/api/checkout/config` | public | `{shippingFee, paymentMethods}` |
 | POST | `/api/checkout/orders` | CUSTOMER | Đặt hàng `{shippingAddress, paymentMethod, vatInvoice?, note, idempotencyKey}`; ref đọc từ cookie `hwin_ref`. Rate limit 5/10 phút |
-| GET | `/api/orders` | CUSTOMER | Đơn của tôi (phân trang, lọc trạng thái) |
-| GET | `/api/orders/{code}` | CUSTOMER | Chi tiết đơn của tôi (+ `qrUrl` nếu BANK_QR chưa trả) |
-| POST | `/api/orders/{code}/cancel` | CUSTOMER | Tự hủy khi còn PENDING |
+| GET | `/api/me/orders` | CUSTOMER | Đơn của tôi (phân trang, lọc trạng thái) |
+| GET | `/api/me/orders/{code}` | CUSTOMER | Chi tiết đơn của tôi (+ `qrUrl` nếu BANK_QR chưa trả) |
+| POST | `/api/me/orders/{code}/cancel` | CUSTOMER | Tự hủy khi còn PENDING |
 | GET | `/api/admin/orders` | ADMIN | Lọc `status, paymentMethod, paymentStatus, q (mã/SĐT), from, to` |
 | GET | `/api/admin/orders/{id}` | ADMIN | Chi tiết + lịch sử trạng thái + VAT |
 | POST | `/api/admin/orders/{id}/mark-paid` | ADMIN | `{paymentRef}` – xác nhận đã nhận chuyển khoản |
@@ -104,17 +104,17 @@
 
 | Method | Path | Quyền | Mô tả |
 |---|---|---|---|
-| POST | `/api/affiliate/clicks` | public | `{code, landingPath}` → ghi click (không đếm trùng IP + mã trong 24h), mã hợp lệ thì set cookie `hwin_ref` 30 ngày. Luôn 204 |
-| POST | `/api/ctv/register` | CUSTOMER | Đăng ký CTV `{fullName, socialLink, note, acceptTerms, phone?}` – `phone` bắt buộc nếu tài khoản đăng nhập bằng email (`PHONE_REQUIRED`); đăng ký lại nếu đã bị từ chối |
-| GET | `/api/ctv/me` | CUSTOMER | Hồ sơ CTV + trạng thái + lý do (404 nếu chưa đăng ký) |
-| GET | `/api/ctv/dashboard` | AFFILIATE | Mã, link chia sẻ, click (tổng / 30 ngày), khách đã gắn, hoa hồng theo trạng thái, số dư khả dụng, đã rút, khóa rút đến |
-| GET | `/api/ctv/commissions` | AFFILIATE | Hoa hồng của tôi (mã đơn, cơ sở tính, số tiền, trạng thái, mốc duyệt) |
-| GET | `/api/ctv/customers` | AFFILIATE | Khách đã gắn (SĐT đã che, ngày gắn) |
-| GET | `/api/ctv/bank-account` | AFFILIATE | Ngân hàng (chỉ 4 số cuối) + `withdrawLockedUntil` |
-| POST | `/api/ctv/bank-account/otp` | AFFILIATE | Gửi OTP `BANK_CHANGE` tới email của tài khoản (không có thì SĐT) |
-| PUT | `/api/ctv/bank-account` | AFFILIATE | `{bankName, accountNo, accountHolder, otp}` – mã hóa AES-GCM; đổi (không phải lần đầu) khóa rút 48h |
-| GET | `/api/ctv/payouts` | AFFILIATE | Lịch sử rút tiền |
-| POST | `/api/ctv/payouts` | AFFILIATE | Yêu cầu rút `{amount}` (≥ 200.000, ≤ số dư, 1 yêu cầu mở / CTV) |
+| POST | `/api/referral-clicks` | public | `{code, landingPath}` → ghi click (không đếm trùng IP + mã trong 24h), mã hợp lệ thì set cookie `hwin_ref` 30 ngày. Luôn 204 |
+| POST | `/api/affiliates/me` | CUSTOMER | Đăng ký CTV `{fullName, socialLink, note, acceptTerms, phone?}` – `phone` bắt buộc nếu tài khoản đăng nhập bằng email (`PHONE_REQUIRED`); đăng ký lại nếu đã bị từ chối |
+| GET | `/api/affiliates/me` | CUSTOMER | Hồ sơ CTV + trạng thái + lý do (404 nếu chưa đăng ký) |
+| GET | `/api/affiliates/me/dashboard` | AFFILIATE | Mã, link chia sẻ, click (tổng / 30 ngày), khách đã gắn, hoa hồng theo trạng thái, số dư khả dụng, đã rút, khóa rút đến |
+| GET | `/api/affiliates/me/commissions` | AFFILIATE | Hoa hồng của tôi (mã đơn, cơ sở tính, số tiền, trạng thái, mốc duyệt) |
+| GET | `/api/affiliates/me/customers` | AFFILIATE | Khách đã gắn (SĐT đã che, ngày gắn) |
+| GET | `/api/affiliates/me/bank-account` | AFFILIATE | Ngân hàng (chỉ 4 số cuối) + `withdrawLockedUntil` |
+| POST | `/api/affiliates/me/bank-account/otp` | AFFILIATE | Gửi OTP `BANK_CHANGE` tới email của tài khoản (không có thì SĐT) |
+| PUT | `/api/affiliates/me/bank-account` | AFFILIATE | `{bankName, accountNo, accountHolder, otp}` – mã hóa AES-GCM; đổi (không phải lần đầu) khóa rút 48h |
+| GET | `/api/affiliates/me/payouts` | AFFILIATE | Lịch sử rút tiền |
+| POST | `/api/affiliates/me/payouts` | AFFILIATE | Yêu cầu rút `{amount}` (≥ 200.000, ≤ số dư, 1 yêu cầu mở / CTV) |
 | GET | `/api/admin/affiliates` | ADMIN | Lọc `status`, `q` (SĐT / tên / mã) |
 | GET | `/api/admin/affiliates/{id}` | ADMIN | Chi tiết |
 | POST | `/api/admin/affiliates/{id}/approve` | ADMIN | Duyệt → sinh mã giới thiệu, cấp vai trò AFFILIATE |
@@ -149,12 +149,12 @@
 
 | Route | Render | Quyền (proxy.ts) |
 |---|---|---|
-| `/`, `/c/[slug]`, `/p/[slug]`, `/search` | SSR | public |
-| `/cart` | CSR | public |
-| `/checkout` | CSR (từng bước) | public → bắt buộc OTP trong luồng |
+| `/`, `/danh-muc/[slug]`, `/san-pham/[slug]`, `/tim-kiem` | SSR | public |
+| `/gio-hang` | CSR | public |
+| `/thanh-toan` | CSR (từng bước) | public → bắt buộc OTP trong luồng |
 | `/order/success/[code]` | SSR | CUSTOMER |
-| `/account`, `/account/orders`, `/account/orders/[code]`, `/account/addresses` | CSR | CUSTOMER |
-| `/ctv`, `/ctv/register`, `/ctv/bank`, `/ctv/payouts` | CSR | auth (`/ctv/register`), AFFILIATE (còn lại) |
+| `/tai-khoan`, `/tai-khoan/don-hang`, `/tai-khoan/don-hang/[code]`, `/tai-khoan/addresses` | CSR | CUSTOMER |
+| `/ctv`, `/ctv/dang-ky`, `/ctv/bank`, `/ctv/payouts` | CSR | auth (`/ctv/dang-ky`), AFFILIATE (còn lại) |
 | `/admin/login` | CSR | public |
 | `/admin/**` | CSR | ADMIN |
 

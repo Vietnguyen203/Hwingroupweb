@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.vietnl.hwin.affiliate.entity.AffiliateEnums.CommissionStatus;
+import com.vietnl.hwin.affiliate.entity.CommissionStatus;
 import com.vietnl.hwin.affiliate.entity.Commission;
 
 public interface CommissionRepository extends JpaRepository<Commission, UUID>, JpaSpecificationExecutor<Commission> {
@@ -23,13 +23,13 @@ public interface CommissionRepository extends JpaRepository<Commission, UUID>, J
 
     /** Tổng tiền + số đơn theo trạng thái của một CTV: [status, count, sum(amount)]. */
     @Query(value = """
-            select status, count(*), coalesce(sum(amount), 0) from affiliate.commission
+            select status, count(*), coalesce(sum(amount), 0) from affiliate.commissions
             where affiliate_id = :affiliateId group by status
             """, nativeQuery = true)
     List<Object[]> summarize(@Param("affiliateId") UUID affiliateId);
 
     @Query(value = """
-            select coalesce(sum(amount), 0) from affiliate.commission
+            select coalesce(sum(amount), 0) from affiliate.commissions
             where affiliate_id = :affiliateId and status = 'APPROVED'
             """, nativeQuery = true)
     long sumApproved(@Param("affiliateId") UUID affiliateId);

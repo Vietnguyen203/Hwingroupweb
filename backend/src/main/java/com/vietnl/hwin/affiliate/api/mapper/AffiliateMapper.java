@@ -1,20 +1,21 @@
 package com.vietnl.hwin.affiliate.api.mapper;
 
+import com.vietnl.hwin.affiliate.service.model.PayoutWithBank;
 import java.time.Duration;
 
 import org.mapstruct.Mapper;
 
-import com.vietnl.hwin.affiliate.api.responses.AdminAffiliateResponse;
-import com.vietnl.hwin.affiliate.api.responses.AdminCommissionResponse;
-import com.vietnl.hwin.affiliate.api.responses.AdminPayoutResponse;
-import com.vietnl.hwin.affiliate.api.responses.AffiliateResponse;
-import com.vietnl.hwin.affiliate.api.responses.CommissionResponse;
-import com.vietnl.hwin.affiliate.api.responses.PayoutResponse;
+import com.vietnl.hwin.affiliate.api.dto.AdminAffiliateResponse;
+import com.vietnl.hwin.affiliate.api.dto.AdminCommissionResponse;
+import com.vietnl.hwin.affiliate.api.dto.AdminPayoutResponse;
+import com.vietnl.hwin.affiliate.api.dto.AffiliateResponse;
+import com.vietnl.hwin.affiliate.api.dto.CommissionResponse;
+import com.vietnl.hwin.affiliate.api.dto.PayoutResponse;
 import com.vietnl.hwin.affiliate.entity.Affiliate;
 import com.vietnl.hwin.affiliate.entity.BankAccount;
 import com.vietnl.hwin.affiliate.entity.Commission;
 import com.vietnl.hwin.affiliate.entity.Payout;
-import com.vietnl.hwin.affiliate.service.PayoutService.PayoutWithBank;
+import com.vietnl.hwin.affiliate.service.model.PayoutWithBank;
 
 /** Map entity affiliate -> DTO. Không bao giờ trả số tài khoản đầy đủ ra API của CTV. */
 @Mapper

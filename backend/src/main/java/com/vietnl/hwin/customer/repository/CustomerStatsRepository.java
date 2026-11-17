@@ -17,12 +17,12 @@ public interface CustomerStatsRepository extends JpaRepository<CustomerStats, UU
      */
     @Modifying
     @Query(value = """
-            insert into customer.processed_event (event_id, listener) values (:eventId, :listener)
+            insert into customer.processed_events (event_id, listener) values (:eventId, :listener)
             on conflict do nothing
             """, nativeQuery = true)
     int markProcessed(@Param("eventId") UUID eventId, @Param("listener") String listener);
 
     @Modifying
-    @Query(value = "delete from customer.processed_event where processed_at < :cutoff", nativeQuery = true)
+    @Query(value = "delete from customer.processed_events where processed_at < :cutoff", nativeQuery = true)
     int deleteProcessedBefore(@Param("cutoff") java.time.Instant cutoff);
 }

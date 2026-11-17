@@ -1,5 +1,6 @@
 package com.vietnl.hwin.customer.service;
 
+import com.vietnl.hwin.customer.service.model.CustomerProfile;
 import com.vietnl.hwin.customer.entity.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -20,7 +21,7 @@ import com.vietnl.hwin.customer.entity.CustomerAddress;
 import com.vietnl.hwin.customer.entity.CustomerStats;
 import com.vietnl.hwin.customer.repository.CustomerRepository;
 import com.vietnl.hwin.customer.repository.CustomerStatsRepository;
-import com.vietnl.hwin.identity.service.UserContact;
+import com.vietnl.hwin.identity.service.model.UserContact;
 import com.vietnl.hwin.identity.service.UserQueryService;
 
 /**
@@ -67,10 +68,10 @@ public class CustomerService {
     }
 
     @Transactional(readOnly = true)
-    public <T> T profile(UUID customerId, Function<Profile, T> mapper) {
+    public <T> T profile(UUID customerId, Function<CustomerProfile, T> mapper) {
         Customer c = load(customerId);
         CustomerStats s = stats.findById(customerId).orElse(CustomerStats.empty(customerId, clock.instant()));
-        return mapper.apply(new Profile(c, s));
+        return mapper.apply(new CustomerProfile(c, s));
     }
 
     @Transactional
@@ -113,7 +114,4 @@ public class CustomerService {
         return customers.findById(customerId).orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.CUSTOMER_NOT_FOUND));
     }
 
-    /** Hồ sơ + thống kê để controller map ra DTO. */
-    public record Profile(Customer customer, CustomerStats stats) {
-    }
 }

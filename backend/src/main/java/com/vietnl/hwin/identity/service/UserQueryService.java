@@ -1,5 +1,6 @@
 package com.vietnl.hwin.identity.service;
 
+import com.vietnl.hwin.identity.service.model.UserContact;
 import java.util.Optional;
 import java.util.UUID;
 

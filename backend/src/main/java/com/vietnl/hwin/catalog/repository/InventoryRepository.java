@@ -20,7 +20,7 @@ public interface InventoryRepository extends Repository<Product, UUID> {
     /** @return 1 nếu ghi nhận mới, 0 nếu đã có (đã xử lý trước đó). */
     @Modifying
     @Query(value = """
-            insert into catalog.stock_movement (product_id, order_id, type, quantity)
+            insert into catalog.stock_movements (product_id, order_id, type, quantity)
             values (:productId, :orderId, :type, :quantity)
             on conflict (order_id, product_id, type) do nothing
             """, nativeQuery = true)
@@ -30,7 +30,7 @@ public interface InventoryRepository extends Repository<Product, UUID> {
     /** Trừ kho nếu còn đủ. @return 1 nếu thành công, 0 nếu thiếu hàng. */
     @Modifying
     @Query(value = """
-            update catalog.product
+            update catalog.products
                set stock = stock - :quantity, sold_count = sold_count + :quantity, version = version + 1
              where id = :productId and stock >= :quantity
             """, nativeQuery = true)
@@ -38,14 +38,14 @@ public interface InventoryRepository extends Repository<Product, UUID> {
 
     @Modifying
     @Query(value = """
-            update catalog.product
+            update catalog.products
                set stock = stock + :quantity, sold_count = greatest(sold_count - :quantity, 0), version = version + 1
              where id = :productId
             """, nativeQuery = true)
     int restore(@Param("productId") UUID productId, @Param("quantity") int quantity);
 
     /** Các dòng đã trừ kho của một đơn: [product_id, quantity]. */
-    @Query(value = "select product_id, quantity from catalog.stock_movement where order_id = :orderId and type = 'DEDUCT'",
+    @Query(value = "select product_id, quantity from catalog.stock_movements where order_id = :orderId and type = 'DEDUCT'",
             nativeQuery = true)
     List<Object[]> findDeducted(@Param("orderId") UUID orderId);
 }

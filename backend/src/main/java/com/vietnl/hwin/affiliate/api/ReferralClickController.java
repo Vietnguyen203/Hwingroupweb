@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vietnl.hwin.affiliate.api.requests.ClickRequest;
-import com.vietnl.hwin.affiliate.service.AffiliateProperties;
+import com.vietnl.hwin.affiliate.api.dto.RecordReferralClickRequest;
+import com.vietnl.hwin.affiliate.service.config.AffiliateProperties;
 import com.vietnl.hwin.affiliate.service.ReferralClickService;
 import com.vietnl.hwin.common.security.SecurityProperties;
 import com.vietnl.hwin.common.web.ClientInfo;
@@ -28,7 +28,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  */
 @Tag(name = "affiliate")
 @RestController
-@RequestMapping("/api/affiliate")
+@RequestMapping("/api/referral-clicks")
 public class ReferralClickController {
 
     public static final String REF_COOKIE = "hwin_ref";
@@ -43,8 +43,8 @@ public class ReferralClickController {
         this.security = security;
     }
 
-    @PostMapping("/clicks")
-    public ResponseEntity<Void> click(@Valid @RequestBody ClickRequest body, HttpServletRequest request, HttpServletResponse response) {
+    @PostMapping
+    public ResponseEntity<Void> click(@Valid @RequestBody RecordReferralClickRequest body, HttpServletRequest request, HttpServletResponse response) {
         clicks.record(body.getCode(), body.getLandingPath(), ClientInfo.from(request)).ifPresent(result ->
                 response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from(REF_COOKIE, result.referralCode())
                         .httpOnly(true)

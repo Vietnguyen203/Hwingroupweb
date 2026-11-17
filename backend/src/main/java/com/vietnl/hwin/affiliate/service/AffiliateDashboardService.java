@@ -1,5 +1,9 @@
 package com.vietnl.hwin.affiliate.service;
 
+import com.vietnl.hwin.affiliate.service.config.AffiliateProperties;
+import com.vietnl.hwin.affiliate.service.model.AffiliateDashboard;
+import com.vietnl.hwin.affiliate.service.model.BoundCustomer;
+import com.vietnl.hwin.affiliate.service.model.CommissionStatusSummary;
 import com.vietnl.hwin.affiliate.entity.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -18,7 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vietnl.hwin.affiliate.entity.Affiliate;
-import com.vietnl.hwin.affiliate.entity.AffiliateEnums.CommissionStatus;
+import com.vietnl.hwin.affiliate.entity.CommissionStatus;
 import com.vietnl.hwin.affiliate.entity.Commission;
 import com.vietnl.hwin.affiliate.entity.CustomerBinding;
 import com.vietnl.hwin.affiliate.repository.AffiliateRepository;
@@ -26,10 +30,10 @@ import com.vietnl.hwin.affiliate.repository.CommissionRepository;
 import com.vietnl.hwin.affiliate.repository.CustomerBindingRepository;
 import com.vietnl.hwin.affiliate.repository.PayoutRepository;
 import com.vietnl.hwin.affiliate.repository.ReferralClickRepository;
-import com.vietnl.hwin.identity.service.UserContact;
+import com.vietnl.hwin.identity.service.model.UserContact;
 import com.vietnl.hwin.identity.service.UserQueryService;
 
-/** Dashboard CTV: link, click, đơn, hoa hồng theo trạng thái, số dư, khách đã gắn. */
+/** AffiliateDashboard CTV: link, click, đơn, hoa hồng theo trạng thái, số dư, khách đã gắn. */
 @Service
 public class AffiliateDashboardService {
 
@@ -58,32 +62,23 @@ public class AffiliateDashboardService {
         this.clock = clock;
     }
 
-    public record StatusSummary(long count, long amount) {
-    }
 
-    public record Dashboard(String referralCode, String shareLink, String status, long clicksTotal, long clicks30Days,
-                            long boundCustomers, Map<CommissionStatus, StatusSummary> commissions,
-                            long availableBalance, long paidOut, long minPayout, Instant withdrawLockedUntil,
-                            boolean hasBankAccount) {
-    }
 
-    public record BoundCustomer(String phoneMasked, Instant boundAt) {
-    }
 
     @Transactional(readOnly = true)
-    public Dashboard dashboard(UUID userId) {
+    public AffiliateDashboard dashboard(UUID userId) {
         Affiliate a = loadActive(userId);
-        Map<CommissionStatus, StatusSummary> summary = new EnumMap<>(CommissionStatus.class);
+        Map<CommissionStatus, CommissionStatusSummary> summary = new EnumMap<>(CommissionStatus.class);
         for (CommissionStatus s : CommissionStatus.values()) {
-            summary.put(s, new StatusSummary(0, 0));
+            summary.put(s, new CommissionStatusSummary(0, 0));
         }
         for (Object[] row : commissions.summarize(a.getId())) {
             summary.put(CommissionStatus.valueOf((String) row[0]),
-                    new StatusSummary(((Number) row[1]).longValue(), ((Number) row[2]).longValue()));
+                    new CommissionStatusSummary(((Number) row[1]).longValue(), ((Number) row[2]).longValue()));
         }
         Instant now = clock.instant();
         String base = props.shareBaseUrl() == null ? "" : props.shareBaseUrl().replaceAll("/+$", "");
-        return new Dashboard(a.getReferralCode(), base + "/?ref=" + a.getReferralCode(), a.getStatus().name(),
+        return new AffiliateDashboard(a.getReferralCode(), base + "/?ref=" + a.getReferralCode(), a.getStatus().name(),
                 clicks.countByAffiliateId(a.getId()),
                 clicks.countByAffiliateIdAndClickedAtAfter(a.getId(), now.minus(Duration.ofDays(30))),
                 bindings.countByAffiliateId(a.getId()), summary,

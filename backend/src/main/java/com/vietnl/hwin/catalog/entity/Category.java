@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 
 /** Aggregate root: danh mục sản phẩm (hiển thị dạng icon trên trang chủ). */
 @Entity
-@Table(name = "category", schema = "catalog")
+@Table(name = "categories", schema = "catalog")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Category extends AggregateRoot<Category> {

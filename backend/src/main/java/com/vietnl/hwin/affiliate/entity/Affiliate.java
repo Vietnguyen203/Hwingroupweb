@@ -1,5 +1,7 @@
 package com.vietnl.hwin.affiliate.entity;
 
+import com.vietnl.hwin.affiliate.entity.event.AffiliateApprovedEvent;
+import com.vietnl.hwin.affiliate.entity.event.AffiliateSuspendedEvent;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -19,7 +21,7 @@ import jakarta.persistence.Table;
 
 import org.hibernate.annotations.UuidGenerator;
 
-import com.vietnl.hwin.affiliate.entity.AffiliateEnums.AffiliateStatus;
+import com.vietnl.hwin.affiliate.entity.AffiliateStatus;
 import com.vietnl.hwin.common.domain.AggregateRoot;
 import com.vietnl.hwin.common.domain.PhoneNumber;
 
@@ -33,7 +35,7 @@ import lombok.NoArgsConstructor;
  * Chỉ APPROVED mới có link hoạt động, nhận hoa hồng mới và được rút tiền.
  */
 @Entity
-@Table(name = "affiliate", schema = "affiliate")
+@Table(name = "affiliates", schema = "affiliate")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Affiliate extends AggregateRoot<Affiliate> {
@@ -92,7 +94,7 @@ public class Affiliate extends AggregateRoot<Affiliate> {
         this.statusReason = null;
     }
 
-    /** Duyệt: gán mã giới thiệu (chỉ lần đầu) và phát AffiliateApproved. */
+    /** Duyệt: gán mã giới thiệu (chỉ lần đầu) và phát AffiliateApprovedEvent. */
     public void approve(ReferralCode code, UUID adminId, Instant now) {
         requireStatus(Set.of(AffiliateStatus.PENDING), "duyệt");
         if (this.referralCode == null) {
@@ -101,7 +103,7 @@ public class Affiliate extends AggregateRoot<Affiliate> {
         this.status = AffiliateStatus.APPROVED;
         this.statusReason = null;
         review(adminId, now);
-        registerEvent(new AffiliateApproved(UUID.randomUUID(), now, id, userId, referralCode));
+        registerEvent(new AffiliateApprovedEvent(UUID.randomUUID(), now, id, userId, referralCode));
     }
 
     public void reject(String reason, UUID adminId, Instant now) {
@@ -117,7 +119,7 @@ public class Affiliate extends AggregateRoot<Affiliate> {
         this.status = AffiliateStatus.SUSPENDED;
         this.statusReason = requireReason(reason);
         review(adminId, now);
-        registerEvent(new AffiliateSuspended(UUID.randomUUID(), now, id, userId));
+        registerEvent(new AffiliateSuspendedEvent(UUID.randomUUID(), now, id, userId));
     }
 
     public void reinstate(UUID adminId, Instant now) {
@@ -125,7 +127,7 @@ public class Affiliate extends AggregateRoot<Affiliate> {
         this.status = AffiliateStatus.APPROVED;
         this.statusReason = null;
         review(adminId, now);
-        registerEvent(new AffiliateApproved(UUID.randomUUID(), now, id, userId, referralCode));
+        registerEvent(new AffiliateApprovedEvent(UUID.randomUUID(), now, id, userId, referralCode));
     }
 
     /**

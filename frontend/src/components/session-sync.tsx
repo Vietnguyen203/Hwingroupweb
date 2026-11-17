@@ -27,7 +27,7 @@ export function SessionSync() {
       if (sessionStorage.getItem(key)) return;
       sessionStorage.setItem(key, "1");
     } catch { /* bỏ qua */ }
-    fetch("/api/affiliate/clicks", {
+    fetch("/api/referral-clicks", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code: ref, landingPath: location.pathname }),

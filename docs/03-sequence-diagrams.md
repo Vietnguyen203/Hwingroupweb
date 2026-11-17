@@ -59,12 +59,12 @@ sequenceDiagram
         AC->>AS: loginOrRegister(phone)
         AS->>DB: findByPhone
         opt Chưa có tài khoản
-            AS->>DB: INSERT user_account + role CUSTOMER
-            AS->>Bus: publish UserRegistered(userId, phone)
+            AS->>DB: INSERT user_accounts + role CUSTOMER
+            AS->>Bus: publish UserRegisteredEvent(userId, phone)
         end
         AS->>TS: issue(user)
         TS->>TS: Ký access JWT 15 phút (sub, roles)
-        TS->>DB: INSERT refresh_token(hash, familyId mới, 7 ngày)
+        TS->>DB: INSERT refresh_tokens(hash, familyId mới, 7 ngày)
         AC-->>FE: 200 + Set-Cookie hwin_at, hwin_rt (HttpOnly, Secure, SameSite=Lax)
     end
 
@@ -72,7 +72,7 @@ sequenceDiagram
     FE->>AC: Gọi API bất kỳ → 401 TOKEN_EXPIRED
     FE->>AC: POST /api/auth/refresh (cookie hwin_rt, path=/api/auth)
     AC->>TS: rotate(rawRefresh)
-    TS->>DB: SELECT refresh_token WHERE token_hash = sha256(raw)
+    TS->>DB: SELECT refresh_tokens WHERE token_hash = sha256(raw)
     alt Token đã bị thu hồi (bị dùng lại)
         TS->>DB: UPDATE revoked_at cho cả family_id
         AC-->>FE: 401 + xóa cookie → đăng nhập lại
@@ -108,7 +108,7 @@ sequenceDiagram
 
     K->>FE: Mở /p/cha-lua?ref=ABC123 (link CTV chia sẻ)
     FE->>FE: proxy.ts đọc ?ref, kiểm tra định dạng A-Z0-9
-    FE->>RC: POST /api/affiliate/clicks {code, landingPath} (kèm IP, UA)
+    FE->>RC: POST /api/referral-clicks {code, landingPath} (kèm IP, UA)
     RC->>RS: record(code, ip, ua, path)
     RS->>DB: findByReferralCode(code)
     alt Không tồn tại hoặc CTV không APPROVED
@@ -117,7 +117,7 @@ sequenceDiagram
     else CTV APPROVED
         RS->>R: SET NX click:ABC123:ipHash EX 24h
         alt Key mới
-            RS->>DB: INSERT referral_click(ipHash, ua, path)
+            RS->>DB: INSERT referral_clicks(ipHash, ua, path)
         else Đã click trong 24h
             Note over RS: Không đếm trùng
         end
@@ -161,7 +161,7 @@ sequenceDiagram
         K->>FE: Bước 2: nhập OTP
         FE->>ID: POST /api/auth/otp/verify
         ID-->>FE: Cookie JWT (tạo tài khoản CUSTOMER nếu mới)
-        FE->>CART: POST /api/cart/merge {items từ localStorage}
+        FE->>CART: POST /api/me/cart/merge {items từ localStorage}
         CART-->>FE: Giỏ server đã gộp, xóa localStorage
     end
 
@@ -188,10 +188,10 @@ sequenceDiagram
         CO-->>FE: 422 + danh sách sản phẩm lỗi
     else Hợp lệ
         O->>O: Tính subtotal, discount=0, total, sinh orderCode, status PENDING
-        O->>O: registerEvent(OrderPlaced)
+        O->>O: registerEvent(OrderPlacedEvent)
         PS->>DB: save(order)
-        Note over PS: Giỏ hàng được xóa bởi listener OrderPlaced (transaction riêng)
-        PS->>Bus: OrderPlaced (phát khi commit)
+        Note over PS: Giỏ hàng được xóa bởi listener OrderPlacedEvent (transaction riêng)
+        PS->>Bus: OrderPlacedEvent (phát khi commit)
         CO-->>FE: 201 {orderCode, total, paymentMethod, qrUrl?}
     end
     FE-->>K: Trang cảm ơn /order/success/HW241116AB12
@@ -204,7 +204,7 @@ sequenceDiagram
 
 ---
 
-## d. Xử lý event sau OrderPlaced
+## d. Xử lý event sau OrderPlacedEvent
 
 Mỗi listener là một transaction riêng, chỉ sửa **một** aggregate, idempotent.
 
@@ -216,33 +216,33 @@ Mỗi listener là một transaction riêng, chỉ sửa **một** aggregate, id
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Bus as Event bus (OrderPlaced)
-    participant OSL as ordering OrderStockListener
+    participant Bus as Event bus (OrderPlacedEvent)
+    participant OSL as ordering OrderStockEventListener
     participant INV as catalog InventoryService
-    participant CL as ordering CartClearListener
-    participant AOL as affiliate AffiliateOrderListener
+    participant CL as ordering CartClearEventListener
+    participant AOL as affiliate OrderCommissionEventListener
     participant ATT as AttributionService
     participant UQ as identity UserQueryService
     participant ADB as PostgreSQL affiliate
-    participant CSL as customer CustomerStatsListener
+    participant CSL as customer CustomerStatsEventListener
     participant CDB as PostgreSQL customer
     participant AUD as AuditLogger
 
     par Trừ kho
-        Bus-->>OSL: OrderPlaced
+        Bus-->>OSL: OrderPlacedEvent
         OSL->>INV: deduct(orderId, items)
-        INV->>INV: UPDATE stock = stock - q WHERE stock ≥ q<br/>INSERT stock_movement DEDUCT (unique)
+        INV->>INV: UPDATE stock = stock - q WHERE stock ≥ q<br/>INSERT stock_movements DEDUCT (unique)
         alt Đủ hàng
             INV-->>OSL: ok
         else Thiếu hàng (bán đồng thời)
             INV-->>OSL: InsufficientStockException (rollback cả lô)
-            OSL->>OSL: order.cancel(OUT_OF_STOCK) → OrderCancelled
+            OSL->>OSL: order.cancel(OUT_OF_STOCK) → OrderCancelledEvent
         end
     and Xóa giỏ
-        Bus-->>CL: OrderPlaced
+        Bus-->>CL: OrderPlacedEvent
         CL->>CL: cart.removeProducts(orderedProductIds)
     and Hoa hồng
-        Bus-->>AOL: OrderPlaced
+        Bus-->>AOL: OrderPlacedEvent
         AOL->>ATT: resolve(customerId, referralCode)
         ATT->>ADB: findBinding(customerId)
         alt Đã có binding (khách cũ)
@@ -253,7 +253,7 @@ sequenceDiagram
             alt CTV không APPROVED hoặc SĐT khách = SĐT CTV
                 ATT-->>AOL: không có CTV (tự giới thiệu bị chặn)
             else Hợp lệ
-                ATT->>ADB: INSERT customer_binding (customer_id UNIQUE)
+                ATT->>ADB: INSERT customer_bindings (customer_id UNIQUE)
                 Note over ATT,ADB: Binding là aggregate riêng → transaction riêng<br/>trước khi tạo Commission
             end
         else Không binding, không ref
@@ -264,10 +264,10 @@ sequenceDiagram
             AOL->>AUD: COMMISSION_CREATED
         end
     and Thống kê khách
-        Bus-->>CSL: OrderPlaced
-        CSL->>CDB: Kiểm tra processed_event(eventId)
+        Bus-->>CSL: OrderPlacedEvent
+        CSL->>CDB: Kiểm tra processed_events(eventId)
         CSL->>CDB: customer_stats: total_orders +1, total_spent + total, last_order_at
-        CSL->>CDB: customer_product_stat: + quantity từng sản phẩm
+        CSL->>CDB: customer_product_stats: + quantity từng sản phẩm
     end
 ```
 
@@ -291,7 +291,7 @@ sequenceDiagram
     participant AO as ordering AdminOrderController
     participant O as Order
     participant Bus as Event bus
-    participant AOL as affiliate AffiliateOrderListener
+    participant AOL as affiliate OrderCommissionEventListener
     participant C as Commission
     participant JOB as CommissionApprovalJob (@Scheduled mỗi giờ)
     participant AUD as AuditLogger
@@ -302,8 +302,8 @@ sequenceDiagram
     A->>AO: POST /api/admin/orders/{id}/deliver
     AO->>O: markDelivered(now)
     O->>O: COD → paymentStatus = PAID
-    O->>Bus: OrderDelivered(orderId, deliveredAt)
-    Bus-->>AOL: OrderDelivered
+    O->>Bus: OrderDeliveredEvent(orderId, deliveredAt)
+    Bus-->>AOL: OrderDeliveredEvent
     AOL->>C: markEligible(deliveredAt + 7 ngày)
     Note over C: Vẫn PENDING, eligible_at được đặt
 
@@ -317,7 +317,7 @@ sequenceDiagram
 
     loop Mỗi giờ
         OJ->>O: DELIVERED quá return-window (7 ngày) → complete()
-        O->>Bus: OrderCompleted
+        O->>Bus: OrderCompletedEvent
     end
 ```
 
@@ -339,36 +339,36 @@ sequenceDiagram
     participant API as ordering OrderController / AdminOrderController
     participant O as Order
     participant Bus as Event bus
-    participant OSL as ordering OrderStockListener
+    participant OSL as ordering OrderStockEventListener
     participant INV as catalog InventoryService
-    participant AOL as affiliate AffiliateOrderListener
+    participant AOL as affiliate OrderCommissionEventListener
     participant C as Commission
-    participant CSL as customer CustomerStatsListener
+    participant CSL as customer CustomerStatsEventListener
     participant AUD as AuditLogger
 
     alt Hủy đơn
-        X->>API: POST /api/orders/{code}/cancel hoặc /api/admin/orders/{id}/cancel
+        X->>API: POST /api/me/orders/{code}/cancel hoặc /api/admin/orders/{id}/cancel
         API->>O: cancel(reason, actor)
         O->>O: Chỉ PENDING / CONFIRMED, ngược lại DomainException
-        O->>Bus: OrderCancelled
+        O->>Bus: OrderCancelledEvent
     else Hoàn đơn (admin)
         X->>API: POST /api/admin/orders/{id}/return
         API->>O: markReturned(now)
         O->>O: Chỉ DELIVERED và trong 7 ngày kể từ deliveredAt
-        O->>Bus: OrderReturned
+        O->>Bus: OrderReturnedEvent
     end
 
     par Hoàn kho
-        Bus-->>OSL: OrderCancelled / OrderReturned
+        Bus-->>OSL: OrderCancelledEvent / OrderReturnedEvent
         OSL->>INV: restore(orderId)
-        INV->>INV: Có DEDUCT mà chưa có RESTORE → cộng lại stock<br/>INSERT stock_movement RESTORE
+        INV->>INV: Có DEDUCT mà chưa có RESTORE → cộng lại stock<br/>INSERT stock_movements RESTORE
     and Hủy hoa hồng
-        Bus-->>AOL: OrderCancelled / OrderReturned
+        Bus-->>AOL: OrderCancelledEvent / OrderReturnedEvent
         AOL->>C: findByOrderId → cancel()
         C->>C: PENDING → CANCELLED (không có commission thì bỏ qua)
         AOL->>AUD: COMMISSION_CANCELLED
     and Thống kê khách
-        Bus-->>CSL: OrderCancelled / OrderReturned
+        Bus-->>CSL: OrderCancelledEvent / OrderReturnedEvent
         CSL->>CSL: total_orders -1, total_spent - total, trừ product stat
     end
 ```
@@ -397,7 +397,7 @@ sequenceDiagram
     participant DB as PostgreSQL affiliate
     participant AUD as AuditLogger
 
-    CTV->>PC: POST /api/ctv/payouts {amount}
+    CTV->>PC: POST /api/affiliates/me/payouts {amount}
     PC->>PS: request(userId, amount)
     PS->>DB: load Affiliate theo userId
     PS->>AF: assertCanWithdraw(now)
@@ -432,7 +432,7 @@ sequenceDiagram
 
 </details>
 
-**Đổi tài khoản ngân hàng** (liên quan): `POST /api/ctv/bank-account/otp` → OTP purpose `BANK_CHANGE` gửi tới SĐT CTV → `PUT /api/ctv/bank-account {bankName, accountNo, holder, otp}` → `OtpService.verify` → `affiliate.changeBankAccount(encrypted, now)` đặt `bankChangedAt = now` (lần đầu thiết lập không khóa) → audit `BANK_CHANGED`.
+**Đổi tài khoản ngân hàng** (liên quan): `POST /api/affiliates/me/bank-account/otp` → OTP purpose `BANK_CHANGE` gửi tới SĐT CTV → `PUT /api/affiliates/me/bank-account {bankName, accountNo, holder, otp}` → `OtpService.verify` → `affiliate.changeBankAccount(encrypted, now)` đặt `bankChangedAt = now` (lần đầu thiết lập không khóa) → audit `BANK_CHANGED`.
 
 ---
 

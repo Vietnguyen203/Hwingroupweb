@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
  * Dòng đơn hàng – chụp lại tên và giá tại thời điểm đặt (đổi giá sản phẩm sau này không ảnh hưởng đơn cũ).
  */
 @Entity
-@Table(name = "order_item", schema = "ordering")
+@Table(name = "order_items", schema = "ordering")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderItem {
@@ -51,16 +51,20 @@ public class OrderItem {
     @Column(nullable = false)
     private Money lineTotal;
 
-    OrderItem(OrderLine line) {
-        if (line.quantity() <= 0) {
+    /** Dòng hàng chốt giá tại lúc đặt (giá lấy từ catalog ở backend, KHÔNG từ client). */
+    public static OrderItem of(UUID productId, String productName, String productSlug, String imageUrl, Money unitPrice,
+                               int quantity) {
+        if (quantity <= 0) {
             throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.QUANTITY_INVALID);
         }
-        this.productId = line.productId();
-        this.productName = line.productName();
-        this.productSlug = line.productSlug();
-        this.imageUrl = line.imageUrl();
-        this.unitPrice = line.unitPrice();
-        this.quantity = line.quantity();
-        this.lineTotal = line.unitPrice().times(line.quantity());
+        OrderItem i = new OrderItem();
+        i.productId = productId;
+        i.productName = productName;
+        i.productSlug = productSlug;
+        i.imageUrl = imageUrl;
+        i.unitPrice = unitPrice;
+        i.quantity = quantity;
+        i.lineTotal = unitPrice.times(quantity);
+        return i;
     }
 }

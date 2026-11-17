@@ -37,7 +37,7 @@ export function SiteFooter() {
             ["Thanh toán & vận chuyển", "#"], ["Câu hỏi thường gặp", "#"],
           ]} />
           <FooterCol title="Về HWIN" links={[
-            ["Giới thiệu", "#"], ["Cộng tác viên", "/ctv"], ["Tài khoản của tôi", "/account"], ["Tìm sản phẩm", "/search"],
+            ["Giới thiệu", "#"], ["Cộng tác viên", "/ctv"], ["Tài khoản của tôi", "/tai-khoan"], ["Tìm sản phẩm", "/tim-kiem"],
           ]} />
           <div>
             <p className="mb-3 font-semibold text-white uppercase">Công ty CP Tập đoàn HWIN</p>

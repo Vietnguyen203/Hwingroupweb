@@ -34,7 +34,7 @@ import lombok.NoArgsConstructor;
  * Aggregate root: giỏ hàng của một user (lưu server). Mỗi sản phẩm một dòng, tối đa 99 / dòng, 50 dòng / giỏ.
  */
 @Entity
-@Table(name = "cart", schema = "ordering")
+@Table(name = "carts", schema = "ordering")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Cart extends AggregateRoot<Cart> {

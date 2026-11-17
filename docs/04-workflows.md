@@ -36,14 +36,14 @@ stateDiagram-v2
 
 | Method | Từ | Sang | Event | Ai gọi |
 |---|---|---|---|---|
-| `place()` | – | PENDING | `OrderPlaced` | Khách |
+| `place()` | – | PENDING | `OrderPlacedEvent` | Khách |
 | `markPaid(ref)` | PENDING, CONFIRMED (UNPAID) | (payment PAID) | – (audit `ORDER_PAID`) | Admin |
-| `confirm()` | PENDING | CONFIRMED | `OrderConfirmed` | Admin |
-| `cancel(reason)` | PENDING (khách), PENDING/CONFIRMED (admin, system) | CANCELLED | `OrderCancelled` | Khách / Admin / `OrderStockListener` |
+| `confirm()` | PENDING | CONFIRMED | `OrderConfirmedEvent` | Admin |
+| `cancel(reason)` | PENDING (khách), PENDING/CONFIRMED (admin, system) | CANCELLED | `OrderCancelledEvent` | Khách / Admin / `OrderStockEventListener` |
 | `markShipping()` | CONFIRMED | SHIPPING | – | Admin |
-| `markDelivered()` | SHIPPING | DELIVERED | `OrderDelivered` | Admin |
-| `markReturned()` | DELIVERED (≤ 7 ngày) | RETURNED | `OrderReturned` | Admin |
-| `complete()` | DELIVERED (> 7 ngày) | COMPLETED | `OrderCompleted` | Job |
+| `markDelivered()` | SHIPPING | DELIVERED | `OrderDeliveredEvent` | Admin |
+| `markReturned()` | DELIVERED (≤ 7 ngày) | RETURNED | `OrderReturnedEvent` | Admin |
+| `complete()` | DELIVERED (> 7 ngày) | COMPLETED | `OrderCompletedEvent` | Job |
 
 > Khách chỉ tự hủy được khi đơn còn `PENDING`; khi đã `CONFIRMED` phải liên hệ shop (admin hủy).
 
@@ -86,10 +86,10 @@ stateDiagram-v2
 
 ```mermaid
 stateDiagram-v2
-    [*] --> PENDING: create() khi OrderPlaced
-    PENDING --> PENDING: markEligible(deliveredAt + 7 ngày) khi OrderDelivered
+    [*] --> PENDING: create() khi OrderPlacedEvent
+    PENDING --> PENDING: markEligible(deliveredAt + 7 ngày) khi OrderDeliveredEvent
     PENDING --> APPROVED: approve() – job, eligibleAt ≤ now
-    PENDING --> CANCELLED: cancel() khi OrderCancelled / OrderReturned
+    PENDING --> CANCELLED: cancel() khi OrderCancelledEvent / OrderReturnedEvent
     APPROVED --> [*]
     CANCELLED --> [*]
 ```
@@ -148,13 +148,13 @@ flowchart TD
     ST -- REJECTED --> RJ[Hiển thị lý do + nút Đăng ký lại]
     ST -- SUSPENDED --> SUS[Hiển thị: Tạm khóa, liên hệ admin]
     HAS -- Chưa --> FORM[Điền form: họ tên, link kênh bán, ghi chú<br/>đồng ý điều khoản CTV]
-    FORM --> REG[POST /api/ctv/register → Affiliate PENDING]
+    FORM --> REG[POST /api/affiliates/me → Affiliate PENDING]
     RJ --> FORM
     REG --> WAIT
 
     WAIT -.-> ADMQ[Admin: danh sách CTV PENDING]
     ADMQ --> CHK{Admin kiểm tra<br/>kênh bán, SĐT}
-    CHK -- Đạt --> APV[approve → sinh ReferralCode duy nhất<br/>AffiliateApproved]
+    CHK -- Đạt --> APV[approve → sinh ReferralCode duy nhất<br/>AffiliateApprovedEvent]
     CHK -- Không đạt --> REJ[reject kèm lý do]
     APV --> ROLE[Listener cấp role AFFILIATE trong identity]
     ROLE --> DASH
@@ -186,8 +186,8 @@ flowchart TD
     CF --> PACK[Đóng gói, in phiếu, kiểm HSD lô hàng]
     PACK --> SH[Bàn giao vận chuyển → markShipping]
     SH --> DL{Kết quả giao}
-    DL -- Thành công --> DV[markDelivered → OrderDelivered<br/>COD tự PAID]
-    DL -- Khách trả lại / hàng lỗi --> RT[Trong 7 ngày: markReturned → OrderReturned]
+    DL -- Thành công --> DV[markDelivered → OrderDeliveredEvent<br/>COD tự PAID]
+    DL -- Khách trả lại / hàng lỗi --> RT[Trong 7 ngày: markReturned → OrderReturnedEvent]
     DV --> WIN{Khách khiếu nại trong 7 ngày?}
     WIN -- Có, chấp nhận trả --> RT
     WIN -- Không --> CP[Job tự complete → COMPLETED]
@@ -226,7 +226,7 @@ flowchart TD
     REC -- Khớp --> AP[approve]
     AP --> TF[Chuyển khoản thủ công qua internet banking]
     TF --> MP[markPaid nhập transactionRef → PAID, audit]
-    MP --> EXP[Xuất báo cáo chi trả tháng từ audit_log]
+    MP --> EXP[Xuất báo cáo chi trả tháng từ audit_logs]
     RJ --> BAL
 ```
 

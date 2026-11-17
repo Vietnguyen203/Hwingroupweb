@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vietnl.hwin.affiliate.entity.Affiliate;
-import com.vietnl.hwin.affiliate.entity.AffiliateEnums.AffiliateStatus;
+import com.vietnl.hwin.affiliate.entity.AffiliateStatus;
 import com.vietnl.hwin.affiliate.entity.ReferralCode;
 import com.vietnl.hwin.affiliate.repository.AffiliateRepository;
 import com.vietnl.hwin.common.audit.AuditLogger;

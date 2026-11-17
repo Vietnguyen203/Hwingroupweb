@@ -5,10 +5,10 @@ import Link from "next/link";
 import { ChevronRight, Menu, X } from "lucide-react";
 
 import { Logo } from "@/components/brand/logo";
-import type { Category } from "@/lib/types";
+import type { CategoryResponse } from "@/lib/types";
 
 /** Nút ☰ trên mobile – mở ngăn trượt danh mục. */
-export function MobileMenu({ categories }: { categories: Category[] }) {
+export function MobileMenu({ categories }: { categories: CategoryResponse[] }) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -27,7 +27,7 @@ export function MobileMenu({ categories }: { categories: Category[] }) {
             <ul className="flex-1 overflow-y-auto">
               {categories.map((c) => (
                 <li key={c.id}>
-                  <Link href={`/c/${c.slug}`} onClick={() => setOpen(false)} className="flex items-center gap-3 px-4 py-2.5 active:bg-neutral-100">
+                  <Link href={`/danh-muc/${c.slug}`} onClick={() => setOpen(false)} className="flex items-center gap-3 px-4 py-2.5 active:bg-neutral-100">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     {c.iconUrl && <img src={c.iconUrl} alt="" className="size-8" />}
                     <span className="flex-1 text-sm">{c.name}</span>

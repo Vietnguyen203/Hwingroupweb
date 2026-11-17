@@ -29,8 +29,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecific
 
     /** Đơn chuyển khoản còn chờ, chưa nhận tiền, đặt trước thời điểm cutoff – để job hủy quá hạn. */
     @Query("select o.id from Order o where o.status = com.vietnl.hwin.ordering.entity.OrderStatus.PENDING "
-            + "and o.paymentMethod = com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod.BANK_QR "
-            + "and o.paymentStatus = com.vietnl.hwin.ordering.entity.OrderEnums.PaymentStatus.UNPAID "
+            + "and o.paymentMethod = com.vietnl.hwin.ordering.entity.PaymentMethod.BANK_QR "
+            + "and o.paymentStatus = com.vietnl.hwin.ordering.entity.PaymentStatus.UNPAID "
             + "and o.placedAt < :cutoff order by o.placedAt")
     List<UUID> findUnpaidBankQrBefore(@Param("cutoff") Instant cutoff, Pageable pageable);
 

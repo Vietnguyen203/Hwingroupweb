@@ -1,5 +1,6 @@
 package com.vietnl.hwin;
 
+import com.vietnl.hwin.ordering.service.model.PlaceOrderCommand;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -15,27 +16,27 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.vietnl.hwin.affiliate.entity.Affiliate;
-import com.vietnl.hwin.affiliate.entity.AffiliateEnums.CommissionStatus;
+import com.vietnl.hwin.affiliate.entity.CommissionStatus;
 import com.vietnl.hwin.affiliate.repository.AffiliateRepository;
 import com.vietnl.hwin.affiliate.repository.CommissionRepository;
 import com.vietnl.hwin.affiliate.repository.CustomerBindingRepository;
 import com.vietnl.hwin.affiliate.service.AffiliateAdminService;
 import com.vietnl.hwin.affiliate.service.AffiliateService;
-import com.vietnl.hwin.affiliate.service.CommissionApprovalJob;
+import com.vietnl.hwin.affiliate.service.job.CommissionApprovalJob;
 import com.vietnl.hwin.affiliate.service.PayoutService;
 import com.vietnl.hwin.catalog.entity.ProductSort;
-import com.vietnl.hwin.catalog.service.ProductSearchCriteria;
+import com.vietnl.hwin.catalog.service.model.ProductSearchCriteria;
 import com.vietnl.hwin.catalog.service.ProductSearchService;
 import com.vietnl.hwin.common.domain.Address;
 import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.identity.service.UserAccountService;
 import com.vietnl.hwin.identity.service.UserQueryService;
 import com.vietnl.hwin.ordering.entity.Order;
-import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
+import com.vietnl.hwin.ordering.entity.PaymentMethod;
 import com.vietnl.hwin.ordering.service.CartService;
 import com.vietnl.hwin.ordering.service.OrderAdminService;
 import com.vietnl.hwin.ordering.service.PlaceOrderService;
-import com.vietnl.hwin.ordering.service.PlaceOrderService.PlaceOrderCommand;
+import com.vietnl.hwin.ordering.service.model.PlaceOrderCommand;
 
 /**
  * Test tích hợp luồng CTV xuyên module (Postgres/Redis thật):

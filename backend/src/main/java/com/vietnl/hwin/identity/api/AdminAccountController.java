@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vietnl.hwin.common.security.AuthPrincipal;
-import com.vietnl.hwin.identity.api.requests.CreateAdminRequest;
-import com.vietnl.hwin.identity.api.responses.MeResponse;
+import com.vietnl.hwin.identity.api.dto.CreateAdminRequest;
+import com.vietnl.hwin.identity.api.dto.MeResponse;
 import com.vietnl.hwin.identity.api.mapper.UserMapper;
 import com.vietnl.hwin.identity.service.AdminAccountService;
 

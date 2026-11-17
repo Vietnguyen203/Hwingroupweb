@@ -12,7 +12,7 @@ import java.util.function.Function;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vietnl.hwin.affiliate.entity.AffiliateEnums.AffiliateStatus;
+import com.vietnl.hwin.affiliate.entity.AffiliateStatus;
 import com.vietnl.hwin.affiliate.entity.Affiliate;
 import com.vietnl.hwin.affiliate.entity.BankAccount;
 import com.vietnl.hwin.affiliate.repository.AffiliateRepository;

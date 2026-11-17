@@ -15,9 +15,9 @@ import com.vietnl.hwin.common.domain.Address;
 import com.vietnl.hwin.common.domain.Money;
 import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.common.exception.ResponseException;
-import com.vietnl.hwin.ordering.entity.OrderEnums.CancelReason;
-import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
-import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentStatus;
+import com.vietnl.hwin.ordering.entity.CancelReason;
+import com.vietnl.hwin.ordering.entity.PaymentMethod;
+import com.vietnl.hwin.ordering.entity.PaymentStatus;
 
 /** Unit test quy tắc nghiệp vụ của aggregate Order (không cần Spring/DB). */
 class OrderTest {
@@ -32,9 +32,9 @@ class OrderTest {
             "Hà Nội", "Cầu Giấy", "Dịch Vọng", "1 Xuân Thủy");
 
     private static Order newOrder(PaymentMethod method) {
-        List<OrderLine> lines = List.of(
-                new OrderLine(P1, "Chả lụa", "cha-lua", null, Money.of(95_000), 2),
-                new OrderLine(P2, "Giò thủ", "gio-thu", null, Money.of(120_000), 1));
+        List<OrderItem> lines = List.of(
+                OrderItem.of(P1, "Chả lụa", "cha-lua", null, Money.of(95_000), 2),
+                OrderItem.of(P2, "Giò thủ", "gio-thu", null, Money.of(120_000), 1));
         return Order.place(CUSTOMER, "HW260101ABCD", lines, Money.of(30_000), ADDRESS, method, null, null, "ABC123", T0);
     }
 

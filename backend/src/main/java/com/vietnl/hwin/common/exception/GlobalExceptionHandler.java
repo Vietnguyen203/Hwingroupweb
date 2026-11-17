@@ -30,7 +30,7 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import com.vietnl.hwin.common.exception.ErrorResponse.FieldErrorDetail;
+import com.vietnl.hwin.common.exception.FieldErrorDetail;
 
 /**
  * Chuyển mọi exception thành {@link ErrorResponse}.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -11,10 +11,10 @@ import { useCartQuote } from "@/hooks/use-cart-quote";
 import { useMe } from "@/hooks/use-me";
 import { useMounted } from "@/hooks/use-mounted";
 import { api, errorMessage } from "@/lib/api";
-import { PAYMENT_METHOD, type Address, type OrderDetail } from "@/lib/account";
+import { PAYMENT_METHOD, type AddressResponse, type OrderDetailResponse } from "@/lib/account";
 import { reconcileServerCart, replaceLocalCart } from "@/lib/cart-sync";
 import { formatVnd } from "@/lib/format";
-import { useCart } from "@/stores/cart";
+import { useCart } from "@/stores/cart-store";
 
 type AddressForm = { recipientName: string; recipientPhone: string; province: string; district: string; ward: string; street: string };
 type Vat = { companyName: string; taxCode: string; address: string; email: string };
@@ -32,7 +32,7 @@ export function CheckoutView() {
   const me = useMe();
   const lines = useCart((s) => s.lines);
   const quote = useCartQuote(lines, mounted);
-  const addresses = useQuery({ queryKey: ["addresses"], queryFn: () => api<Address[]>("/api/me/addresses"), enabled: !!me.data });
+  const addresses = useQuery({ queryKey: ["addresses"], queryFn: () => api<AddressResponse[]>("/api/me/addresses"), enabled: !!me.data });
 
   const [picked, setPicked] = useState<string | null>(null);
   const [form, setForm] = useState<AddressForm>(EMPTY_ADDRESS);
@@ -41,12 +41,12 @@ export function CheckoutView() {
   const [vatOn, setVatOn] = useState(false);
   const [vat, setVat] = useState<Vat>({ companyName: "", taxCode: "", address: "", email: "" });
   const [note, setNote] = useState("");
-  const [idempotencyKey] = useState(() => crypto.randomUUID()); // bấm 2 lần / mạng chập chờn không tạo 2 đơn
+  const idempotencyKey = useRef<string | null>(null); // bấm 2 lần / mạng chập chờn không tạo 2 đơn
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (me.data === null) router.replace("/login?next=/checkout");
+    if (me.data === null) router.replace("/dang-nhap?next=/thanh-toan");
   }, [me.data, router]);
 
   const book = addresses.data ?? [];
@@ -61,6 +61,7 @@ export function CheckoutView() {
     e.preventDefault();
     setBusy(true);
     setError(null);
+    idempotencyKey.current ??= crypto.randomUUID();
     try {
       const chosen = book.find((a) => a.id === selected);
       const shippingAddress = chosen
@@ -70,15 +71,15 @@ export function CheckoutView() {
         await api("/api/me/addresses", { method: "POST", body: { ...form, makeDefault: book.length === 0 } }).catch(() => undefined);
       }
       await reconcileServerCart(lines);
-      const order = await api<OrderDetail>("/api/checkout/orders", {
+      const order = await api<OrderDetailResponse>("/api/checkout/orders", {
         method: "POST",
-        body: { shippingAddress, paymentMethod: method, vatInvoice: vatOn ? vat : null, note: note.trim() || null, idempotencyKey },
+        body: { shippingAddress, paymentMethod: method, vatInvoice: vatOn ? vat : null, note: note.trim() || null, idempotencyKey: idempotencyKey.current },
       });
       replaceLocalCart([]); // backend tự xóa giỏ server sau khi đặt
       qc.invalidateQueries({ queryKey: ["orders"] });
       qc.invalidateQueries({ queryKey: ["addresses"] });
       qc.setQueryData(["order", order.code], order);
-      router.replace(`/account/orders/${order.code}?placed=1`);
+      router.replace(`/tai-khoan/don-hang/${order.code}?placed=1`);
     } catch (err) {
       setError(errorMessage(err));
       setBusy(false);
@@ -178,7 +179,7 @@ export function CheckoutView() {
             <div className="flex justify-between text-base font-bold"><span>Tổng cộng</span><span className="text-brand-red">{formatVnd(view.total)}</span></div>
           </div>
         )}
-        {view && !view.checkoutReady && <p className="text-destructive">Giỏ có sản phẩm hết hàng / ngừng bán. <Link href="/cart" className="text-brand-link">Sửa giỏ</Link></p>}
+        {view && !view.checkoutReady && <p className="text-destructive">Giỏ có sản phẩm hết hàng / ngừng bán. <Link href="/gio-hang" className="text-brand-link">Sửa giỏ</Link></p>}
         {error && <p role="alert" className="text-destructive">{error}</p>}
         <Button type="submit" disabled={busy || !view?.checkoutReady} className="h-12 w-full text-base">
           {busy ? "Đang đặt hàng..." : "Đặt hàng"}

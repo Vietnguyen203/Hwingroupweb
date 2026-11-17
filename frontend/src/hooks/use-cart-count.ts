@@ -1,7 +1,7 @@
 "use client";
 
 import { useMounted } from "@/hooks/use-mounted";
-import { cartCount, useCart } from "@/stores/cart";
+import { cartCount, useCart } from "@/stores/cart-store";
 
 /** Số sản phẩm trong giỏ (0 trước khi hydrate để tránh lệch HTML). */
 export function useCartCount(): number {

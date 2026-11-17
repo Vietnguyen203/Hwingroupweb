@@ -1,5 +1,6 @@
 package com.vietnl.hwin.catalog.service;
 
+import com.vietnl.hwin.catalog.service.model.ProductSearchCriteria;
 import com.vietnl.hwin.catalog.entity.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;

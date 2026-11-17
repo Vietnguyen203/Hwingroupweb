@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { api, ApiError } from "@/lib/api";
-import type { Me } from "@/lib/account";
+import type { MeResponse } from "@/lib/account";
 
 /** Người dùng đang đăng nhập; null nếu chưa đăng nhập (401). */
 export function useMe() {
@@ -11,7 +11,7 @@ export function useMe() {
     queryKey: ["me"],
     queryFn: async () => {
       try {
-        return await api<Me>("/api/auth/me"); // api() tự làm mới phiên khi gặp 401
+        return await api<MeResponse>("/api/auth/me"); // api() tự làm mới phiên khi gặp 401
       } catch (e) {
         if (e instanceof ApiError && e.status === 401) return null;
         throw e;

@@ -1,5 +1,7 @@
 package com.vietnl.hwin;
 
+import com.vietnl.hwin.customer.service.model.CustomerProfile;
+import com.vietnl.hwin.identity.service.model.SendOtpResult;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -18,14 +20,14 @@ import com.vietnl.hwin.common.domain.EmailAddress;
 import com.vietnl.hwin.common.exception.ResponseException;
 import com.vietnl.hwin.common.web.ClientInfo;
 import com.vietnl.hwin.customer.service.CustomerService;
-import com.vietnl.hwin.customer.service.CustomerService.Profile;
+import com.vietnl.hwin.customer.service.model.CustomerProfile;
 import com.vietnl.hwin.identity.entity.OtpChannel;
 import com.vietnl.hwin.identity.entity.OtpPurpose;
 import com.vietnl.hwin.identity.entity.OtpTarget;
 import com.vietnl.hwin.identity.entity.UserAccount;
 import com.vietnl.hwin.identity.service.AuthService;
-import com.vietnl.hwin.identity.service.AuthService.OtpDispatch;
-import com.vietnl.hwin.identity.service.OtpProperties;
+import com.vietnl.hwin.identity.service.model.SendOtpResult;
+import com.vietnl.hwin.identity.service.config.OtpProperties;
 import com.vietnl.hwin.identity.service.UserAccountService;
 import com.vietnl.hwin.identity.service.integration.DevOtpInbox;
 import com.vietnl.hwin.identity.service.integration.SimulatedSmsOtpSender;
@@ -59,7 +61,7 @@ class EmailLoginTests {
 
     @Test
     void registerByEmailThenLogin() {
-        OtpDispatch sent = auth.requestOtp(null, "  Khach.Email@Gmail.com ", true, client("10.1.0.1"));
+        SendOtpResult sent = auth.requestOtp(null, "  Khach.Email@Gmail.com ", true, client("10.1.0.1"));
         assertThat(sent.channel()).isEqualTo(OtpChannel.EMAIL);
         assertThat(sent.sentTo()).isEqualTo("kh******@gmail.com");
 
@@ -72,7 +74,7 @@ class EmailLoginTests {
 
         // hồ sơ khách tạo được dù không có SĐT, mang theo họ tên
         customers.ensureCustomer(userId);
-        Profile profile = customers.profile(userId, p -> p);
+        CustomerProfile profile = customers.profile(userId, p -> p);
         assertThat(profile.customer().getEmail()).isEqualTo("khach.email@gmail.com");
         assertThat(profile.customer().getPhone()).isNull();
         assertThat(profile.customer().getFullName()).isEqualTo("Nguyễn Văn Email");

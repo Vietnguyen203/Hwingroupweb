@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 
 const BANNERS = [
-  { src: "/sample/banners/banner-1.svg", alt: "Đặc sản chế biến sẵn – giao nhanh giữ lạnh", href: "/c/cha-gio" },
-  { src: "/sample/banners/banner-2.svg", alt: "Combo Tết sum vầy – tiết kiệm", href: "/p/combo-tet-sum-vay" },
-  { src: "/sample/banners/banner-3.svg", alt: "Đổi trả trong 7 ngày", href: "/search" },
+  { src: "/sample/banners/banner-1.svg", alt: "Đặc sản chế biến sẵn – giao nhanh giữ lạnh", href: "/danh-muc/cha-gio" },
+  { src: "/sample/banners/banner-2.svg", alt: "Combo Tết sum vầy – tiết kiệm", href: "/san-pham/combo-tet-sum-vay" },
+  { src: "/sample/banners/banner-3.svg", alt: "Đổi trả trong 7 ngày", href: "/tim-kiem" },
 ];
 
 /** Banner chạy tự động, bo tròn, lộ một phần banner kế bên (vuốt được trên điện thoại). */

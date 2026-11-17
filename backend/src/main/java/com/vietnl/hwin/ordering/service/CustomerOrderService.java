@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vietnl.hwin.ordering.entity.Order;
-import com.vietnl.hwin.ordering.entity.OrderEnums.CancelReason;
+import com.vietnl.hwin.ordering.entity.CancelReason;
 import com.vietnl.hwin.ordering.entity.OrderStatus;
 import com.vietnl.hwin.ordering.repository.OrderRepository;
 

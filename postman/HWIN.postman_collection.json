@@ -65,12 +65,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/cart",
+              "raw": "{{baseUrl}}/api/me/cart",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "cart"
               ]
             },
@@ -1114,14 +1115,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/cart/quote",
+              "raw": "{{baseUrl}}/api/me/cart-quotes",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "cart",
-                "quote"
+                "me",
+                "cart-quotes"
               ]
             },
             "description": "Giỏ localStorage của khách chưa đăng nhập: client chỉ gửi productId + số lượng, giá do backend tính.",
@@ -1197,12 +1198,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/cart/merge",
+              "raw": "{{baseUrl}}/api/me/cart/merge",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "cart",
                 "merge"
               ]
@@ -1243,12 +1245,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/cart/items",
+              "raw": "{{baseUrl}}/api/me/cart/items",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "cart",
                 "items"
               ]
@@ -1288,12 +1291,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/cart/items/{{productB}}",
+              "raw": "{{baseUrl}}/api/me/cart/items/{{productB}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "cart",
                 "items",
                 "{{productB}}"
@@ -1330,12 +1334,13 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/cart/items/{{productB}}",
+              "raw": "{{baseUrl}}/api/me/cart/items/{{productB}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "cart",
                 "items",
                 "{{productB}}"
@@ -1367,12 +1372,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/cart/items",
+              "raw": "{{baseUrl}}/api/me/cart/items",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "cart",
                 "items"
               ]
@@ -1412,12 +1418,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/cart/items",
+              "raw": "{{baseUrl}}/api/me/cart/items",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "cart",
                 "items"
               ]
@@ -1452,12 +1459,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/cart",
+              "raw": "{{baseUrl}}/api/me/cart",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "cart"
               ]
             },
@@ -1728,12 +1736,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/cart/items",
+              "raw": "{{baseUrl}}/api/me/cart/items",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "cart",
                 "items"
               ]
@@ -1865,12 +1874,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/cart/items",
+              "raw": "{{baseUrl}}/api/me/cart/items",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "cart",
                 "items"
               ]
@@ -1958,12 +1968,13 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/orders/{{cancelCode}}/cancel",
+              "raw": "{{baseUrl}}/api/me/orders/{{cancelCode}}/cancel",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "orders",
                 "{{cancelCode}}",
                 "cancel"
@@ -1990,12 +2001,13 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/orders/{{cancelCode}}/cancel",
+              "raw": "{{baseUrl}}/api/me/orders/{{cancelCode}}/cancel",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "orders",
                 "{{cancelCode}}",
                 "cancel"
@@ -2022,12 +2034,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/orders?page=1&page_size=10",
+              "raw": "{{baseUrl}}/api/me/orders?page=1&page_size=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "orders"
               ],
               "query": [
@@ -2063,12 +2076,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/orders?status=CANCELLED",
+              "raw": "{{baseUrl}}/api/me/orders?status=CANCELLED",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "orders"
               ],
               "query": [
@@ -2099,12 +2113,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/orders/{{codCode}}",
+              "raw": "{{baseUrl}}/api/me/orders/{{codCode}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "orders",
                 "{{codCode}}"
               ]
@@ -2130,12 +2145,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/orders/HW000000XXXX",
+              "raw": "{{baseUrl}}/api/me/orders/HW000000XXXX",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "orders",
                 "HW000000XXXX"
               ]
@@ -2487,12 +2503,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/cart",
+              "raw": "{{baseUrl}}/api/me/cart",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "cart"
               ]
             },
@@ -3833,13 +3850,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/me",
+              "raw": "{{ctvUrl}}/api/affiliates/me",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
                 "me"
               ]
             },
@@ -3868,14 +3885,14 @@
               }
             ],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/register",
+              "raw": "{{ctvUrl}}/api/affiliates/me",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
-                "register"
+                "affiliates",
+                "me"
               ]
             },
             "description": "",
@@ -3913,14 +3930,14 @@
               }
             ],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/register",
+              "raw": "{{ctvUrl}}/api/affiliates/me",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
-                "register"
+                "affiliates",
+                "me"
               ]
             },
             "description": "",
@@ -3960,14 +3977,14 @@
               }
             ],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/register",
+              "raw": "{{ctvUrl}}/api/affiliates/me",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
-                "register"
+                "affiliates",
+                "me"
               ]
             },
             "description": "",
@@ -4000,13 +4017,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/dashboard",
+              "raw": "{{ctvUrl}}/api/affiliates/me/dashboard",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "dashboard"
               ]
             },
@@ -4267,13 +4285,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/dashboard",
+              "raw": "{{ctvUrl}}/api/affiliates/me/dashboard",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "dashboard"
               ]
             },
@@ -4305,13 +4324,14 @@
               }
             ],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/payouts",
+              "raw": "{{ctvUrl}}/api/affiliates/me/payouts",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "payouts"
               ]
             },
@@ -4345,13 +4365,14 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/bank-account/otp",
+              "raw": "{{ctvUrl}}/api/affiliates/me/bank-account/otp",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "bank-account",
                 "otp"
               ]
@@ -4381,13 +4402,14 @@
               }
             ],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/bank-account",
+              "raw": "{{ctvUrl}}/api/affiliates/me/bank-account",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "bank-account"
               ]
             },
@@ -4425,13 +4447,14 @@
               }
             ],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/bank-account",
+              "raw": "{{ctvUrl}}/api/affiliates/me/bank-account",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "bank-account"
               ]
             },
@@ -4485,13 +4508,14 @@
               }
             ],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/payouts",
+              "raw": "{{ctvUrl}}/api/affiliates/me/payouts",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "payouts"
               ]
             },
@@ -4530,13 +4554,14 @@
               }
             ],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/payouts",
+              "raw": "{{ctvUrl}}/api/affiliates/me/payouts",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "payouts"
               ]
             },
@@ -4626,14 +4651,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/affiliate/clicks",
+              "raw": "{{baseUrl}}/api/referral-clicks",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "affiliate",
-                "clicks"
+                "referral-clicks"
               ]
             },
             "description": "",
@@ -4671,14 +4695,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/affiliate/clicks",
+              "raw": "{{baseUrl}}/api/referral-clicks",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "affiliate",
-                "clicks"
+                "referral-clicks"
               ]
             },
             "description": "",
@@ -4715,14 +4738,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/affiliate/clicks",
+              "raw": "{{baseUrl}}/api/referral-clicks",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "affiliate",
-                "clicks"
+                "referral-clicks"
               ]
             },
             "description": "",
@@ -4760,12 +4782,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/cart/items",
+              "raw": "{{baseUrl}}/api/me/cart/items",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "cart",
                 "items"
               ]
@@ -4845,13 +4868,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/commissions",
+              "raw": "{{ctvUrl}}/api/affiliates/me/commissions",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "commissions"
               ]
             },
@@ -4889,13 +4913,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/customers",
+              "raw": "{{ctvUrl}}/api/affiliates/me/customers",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "customers"
               ]
             },
@@ -4926,14 +4951,13 @@
               }
             ],
             "url": {
-              "raw": "{{ctvUrl}}/api/affiliate/clicks",
+              "raw": "{{ctvUrl}}/api/referral-clicks",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "affiliate",
-                "clicks"
+                "referral-clicks"
               ]
             },
             "description": "",
@@ -4970,12 +4994,13 @@
               }
             ],
             "url": {
-              "raw": "{{ctvUrl}}/api/cart/items",
+              "raw": "{{ctvUrl}}/api/me/cart/items",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "cart",
                 "items"
               ]
@@ -5053,13 +5078,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/commissions",
+              "raw": "{{ctvUrl}}/api/affiliates/me/commissions",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "commissions"
               ]
             },
@@ -5268,13 +5294,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/commissions",
+              "raw": "{{ctvUrl}}/api/affiliates/me/commissions",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "commissions"
               ]
             },
@@ -5348,13 +5375,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/dashboard",
+              "raw": "{{ctvUrl}}/api/affiliates/me/dashboard",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "dashboard"
               ]
             },
@@ -5387,13 +5415,14 @@
               }
             ],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/payouts",
+              "raw": "{{ctvUrl}}/api/affiliates/me/payouts",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "payouts"
               ]
             },
@@ -5432,13 +5461,14 @@
               }
             ],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/payouts",
+              "raw": "{{ctvUrl}}/api/affiliates/me/payouts",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "payouts"
               ]
             },
@@ -5478,13 +5508,14 @@
               }
             ],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/payouts",
+              "raw": "{{ctvUrl}}/api/affiliates/me/payouts",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "payouts"
               ]
             },
@@ -5518,13 +5549,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/dashboard",
+              "raw": "{{ctvUrl}}/api/affiliates/me/dashboard",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "dashboard"
               ]
             },
@@ -5747,13 +5779,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/payouts",
+              "raw": "{{ctvUrl}}/api/affiliates/me/payouts",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "payouts"
               ]
             },
@@ -5938,12 +5971,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/cart/items",
+              "raw": "{{baseUrl}}/api/me/cart/items",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "cart",
                 "items"
               ]
@@ -6062,12 +6096,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/orders/{{timeoutCode}}",
+              "raw": "{{baseUrl}}/api/me/orders/{{timeoutCode}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "orders",
                 "{{timeoutCode}}"
               ]
@@ -6140,12 +6175,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/orders/{{timeoutCode}}",
+              "raw": "{{baseUrl}}/api/me/orders/{{timeoutCode}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "orders",
                 "{{timeoutCode}}"
               ]
@@ -6230,14 +6266,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/affiliate/clicks",
+              "raw": "{{baseUrl}}/api/referral-clicks",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "affiliate",
-                "clicks"
+                "referral-clicks"
               ]
             },
             "description": "",
@@ -6309,13 +6344,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/dashboard",
+              "raw": "{{ctvUrl}}/api/affiliates/me/dashboard",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
+                "me",
                 "dashboard"
               ]
             },
@@ -6339,13 +6375,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{ctvUrl}}/api/ctv/me",
+              "raw": "{{ctvUrl}}/api/affiliates/me",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
-                "ctv",
+                "affiliates",
                 "me"
               ]
             },
@@ -7161,12 +7197,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/orders",
+              "raw": "{{baseUrl}}/api/me/orders",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
+                "me",
                 "orders"
               ]
             },

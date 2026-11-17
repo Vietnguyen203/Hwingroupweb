@@ -18,13 +18,13 @@ export function BottomNav() {
   return (
     <nav aria-label="Điều hướng" className="fixed inset-x-0 bottom-0 z-50 flex h-14 border-t border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
       <Link href="/" className={item(pathname === "/")}><House className="size-5" />Trang chủ</Link>
-      <Link href="/danh-muc" className={item(pathname.startsWith("/danh-muc") || pathname.startsWith("/c/"))}>
+      <Link href="/danh-muc" className={item(pathname.startsWith("/danh-muc") || pathname.startsWith("/danh-muc/"))}>
         <LayoutGrid className="size-5" />Danh mục
       </Link>
       <a href={siteConfig.zaloUrl} target="_blank" rel="noopener noreferrer" className={item(false)}>
         <MessageCircle className="size-5" />Zalo
       </a>
-      <Link href="/cart" className={item(pathname === "/cart")}>
+      <Link href="/gio-hang" className={item(pathname === "/gio-hang")}>
         <span className="relative">
           <ShoppingCart className="size-5" />
           {count > 0 && (
@@ -35,7 +35,7 @@ export function BottomNav() {
         </span>
         Giỏ hàng
       </Link>
-      <Link href="/account" className={item(pathname.startsWith("/account") || pathname === "/login")}>
+      <Link href="/tai-khoan" className={item(pathname.startsWith("/tai-khoan") || pathname === "/dang-nhap")}>
         <UserRound className="size-5" />Tài khoản
       </Link>
     </nav>

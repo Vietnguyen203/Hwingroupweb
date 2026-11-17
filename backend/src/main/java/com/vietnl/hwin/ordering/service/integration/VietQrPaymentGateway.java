@@ -6,8 +6,8 @@ import java.nio.charset.StandardCharsets;
 import org.springframework.stereotype.Component;
 
 import com.vietnl.hwin.common.domain.Money;
-import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
-import com.vietnl.hwin.ordering.service.OrderingProperties;
+import com.vietnl.hwin.ordering.entity.PaymentMethod;
+import com.vietnl.hwin.ordering.service.config.OrderingProperties;
 
 /**
  * Sinh link ảnh VietQR (img.vietqr.io) theo số tiền + mã đơn. Không gọi API ngoài – trình duyệt tự tải ảnh.

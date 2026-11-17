@@ -37,7 +37,7 @@ import lombok.NoArgsConstructor;
  * - Admin: định danh bằng email + mật khẩu (BCrypt).
  */
 @Entity
-@Table(name = "user_account", schema = "identity")
+@Table(name = "user_accounts", schema = "identity")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserAccount extends AggregateRoot<UserAccount> {
@@ -60,7 +60,7 @@ public class UserAccount extends AggregateRoot<UserAccount> {
     private UserStatus status;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_role", schema = "identity", joinColumns = @JoinColumn(name = "user_id"))
+    @CollectionTable(name = "user_roles", schema = "identity", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Set<Role> roles = new HashSet<>();

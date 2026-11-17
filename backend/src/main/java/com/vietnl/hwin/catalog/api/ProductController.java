@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vietnl.hwin.catalog.api.responses.CategoryResponse;
-import com.vietnl.hwin.catalog.api.responses.ProductCardResponse;
-import com.vietnl.hwin.catalog.api.responses.ProductDetailResponse;
-import com.vietnl.hwin.catalog.api.mapper.CatalogMapper;
+import com.vietnl.hwin.catalog.api.dto.CategoryResponse;
+import com.vietnl.hwin.catalog.api.dto.ProductCardResponse;
+import com.vietnl.hwin.catalog.api.dto.ProductDetailResponse;
+import com.vietnl.hwin.catalog.api.mapper.ProductMapper;
 import com.vietnl.hwin.catalog.entity.ProductSort;
 import com.vietnl.hwin.catalog.service.CategoryService;
-import com.vietnl.hwin.catalog.service.ProductSearchCriteria;
+import com.vietnl.hwin.catalog.service.model.ProductSearchCriteria;
 import com.vietnl.hwin.catalog.service.ProductSearchService;
 import com.vietnl.hwin.common.web.PageResponse;
 
@@ -33,10 +33,10 @@ public class ProductController {
 
     private final ProductSearchService searchService;
     private final CategoryService categoryService;
-    private final CatalogMapper mapper;
+    private final ProductMapper mapper;
 
     public ProductController(ProductSearchService searchService, CategoryService categoryService,
-                             CatalogMapper mapper) {
+                             ProductMapper mapper) {
         this.searchService = searchService;
         this.categoryService = categoryService;
         this.mapper = mapper;

@@ -1,5 +1,6 @@
 package com.vietnl.hwin;
 
+import com.vietnl.hwin.ordering.service.model.PlaceOrderCommand;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
@@ -16,23 +17,23 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.vietnl.hwin.catalog.entity.ProductSort;
 import com.vietnl.hwin.catalog.service.ProductQueryService;
-import com.vietnl.hwin.catalog.service.ProductSearchCriteria;
+import com.vietnl.hwin.catalog.service.model.ProductSearchCriteria;
 import com.vietnl.hwin.catalog.service.ProductSearchService;
 import com.vietnl.hwin.common.domain.Address;
 import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.common.web.ClientInfo;
 import com.vietnl.hwin.identity.entity.UserAccount;
-import com.vietnl.hwin.identity.service.RefreshTokenCleanupJob;
+import com.vietnl.hwin.identity.service.job.RefreshTokenCleanupJob;
 import com.vietnl.hwin.identity.service.TokenService;
 import com.vietnl.hwin.identity.service.UserAccountService;
 import com.vietnl.hwin.ordering.entity.Order;
-import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
+import com.vietnl.hwin.ordering.entity.PaymentMethod;
 import com.vietnl.hwin.ordering.entity.OrderStatus;
 import com.vietnl.hwin.ordering.service.CartService;
 import com.vietnl.hwin.ordering.service.CustomerOrderService;
-import com.vietnl.hwin.ordering.service.OrderPaymentTimeoutJob;
+import com.vietnl.hwin.ordering.service.job.OrderPaymentTimeoutJob;
 import com.vietnl.hwin.ordering.service.PlaceOrderService;
-import com.vietnl.hwin.ordering.service.PlaceOrderService.PlaceOrderCommand;
+import com.vietnl.hwin.ordering.service.model.PlaceOrderCommand;
 
 /** Test các job vận hành: hủy đơn chuyển khoản quá hạn, dọn refresh token cũ. */
 @Import(TestcontainersConfiguration.class)
@@ -81,14 +82,14 @@ class MaintenanceJobsTests {
         String active = tokens.issue(user, client).refreshToken();
         tokens.issue(user, client);
         // giả lập 1 token đã thu hồi từ 10 ngày trước và 1 token hết hạn từ 8 ngày trước
-        jdbc.update("update identity.refresh_token set revoked_at = now() - interval '10 days' where user_id = ? "
-                + "and id = (select id from identity.refresh_token where user_id = ? order by id asc limit 1)", user.getId(), user.getId());
-        jdbc.update("update identity.refresh_token set expires_at = now() - interval '8 days' where user_id = ? "
-                + "and id = (select id from identity.refresh_token where user_id = ? order by id desc limit 1)", user.getId(), user.getId());
-        int before = jdbc.queryForObject("select count(*) from identity.refresh_token where user_id = ?", Integer.class, user.getId());
+        jdbc.update("update identity.refresh_tokens set revoked_at = now() - interval '10 days' where user_id = ? "
+                + "and id = (select id from identity.refresh_tokens where user_id = ? order by id asc limit 1)", user.getId(), user.getId());
+        jdbc.update("update identity.refresh_tokens set expires_at = now() - interval '8 days' where user_id = ? "
+                + "and id = (select id from identity.refresh_tokens where user_id = ? order by id desc limit 1)", user.getId(), user.getId());
+        int before = jdbc.queryForObject("select count(*) from identity.refresh_tokens where user_id = ?", Integer.class, user.getId());
 
         assertThat(tokenCleanup.run()).isGreaterThanOrEqualTo(2);
-        int after = jdbc.queryForObject("select count(*) from identity.refresh_token where user_id = ?", Integer.class, user.getId());
+        int after = jdbc.queryForObject("select count(*) from identity.refresh_tokens where user_id = ?", Integer.class, user.getId());
         assertThat(after).isEqualTo(before - 2);
         assertThat(active).isNotBlank();
     }

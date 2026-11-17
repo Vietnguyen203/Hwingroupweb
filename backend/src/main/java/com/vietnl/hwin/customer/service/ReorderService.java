@@ -1,5 +1,8 @@
 package com.vietnl.hwin.customer.service;
 
+import com.vietnl.hwin.customer.service.model.ReorderAddedItem;
+import com.vietnl.hwin.customer.service.model.ReorderResult;
+import com.vietnl.hwin.customer.service.model.ReorderSkippedItem;
 import com.vietnl.hwin.customer.entity.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -15,7 +18,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.vietnl.hwin.catalog.service.ProductQueryService;
-import com.vietnl.hwin.catalog.service.ProductSnapshot;
+import com.vietnl.hwin.catalog.service.model.ProductSnapshot;
 import com.vietnl.hwin.ordering.service.CartService;
 import com.vietnl.hwin.ordering.service.OrderQueryService;
 
@@ -36,42 +39,35 @@ public class ReorderService {
         this.cart = cart;
     }
 
-    public record Added(UUID productId, String name, int quantity) {
-    }
 
-    /** @param reason INACTIVE (ngừng bán), OUT_OF_STOCK, NOT_FOUND */
-    public record Skipped(UUID productId, String name, String reason) {
-    }
 
-    public record Result(List<Added> added, List<Skipped> skipped) {
-    }
 
-    public Result reorder(UUID customerId, String orderCode) {
+    public ReorderResult reorder(UUID customerId, String orderCode) {
         Map<UUID, Integer> items = orders.findItemsForCustomer(orderCode, customerId)
                 .orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.ORDER_NOT_FOUND));
         Map<UUID, ProductSnapshot> snapshots = products.findSnapshots(items.keySet()).stream()
                 .collect(Collectors.toMap(ProductSnapshot::id, Function.identity()));
 
         Map<UUID, Integer> toAdd = new LinkedHashMap<>();
-        List<Added> added = new ArrayList<>();
-        List<Skipped> skipped = new ArrayList<>();
+        List<ReorderAddedItem> added = new ArrayList<>();
+        List<ReorderSkippedItem> skipped = new ArrayList<>();
         items.forEach((productId, qty) -> {
             ProductSnapshot p = snapshots.get(productId);
             if (p == null) {
-                skipped.add(new Skipped(productId, null, "NOT_FOUND"));
+                skipped.add(new ReorderSkippedItem(productId, null, "NOT_FOUND"));
             } else if (!p.active()) {
-                skipped.add(new Skipped(productId, p.name(), "INACTIVE"));
+                skipped.add(new ReorderSkippedItem(productId, p.name(), "INACTIVE"));
             } else if (p.stock() <= 0) {
-                skipped.add(new Skipped(productId, p.name(), "OUT_OF_STOCK"));
+                skipped.add(new ReorderSkippedItem(productId, p.name(), "OUT_OF_STOCK"));
             } else {
                 int q = Math.min(qty, p.stock());
                 toAdd.put(productId, q);
-                added.add(new Added(productId, p.name(), q));
+                added.add(new ReorderAddedItem(productId, p.name(), q));
             }
         });
         if (!toAdd.isEmpty()) {
             cart.addItems(customerId, toAdd);
         }
-        return new Result(added, skipped);
+        return new ReorderResult(added, skipped);
     }
 }

@@ -10,10 +10,10 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
-import com.vietnl.hwin.affiliate.entity.AffiliateEnums.AffiliateStatus;
-import com.vietnl.hwin.affiliate.entity.AffiliateEnums.CommissionStatus;
-import com.vietnl.hwin.affiliate.entity.AffiliateEnums.PayoutStatus;
-import com.vietnl.hwin.affiliate.service.AffiliateProperties;
+import com.vietnl.hwin.affiliate.entity.AffiliateStatus;
+import com.vietnl.hwin.affiliate.entity.CommissionStatus;
+import com.vietnl.hwin.affiliate.entity.PayoutStatus;
+import com.vietnl.hwin.affiliate.service.config.AffiliateProperties;
 import com.vietnl.hwin.affiliate.service.BankAccountCrypto;
 import com.vietnl.hwin.common.domain.Money;
 import com.vietnl.hwin.common.domain.PhoneNumber;

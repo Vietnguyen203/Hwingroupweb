@@ -17,7 +17,7 @@ import jakarta.persistence.Table;
 
 import org.hibernate.annotations.UuidGenerator;
 
-import com.vietnl.hwin.affiliate.entity.AffiliateEnums.PayoutStatus;
+import com.vietnl.hwin.affiliate.entity.PayoutStatus;
 import com.vietnl.hwin.common.domain.AggregateRoot;
 import com.vietnl.hwin.common.domain.Money;
 
@@ -32,7 +32,7 @@ import lombok.NoArgsConstructor;
  * tiền tự trở lại số dư mà không phải sửa hoa hồng.
  */
 @Entity
-@Table(name = "payout", schema = "affiliate")
+@Table(name = "payouts", schema = "affiliate")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Payout extends AggregateRoot<Payout> {

@@ -1,5 +1,7 @@
 package com.vietnl.hwin.ordering.service;
 
+import com.vietnl.hwin.ordering.service.config.OrderingProperties;
+import com.vietnl.hwin.ordering.service.model.PlaceOrderCommand;
 import com.vietnl.hwin.ordering.entity.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -24,8 +26,8 @@ import com.vietnl.hwin.common.domain.Address;
 import com.vietnl.hwin.common.domain.Money;
 import com.vietnl.hwin.common.ratelimit.RateLimiter;
 import com.vietnl.hwin.ordering.entity.Order;
-import com.vietnl.hwin.ordering.entity.OrderEnums.PaymentMethod;
-import com.vietnl.hwin.ordering.entity.OrderLine;
+import com.vietnl.hwin.ordering.entity.PaymentMethod;
+import com.vietnl.hwin.ordering.entity.OrderItem;
 import com.vietnl.hwin.ordering.entity.VatInvoiceInfo;
 import com.vietnl.hwin.ordering.repository.OrderRepository;
 
@@ -65,9 +67,6 @@ public class PlaceOrderService {
         this.clock = clock;
     }
 
-    public record PlaceOrderCommand(Address shippingAddress, PaymentMethod paymentMethod, VatInvoiceInfo vatInvoice,
-                                    String note, String idempotencyKey) {
-    }
 
     /**
      * @param referralCode mã CTV đọc từ cookie hwin_ref (có thể null); affiliate sẽ kiểm tra tính hợp lệ
@@ -88,8 +87,8 @@ public class PlaceOrderService {
                 ExceptionMessage.PLACE_ORDER_TOO_FAST);
 
         Map<UUID, Integer> cart = cartService.quantitiesOf(customerId);
-        List<OrderLine> lines = pricing.toOrderLines(cart);
-        Money subtotal = lines.stream().map(l -> l.unitPrice().times(l.quantity())).reduce(Money.ZERO, Money::plus);
+        List<OrderItem> lines = pricing.toOrderItems(cart);
+        Money subtotal = lines.stream().map(OrderItem::getLineTotal).reduce(Money.ZERO, Money::plus);
         Instant now = clock.instant();
 
         Order order = Order.place(customerId, codes.next(), lines, pricing.shippingFee(subtotal, cmd.shippingAddress()),

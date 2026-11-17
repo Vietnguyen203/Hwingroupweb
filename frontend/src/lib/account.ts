@@ -1,10 +1,10 @@
 // Kiểu dữ liệu tài khoản / đơn hàng (khớp DTO backend identity, customer, ordering)
 
-export type Me = { id: string; phoneMasked: string | null; email: string | null; fullName: string | null; roles: string[] };
+export type MeResponse = { id: string; phoneMasked: string | null; email: string | null; fullName: string | null; roles: string[] };
 
-export type OtpSent = { channel: "SMS" | "EMAIL"; sentTo: string; expiresInSeconds: number };
+export type OtpSentResponse = { channel: "SMS" | "EMAIL"; sentTo: string; expiresInSeconds: number };
 
-export type Profile = {
+export type ProfileResponse = {
   id: string;
   phone: string | null;
   email: string | null;
@@ -13,7 +13,7 @@ export type Profile = {
   totalSpent: number;
 };
 
-export type Address = {
+export type AddressResponse = {
   id: string;
   recipientName: string;
   recipientPhone: string;
@@ -25,9 +25,9 @@ export type Address = {
   isDefault: boolean;
 };
 
-export type AddressInput = Omit<Address, "id" | "fullText" | "isDefault"> & { makeDefault: boolean };
+export type SaveAddressRequest = Omit<AddressResponse, "id" | "fullText" | "isDefault"> & { makeDefault: boolean };
 
-export type OrderSummary = {
+export type OrderSummaryResponse = {
   code: string;
   status: OrderStatus;
   paymentMethod: string;
@@ -39,7 +39,7 @@ export type OrderSummary = {
   placedAt: string;
 };
 
-export type OrderDetail = Omit<OrderSummary, "itemCount" | "firstItemName" | "firstItemImage"> & {
+export type OrderDetailResponse = Omit<OrderSummaryResponse, "itemCount" | "firstItemName" | "firstItemImage"> & {
   subtotal: number;
   discount: number;
   shippingFee: number;

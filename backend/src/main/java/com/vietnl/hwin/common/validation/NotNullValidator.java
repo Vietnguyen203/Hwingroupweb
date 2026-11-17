@@ -13,7 +13,7 @@ import jakarta.validation.Payload;
 
 /** Giá trị bắt buộc (không null). Thông báo tự sinh: "{field} là bắt buộc". */
 @Documented
-@Constraint(validatedBy = TextConstraints.NotNullCheck.class)
+@Constraint(validatedBy = NotNullValidatorConstraint.class)
 @Target({FIELD, PARAMETER})
 @Retention(RUNTIME)
 public @interface NotNullValidator {

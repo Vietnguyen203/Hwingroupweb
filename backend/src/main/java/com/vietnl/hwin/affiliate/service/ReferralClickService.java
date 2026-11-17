@@ -1,5 +1,7 @@
 package com.vietnl.hwin.affiliate.service;
 
+import com.vietnl.hwin.affiliate.service.config.AffiliateProperties;
+import com.vietnl.hwin.affiliate.service.model.RecordClickResult;
 import java.time.Clock;
 import java.util.Optional;
 
@@ -37,12 +39,10 @@ public class ReferralClickService {
         this.clock = clock;
     }
 
-    public record ClickResult(String referralCode, boolean counted) {
-    }
 
     /** @return mã hợp lệ (để đặt cookie) nếu CTV đang hoạt động; empty nếu bỏ qua. */
     @Transactional
-    public Optional<ClickResult> record(String rawCode, String landingPath, ClientInfo client) {
+    public Optional<RecordClickResult> record(String rawCode, String landingPath, ClientInfo client) {
         ReferralCode code = ReferralCode.parseOrNull(rawCode);
         if (code == null) {
             return Optional.empty();
@@ -58,6 +58,6 @@ public class ReferralClickService {
             clicks.save(ReferralClick.record(affiliate.get().getId(), code.value(), ipHash, client.userAgent(),
                     landingPath, clock.instant()));
         }
-        return Optional.of(new ClickResult(code.value(), counted));
+        return Optional.of(new RecordClickResult(code.value(), counted));
     }
 }

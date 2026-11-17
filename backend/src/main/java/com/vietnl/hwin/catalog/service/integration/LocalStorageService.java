@@ -1,5 +1,6 @@
 package com.vietnl.hwin.catalog.service.integration;
 
+import com.vietnl.hwin.catalog.service.config.StorageProperties;
 import com.vietnl.hwin.catalog.entity.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -63,7 +64,4 @@ public class LocalStorageService implements StorageService, WebMvcConfigurer {
                 .addResourceLocations(root.toUri().toString());
     }
 
-    @ConfigurationProperties(prefix = "hwin.storage")
-    public record StorageProperties(String localDir, String publicPath) {
-    }
 }
