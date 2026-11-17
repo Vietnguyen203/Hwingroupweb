@@ -1,5 +1,6 @@
 package com.vietnl.hwin.catalog.service;
 
+import com.vietnl.hwin.common.audit.AuditLogger;
 import com.vietnl.hwin.catalog.entity.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -22,10 +23,12 @@ public class ProductAdminService {
 
     private final ProductRepository products;
     private final CategoryRepository categories;
+    private final AuditLogger audit;
 
-    public ProductAdminService(ProductRepository products, CategoryRepository categories) {
+    public ProductAdminService(ProductRepository products, CategoryRepository categories, AuditLogger audit) {
         this.products = products;
         this.categories = categories;
+        this.audit = audit;
     }
 
     @Transactional(readOnly = true)
@@ -57,8 +60,26 @@ public class ProductAdminService {
     }
 
     @Transactional
+    public void setCategory(UUID id, UUID categoryId) {
+        if (categoryId != null) {
+            ensureCategoryExists(categoryId);
+        }
+        load(id).setCategory(categoryId);
+    }
+
+    @Transactional
     public void adjustStock(UUID id, int delta) {
         load(id).adjustStock(delta);
+    }
+
+    /** Đặt giảm giá thêm (%) cho sản phẩm / combo. Chỉ ADMIN gọi (chặn ở SecurityConfig: /api/admin/**). Có ghi audit. */
+    @Transactional
+    public void setSale(UUID id, int percent, UUID adminId) {
+        Product p = load(id);
+        int before = p.getSalePercent();
+        p.changeSalePercent(percent);
+        audit.log("catalog", "Product", p.getId(), "SALE_CHANGED", adminId, p.getEffectivePrice().amount(),
+                "{\"from\":" + before + ",\"to\":" + percent + "}");
     }
 
     @Transactional
@@ -69,6 +90,12 @@ public class ProductAdminService {
         } else {
             p.deactivate();
         }
+    }
+
+    @Transactional
+    public void delete(UUID id) {
+        Product p = load(id);
+        products.delete(p);
     }
 
     private Product load(UUID id) {

@@ -40,7 +40,12 @@ public class AdminCategoryController {
 
     @GetMapping
     public ResponseEntity<List<CategoryResponse>> list() {
-        return ResponseEntity.ok(categoryService.listAll(mapper::toResponse));
+        var counts = categoryService.activeProductCounts();
+        return ResponseEntity.ok(categoryService.listAll(c -> {
+            CategoryResponse r = mapper.toResponse(c);
+            r.setProductCount(counts.getOrDefault(c.getId(), 0L));
+            return r;
+        }));
     }
 
     @PostMapping
@@ -53,10 +58,10 @@ public class AdminCategoryController {
         return ResponseEntity.ok(mapper.toResponse(categoryService.update(id, r.getName(), r.getSlug(), r.getIconUrl(), r.getSortOrder(), r.isActive())));
     }
 
-    /** Ẩn danh mục (không xóa cứng). */
+    /** Xóa danh mục khỏi hệ thống. */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deactivate(@PathVariable UUID id) {
-        categoryService.deactivate(id);
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        categoryService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -29,6 +29,11 @@ public class CategoryController {
     /** Danh mục đang hiển thị, theo thứ tự (menu icon trang chủ). */
     @GetMapping
     public ResponseEntity<List<CategoryResponse>> list() {
-        return ResponseEntity.ok(categoryService.listActive(mapper::toResponse));
+        var counts = categoryService.activeProductCounts();
+        return ResponseEntity.ok(categoryService.listActive(c -> {
+            CategoryResponse r = mapper.toResponse(c);
+            r.setProductCount(counts.getOrDefault(c.getId(), 0L));
+            return r;
+        }));
     }
 }

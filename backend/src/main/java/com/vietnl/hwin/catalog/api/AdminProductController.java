@@ -1,5 +1,8 @@
 package com.vietnl.hwin.catalog.api;
 
+import com.vietnl.hwin.catalog.api.dto.UpdateProductSaleRequest;
+import com.vietnl.hwin.common.security.AuthPrincipal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.ResponseEntity;
 import java.util.UUID;
 
@@ -10,6 +13,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -82,9 +86,27 @@ public class AdminProductController {
         adminService.adjustStock(id, r.getDelta());
         return ResponseEntity.noContent().build();
     }
+    @PatchMapping("/{id}/category")
+    public ResponseEntity<Void> setCategory(@PathVariable UUID id, @RequestBody Map<String, UUID> body) {
+        adminService.setCategory(id, body.get("categoryId"));
+        return ResponseEntity.noContent().build();
+    }
+    /** Giảm giá thêm (%) cho sản phẩm / combo – chỉ ADMIN. */
+    @PatchMapping("/{id}/sale")
+    public ResponseEntity<AdminProductResponse> setSale(@PathVariable UUID id, @Valid @RequestBody UpdateProductSaleRequest r,
+                                                        @AuthenticationPrincipal AuthPrincipal me) {
+        adminService.setSale(id, r.getSalePercent(), me.userId());
+        return ResponseEntity.ok(adminService.get(id, mapper::toAdmin));
+    }
+
     @PatchMapping("/{id}/active")
     public ResponseEntity<Void> setActive(@PathVariable UUID id, @RequestBody UpdateProductStatusRequest r) {
         adminService.setActive(id, r.isActive());
+        return ResponseEntity.noContent().build();
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        adminService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

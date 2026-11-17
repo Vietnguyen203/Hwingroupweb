@@ -24,4 +24,6 @@ public class CategoryResponse {
     private String iconUrl;
     private int sortOrder;
     private boolean active;
+    /** Số sản phẩm đang bán trong danh mục (trang chủ ẩn danh mục rỗng). */
+    private long productCount;
 }

@@ -23,7 +23,12 @@ public class AdminProductResponse {
     private UUID categoryId;
     private String name;
     private String slug;
+    /** Giá niêm yết (chưa tính giảm giá thêm) – dùng để sửa sản phẩm. */
     private long price;
+    /** Giảm giá thêm (%) – đặt bằng PATCH /api/admin/products/{id}/sale. */
+    private int salePercent;
+    /** Giá khách thực trả sau giảm giá thêm. */
+    private long effectivePrice;
     private Long compareAtPrice;
     private String shortDescription;
     private String description;

@@ -82,8 +82,8 @@ public class ProductSearchService {
 
     private static Sort toSort(ProductSearchCriteria c) {
         return switch (c.sort()) {
-            case PRICE_ASC -> Sort.by(Sort.Order.asc("price"), Sort.Order.desc("id"));
-            case PRICE_DESC -> Sort.by(Sort.Order.desc("price"), Sort.Order.desc("id"));
+            case PRICE_ASC -> Sort.by(Sort.Order.asc("effectivePrice"), Sort.Order.desc("id"));
+            case PRICE_DESC -> Sort.by(Sort.Order.desc("effectivePrice"), Sort.Order.desc("id"));
             case BESTSELLER -> Sort.by(Sort.Order.desc("soldCount"), Sort.Order.desc("id"));
             case NEWEST -> Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id"));
         };

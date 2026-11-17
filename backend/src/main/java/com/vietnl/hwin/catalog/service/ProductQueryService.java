@@ -41,7 +41,7 @@ public class ProductQueryService {
     }
 
     private static ProductSnapshot toSnapshot(Product p) {
-        return new ProductSnapshot(p.getId(), p.getName(), p.getSlug(), p.mainImageUrl(), p.getPrice().amount(),
+        return new ProductSnapshot(p.getId(), p.getName(), p.getSlug(), p.mainImageUrl(), p.getEffectivePrice().amount(),
                 p.getStock(), p.isActive());
     }
 }

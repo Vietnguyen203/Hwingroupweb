@@ -45,6 +45,8 @@ public class Product extends AggregateRoot<Product> {
     /** Mỗi sản phẩm có tối thiểu 1 và tối đa 5 ảnh. */
     public static final int MIN_IMAGES = 1;
     public static final int MAX_IMAGES = 5;
+    /** Giảm giá thêm tối đa (%). */
+    public static final int MAX_SALE_PERCENT = 90;
 
     @Id
     @GeneratedValue
@@ -64,6 +66,14 @@ public class Product extends AggregateRoot<Product> {
 
     /** Giá gốc để hiển thị gạch ngang; null nếu không giảm giá. */
     private Money compareAtPrice;
+
+    /** Giảm giá thêm (%), 0–{@link #MAX_SALE_PERCENT}; chỉ ADMIN đặt. Tính trên {@link #price} (với combo là giá đã trừ 10%). */
+    @Column(nullable = false)
+    private int salePercent;
+
+    /** Giá khách thực trả = price * (100 - salePercent) / 100; lưu sẵn để sắp xếp / truy vấn theo giá. */
+    @Column(nullable = false)
+    private Money effectivePrice;
 
     private String shortDescription;
 
@@ -140,6 +150,7 @@ public class Product extends AggregateRoot<Product> {
         this.slug = TextNormalizer.slugify(d.slug() == null || d.slug().isBlank() ? d.name() : d.slug());
         this.price = d.price();
         this.compareAtPrice = d.compareAtPrice();
+        refreshEffectivePrice();
         this.shortDescription = d.shortDescription();
         this.description = d.description();
         this.unit = d.unit();
@@ -213,12 +224,40 @@ public class Product extends AggregateRoot<Product> {
         return images.isEmpty() ? null : images.get(0).getUrl();
     }
 
-    /** Phần trăm giảm so với giá gốc (làm tròn), 0 nếu không có giá gốc. */
+    /**
+     * Đặt giảm giá thêm (%). Chỉ gọi từ chức năng của ADMIN. 0 = bỏ giảm giá.
+     * Ví dụ combo niêm yết 1.000.000đ (đã trừ 10%) giảm thêm 15% -> khách trả 850.000đ.
+     */
+    public void changeSalePercent(int percent) {
+        if (percent < 0 || percent > MAX_SALE_PERCENT) {
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.SALE_PERCENT_INVALID,
+                    Map.of("max", String.valueOf(MAX_SALE_PERCENT)));
+        }
+        this.salePercent = percent;
+        refreshEffectivePrice();
+    }
+
+    /** Giá khách thực trả sau giảm giá thêm (làm tròn xuống đồng, tối thiểu 1đ). */
+    private void refreshEffectivePrice() {
+        long v = price.amount() * (100L - salePercent) / 100L;
+        this.effectivePrice = Money.of(Math.max(v, 1L));
+    }
+
+    /** Giá gạch ngang hiển thị: giá gốc nếu có, nếu không thì giá niêm yết khi đang giảm thêm; null nếu không giảm. */
+    public Money displayCompareAtPrice() {
+        if (compareAtPrice != null) {
+            return compareAtPrice;
+        }
+        return salePercent > 0 ? price : null;
+    }
+
+    /** Phần trăm giảm của giá thực trả so với giá gạch ngang (làm tròn), 0 nếu không có giá gạch ngang. */
     public int discountPercent() {
-        if (compareAtPrice == null || compareAtPrice.isZero()) {
+        Money ref = displayCompareAtPrice();
+        if (ref == null || ref.isZero()) {
             return 0;
         }
-        return (int) Math.round(100.0 * (compareAtPrice.amount() - price.amount()) / compareAtPrice.amount());
+        return (int) Math.round(100.0 * (ref.amount() - effectivePrice.amount()) / ref.amount());
     }
 
     public List<ProductImage> getImages() {

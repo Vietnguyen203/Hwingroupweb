@@ -25,10 +25,17 @@ public interface ProductMapper {
     CategoryResponse toResponse(Category category);
 
     @Mapping(target = "imageUrl", expression = "java(product.mainImageUrl())")
+    @Mapping(target = "price", expression = "java(product.getEffectivePrice().amount())")
+    @Mapping(target = "basePrice", expression = "java(product.getPrice().amount())")
+    @Mapping(target = "compareAtPrice", expression = "java(moneyToLong(product.displayCompareAtPrice()))")
     @Mapping(target = "discountPercent", expression = "java(product.discountPercent())")
     @Mapping(target = "inStock", expression = "java(product.isInStock())")
     ProductCardResponse toCard(Product product);
 
+    @Mapping(target = "price", expression = "java(product.getEffectivePrice().amount())")
+    @Mapping(target = "basePrice", expression = "java(product.getPrice().amount())")
+    @Mapping(target = "salePercent", source = "product.salePercent")
+    @Mapping(target = "compareAtPrice", expression = "java(moneyToLong(product.displayCompareAtPrice()))")
     @Mapping(target = "discountPercent", expression = "java(product.discountPercent())")
     @Mapping(target = "inStock", expression = "java(product.isInStock())")
     @Mapping(target = "category", source = "category")

@@ -21,7 +21,12 @@ public class ProductDetailResponse {
     private UUID id;
     private String name;
     private String slug;
+    /** Giá khách thực trả (đã gồm giảm giá thêm). */
     private long price;
+    /** Giá niêm yết trước khi giảm giá thêm. */
+    private long basePrice;
+    /** Giảm giá thêm (%) do admin đặt, 0 nếu không có. */
+    private int salePercent;
     private Long compareAtPrice;
     private int discountPercent;
     private String shortDescription;

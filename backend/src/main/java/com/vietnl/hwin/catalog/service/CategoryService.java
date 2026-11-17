@@ -32,6 +32,18 @@ public class CategoryService {
         return categories.findAllByActiveTrueOrderBySortOrderAscIdAsc().stream().map(mapper).toList();
     }
 
+    /** Số sản phẩm đang bán của từng danh mục (danh mục không có sản phẩm thì không có khóa). */
+    @Transactional(readOnly = true)
+    public java.util.Map<UUID, Long> activeProductCounts() {
+        java.util.Map<UUID, Long> counts = new java.util.HashMap<>();
+        for (Object[] row : products.countActiveByCategory()) {
+            if (row[0] != null) {
+                counts.put((UUID) row[0], ((Number) row[1]).longValue());
+            }
+        }
+        return counts;
+    }
+
     @Transactional(readOnly = true)
     public <T> List<T> listAll(Function<Category, T> mapper) {
         return categories.findAllByOrderBySortOrderAscIdAsc().stream().map(mapper).toList();
@@ -67,16 +79,19 @@ public class CategoryService {
         return c;
     }
 
-    /** Ẩn danh mục; chặn nếu còn sản phẩm đang bán. */
+    /** Xóa hoàn toàn danh mục khỏi hệ thống. */
+    @Transactional
+    public void delete(UUID id) {
+        categories.delete(get(id));
+    }
+
+    /** Ẩn danh mục. */
     @Transactional
     public void deactivate(UUID id) {
         deactivate(get(id));
     }
 
     private void deactivate(Category c) {
-        if (products.countByCategoryIdAndActiveTrue(c.getId()) > 0) {
-            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.CATEGORY_IN_USE);
-        }
         c.deactivate();
     }
 

@@ -25,4 +25,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
     boolean existsBySlugAndIdNot(String slug, UUID id);
 
     long countByCategoryIdAndActiveTrue(UUID categoryId);
+
+    /** Số sản phẩm đang bán theo danh mục: [categoryId, số lượng]. Sản phẩm chưa phân loại có categoryId null. */
+    @org.springframework.data.jpa.repository.Query("select p.categoryId, count(p) from Product p where p.active = true group by p.categoryId")
+    List<Object[]> countActiveByCategory();
 }

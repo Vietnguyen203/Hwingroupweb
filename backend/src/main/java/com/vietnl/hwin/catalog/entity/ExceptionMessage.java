@@ -10,6 +10,7 @@ public enum ExceptionMessage implements BaseErrorMessage {
     PRODUCT_NAME_REQUIRED("Tên sản phẩm không được trống"),
     PRODUCT_CATEGORY_REQUIRED("Sản phẩm phải thuộc một danh mục"),
     PRODUCT_PRICE_INVALID("Giá bán phải lớn hơn 0"),
+    SALE_PERCENT_INVALID("Phần trăm giảm giá phải là số nguyên từ 0 đến #max#"),
     COMPARE_PRICE_INVALID("Giá gốc phải lớn hơn giá bán"),
     PRODUCT_IMAGE_REQUIRED("Sản phẩm cần ít nhất #min# ảnh"),
     TOO_MANY_IMAGES("Tối đa #max# ảnh mỗi sản phẩm"),
