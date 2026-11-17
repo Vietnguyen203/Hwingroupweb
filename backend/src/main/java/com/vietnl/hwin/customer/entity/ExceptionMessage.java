@@ -12,7 +12,12 @@ public enum ExceptionMessage implements BaseErrorMessage {
     ADDRESS_NOT_FOUND("Không tìm thấy địa chỉ"),
     CUSTOMER_NOT_FOUND("Không tìm thấy khách hàng"),
     USER_NOT_FOUND("Không tìm thấy tài khoản"),
-    ORDER_NOT_FOUND("Không tìm thấy đơn hàng");
+    ORDER_NOT_FOUND("Không tìm thấy đơn hàng"),
+    REVIEW_RATING_INVALID("Số sao đánh giá phải từ 1 đến 5"),
+    REVIEW_COMMENT_TOO_LONG("Nội dung đánh giá tối đa #max# ký tự"),
+    REVIEW_NOT_PURCHASED("Bạn chỉ có thể đánh giá sản phẩm đã mua và nhận hàng"),
+    REVIEW_ALREADY_EXISTS("Bạn đã đánh giá sản phẩm này rồi"),
+    REVIEW_PRODUCT_NOT_FOUND("Không tìm thấy sản phẩm để đánh giá");
 
     private final String val;
 

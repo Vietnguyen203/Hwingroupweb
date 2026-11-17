@@ -18,6 +18,12 @@ import com.vietnl.hwin.ordering.entity.OrderStatus;
 
 public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecificationExecutor<Order> {
 
+    /** Khách đã NHẬN sản phẩm này chưa (có đơn DELIVERED / COMPLETED chứa sản phẩm). */
+    @Query("select count(o) > 0 from Order o join o.items i where o.customerId = :customerId and i.productId = :productId "
+            + "and o.status in (com.vietnl.hwin.ordering.entity.OrderStatus.DELIVERED, "
+            + "com.vietnl.hwin.ordering.entity.OrderStatus.COMPLETED)")
+    boolean hasReceivedProduct(@Param("customerId") UUID customerId, @Param("productId") UUID productId);
+
     /** Luôn lọc theo customerId để chống xem đơn của người khác (IDOR). */
     Optional<Order> findByOrderCodeAndCustomerId(String orderCode, UUID customerId);
 

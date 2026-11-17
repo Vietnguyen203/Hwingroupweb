@@ -27,6 +27,12 @@ public class OrderQueryService {
         this.orders = orders;
     }
 
+    /** Khách đã nhận sản phẩm này (đơn đã giao / hoàn tất) – điều kiện để được đánh giá. */
+    @Transactional(readOnly = true)
+    public boolean hasReceivedProduct(UUID customerId, UUID productId) {
+        return orders.hasReceivedProduct(customerId, productId);
+    }
+
     /**
      * Sản phẩm + số lượng của một đơn – CHỈ khi đơn thuộc khách {@code customerId} (chống IDOR).
      *
