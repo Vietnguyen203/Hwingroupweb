@@ -27,7 +27,7 @@ export function MobileMenu({ categories }: { categories: CategoryResponse[] }) {
             <ul className="flex-1 overflow-y-auto">
               {categories.map((c) => (
                 <li key={c.id}>
-                  <Link href={`/danh-muc/${c.slug}`} onClick={() => setOpen(false)} className="flex items-center gap-3 px-4 py-2.5 active:bg-neutral-100">
+                  <Link href={`/categories/${c.slug}`} onClick={() => setOpen(false)} className="flex items-center gap-3 px-4 py-2.5 active:bg-neutral-100">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     {c.iconUrl && <img src={c.iconUrl} alt="" className="size-8" />}
                     <span className="flex-1 text-sm">{c.name}</span>
@@ -37,7 +37,7 @@ export function MobileMenu({ categories }: { categories: CategoryResponse[] }) {
               ))}
             </ul>
             <div className="border-t p-4">
-              <Link href="/ctv" onClick={() => setOpen(false)} className="block rounded-full bg-brand-cta py-2.5 text-center text-sm font-semibold text-white">
+              <Link href="/affiliate" onClick={() => setOpen(false)} className="block rounded-full bg-brand-cta py-2.5 text-center text-sm font-semibold text-white">
                 Đăng ký cộng tác viên
               </Link>
             </div>

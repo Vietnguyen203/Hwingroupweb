@@ -1,16 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
- * Chặn /admin và /ctv theo vai trò (Next.js 16 đổi tên middleware.ts -> proxy.ts).
+ * Chặn /admin và /affiliate theo vai trò (Next.js 16 đổi tên middleware.ts -> proxy.ts).
  * Chỉ giải mã payload JWT để điều hướng giao diện – backend mới là nơi kiểm quyền thật.
  * Access token hết hạn -> chuyển tới trang đăng nhập, trang đó sẽ thử /api/auth/refresh trước.
  */
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const isAdmin = pathname.startsWith("/admin");
-  const loginPath = isAdmin ? "/admin/login" : "/dang-nhap";
-  // /ctv là trang giới thiệu công khai (dashboard CTV hiển thị ở đây khi đã đăng nhập)
-  if (pathname === loginPath || pathname === "/ctv") return NextResponse.next();
+  const loginPath = "/login"; // một trang đăng nhập chung; admin đi qua API đăng nhập admin
+  // Link cũ /admin/login -> trang đăng nhập chung
+  if (pathname === "/admin/login") return NextResponse.redirect(new URL(`${loginPath}?next=/admin/orders`, request.url));
+  // /affiliate là trang giới thiệu công khai (dashboard CTV hiển thị ở đây khi đã đăng nhập)
+  if (pathname === loginPath || pathname === "/affiliate") return NextResponse.next();
 
   const roles = readRoles(request.cookies.get("hwin_at")?.value);
   const required = isAdmin ? "ADMIN" : null; // trang CTV khác chỉ cần đăng nhập; quyền AFFILIATE do backend kiểm tra
@@ -38,5 +40,5 @@ function readRoles(token: string | undefined): string[] | null {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/ctv/:path*"],
+  matcher: ["/admin/:path*", "/affiliate/:path*"],
 };

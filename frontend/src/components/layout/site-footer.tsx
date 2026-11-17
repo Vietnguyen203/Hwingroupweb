@@ -16,7 +16,7 @@ export function SiteFooter() {
             <p className="text-lg font-bold uppercase">Đăng ký cộng tác viên HWIN</p>
             <p className="text-sm text-white/80">Phát triển cùng HWIN</p>
           </div>
-          <form action="/ctv" method="get" className="flex w-full max-w-md gap-2">
+          <form action="/affiliate" method="get" className="flex w-full max-w-md gap-2">
             <input name="phone" type="tel" inputMode="numeric" placeholder="Số điện thoại của bạn" maxLength={15}
                    className="h-11 min-w-0 flex-1 rounded-full bg-white px-4 text-sm text-neutral-900 outline-none" />
             <button className="h-11 shrink-0 rounded-full bg-[#6c64d9] px-5 text-sm font-semibold">Đăng ký ngay</button>
@@ -41,7 +41,7 @@ export function SiteFooter() {
             ["Thanh toán & vận chuyển", "#"], ["Câu hỏi thường gặp", "#"],
           ]} />
           <FooterCol title="Về HWIN" links={[
-            ["Giới thiệu", "#"], ["Cộng tác viên", "/ctv"], ["Tài khoản của tôi", "/tai-khoan"], ["Tìm sản phẩm", "/tim-kiem"],
+            ["Giới thiệu", siteConfig.aboutUrl], ["Cộng tác viên", "/affiliate"], ["Tài khoản của tôi", "/account"], ["Tìm sản phẩm", "/search"],
           ]} />
           <div>
             <p className="mb-3 font-semibold text-white uppercase">Công ty CP Tập đoàn HWIN</p>
@@ -57,7 +57,7 @@ export function SiteFooter() {
             </a>
           </div>
         </div>
-        <p className="border-t border-white/15 px-4 py-4 text-center text-xs text-white/60">Copyright © 2026 HWINGROUP – bản demo</p>
+        <p className="border-t border-white/15 px-4 py-4 text-center text-xs text-white/60">Copyright © 2026 HWINGROUP</p>
       </section>
     </footer>
   );

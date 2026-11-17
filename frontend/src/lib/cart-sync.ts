@@ -19,6 +19,8 @@ export type CartView = {
   total: number;
   itemCount: number;
   checkoutReady: boolean;
+  /** Tạm tính từ mức này được miễn phí ship; 0 = không có miễn phí ship. */
+  freeShippingThreshold: number;
 };
 
 let online = false; // true khi đã đăng nhập và đã gộp giỏ

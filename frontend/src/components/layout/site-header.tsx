@@ -25,7 +25,7 @@ export function SiteHeader() {
         </Suspense>
         <Logo />
 
-        <form action="/tim-kiem" method="get" role="search" className="min-w-0 flex-1 md:max-w-xl">
+        <form action="/search" method="get" role="search" className="min-w-0 flex-1 md:max-w-xl">
           <label className="flex h-10 items-center rounded-full bg-neutral-100 pl-3 md:border md:border-neutral-200 md:bg-white">
             <Search className="size-4 shrink-0 text-neutral-500 md:hidden" />
             <input
@@ -42,8 +42,10 @@ export function SiteHeader() {
         </form>
 
         <div className="hidden items-center gap-5 text-sm text-neutral-700 xl:flex">
-          <Link href="/ctv" className="flex items-center gap-1.5 hover:text-brand"><Info className="size-4 text-brand" /> Về chúng tôi</Link>
-          <Link href="/tim-kiem?sort=PRICE_ASC" className="flex items-center gap-1.5 hover:text-brand"><Newspaper className="size-4 text-brand" /> Khuyến mãi</Link>
+          <a href={siteConfig.aboutUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-brand">
+            <Info className="size-4 text-brand" /> Về chúng tôi
+          </a>
+          <Link href="/search?sort=PRICE_ASC" className="flex items-center gap-1.5 hover:text-brand"><Newspaper className="size-4 text-brand" /> Khuyến mãi</Link>
           <a href={siteConfig.zaloUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-brand">
             <Headset className="size-4 text-brand" /> Hỗ trợ
           </a>
@@ -55,34 +57,11 @@ export function SiteHeader() {
         <AccountLink />
         <CartButton />
       </div>
-
-      <Suspense fallback={<div className="hidden h-10 md:block" />}>
-        <CategoryNav />
-      </Suspense>
     </header>
   );
 }
 
 async function MobileMenuLoader() {
-  return <MobileMenu categories={await getCategories()} />;
-}
-
-/** Hàng menu danh mục (desktop). */
-async function CategoryNav() {
-  const categories = await getCategories();
-  return (
-    <nav aria-label="Danh mục" className="hidden border-t border-neutral-100 md:block">
-      <ul className="mx-auto flex max-w-6xl items-center gap-6 overflow-x-auto px-3 text-sm text-neutral-700">
-        {categories.map((c) => (
-          <li key={c.id} className="shrink-0">
-            <Link href={`/danh-muc/${c.slug}`} className="flex items-center gap-1.5 py-2.5 hover:text-brand">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              {c.iconUrl && <img src={c.iconUrl} alt="" className="size-5" />}
-              {c.name}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  );
+  // Menu chỉ là phụ: backend lỗi thì để trống, không làm sập cả trang (trang tự báo lỗi ở phần nội dung)
+  return <MobileMenu categories={await getCategories().catch(() => [])} />;
 }

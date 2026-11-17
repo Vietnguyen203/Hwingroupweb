@@ -21,7 +21,12 @@ const MAX_QTY = 99;
 
 type CartState = {
   lines: CartLine[];
-  add: (line: Omit<CartLine, "quantity">, quantity?: number) => void;
+  isDrawerOpen: boolean;
+  openDrawer: () => void;
+  closeDrawer: () => void;
+  toggleDrawer: () => void;
+  /** openDrawer=false: thêm mà không mở giỏ nhỏ (khi khách đang ở trang giỏ hàng). */
+  add: (line: Omit<CartLine, "quantity">, quantity?: number, openDrawer?: boolean) => void;
   setQuantity: (productId: string, quantity: number) => void;
   remove: (productId: string) => void;
   clear: () => void;
@@ -31,7 +36,11 @@ export const useCart = create<CartState>()(
   persist(
     (set) => ({
       lines: [],
-      add: (line, quantity = 1) =>
+      isDrawerOpen: false,
+      openDrawer: () => set({ isDrawerOpen: true }),
+      closeDrawer: () => set({ isDrawerOpen: false }),
+      toggleDrawer: () => set((s) => ({ isDrawerOpen: !s.isDrawerOpen })),
+      add: (line, quantity = 1, openDrawer = true) =>
         set((s) => {
           const existing = s.lines.find((l) => l.productId === line.productId);
           if (existing) {
@@ -41,9 +50,13 @@ export const useCart = create<CartState>()(
                   ? { ...l, ...line, quantity: Math.min(MAX_QTY, l.quantity + quantity) }
                   : l,
               ),
+              isDrawerOpen: openDrawer ? true : s.isDrawerOpen, // mặc định tự mở giỏ nhỏ để khách thấy món đã vào giỏ
             };
           }
-          return { lines: [...s.lines, { ...line, quantity: Math.min(MAX_QTY, quantity) }] };
+          return {
+            lines: [...s.lines, { ...line, quantity: Math.min(MAX_QTY, quantity) }],
+            isDrawerOpen: openDrawer ? true : s.isDrawerOpen,
+          };
         }),
       setQuantity: (productId, quantity) =>
         set((s) => ({
@@ -54,7 +67,10 @@ export const useCart = create<CartState>()(
       remove: (productId) => set((s) => ({ lines: s.lines.filter((l) => l.productId !== productId) })),
       clear: () => set({ lines: [] }),
     }),
-    { name: "hwin-cart-v2" }, // v2: id sản phẩm dạng UUID
+    {
+      name: "hwin-cart-v2",
+      partialize: (s) => ({ lines: s.lines }),
+    },
   ),
 );
 

@@ -52,7 +52,7 @@ export function RegisterAffiliateForm() {
         body: { ...form, idCardFrontKey, idCardBackKey, socialLink: form.socialLink || null, note: form.note || null, phone: needsPhone ? form.phone : null },
       });
       qc.setQueryData(["affiliate-me"], a);
-      router.replace("/ctv");
+      router.replace("/affiliate");
     } catch (err) {
       setError(errorMessage(err));
       setBusy(false);

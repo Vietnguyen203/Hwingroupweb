@@ -1,13 +1,43 @@
+import { Suspense } from "react";
 import Link from "next/link";
+import { SearchX } from "lucide-react";
 
+import { SiteChrome } from "@/components/layout/site-chrome";
+import { ProductGrid, ProductGridSkeleton } from "@/components/product/product-card";
+import { SectionTitle } from "@/components/section-title";
+import { EmptyState, emptyStateButton } from "@/components/ui/empty-state";
+import { getBestsellers } from "@/lib/catalog";
+
+/** 404 toàn site (cả khi một trang gọi notFound()): có header / footer, nút quay về và vài món bán chạy để khách đi tiếp. */
 export default function NotFound() {
   return (
-    <div className="px-4 py-20 text-center">
-      <p className="text-5xl font-extrabold text-brand">404</p>
-      <p className="mt-2 text-muted-foreground">Không tìm thấy trang hoặc sản phẩm bạn cần.</p>
-      <Link href="/" className="mt-6 inline-block rounded-full bg-brand px-5 py-2.5 font-semibold text-white">
-        Về trang chủ
-      </Link>
-    </div>
+    <SiteChrome>
+      <EmptyState
+        icon={SearchX}
+        title="Không tìm thấy trang"
+        description="Trang hoặc sản phẩm bạn cần không tồn tại, hoặc đã được chuyển đi nơi khác."
+        actions={
+          <>
+            <Link href="/" className={emptyStateButton.primary}>Về trang chủ</Link>
+            <Link href="/search" className={emptyStateButton.secondary}>Xem tất cả sản phẩm</Link>
+          </>
+        }
+      />
+      <Suspense fallback={<ProductGridSkeleton />}>
+        <Popular />
+      </Suspense>
+    </SiteChrome>
+  );
+}
+
+/** Gợi ý món bán chạy; đọc dữ liệu trong Suspense để không chặn prerender. Backend lỗi thì chỉ bỏ phần gợi ý. */
+async function Popular() {
+  const popular = await getBestsellers(6).catch(() => []);
+  if (popular.length === 0) return null;
+  return (
+    <>
+      <SectionTitle title="Có thể bạn quan tâm" href="/search?sort=BESTSELLER" />
+      <ProductGrid products={popular} />
+    </>
   );
 }

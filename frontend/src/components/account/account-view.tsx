@@ -16,6 +16,7 @@ import {
 } from "@/lib/account";
 import type { PageResponse } from "@/lib/types";
 import { formatVnd } from "@/lib/format";
+import { AddPhoneForm } from "./add-phone-form";
 
 /** Trang tài khoản khách: hồ sơ, sổ địa chỉ, đơn hàng gần đây, đăng xuất. */
 export function AccountView() {
@@ -23,7 +24,11 @@ export function AccountView() {
   const me = useMe();
 
   useEffect(() => {
-    if (me.data === null) router.replace("/dang-nhap?next=/tai-khoan");
+    if (me.data === null) {
+      router.replace("/login?next=/account");
+    } else if (me.data?.roles?.includes("ADMIN") && !me.data?.roles?.includes("CUSTOMER")) {
+      router.replace("/admin/orders");
+    }
   }, [me.data, router]);
 
   if (!me.data) return <div className="m-3 h-64 animate-pulse rounded-2xl bg-neutral-200" />;
@@ -100,7 +105,7 @@ function ProfileCard() {
             <p className="text-base font-semibold">{p.fullName || "Chưa có tên"}</p>
           )}
           {p.email && <p className="text-muted-foreground">Email: {p.email}</p>}
-          {p.phone && <p className="text-muted-foreground">SĐT: {p.phone}</p>}
+          {p.phone ? <p className="text-muted-foreground">SĐT: {p.phone}</p> : <AddPhoneForm />}
           <div className="grid grid-cols-2 gap-2 pt-2">
             <div className="rounded-xl bg-brand-soft p-3"><p className="text-xs text-muted-foreground">Đơn hàng</p><p className="text-lg font-bold text-brand">{p.totalOrders}</p></div>
             <div className="rounded-xl bg-brand-soft p-3"><p className="text-xs text-muted-foreground">Đã chi tiêu</p><p className="text-lg font-bold text-brand">{formatVnd(p.totalSpent)}</p></div>
@@ -153,7 +158,7 @@ export function OrdersCard({ pageSize = 10 }: { pageSize?: number }) {
             const st = ORDER_STATUS[o.status];
             return (
               <li key={o.code}>
-                <Link href={`/tai-khoan/don-hang/${o.code}`} className="flex items-center gap-3 py-3">
+                <Link href={`/account/orders/${o.code}`} className="flex items-center gap-3 py-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   {o.firstItemImage ? <img src={o.firstItemImage} alt="" className="size-14 rounded-lg object-cover" /> : <div className="size-14 rounded-lg bg-neutral-100" />}
                   <div className="min-w-0 flex-1 text-sm">

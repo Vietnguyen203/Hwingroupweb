@@ -8,7 +8,7 @@ import { useAffiliateCode } from "@/hooks/use-affiliate-code";
 export function AffiliateCta() {
   const code = useAffiliateCode();
   return (
-    <Link href="/ctv" className="hidden shrink-0 rounded-full bg-brand-cta px-4 py-2 text-sm font-semibold text-white shadow-sm hover:brightness-110 md:block">
+    <Link href="/affiliate" className="hidden shrink-0 rounded-full bg-brand-cta px-4 py-2 text-sm font-semibold text-white shadow-sm hover:brightness-110 md:block">
       {code ? "Trang CTV" : "Đăng ký CTV"}
     </Link>
   );

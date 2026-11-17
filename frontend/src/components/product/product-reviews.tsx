@@ -113,7 +113,7 @@ function WriteReview({ productId }: { productId: string }) {
   if (!me.data) {
     return (
       <p className="rounded-xl border border-dashed p-4 text-center text-sm text-muted-foreground">
-        <Link href="/dang-nhap" className="font-semibold text-brand-link">Đăng nhập</Link> để đánh giá sản phẩm bạn đã mua.
+        <Link href="/login" className="font-semibold text-brand-link">Đăng nhập</Link> để đánh giá sản phẩm bạn đã mua.
       </p>
     );
   }

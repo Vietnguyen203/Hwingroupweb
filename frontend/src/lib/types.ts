@@ -7,13 +7,20 @@ export type CategoryResponse = {
   iconUrl: string | null;
   sortOrder: number;
   active: boolean;
+  /** Số sản phẩm đang bán trong danh mục. */
+  productCount: number;
 };
 
 export type ProductCardResponse = {
   id: string;
   name: string;
   slug: string;
+  /** Giá khách thực trả (đã gồm giảm giá thêm do admin đặt). */
   price: number;
+  /** Giá niêm yết trước khi giảm giá thêm. */
+  basePrice: number;
+  /** Giảm giá thêm (%) do admin đặt, 0 nếu không có. */
+  salePercent: number;
   compareAtPrice: number | null;
   discountPercent: number;
   imageUrl: string | null;

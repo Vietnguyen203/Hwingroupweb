@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { AffiliateDashboardView } from "./affiliate-dashboard";
 
 /**
- * /ctv – theo trạng thái người xem:
+ * /affiliate – theo trạng thái người xem:
  * chưa đăng nhập -> giới thiệu chương trình; chưa đăng ký -> mời đăng ký; PENDING / REJECTED / SUSPENDED -> thông báo;
  * APPROVED -> dashboard CTV.
  */
@@ -60,7 +60,7 @@ export function AffiliateHome() {
         <h1 className="text-lg font-bold text-brand">{notice.title}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{notice.text}</p>
         {a.status === "REJECTED" && (
-          <Link href="/ctv/dang-ky" className={cn(buttonVariants(), "mt-4 h-11 w-full text-base")}>Đăng ký lại</Link>
+          <Link href="/affiliate/register" className={cn(buttonVariants(), "mt-4 h-11 w-full text-base")}>Đăng ký lại</Link>
         )}
       </div>
     </div>
@@ -73,7 +73,7 @@ function Landing({ loggedIn }: { loggedIn: boolean }) {
     { icon: BadgePercent, title: "Hoa hồng 10%", text: "Tính trên giá trị đơn (trước phí ship), khách gắn với bạn vĩnh viễn." },
     { icon: Wallet, title: "Rút tiền về ngân hàng", text: "Hoa hồng được duyệt sau 7 ngày kể từ khi giao hàng thành công." },
   ];
-  const href = loggedIn ? "/ctv/dang-ky" : "/dang-nhap?next=/ctv/dang-ky";
+  const href = loggedIn ? "/affiliate/register" : "/login?next=/affiliate/register";
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-3 md:py-10">
       <section className="rounded-2xl bg-brand p-6 text-white shadow-sm">

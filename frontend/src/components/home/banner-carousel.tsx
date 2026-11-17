@@ -42,7 +42,7 @@ export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
       <div className="overflow-hidden px-3 md:rounded-2xl md:px-0">
         <div className="flex transition-transform duration-700 ease-out" style={{ transform: `translateX(-${index * 100}%)` }}>
           {slides.map(({ product: p, tag }, i) => (
-            <Link key={p.id} href={`/san-pham/${p.slug}`} aria-label={p.name}
+            <Link key={p.id} href={`/products/${p.slug}`} aria-label={p.name}
                   className={cn("relative flex aspect-[12/5] w-full shrink-0 items-center overflow-hidden rounded-2xl bg-gradient-to-r text-white md:rounded-none",
                     BACKGROUNDS[i % BACKGROUNDS.length])}>
               <div className="z-10 w-3/5 space-y-1.5 pl-5 md:space-y-3 md:pl-14">

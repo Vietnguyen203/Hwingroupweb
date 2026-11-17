@@ -16,7 +16,7 @@ export function AffiliateBanner() {
           <p className="text-sm font-semibold tracking-widest text-brand-accent uppercase">Cộng tác viên HWIN</p>
           <h2 className="mt-2 text-2xl leading-tight font-black md:text-4xl">Chia sẻ món ngon,<br />nhận hoa hồng mỗi đơn</h2>
           <p className="mt-3 text-white/80">Không cần vốn, không cần ôm hàng – HWIN lo sản phẩm, giao hàng và chăm sóc khách.</p>
-          <Link href="/ctv" className="mt-6 inline-block rounded-full bg-brand-cta px-7 py-3 font-semibold shadow-lg hover:brightness-110">
+          <Link href="/affiliate" className="mt-6 inline-block rounded-full bg-brand-cta px-7 py-3 font-semibold shadow-lg hover:brightness-110">
             Đăng ký CTV ngay
           </Link>
         </div>

@@ -55,7 +55,7 @@ export function AdminAffiliates() {
                 </td>
                 <td className="px-3 py-2 text-xs">
                   {a.hasIdCard
-                    ? <ActionButton onClick={() => setIdCardOf(a)}>Xem ảnh</ActionButton>
+                    ? <ActionButton onClick={() => setIdCardOf(a)}>{a.status === "PENDING" ? "Xem hồ sơ" : "Xem ảnh"}</ActionButton>
                     : <span className="text-muted-foreground">Chưa có</span>}
                 </td>
                 <td className="px-3 py-2 text-xs">{a.bankName ? `${a.bankName} · ${a.bankAccountNoMasked}` : "–"}</td>
@@ -75,30 +75,96 @@ export function AdminAffiliates() {
           <Pager page={page} totalPages={query.data.totalPages} onChange={setPage} />
         </>
       )}
-      {idCardOf && <IdCardDialog affiliate={idCardOf} onClose={() => setIdCardOf(null)} />}
+      {idCardOf && (
+        <AffiliateReviewDialog
+          affiliate={idCardOf}
+          busy={act.isPending}
+          error={act.error ? errorMessage(act.error) : null}
+          onClose={() => { act.reset(); setIdCardOf(null); }}
+          onApprove={() => act.mutate({ id: idCardOf.id, action: "approve" }, { onSuccess: () => setIdCardOf(null) })}
+          onReject={(reason) => act.mutate({ id: idCardOf.id, action: "reject", reason }, { onSuccess: () => setIdCardOf(null) })}
+        />
+      )}
     </AdminPage>
   );
 }
 
-/** Ảnh CCCD chỉ tải được khi đang đăng nhập ADMIN (API không cache, mỗi lần xem có ghi audit). */
-function IdCardDialog({ affiliate, onClose }: { affiliate: AdminAffiliateResponse; onClose: () => void }) {
+/**
+ * Hộp hồ sơ CTV: thông tin + ảnh CCCD mặt trước/sau (bấm để mở bản đầy đủ) + Duyệt / Từ chối khi đang chờ duyệt.
+ * Ảnh chỉ tải được khi đang đăng nhập ADMIN (API không cache, mỗi lần xem có ghi audit).
+ */
+function AffiliateReviewDialog({ affiliate, busy, error, onClose, onApprove, onReject }: {
+  affiliate: AdminAffiliateResponse;
+  busy: boolean;
+  error: string | null;
+  onClose: () => void;
+  onApprove: () => void;
+  onReject: (reason: string) => void;
+}) {
+  const [rejecting, setRejecting] = useState(false);
+  const [reason, setReason] = useState("");
+  const info: [string, string | null][] = [
+    ["Họ tên", affiliate.fullName],
+    ["Số điện thoại", affiliate.phone],
+    ["Link mạng xã hội", affiliate.socialLink],
+    ["Ghi chú", affiliate.note],
+    ["Ngày đăng ký", formatDateTime(affiliate.createdAt)],
+  ];
+
   return (
-    <div role="dialog" aria-modal="true" aria-label="Ảnh CCCD" className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+    <div role="dialog" aria-modal="true" aria-label="Hồ sơ cộng tác viên" className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
       <div className="max-h-full w-full max-w-3xl overflow-auto rounded-2xl bg-white p-5" onClick={(e) => e.stopPropagation()}>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-bold">CCCD của {affiliate.fullName}</h2>
+          <h2 className="text-lg font-bold">Hồ sơ CTV: {affiliate.fullName}</h2>
           <button type="button" onClick={onClose} className="rounded-lg border px-3 py-1 text-sm">Đóng</button>
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          {(["front", "back"] as const).map((side) => (
-            <figure key={side} className="space-y-1">
-              {/* eslint-disable-next-line @next/next/no-img-element -- ảnh có phân quyền, không qua tối ưu ảnh của Next */}
-              <img src={`/api/admin/affiliates/${affiliate.id}/id-card/${side}`} alt={side === "front" ? "CCCD mặt trước" : "CCCD mặt sau"}
-                   className="w-full rounded-lg border bg-neutral-50 object-contain" />
-              <figcaption className="text-center text-xs text-muted-foreground">{side === "front" ? "Mặt trước" : "Mặt sau"}</figcaption>
-            </figure>
+
+        <dl className="mb-4 grid grid-cols-[130px_1fr] gap-y-1.5 text-sm">
+          {info.filter(([, v]) => v).map(([k, v]) => (
+            <div key={k} className="contents"><dt className="text-muted-foreground">{k}</dt><dd className="break-words font-medium">{v}</dd></div>
           ))}
+          <dt className="text-muted-foreground">Trạng thái</dt>
+          <dd><StatusBadge map={AFFILIATE_STATUS} value={affiliate.status} /></dd>
+        </dl>
+
+        <p className="mb-2 text-sm font-semibold">Ảnh CCCD <span className="font-normal text-muted-foreground">(bấm vào ảnh để mở bản đầy đủ)</span></p>
+        <div className="grid gap-4 md:grid-cols-2">
+          {(["front", "back"] as const).map((side) => {
+            const src = `/api/admin/affiliates/${affiliate.id}/id-card/${side}`;
+            const label = side === "front" ? "Mặt trước" : "Mặt sau";
+            return (
+              <figure key={side} className="space-y-1">
+                <a href={src} target="_blank" rel="noopener noreferrer" title={`Mở ${label.toLowerCase()} ở tab mới`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- ảnh có phân quyền, không qua tối ưu ảnh của Next */}
+                  <img src={src} alt={`CCCD ${label.toLowerCase()}`} className="max-h-72 w-full rounded-lg border bg-neutral-50 object-contain" />
+                </a>
+                <figcaption className="text-center text-xs text-muted-foreground">{label}</figcaption>
+              </figure>
+            );
+          })}
         </div>
+
+        {affiliate.status === "PENDING" && (
+          <div className="mt-5 space-y-3 border-t pt-4">
+            {rejecting ? (
+              <div className="space-y-2">
+                <textarea autoFocus rows={2} maxLength={500} value={reason} onChange={(e) => setReason(e.target.value)}
+                          placeholder="Lý do từ chối (bắt buộc, CTV sẽ thấy lý do này)"
+                          className="w-full rounded-lg border border-input p-2.5 text-sm outline-none focus-visible:border-ring" />
+                <div className="flex gap-2">
+                  <ActionButton tone="danger" disabled={busy || !reason.trim()} onClick={() => onReject(reason.trim())}>Xác nhận từ chối</ActionButton>
+                  <ActionButton onClick={() => { setRejecting(false); setReason(""); }}>Hủy</ActionButton>
+                </div>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <ActionButton disabled={busy} onClick={onApprove}>Duyệt CTV</ActionButton>
+                <ActionButton tone="danger" disabled={busy} onClick={() => setRejecting(true)}>Từ chối</ActionButton>
+              </div>
+            )}
+            {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+          </div>
+        )}
       </div>
     </div>
   );

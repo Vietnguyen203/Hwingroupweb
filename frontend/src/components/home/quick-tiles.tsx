@@ -2,9 +2,9 @@ import Link from "next/link";
 import { Flame, Gift, Handshake } from "lucide-react";
 
 const TILES = [
-  { title: "Bán chạy", text: "Món ngon được chọn nhiều nhất", href: "/tim-kiem?sort=BESTSELLER", icon: Flame, bg: "bg-[#fdeee9]", color: "text-brand-red" },
-  { title: "Combo", text: "Mua theo bộ – giá tốt hơn", href: "/danh-muc/combo", icon: Gift, bg: "bg-[#e8f1fd]", color: "text-brand" },
-  { title: "Cộng tác viên", text: "Hoa hồng 10% mỗi đơn", href: "/ctv", icon: Handshake, bg: "bg-[#fdecef]", color: "text-[#d6336c]" },
+  { title: "Bán chạy", text: "Món ngon được chọn nhiều nhất", href: "/search?sort=BESTSELLER", icon: Flame, bg: "bg-[#fdeee9]", color: "text-brand-red" },
+  { title: "Combo", text: "Mua theo bộ – giá tốt hơn", href: "/categories/combo", icon: Gift, bg: "bg-[#e8f1fd]", color: "text-brand" },
+  { title: "Cộng tác viên", text: "Hoa hồng 10% mỗi đơn", href: "/affiliate", icon: Handshake, bg: "bg-[#fdecef]", color: "text-[#d6336c]" },
 ];
 
 /** 3 ô truy cập nhanh (desktop) – tương tự Flash sale / Voucher / Combo của hwingroup.com. */

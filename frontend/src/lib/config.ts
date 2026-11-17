@@ -14,9 +14,11 @@ export const siteConfig = {
     shopee: process.env.NEXT_PUBLIC_SHOPEE_URL ?? "https://shopee.vn/",
     youtube: process.env.NEXT_PUBLIC_YOUTUBE_URL ?? "https://www.youtube.com/",
   },
+  /** Trang giới thiệu về HWIN. */
+  aboutUrl: process.env.NEXT_PUBLIC_ABOUT_URL ?? "https://hwingroup.com/ve-hwin/",
   /** Trang xác nhận đã thông báo website với Bộ Công Thương. */
   bctUrl: process.env.NEXT_PUBLIC_BCT_URL ?? "https://online.gov.vn/nen-tang/ff8a4c18-53de-46d7-9267-c9f492a33c48",
 };
 
 /** Địa chỉ backend cho code chạy trên server Next.js. */
-export const backendUrl = process.env.BACKEND_INTERNAL_URL ?? "http://localhost:8088";
+export const backendUrl = process.env.BACKEND_INTERNAL_URL ?? "http://127.0.0.1:8088";

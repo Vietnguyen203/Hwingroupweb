@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Flame } from "lucide-react";
+import { Flame, SearchX } from "lucide-react";
 
 import { AffiliateProductTools } from "@/components/affiliate/affiliate-product-tools";
+import { EmptyState, emptyStateButton } from "@/components/ui/empty-state";
 import { formatVnd } from "@/lib/format";
 import type { ProductCardResponse } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -15,7 +16,7 @@ export function ProductCard({ product }: { product: ProductCardResponse }) {
   const hasCompare = product.compareAtPrice != null && product.compareAtPrice > product.price;
   return (
     <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-sm transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-brand/40 hover:shadow-[0_12px_28px_rgba(36,60,132,0.14)]">
-      <Link href={`/san-pham/${product.slug}`} className="relative block aspect-square overflow-hidden bg-neutral-50">
+      <Link href={`/products/${product.slug}`} className="relative block aspect-square overflow-hidden bg-neutral-50">
         {/* Dải sáng Shimmer sweep khi hover */}
         <div className="pointer-events-none absolute inset-0 z-10 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 ease-in-out group-hover:translate-x-full" />
 
@@ -43,7 +44,7 @@ export function ProductCard({ product }: { product: ProductCardResponse }) {
       </Link>
       <div className="flex flex-1 flex-col p-2.5 md:p-3">
         <Link
-          href={`/san-pham/${product.slug}`}
+          href={`/products/${product.slug}`}
           className="line-clamp-2 min-h-10 text-sm font-semibold leading-5 text-neutral-800 uppercase transition-colors duration-200 group-hover:text-brand"
         >
           {product.name}
@@ -55,6 +56,11 @@ export function ProductCard({ product }: { product: ProductCardResponse }) {
         <span className="text-lg font-black tracking-tight text-brand-red md:text-xl drop-shadow-[0_1px_1px_rgba(230,46,4,0.1)]">
           {formatVnd(product.price)}
         </span>
+        {product.salePercent > 0 && (
+          <span className="mt-0.5 w-fit rounded bg-red-50 px-1.5 py-0.5 text-[11px] font-semibold text-brand-red">
+            Giảm thêm {product.salePercent}%
+          </span>
+        )}
         <div className="mt-auto flex items-center justify-between gap-1 pt-2">
           {product.bestseller ? (
             <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 px-2 py-0.5 text-[11px] font-bold text-white shadow-sm shadow-orange-500/20">
@@ -78,7 +84,15 @@ const GRID = "grid grid-cols-2 gap-2.5 px-3 sm:grid-cols-3 md:grid-cols-4 md:gap
 
 export function ProductGrid({ products, className }: { products: ProductCardResponse[]; className?: string }) {
   if (products.length === 0) {
-    return <p className="px-4 py-10 text-center text-muted-foreground">Không có sản phẩm phù hợp.</p>;
+    return (
+      <EmptyState
+        icon={SearchX}
+        title="Không có sản phẩm phù hợp"
+        description="Thử đổi từ khóa hoặc bỏ bớt bộ lọc để xem thêm sản phẩm."
+        actions={<Link href="/search" className={emptyStateButton.secondary}>Xem tất cả sản phẩm</Link>}
+        className="py-10 md:py-14"
+      />
+    );
   }
   return (
     <div className={cn(GRID, className)}>
