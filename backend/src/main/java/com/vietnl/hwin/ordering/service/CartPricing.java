@@ -1,5 +1,6 @@
 package com.vietnl.hwin.ordering.service;
 
+import com.vietnl.hwin.ordering.service.config.OrderingProperties;
 import com.vietnl.hwin.ordering.service.model.CartView;
 import com.vietnl.hwin.ordering.service.model.CartLineView;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -30,10 +31,12 @@ public class CartPricing {
 
     private final ProductQueryService products;
     private final ShippingProvider shipping;
+    private final OrderingProperties props;
 
-    public CartPricing(ProductQueryService products, ShippingProvider shipping) {
+    public CartPricing(ProductQueryService products, ShippingProvider shipping, OrderingProperties props) {
         this.products = products;
         this.shipping = shipping;
+        this.props = props;
     }
 
     /** @param quantities productId -> số lượng, giữ thứ tự hiển thị */
@@ -61,7 +64,8 @@ public class CartPricing {
         }
         Money fee = shipping.quoteFee(subtotal, null);
         boolean ready = !lines.isEmpty() && lines.stream().allMatch(CartLineView::available);
-        return new CartView(lines, subtotal.amount(), fee.amount(), subtotal.plus(fee).amount(), count, ready);
+        return new CartView(lines, subtotal.amount(), fee.amount(), subtotal.plus(fee).amount(), count, ready,
+                props.freeShippingThreshold());
     }
 
     /**

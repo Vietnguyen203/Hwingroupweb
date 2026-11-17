@@ -8,7 +8,10 @@ import com.vietnl.hwin.common.domain.Address;
 import com.vietnl.hwin.common.domain.Money;
 import com.vietnl.hwin.ordering.service.config.OrderingProperties;
 
-/** Implementation giả: phí ship cố định theo cấu hình hwin.ordering.shipping-fee. */
+/**
+ * Implementation giả: phí ship cố định theo cấu hình hwin.ordering.shipping-fee;
+ * miễn phí khi tạm tính đạt hwin.ordering.free-shipping-threshold (0 = không miễn phí).
+ */
 @Component
 public class FixedFeeShippingProvider implements ShippingProvider {
 
@@ -22,7 +25,11 @@ public class FixedFeeShippingProvider implements ShippingProvider {
 
     @Override
     public Money quoteFee(Money subtotal, Address address) {
-        return subtotal.isZero() ? Money.ZERO : Money.of(props.shippingFee());
+        if (subtotal.isZero()) {
+            return Money.ZERO;
+        }
+        long threshold = props.freeShippingThreshold();
+        return threshold > 0 && subtotal.amount() >= threshold ? Money.ZERO : Money.of(props.shippingFee());
     }
 
     @Override

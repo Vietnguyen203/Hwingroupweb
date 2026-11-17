@@ -111,6 +111,7 @@ hwin:
     private-dir: ${PRIVATE_STORAGE_DIR:./private-uploads}
   ordering:
     shipping-fee: 30000
+    free-shipping-threshold: 500000   # đơn từ mức này được miễn phí ship (0 = tắt)
     return-window-days: 7
     place-order-limit: 5          # số đơn tối đa / 10 phút / user
     bank-qr-payment-timeout-hours: 24   # đơn chuyển khoản chưa nhận tiền quá hạn -> tự hủy
