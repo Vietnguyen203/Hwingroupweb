@@ -1,10 +1,11 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { Headset, Menu, Phone, Search, UserRound } from "lucide-react";
+import { Headset, Menu, Phone, Search } from "lucide-react";
 
 import { Logo } from "@/components/brand/logo";
 import { getCategories } from "@/lib/catalog";
 import { siteConfig } from "@/lib/config";
+import { AccountLink } from "./account-link";
 import { CartButton } from "./cart-button";
 import { MobileMenu } from "./mobile-menu";
 
@@ -50,10 +51,7 @@ export function SiteHeader() {
         <Link href="/ctv" className="hidden shrink-0 rounded-full bg-brand-cta px-4 py-2 text-sm font-semibold text-white md:block">
           Đăng ký CTV
         </Link>
-        <Link href="/account" className="hidden items-center gap-1.5 text-sm text-neutral-700 md:flex">
-          <UserRound className="size-6" />
-          <span className="hidden leading-tight xl:block">Đăng nhập<br /><span className="text-xs text-muted-foreground">Tài khoản</span></span>
-        </Link>
+        <AccountLink />
         <CartButton />
       </div>
 
