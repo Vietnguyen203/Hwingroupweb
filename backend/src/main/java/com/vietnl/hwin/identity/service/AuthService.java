@@ -18,6 +18,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.vietnl.hwin.common.domain.EmailAddress;
+import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.common.ratelimit.RateLimiter;
 import com.vietnl.hwin.common.util.Hashing;
 import com.vietnl.hwin.common.web.ClientInfo;
@@ -86,22 +88,28 @@ public class AuthService {
     }
 
     /**
-     * Đăng nhập khách / CTV bước 1: tên đăng nhập (email hoặc SĐT) + mật khẩu.
-     * - Thiết bị đã được "ghi nhớ" (cookie hwin_td còn hạn, đúng tài khoản) -> đăng nhập luôn.
-     * - Còn lại -> gửi OTP tới đúng nơi đã nhập (email / SĐT), trả challengeId cho bước 2.
+     * Đăng nhập khách / CTV: tên đăng nhập (email hoặc SĐT) + mật khẩu.
+     * - Nếu otpOnLogin=false (mặc định) hoặc thiết bị đã ghi nhớ -> đăng nhập luôn không cần OTP.
+     * - Nếu otpOnLogin=true (test) và thiết bị mới -> gửi OTP tới nơi nhận, trả challengeId cho bước 2.
      * Sai mật khẩu: tối đa 5 lần / 15 phút theo IP và theo tài khoản (không tiết lộ tài khoản có tồn tại không).
      */
     public LoginResult login(String identifier, String password, String trustedDeviceToken, ClientInfo client) {
-        OtpTarget target = identifier != null && identifier.contains("@")
-                ? OtpTarget.of(null, identifier) : OtpTarget.of(identifier, null);
+        String trimmed = identifier == null ? "" : identifier.trim();
         String ipKey = "rl:login-fail:ip:" + client.ipHash();
-        String accountKey = "rl:login-fail:acc:" + target.key();
+        String accountKey = "rl:login-fail:acc:" + trimmed.toLowerCase();
         if (rateLimiter.isExhausted(ipKey, identity.loginFailLimit()) || rateLimiter.isExhausted(accountKey, identity.loginFailLimit())) {
             throw new ResponseException(HttpStatus.TOO_MANY_REQUESTS, ExceptionMessage.LOGIN_LOCKED,
                     java.util.Map.of("minutes", String.valueOf(identity.loginFailWindow().toMinutes())));
         }
-        UserAccount user = userAccountService.find(target).orElse(null);
+        UserAccount user = users.findByEmail(trimmed.toLowerCase()).orElse(null);
+        if (user == null) {
+            try {
+                user = users.findByPhone(PhoneNumber.of(trimmed)).orElse(null); // chấp nhận 0912..., +84..., có dấu cách
+            } catch (Exception ignored) {
+            }
+        }
         if (user != null && user.isAdmin()) {
+            // admin luôn đăng nhập ở trang quản trị (mật khẩu + OTP), không đi đường khách
             throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ADMIN_USE_ADMIN_LOGIN);
         }
         if (user != null && !user.hasPassword()) {
@@ -113,10 +121,14 @@ public class AuthService {
             throw new ResponseException(HttpStatus.UNAUTHORIZED, ExceptionMessage.INVALID_LOGIN);
         }
         user.ensureActive();
-        if (trustedDevices.isTrusted(trustedDeviceToken, user.getId())) {
+
+        // Mặc định (otpOnLogin=false), hoặc tài khoản admin miễn OTP, hoặc thiết bị đã ghi nhớ -> đăng nhập luôn
+        if (!Boolean.TRUE.equals(identity.otpOnLogin()) || user.isOtpExempt() || trustedDevices.isTrusted(trustedDeviceToken, user.getId())) {
             userAccountService.recordLogin(user.getId());
             return LoginResult.loggedIn(tokenService.issue(user, client), null);
         }
+
+        OtpTarget target = user.otpTarget();
         long ttl = otpService.send(target, OtpPurpose.LOGIN, client.ipHash());
         String challengeId = Hashing.randomToken(24);
         redis.opsForValue().set(LOGIN_CHALLENGE_PREFIX + challengeId, user.getId() + "|" + target.channel() + "|" + target.value(),

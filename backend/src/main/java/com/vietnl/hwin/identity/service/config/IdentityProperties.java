@@ -14,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
  * @param trustedDeviceTtl  "Ghi nhớ đăng nhập": thời gian thiết bị không phải nhập OTP lại (mặc định 30 ngày)
  * @param loginFailLimit    số lần sai mật khẩu tối đa trong loginFailWindow (theo IP và theo tài khoản)
  * @param loginFailWindow   cửa sổ đếm lần sai / thời gian khóa
+ * @param otpOnLogin        bật xác thực OTP bước 2 khi đăng nhập (mặc định false: chỉ cần tên đăng nhập + mật khẩu)
  */
 @Validated
 @ConfigurationProperties(prefix = "hwin.identity")
@@ -21,11 +22,13 @@ public record IdentityProperties(
         @NotBlank String piiEncryptionKey,
         Duration trustedDeviceTtl,
         int loginFailLimit,
-        Duration loginFailWindow) {
+        Duration loginFailWindow,
+        Boolean otpOnLogin) {
 
     public IdentityProperties {
         trustedDeviceTtl = trustedDeviceTtl == null ? Duration.ofDays(30) : trustedDeviceTtl;
         loginFailLimit = loginFailLimit <= 0 ? 5 : loginFailLimit;
         loginFailWindow = loginFailWindow == null ? Duration.ofMinutes(15) : loginFailWindow;
+        otpOnLogin = otpOnLogin != null && otpOnLogin;
     }
 }

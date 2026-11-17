@@ -5,6 +5,7 @@ spring:
 hwin:
   identity:
     pii-encryption-key: dGVzdC1vbmx5LXBpaS1rZXktMzItYnl0ZXMtLS0tLSE=
+    otp-on-login: true
   admin-seed:          # test không tạo admin seed (bỏ qua giá trị trong .env của máy dev)
     email: ""
     password: ""
