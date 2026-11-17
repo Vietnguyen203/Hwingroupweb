@@ -5,6 +5,8 @@ export const siteConfig = {
   hotline: process.env.NEXT_PUBLIC_HOTLINE ?? "0961008971",
   zaloUrl: process.env.NEXT_PUBLIC_ZALO_URL ?? "https://zalo.me/0900000000",
   messengerUrl: process.env.NEXT_PUBLIC_MESSENGER_URL ?? "https://m.me/",
+  /** Tỉ lệ hoa hồng CTV – chỉ để hiển thị ước tính (backend tính số chính xác). */
+  commissionRate: Number(process.env.NEXT_PUBLIC_COMMISSION_RATE ?? 0.1),
   /** Mạng xã hội ở footer – đổi qua biến môi trường. */
   social: {
     facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL ?? "https://www.facebook.com/",

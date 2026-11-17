@@ -31,7 +31,7 @@ export function AddToCartButton({ product, disabled, variant = "icon" }: Props) 
         onClick={onAdd}
         disabled={disabled}
         aria-label={disabled ? "Hết hàng" : `Thêm ${product.name} vào giỏ`}
-        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#eeeefc] text-[#6c64d9] transition active:scale-95 disabled:opacity-40"
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-cta text-white shadow-sm transition hover:brightness-110 active:scale-95 disabled:opacity-40"
       >
         {added ? <Check className="size-4" /> : <ShoppingCart className="size-4" />}
       </button>

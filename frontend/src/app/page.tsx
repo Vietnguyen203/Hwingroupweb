@@ -3,15 +3,17 @@ import { Suspense } from "react";
 import { BannerCarousel } from "@/components/home/banner-carousel";
 import { CategoryMenu } from "@/components/home/category-menu";
 import { QuickTiles } from "@/components/home/quick-tiles";
+import { AffiliateBanner } from "@/components/home/affiliate-banner";
 import { SaleStrip } from "@/components/home/sale-strip";
+import { WhyHwin } from "@/components/home/why-hwin";
 import { ProductGrid, ProductGridSkeleton } from "@/components/product/product-card";
 import { SectionTitle } from "@/components/section-title";
 import { getBestsellers, getCategories, searchProducts } from "@/lib/catalog";
 
 /**
  * Trang chủ (bố cục theo hwingroup.com):
- * banner – ô truy cập nhanh – danh mục icon – đang giảm giá – combo – bán chạy – sản phẩm mới.
- * Cam kết + đăng ký CTV nằm ở footer.
+ * banner – ô truy cập nhanh – đang giảm giá – danh mục – combo – khối CTV – bán chạy – vì sao chọn HWIN – sản phẩm mới.
+ * Web phục vụ cộng tác viên nên khối CTV đặt nổi bật giữa trang.
  */
 export default function HomePage() {
   return (
@@ -19,24 +21,29 @@ export default function HomePage() {
       <BannerCarousel />
       <QuickTiles />
 
+      <Suspense fallback={<div className="mx-3 mt-8 h-72 animate-pulse rounded-2xl bg-neutral-200" />}>
+        <OnSale />
+      </Suspense>
+
       <SectionTitle title="Danh mục sản phẩm" />
       <Suspense fallback={<div className="mx-3 h-40 animate-pulse rounded-xl bg-neutral-200" />}>
         <Categories />
       </Suspense>
 
-      <Suspense fallback={<div className="mx-3 mt-6 h-72 animate-pulse rounded-2xl bg-neutral-200" />}>
-        <OnSale />
-      </Suspense>
-
       <SectionTitle title="Combo ưu đãi" href="/danh-muc/combo" />
-      <Suspense fallback={<ProductGridSkeleton count={2} />}>
+      <Suspense fallback={<ProductGridSkeleton count={4} />}>
         <Combos />
       </Suspense>
+
+      <AffiliateBanner />
 
       <SectionTitle title="Bán chạy" href="/tim-kiem?sort=BESTSELLER" />
       <Suspense fallback={<ProductGridSkeleton />}>
         <Bestsellers />
       </Suspense>
+
+      <SectionTitle title="Vì sao chọn HWIN" />
+      <WhyHwin />
 
       <SectionTitle title="Sản phẩm mới" href="/tim-kiem" />
       <Suspense fallback={<ProductGridSkeleton />}>
@@ -56,13 +63,13 @@ async function OnSale() {
 }
 
 async function Combos() {
-  return <ProductGrid products={(await searchProducts({ category: "combo", size: 5 })).content} />;
+  return <ProductGrid products={(await searchProducts({ category: "combo", size: 4 })).content} className="lg:grid-cols-4 xl:grid-cols-4" />;
 }
 
 async function Bestsellers() {
-  return <ProductGrid products={await getBestsellers(10)} />;
+  return <ProductGrid products={await getBestsellers(12)} />;
 }
 
 async function Newest() {
-  return <ProductGrid products={(await searchProducts({ sort: "NEWEST", size: 10 })).content} />;
+  return <ProductGrid products={(await searchProducts({ sort: "NEWEST", size: 12 })).content} />;
 }

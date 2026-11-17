@@ -1,11 +1,12 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { Headset, Menu, Phone, Search } from "lucide-react";
+import { Headset, Info, Menu, Newspaper, Phone, Search } from "lucide-react";
 
 import { Logo } from "@/components/brand/logo";
 import { getCategories } from "@/lib/catalog";
 import { siteConfig } from "@/lib/config";
 import { AccountLink } from "./account-link";
+import { AffiliateCta } from "./affiliate-cta";
 import { CartButton } from "./cart-button";
 import { MobileMenu } from "./mobile-menu";
 
@@ -40,17 +41,17 @@ export function SiteHeader() {
           </label>
         </form>
 
-        <div className="hidden items-center gap-5 text-sm text-neutral-700 lg:flex">
-          <a href={`tel:${siteConfig.hotline}`} className="flex items-center gap-1.5 hover:text-brand">
-            <Phone className="size-4 text-brand" /> {siteConfig.hotline}
-          </a>
+        <div className="hidden items-center gap-5 text-sm text-neutral-700 xl:flex">
+          <Link href="/ctv" className="flex items-center gap-1.5 hover:text-brand"><Info className="size-4 text-brand" /> Về chúng tôi</Link>
+          <Link href="/tim-kiem?sort=PRICE_ASC" className="flex items-center gap-1.5 hover:text-brand"><Newspaper className="size-4 text-brand" /> Khuyến mãi</Link>
           <a href={siteConfig.zaloUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-brand">
             <Headset className="size-4 text-brand" /> Hỗ trợ
           </a>
+          <a href={`tel:${siteConfig.hotline}`} className="flex items-center gap-1.5 hover:text-brand">
+            <Phone className="size-4 text-brand" /> {siteConfig.hotline}
+          </a>
         </div>
-        <Link href="/ctv" className="hidden shrink-0 rounded-full bg-brand-cta px-4 py-2 text-sm font-semibold text-white md:block">
-          Đăng ký CTV
-        </Link>
+        <AffiliateCta />
         <AccountLink />
         <CartButton />
       </div>
