@@ -43,9 +43,14 @@ export function SiteFooter() {
             <p className="mb-3 font-semibold text-white uppercase">Công ty CP Tập đoàn HWIN</p>
             <ul className="space-y-2">
               <li className="flex gap-2"><MapPin className="mt-0.5 size-4 shrink-0" />Địa chỉ: Khu đô thị The Manor Central Park, Phường Định Công, TP Hà Nội</li>
-              <li className="flex gap-2"><Phone className="mt-0.5 size-4 shrink-0" />Hotline: 0961 008 971 <a href={`tel:${siteConfig.hotline}`} className="text-white">{siteConfig.hotline}</a></li>
+              <li className="flex gap-2"><Phone className="mt-0.5 size-4 shrink-0" />Hotline: <a href={`tel:${siteConfig.hotline}`} className="text-white">{siteConfig.hotline}</a></li>
               <li className="flex gap-2"><Mail className="mt-0.5 size-4 shrink-0" />Email: CeoHwinGroup@gmail.com</li>
             </ul>
+            {/* Logo đã thông báo website TMĐT với Bộ Công Thương (online.gov.vn) */}
+            <a href={siteConfig.bctUrl} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block" title="Đã thông báo Bộ Công Thương">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/bct-da-thong-bao.png" alt="Đã thông báo Bộ Công Thương" width={150} height={50} className="h-auto w-[150px]" />
+            </a>
           </div>
         </div>
         <p className="border-t border-white/15 px-4 py-4 text-center text-xs text-white/60">Copyright © 2026 HWINGROUP – bản demo</p>
