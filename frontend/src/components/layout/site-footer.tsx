@@ -31,7 +31,7 @@ export function SiteFooter() {
       <section className="bg-brand text-sm text-white/85">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4">
-            <Logo tone="light" className="[&_svg]:h-10 [&_span]:text-4xl" />
+            <Logo tone="light" className="[&_img]:h-20" />
             <p className="leading-relaxed">Hệ sinh thái sản phẩm nhập khẩu chính hãng, mang đến cuộc sống chất lượng hơn cho mọi gia đình Việt.</p>
             <p className="font-bold text-white uppercase">Theo dõi HWIN trên mạng xã hội</p>
             <SocialLinks />
