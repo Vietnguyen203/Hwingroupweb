@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { BannerCarousel } from "@/components/home/banner-carousel";
+import { BannerCarousel, type BannerSlide } from "@/components/home/banner-carousel";
 import { CategoryMenu } from "@/components/home/category-menu";
 import { QuickTiles } from "@/components/home/quick-tiles";
 import { AffiliateBanner } from "@/components/home/affiliate-banner";
@@ -18,7 +18,9 @@ import { getBestsellers, getCategories, searchProducts } from "@/lib/catalog";
 export default function HomePage() {
   return (
     <>
-      <BannerCarousel />
+      <Suspense fallback={<div className="mx-3 mt-3 aspect-[12/5] animate-pulse rounded-2xl bg-neutral-200 md:mx-0" />}>
+        <Banners />
+      </Suspense>
       <QuickTiles />
 
       <Suspense fallback={<div className="mx-3 mt-8 h-72 animate-pulse rounded-2xl bg-neutral-200" />}>
@@ -51,6 +53,22 @@ export default function HomePage() {
       </Suspense>
     </>
   );
+}
+
+/** Banner: xen kẽ sản phẩm mới và bán chạy, bỏ trùng, tối đa 5. */
+async function Banners() {
+  const [newest, best] = await Promise.all([searchProducts({ sort: "NEWEST", size: 5 }), getBestsellers(5)]);
+  const slides: BannerSlide[] = [];
+  const seen = new Set<string>();
+  for (let i = 0; i < 5 && slides.length < 5; i++) {
+    for (const [p, tag] of [[newest.content[i], "Mới"], [best[i], "Bán chạy"]] as const) {
+      if (p && !seen.has(p.id) && slides.length < 5) {
+        seen.add(p.id);
+        slides.push({ product: p, tag });
+      }
+    }
+  }
+  return <BannerCarousel slides={slides} />;
 }
 
 async function Categories() {
