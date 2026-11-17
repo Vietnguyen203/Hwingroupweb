@@ -2,12 +2,15 @@ import { Phone } from "lucide-react";
 
 import { siteConfig } from "@/lib/config";
 
-/** Nút nổi bên trái: Zalo, Messenger và nút cam "Gọi miễn phí" (như hwingroup.com). */
+/**
+ * Nút nổi bên trái: Zalo, Messenger và nút cam "Gọi miễn phí" (như hwingroup.com).
+ * Mobile thu gọn (Zalo đã có ở thanh tab dưới) để không che sản phẩm.
+ */
 export function FloatingContact() {
-  const circle = "flex size-11 items-center justify-center rounded-full bg-white shadow-md ring-1 ring-neutral-200";
+  const circle = "flex size-10 md:size-11 items-center justify-center rounded-full bg-white shadow-md ring-1 ring-neutral-200";
   return (
     <div className="fixed bottom-20 left-3 z-40 flex flex-col items-start gap-2.5 md:bottom-6">
-      <a href={siteConfig.zaloUrl} target="_blank" rel="noopener noreferrer" aria-label="Chat Zalo" className={`${circle} text-[11px] font-bold text-[#0068ff]`}>
+      <a href={siteConfig.zaloUrl} target="_blank" rel="noopener noreferrer" aria-label="Chat Zalo" className={`${circle} hidden text-[11px] font-bold text-[#0068ff] md:flex`}>
         Zalo
       </a>
       <a href={siteConfig.messengerUrl} target="_blank" rel="noopener noreferrer" aria-label="Chat Messenger" className={circle}>
@@ -20,9 +23,9 @@ export function FloatingContact() {
           <path fill="url(#msg)" d="M12 2C6.4 2 2 6.1 2 11.6c0 2.9 1.2 5.4 3.2 7.1V22l3-1.7c1.2.3 2.4.5 3.8.5 5.6 0 10-4.1 10-9.2S17.6 2 12 2Zm1 12.4-2.5-2.7-5 2.7 5.5-5.8 2.6 2.7 4.9-2.7-5.5 5.8Z" />
         </svg>
       </a>
-      <a href={`tel:${siteConfig.hotline}`} className="flex items-center gap-2 rounded-full bg-brand-accent py-1.5 pr-3.5 pl-1.5 text-white shadow-md">
+      <a href={`tel:${siteConfig.hotline}`} aria-label="Gọi hotline" className="flex items-center gap-2 rounded-full bg-brand-accent p-1.5 text-white shadow-md md:pr-3.5">
         <span className="flex size-7 animate-pulse items-center justify-center rounded-full bg-white/25"><Phone className="size-4" /></span>
-        <span className="text-left leading-tight">
+        <span className="hidden text-left leading-tight md:block">
           <span className="block text-[10px] opacity-90">Gọi miễn phí</span>
           <span className="block text-sm font-bold">{siteConfig.hotline}</span>
         </span>

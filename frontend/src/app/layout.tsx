@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
 import { Roboto } from "next/font/google";
 
@@ -35,7 +36,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <main className="mx-auto w-full max-w-6xl flex-1 md:px-3">{children}</main>
           <SiteFooter />
           <FloatingContact />
-          <BottomNav />
+          <Suspense fallback={<div className="fixed inset-x-0 bottom-0 h-14 border-t bg-white md:hidden" />}>
+            <BottomNav />
+          </Suspense>
         </Providers>
       </body>
     </html>
