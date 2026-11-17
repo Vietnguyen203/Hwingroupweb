@@ -68,8 +68,9 @@ public class AdminAffiliateController {
     @GetMapping("/affiliates")
     public PageResponse<AdminAffiliateResponse> list(@RequestParam(required = false) AffiliateStatus status,
                                                      @RequestParam(required = false) String q,
-                                                     @RequestParam(defaultValue = "0") int page,
-                                                     @RequestParam(defaultValue = "20") int size) {
+                                                     @RequestParam(name = "page", defaultValue = "1") int pageNo,
+                                                     @RequestParam(name = "page_size", defaultValue = "20") int size) {
+        int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
         return PageResponse.of(affiliates.search(status, q, page, size, mapper::toAdmin), x -> x);
     }
 
@@ -106,8 +107,9 @@ public class AdminAffiliateController {
     public PageResponse<AdminCommissionResponse> commissions(@RequestParam(required = false) CommissionStatus status,
                                                              @RequestParam(required = false) UUID affiliateId,
                                                              @RequestParam(required = false) String orderCode,
-                                                             @RequestParam(defaultValue = "0") int page,
-                                                             @RequestParam(defaultValue = "20") int size) {
+                                                             @RequestParam(name = "page", defaultValue = "1") int pageNo,
+                                                             @RequestParam(name = "page_size", defaultValue = "20") int size) {
+        int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
         return PageResponse.of(commissionQuery.search(status, affiliateId, orderCode, page, size, mapper::toAdmin), x -> x);
     }
 
@@ -129,8 +131,9 @@ public class AdminAffiliateController {
 
     @GetMapping("/payouts")
     public PageResponse<PayoutResponse> payouts(@RequestParam(required = false) PayoutStatus status,
-                                                @RequestParam(defaultValue = "0") int page,
-                                                @RequestParam(defaultValue = "20") int size) {
+                                                @RequestParam(name = "page", defaultValue = "1") int pageNo,
+                                                @RequestParam(name = "page_size", defaultValue = "20") int size) {
+        int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
         return PageResponse.of(payouts.search(status, page, size, mapper::toResponse), x -> x);
     }
 

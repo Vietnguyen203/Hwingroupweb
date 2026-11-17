@@ -1,5 +1,6 @@
 package com.vietnl.hwin.customer.service;
 
+import com.vietnl.hwin.common.web.PageResponse;
 import com.vietnl.hwin.customer.entity.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -46,11 +47,9 @@ public class CustomerAdminService {
                               Instant firstOrderAt, Instant lastOrderAt, Instant createdAt, CustomerSegment segment) {
     }
 
-    public record Page(List<CustomerRow> content, int page, int size, long totalElements, int totalPages) {
-    }
 
     @Transactional(readOnly = true)
-    public Page search(String q, CustomerSegment segment, int page, int size) {
+    public PageResponse<CustomerRow> search(String q, CustomerSegment segment, int page, int size) {
         int p = Math.max(page, 0);
         int s = Math.clamp(size, 1, 100);
         List<Object> args = new ArrayList<>();
@@ -63,7 +62,7 @@ public class CustomerAdminService {
         List<CustomerRow> rows = jdbc.query(select() + where + " order by c.created_at desc limit ? offset ?",
                 (rs, i) -> row(rs), pageArgs.toArray());
         long t = total == null ? 0 : total;
-        return new Page(rows, p, s, t, (int) Math.ceil((double) t / s));
+        return new PageResponse<>(rows, p + 1, s, t, (int) Math.ceil((double) t / s));
     }
 
     @Transactional(readOnly = true)

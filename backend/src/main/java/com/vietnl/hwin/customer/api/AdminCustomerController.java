@@ -1,5 +1,6 @@
 package com.vietnl.hwin.customer.api;
 
+import com.vietnl.hwin.common.web.PageResponse;
 import java.util.UUID;
 
 import java.io.IOException;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vietnl.hwin.customer.entity.CustomerSegment;
 import com.vietnl.hwin.customer.service.CustomerAdminService;
 import com.vietnl.hwin.customer.service.CustomerAdminService.CustomerRow;
-import com.vietnl.hwin.customer.service.CustomerAdminService.Page;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -37,10 +37,11 @@ public class AdminCustomerController {
 
     /** @param segment NEW | LOYAL | DORMANT */
     @GetMapping
-    public Page list(@RequestParam(required = false) String q,
+    public PageResponse<CustomerRow> list(@RequestParam(required = false) String q,
                      @RequestParam(required = false) CustomerSegment segment,
-                     @RequestParam(defaultValue = "0") int page,
-                     @RequestParam(defaultValue = "20") int size) {
+                     @RequestParam(name = "page", defaultValue = "1") int pageNo,
+                     @RequestParam(name = "page_size", defaultValue = "20") int size) {
+        int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
         return service.search(q, segment, page, size);
     }
 

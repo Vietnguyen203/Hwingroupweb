@@ -39,8 +39,9 @@ public class OrderController {
     @GetMapping
     public PageResponse<OrderSummaryResponse> list(@AuthenticationPrincipal AuthPrincipal me,
                                                    @RequestParam(required = false) OrderStatus status,
-                                                   @RequestParam(defaultValue = "0") int page,
-                                                   @RequestParam(defaultValue = "10") int size) {
+                                                   @RequestParam(name = "page", defaultValue = "1") int pageNo,
+                                                   @RequestParam(name = "page_size", defaultValue = "10") int size) {
+        int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
         return PageResponse.of(service.list(me.userId(), status, page, size, mapper::toSummary), x -> x);
     }
 

@@ -136,7 +136,7 @@ function LogoutButton() {
 // ------------------------------------------------------------------ đơn hàng
 
 function OrdersCard() {
-  const orders = useQuery({ queryKey: ["orders"], queryFn: () => api<Page<OrderSummary>>("/api/orders?size=10") });
+  const orders = useQuery({ queryKey: ["orders"], queryFn: () => api<Page<OrderSummary>>("/api/orders?page_size=10") });
   return (
     <Card title="Đơn hàng của tôi" icon={Package}>
       {orders.isPending ? (

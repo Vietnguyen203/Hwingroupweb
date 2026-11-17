@@ -48,8 +48,9 @@ public class AuditLogController {
                                                @RequestParam(required = false) UUID actorId,
                                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant from,
                                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant to,
-                                               @RequestParam(defaultValue = "0") int page,
-                                               @RequestParam(defaultValue = "50") int size) {
+                                               @RequestParam(name = "page", defaultValue = "1") int pageNo,
+                                               @RequestParam(name = "page_size", defaultValue = "50") int size) {
+        int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
         StringBuilder where = new StringBuilder(" where 1 = 1");
         List<Object> args = new ArrayList<>();
         filter(where, args, "module", module);
@@ -83,7 +84,7 @@ public class AuditLogController {
                         rs.getTimestamp("created_at").toInstant()),
                 pageArgs.toArray());
         long t = total == null ? 0 : total;
-        return new PageResponse<>(rows, p, s, t, (int) Math.ceil((double) t / s));
+        return new PageResponse<>(rows, p + 1, s, t, (int) Math.ceil((double) t / s));
     }
 
     private static void filter(StringBuilder where, List<Object> args, String column, String value) {

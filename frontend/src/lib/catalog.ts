@@ -33,10 +33,11 @@ export async function searchProducts(params: SearchParams): Promise<Page<Product
   if (params.q) qs.set("q", params.q);
   if (params.category) qs.set("category", params.category);
   if (params.sort) qs.set("sort", params.sort);
-  qs.set("page", String(params.page ?? 0));
-  qs.set("size", String(params.size ?? 20));
+  qs.set("page", String((params.page ?? 0) + 1)); // API: trang bắt đầu từ 1
+  qs.set("page_size", String(params.size ?? 20));
   const page = await get<Page<ProductCard>>(`/api/products?${qs.toString()}`);
-  return page ?? { content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 };
+  // giao diện dùng trang 0-based (Pagination) -> đổi lại
+  return page ? { ...page, page: page.page - 1 } : { content: [], page: 0, pageSize: 20, totalElements: 0, totalPages: 0 };
 }
 
 export async function getProduct(slug: string): Promise<ProductDetail | null> {

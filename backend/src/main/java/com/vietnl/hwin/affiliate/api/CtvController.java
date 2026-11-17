@@ -77,15 +77,17 @@ public class CtvController {
 
     @GetMapping("/commissions")
     public PageResponse<CommissionResponse> commissions(@AuthenticationPrincipal AuthPrincipal me,
-                                                        @RequestParam(defaultValue = "0") int page,
-                                                        @RequestParam(defaultValue = "20") int size) {
+                                                        @RequestParam(name = "page", defaultValue = "1") int pageNo,
+                                                        @RequestParam(name = "page_size", defaultValue = "20") int size) {
+        int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
         return PageResponse.of(dashboards.commissions(me.userId(), page, size, mapper::toResponse), x -> x);
     }
 
     @GetMapping("/customers")
     public PageResponse<BoundCustomer> customers(@AuthenticationPrincipal AuthPrincipal me,
-                                                 @RequestParam(defaultValue = "0") int page,
-                                                 @RequestParam(defaultValue = "20") int size) {
+                                                 @RequestParam(name = "page", defaultValue = "1") int pageNo,
+                                                 @RequestParam(name = "page_size", defaultValue = "20") int size) {
+        int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
         return PageResponse.of(dashboards.customers(me.userId(), page, size), x -> x);
     }
 
@@ -110,8 +112,9 @@ public class CtvController {
 
     @GetMapping("/payouts")
     public PageResponse<PayoutResponse> payouts(@AuthenticationPrincipal AuthPrincipal me,
-                                                @RequestParam(defaultValue = "0") int page,
-                                                @RequestParam(defaultValue = "20") int size) {
+                                                @RequestParam(name = "page", defaultValue = "1") int pageNo,
+                                                @RequestParam(name = "page_size", defaultValue = "20") int size) {
+        int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
         return PageResponse.of(payouts.listMine(me.userId(), page, size, mapper::toResponse), x -> x);
     }
 

@@ -67,8 +67,9 @@ public class AdminOrderController {
                                             @RequestParam(required = false) String q,
                                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant from,
                                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant to,
-                                            @RequestParam(defaultValue = "0") int page,
-                                            @RequestParam(defaultValue = "20") int size) {
+                                            @RequestParam(name = "page", defaultValue = "1") int pageNo,
+                                            @RequestParam(name = "page_size", defaultValue = "20") int size) {
+        int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
         var filter = new OrderFilter(status, paymentMethod, paymentStatus, q, from, to, page, size);
         return PageResponse.of(service.search(filter, mapper::toRow), x -> x);
     }

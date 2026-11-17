@@ -46,8 +46,9 @@ public class ProductController {
     public PageResponse<ProductCardResponse> search(@RequestParam(required = false) String q,
                                                     @RequestParam(required = false) String category,
                                                     @RequestParam(defaultValue = "NEWEST") ProductSort sort,
-                                                    @RequestParam(defaultValue = "0") int page,
-                                                    @RequestParam(defaultValue = "20") int size) {
+                                                    @RequestParam(name = "page", defaultValue = "1") int pageNo,
+                                                    @RequestParam(name = "page_size", defaultValue = "20") int size) {
+        int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
         var criteria = new ProductSearchCriteria(q, category, sort, page, size, true);
         var result = searchService.search(criteria, mapper::toCard);
         return PageResponse.of(result, Function.identity());

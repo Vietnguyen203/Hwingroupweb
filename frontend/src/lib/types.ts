@@ -40,10 +40,11 @@ export type ProductDetail = Omit<ProductCard, "imageUrl"> & {
   category: Category | null;
 };
 
+/** Kết quả phân trang của API: page bắt đầu từ 1 (tham số request: page, page_size). */
 export type Page<T> = {
   content: T[];
   page: number;
-  size: number;
+  pageSize: number;
   totalElements: number;
   totalPages: number;
 };

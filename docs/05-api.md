@@ -8,6 +8,7 @@
 - `me` / `ctv` = tài nguyên của chính user trong JWT → **không bao giờ nhận userId từ client** (chống IDOR). Tài nguyên có mã (đơn hàng) luôn lọc thêm `customerId = currentUser`, không khớp trả **404**.
 - Endpoint admin có tiền tố `/api/admin/**` và nằm trong module sở hữu dữ liệu.
 - Phân trang: `?page=0&size=20&sort=field,dir` → `{content, page, size, totalElements, totalPages}`.
+- Danh sách phân trang: tham số `page` (bắt đầu từ **1**), `page_size`; trả `PageResponse {content, page, pageSize, totalElements, totalPages}`.
 - Lỗi chuẩn `ErrorResponse` (theo `ai/skills/spring-boot-core`): `{traceId, timestamp, status, statusCode, messageCode, message, path, method, errors?[{field, message, rejectedValue?}], details?}`.
   - `messageCode`: mã ổn định cho frontend, ví dụ `OTP_INVALID`, `ACCOUNT_NOT_FOUND`, `CART_INVALID`; `message`: câu tiếng Việt hiển thị luôn được.
   - Code ném `ResponseException(HttpStatus, XxxErrorMessage)`; mã + câu thông báo khai báo ở enum `ExceptionMessage` của từng module (`<module>/entity/ExceptionMessage.java`), lỗi dùng chung ở `common/exception/CommonErrorMessage.java`. Placeholder `#key#` trong câu được thay bằng dữ liệu truyền kèm.

@@ -59,8 +59,9 @@ public class AdminProductController {
     @GetMapping("/products")
     public PageResponse<AdminProductResponse> list(@RequestParam(required = false) String q,
                                                    @RequestParam(required = false) String category,
-                                                   @RequestParam(defaultValue = "0") int page,
-                                                   @RequestParam(defaultValue = "20") int size) {
+                                                   @RequestParam(name = "page", defaultValue = "1") int pageNo,
+                                                   @RequestParam(name = "page_size", defaultValue = "20") int size) {
+        int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
         var criteria = new ProductSearchCriteria(q, category, ProductSort.NEWEST, page, size, false);
         return PageResponse.of(searchService.search(criteria, mapper::toAdmin), x -> x);
     }
