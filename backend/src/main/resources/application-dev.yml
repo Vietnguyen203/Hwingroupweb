@@ -11,8 +11,8 @@ spring:
     host: ${MAIL_HOST:localhost}
     port: ${MAIL_PORT:11025}
     properties:
-      mail.smtp.auth: false
-      mail.smtp.starttls.enable: false
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:false}            # Gmail / SMTP thật: đặt true trong .env
+      mail.smtp.starttls.enable: ${MAIL_STARTTLS:false}
 
 hwin:
   admin-seed:                    # dev: tài khoản admin/admin MIỄN OTP (chỉ tồn tại ở dev)
