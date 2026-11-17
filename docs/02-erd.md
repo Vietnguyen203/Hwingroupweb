@@ -368,6 +368,8 @@ erDiagram
         varchar phone "snapshot, dùng chống tự giới thiệu"
         varchar full_name
         varchar referral_code UK "A-Z0-9, 6-10 ký tự, sinh khi được duyệt"
+        varchar id_card_front_key "ảnh CCCD mặt trước – kho riêng tư, chỉ ADMIN xem"
+        varchar id_card_back_key "ảnh CCCD mặt sau – kho riêng tư, chỉ ADMIN xem"
         varchar status "PENDING | APPROVED | REJECTED | SUSPENDED"
         varchar social_link "kênh bán của CTV"
         text note

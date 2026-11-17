@@ -1,5 +1,10 @@
 package com.vietnl.hwin.affiliate.api;
 
+import com.vietnl.hwin.common.exception.CommonErrorMessage;
+import com.vietnl.hwin.common.exception.ResponseException;
+import com.vietnl.hwin.common.storage.PrivateFileStore;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import com.vietnl.hwin.common.exception.CommonErrorMessage;
 import org.springframework.http.HttpStatus;
@@ -66,6 +71,17 @@ public class AdminAffiliateController {
     public ResponseEntity<AdminAffiliateResponse> get(@PathVariable UUID id) {
         return ResponseEntity.ok(affiliates.get(id, mapper::toAdmin));
     }
+    /** Ảnh CCCD (chỉ ADMIN; không cache). side = front | back. */
+    @GetMapping("/{id}/id-card/{side}")
+    public ResponseEntity<byte[]> idCard(@PathVariable UUID id, @PathVariable String side, @AuthenticationPrincipal AuthPrincipal me) {
+        if (!side.equals("front") && !side.equals("back")) {
+            throw new ResponseException(HttpStatus.NOT_FOUND, CommonErrorMessage.NOT_FOUND);
+        }
+        PrivateFileStore.StoredFile f = affiliates.idCardImage(id, side.equals("front"), me.userId());
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType(f.contentType()))
+                .header("Cache-Control", "no-store").header("X-Content-Type-Options", "nosniff").body(f.content());
+    }
+
     @PostMapping("/{id}/approve")
     public ResponseEntity<AdminAffiliateResponse> approve(@PathVariable UUID id, @AuthenticationPrincipal AuthPrincipal me) {
         return ResponseEntity.ok(affiliates.approve(id, me.userId(), mapper::toAdmin));

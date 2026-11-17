@@ -30,4 +30,9 @@ public class RegisterAffiliateRequest {
     private boolean acceptTerms;
     @Pattern(regexp = "^[0-9+ .\\-]{9,16}$", message = "Số điện thoại không hợp lệ")
     private String phone;
+    /** Khóa ảnh CCCD mặt trước, nhận từ POST /api/affiliates/id-card-uploads. */
+    @NotBlankValidator(field = "Ảnh CCCD mặt trước")
+    private String idCardFrontKey;
+    @NotBlankValidator(field = "Ảnh CCCD mặt sau")
+    private String idCardBackKey;
 }

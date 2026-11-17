@@ -13,6 +13,7 @@ public enum CommonErrorMessage implements BaseErrorMessage {
     METHOD_NOT_ALLOWED("Phương thức không được hỗ trợ"),
     UNSUPPORTED_MEDIA_TYPE("Content-Type không được hỗ trợ"),
     FILE_TOO_LARGE("File vượt quá dung lượng cho phép"),
+    FILE_TYPE_INVALID("Chỉ chấp nhận ảnh JPG, PNG hoặc WebP"),
     CONCURRENT_MODIFICATION("Dữ liệu vừa bị thay đổi, vui lòng thử lại"),
     DATA_CONFLICT("Dữ liệu bị trùng hoặc không hợp lệ"),
     RATE_LIMITED("Bạn thao tác quá nhiều lần, vui lòng thử lại sau ít phút"),

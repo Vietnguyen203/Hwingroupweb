@@ -77,19 +77,27 @@ public class Affiliate extends AggregateRoot<Affiliate> {
 
     private String statusReason;
 
-    public static Affiliate register(UUID userId, PhoneNumber phone, String fullName, String socialLink, String note) {
+    /** Khóa file ảnh CCCD trong kho riêng tư (chỉ ADMIN xem được). */
+    private String idCardFrontKey;
+
+    private String idCardBackKey;
+
+    public static Affiliate register(UUID userId, PhoneNumber phone, String fullName, String socialLink, String note,
+                                     String idCardFrontKey, String idCardBackKey) {
         Affiliate a = new Affiliate();
         a.userId = userId;
         a.phone = phone;
         a.status = AffiliateStatus.PENDING;
         a.updateProfile(fullName, socialLink, note);
+        a.attachIdCard(idCardFrontKey, idCardBackKey);
         return a;
     }
 
     /** Đăng ký lại sau khi bị từ chối. */
-    public void reapply(String fullName, String socialLink, String note) {
+    public void reapply(String fullName, String socialLink, String note, String idCardFrontKey, String idCardBackKey) {
         requireStatus(Set.of(AffiliateStatus.REJECTED), "đăng ký lại");
         updateProfile(fullName, socialLink, note);
+        attachIdCard(idCardFrontKey, idCardBackKey);
         this.status = AffiliateStatus.PENDING;
         this.statusReason = null;
     }
@@ -169,6 +177,19 @@ public class Affiliate extends AggregateRoot<Affiliate> {
     /** Chống tự giới thiệu: khách là chính CTV (cùng tài khoản hoặc cùng SĐT). */
     public boolean isSelf(UUID customerUserId, PhoneNumber customerPhone) {
         return userId.equals(customerUserId) || (customerPhone != null && phone.equals(customerPhone));
+    }
+
+    public boolean hasIdCard() {
+        return idCardFrontKey != null && idCardBackKey != null;
+    }
+
+    /** Ảnh CCCD mặt trước + mặt sau là bắt buộc khi đăng ký CTV. */
+    private void attachIdCard(String front, String back) {
+        if (front == null || front.isBlank() || back == null || back.isBlank()) {
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ID_CARD_REQUIRED);
+        }
+        this.idCardFrontKey = front;
+        this.idCardBackKey = back;
     }
 
     private void updateProfile(String fullName, String socialLink, String note) {

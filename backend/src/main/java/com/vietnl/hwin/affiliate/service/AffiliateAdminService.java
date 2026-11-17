@@ -1,5 +1,6 @@
 package com.vietnl.hwin.affiliate.service;
 
+import com.vietnl.hwin.common.storage.PrivateFileStore;
 import com.vietnl.hwin.affiliate.entity.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -31,11 +32,13 @@ public class AffiliateAdminService {
 
     private final AffiliateRepository affiliates;
     private final AuditLogger audit;
+    private final PrivateFileStore files;
     private final Clock clock;
 
-    public AffiliateAdminService(AffiliateRepository affiliates, AuditLogger audit, Clock clock) {
+    public AffiliateAdminService(AffiliateRepository affiliates, AuditLogger audit, PrivateFileStore files, Clock clock) {
         this.affiliates = affiliates;
         this.audit = audit;
+        this.files = files;
         this.clock = clock;
     }
 
@@ -109,6 +112,19 @@ public class AffiliateAdminService {
             }
         }
         throw new IllegalStateException("Không sinh được mã giới thiệu duy nhất");
+    }
+
+    /** Admin xem ảnh CCCD (front = mặt trước, khác = mặt sau). Mỗi lần xem được ghi audit. */
+    @Transactional // ghi audit nên không để readOnly
+    public PrivateFileStore.StoredFile idCardImage(UUID id, boolean front, UUID adminId) {
+        Affiliate a = load(id);
+        String key = front ? a.getIdCardFrontKey() : a.getIdCardBackKey();
+        if (key == null) {
+            throw new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.ID_CARD_NOT_FOUND);
+        }
+        audit.log("affiliate", "Affiliate", a.getId(), "ID_CARD_VIEWED", adminId, null,
+                "{\"side\":\"" + (front ? "FRONT" : "BACK") + "\"}");
+        return files.load(key);
     }
 
     private Affiliate load(UUID id) {

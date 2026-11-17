@@ -34,7 +34,7 @@ public interface AffiliateMapper {
         return new AdminAffiliateResponse(a.getId(), a.getUserId(), a.getFullName(), a.getPhone().local(),
                 a.getStatus().name(), a.getReferralCode(), a.getSocialLink(), a.getNote(), a.getStatusReason(),
                 b == null ? null : b.bankName(), b == null ? null : b.maskedAccountNo(), a.getCreatedAt(),
-                a.getReviewedAt(), a.getReviewedBy());
+                a.getReviewedAt(), a.getReviewedBy(), a.hasIdCard());
     }
 
     default CommissionResponse toResponse(Commission c) {

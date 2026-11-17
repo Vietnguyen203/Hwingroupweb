@@ -109,7 +109,8 @@
 | Method | Path | Quyền | Mô tả |
 |---|---|---|---|
 | POST | `/api/referral-clicks` | public | `{code, landingPath}` → ghi click (không đếm trùng IP + mã trong 24h), mã hợp lệ thì set cookie `hwin_ref` 30 ngày. Luôn 204 |
-| POST | `/api/affiliates/me` | CUSTOMER | Đăng ký CTV `{fullName, socialLink, note, acceptTerms, phone?}` – `phone` bắt buộc nếu tài khoản đăng nhập bằng email (`PHONE_REQUIRED`); đăng ký lại nếu đã bị từ chối |
+| POST | `/api/affiliates/id-card-uploads` | CUSTOMER | Tải 1 ảnh CCCD (multipart `file`, JPG/PNG/WebP ≤ 5MB) vào kho riêng tư, trả `{key}`; gọi 2 lần (mặt trước, mặt sau) |
+| POST | `/api/affiliates/me` | CUSTOMER | Đăng ký CTV `{fullName, socialLink, note, acceptTerms, phone?, idCardFrontKey, idCardBackKey}` (2 khóa ảnh bắt buộc, phải do chính mình tải lên: `ID_CARD_REQUIRED` / `ID_CARD_INVALID`) – `phone` bắt buộc nếu tài khoản đăng nhập bằng email (`PHONE_REQUIRED`); đăng ký lại nếu đã bị từ chối |
 | GET | `/api/affiliates/me` | CUSTOMER | Hồ sơ CTV + trạng thái + lý do (404 nếu chưa đăng ký) |
 | GET | `/api/affiliates/me/dashboard` | AFFILIATE | Mã, link chia sẻ, click (tổng / 30 ngày), khách đã gắn, hoa hồng theo trạng thái, số dư khả dụng, đã rút, khóa rút đến |
 | GET | `/api/affiliates/me/commissions` | AFFILIATE | Hoa hồng của tôi (mã đơn, cơ sở tính, số tiền, trạng thái, mốc duyệt) |
@@ -120,7 +121,8 @@
 | GET | `/api/affiliates/me/payouts` | AFFILIATE | Lịch sử rút tiền |
 | POST | `/api/affiliates/me/payouts` | AFFILIATE | Yêu cầu rút `{amount}` (≥ 200.000, ≤ số dư, 1 yêu cầu mở / CTV) |
 | GET | `/api/admin/affiliates` | ADMIN | Lọc `status`, `q` (SĐT / tên / mã) |
-| GET | `/api/admin/affiliates/{id}` | ADMIN | Chi tiết |
+| GET | `/api/admin/affiliates/{id}` | ADMIN | Chi tiết (`hasIdCard`) |
+| GET | `/api/admin/affiliates/{id}/id-card/{front\|back}` | ADMIN | Ảnh CCCD (trả ảnh, `Cache-Control: no-store`); mỗi lần xem ghi audit `ID_CARD_VIEWED` |
 | POST | `/api/admin/affiliates/{id}/approve` | ADMIN | Duyệt → sinh mã giới thiệu, cấp vai trò AFFILIATE |
 | POST | `/api/admin/affiliates/{id}/reject` | ADMIN | `{reason}` |
 | POST | `/api/admin/affiliates/{id}/suspend` | ADMIN | `{reason}` – link ngừng hoạt động, gỡ vai trò |

@@ -63,6 +63,7 @@ public class AffiliateController {
     @PostMapping
     public ResponseEntity<AffiliateResponse> register(@AuthenticationPrincipal AuthPrincipal me, @Valid @RequestBody RegisterAffiliateRequest r) {
         return ResponseEntity.status(HttpStatus.CREATED).body(affiliates.register(me.userId(), r.getFullName(), r.getSocialLink(), r.getNote(), r.getPhone(),
+                r.getIdCardFrontKey(), r.getIdCardBackKey(),
                 a -> mapper.toResponse(a, props.bankChangeLock())));
     }
 

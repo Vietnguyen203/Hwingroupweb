@@ -29,7 +29,7 @@ class AffiliateDomainTest {
     private static final BankAccount BANK = new BankAccount("Vietcombank", "enc-no", "enc-holder", "6789");
 
     private static Affiliate approved() {
-        Affiliate a = Affiliate.register(UUID.randomUUID(), PhoneNumber.of("0901234567"), "CTV A", null, null);
+        Affiliate a = Affiliate.register(UUID.randomUUID(), PhoneNumber.of("0901234567"), "CTV A", null, null, "id-cards/x/f.jpg", "id-cards/x/b.jpg");
         a.approve(new ReferralCode("ABC12345"), ADMIN, T0);
         return a;
     }
@@ -113,11 +113,11 @@ class AffiliateDomainTest {
 
     @Test
     void affiliateStatusTransitions() {
-        Affiliate a = Affiliate.register(UUID.randomUUID(), PhoneNumber.of("0901234567"), "CTV", null, null);
+        Affiliate a = Affiliate.register(UUID.randomUUID(), PhoneNumber.of("0901234567"), "CTV", null, null, "id-cards/x/f.jpg", "id-cards/x/b.jpg");
         assertThat(a.canEarn()).isFalse();
         a.reject("Thiếu thông tin", ADMIN, T0);
         assertThatThrownBy(() -> a.approve(new ReferralCode("ABC12345"), ADMIN, T0)).isInstanceOf(ResponseException.class);
-        a.reapply("CTV", "https://fb.com/ctv", null);
+        a.reapply("CTV", "https://fb.com/ctv", null, "id-cards/x/f2.jpg", "id-cards/x/b2.jpg");
         a.approve(new ReferralCode("ABC12345"), ADMIN, T0);
         assertThat(a.canEarn()).isTrue();
         a.suspend("Vi phạm", ADMIN, T0);

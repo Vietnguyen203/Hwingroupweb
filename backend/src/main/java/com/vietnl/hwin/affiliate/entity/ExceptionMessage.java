@@ -25,6 +25,9 @@ public enum ExceptionMessage implements BaseErrorMessage {
     AFFILIATE_NOT_REGISTERED("Bạn chưa đăng ký cộng tác viên"),
     AFFILIATE_NOT_APPROVED("Tài khoản CTV chưa được duyệt"),
     PHONE_REQUIRED("Vui lòng nhập số điện thoại liên hệ để đăng ký CTV"),
+    ID_CARD_REQUIRED("Vui lòng tải lên ảnh CCCD mặt trước và mặt sau"),
+    ID_CARD_INVALID("Ảnh CCCD không hợp lệ, vui lòng tải lại"),
+    ID_CARD_NOT_FOUND("CTV chưa có ảnh CCCD"),
     ALREADY_REGISTERED("Bạn đã đăng ký CTV (trạng thái #status#)"),
     PAYOUT_OPEN("Bạn đang có một yêu cầu rút tiền chưa xử lý xong"),
     PAYOUT_NOT_FOUND("Không tìm thấy yêu cầu rút tiền");

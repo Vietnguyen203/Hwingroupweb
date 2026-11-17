@@ -1,6 +1,8 @@
 package com.vietnl.hwin.affiliate.service;
 
+import java.io.InputStream;
 import java.util.Map;
+import com.vietnl.hwin.common.storage.PrivateFileStore;
 import com.vietnl.hwin.affiliate.entity.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import com.vietnl.hwin.common.exception.ResponseException;
@@ -33,16 +35,38 @@ public class AffiliateService {
     private final OtpService otp;
     private final BankAccountCrypto crypto;
     private final AuditLogger audit;
+    private final PrivateFileStore files;
     private final Clock clock;
 
     public AffiliateService(AffiliateRepository affiliates, UserQueryService users, OtpService otp,
-                            BankAccountCrypto crypto, AuditLogger audit, Clock clock) {
+                            BankAccountCrypto crypto, AuditLogger audit, PrivateFileStore files, Clock clock) {
         this.affiliates = affiliates;
         this.users = users;
         this.otp = otp;
         this.crypto = crypto;
         this.audit = audit;
+        this.files = files;
         this.clock = clock;
+    }
+
+    /** Nhận 1 ảnh CCCD vào kho riêng tư, trả về khóa để đính kèm khi đăng ký CTV. */
+    public String uploadIdCard(UUID userId, InputStream content, long size, String contentType) {
+        return files.store(idCardFolder(userId), content, size, contentType);
+    }
+
+    private static String idCardFolder(UUID userId) {
+        return "id-cards/" + userId;
+    }
+
+    /** Khóa phải do chính người dùng này tải lên (chặn dùng ảnh của người khác hoặc đường dẫn bất kỳ). */
+    private String checkedIdCardKey(UUID userId, String key) {
+        if (key == null || key.isBlank()) {
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ID_CARD_REQUIRED);
+        }
+        if (!key.startsWith(idCardFolder(userId) + "/") || key.contains("..") || !files.exists(key)) {
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ID_CARD_INVALID);
+        }
+        return key;
     }
 
     /**
@@ -51,7 +75,9 @@ public class AffiliateService {
      */
     @Transactional
     public <T> T register(UUID userId, String fullName, String socialLink, String note, String rawPhone,
-                          Function<Affiliate, T> mapper) {
+                          String idCardFrontKey, String idCardBackKey, Function<Affiliate, T> mapper) {
+        String front = checkedIdCardKey(userId, idCardFrontKey);
+        String back = checkedIdCardKey(userId, idCardBackKey);
         Affiliate a = affiliates.findByUserId(userId).orElse(null);
         if (a == null) {
             PhoneNumber phone = users.findPhone(userId).orElseGet(() -> {
@@ -60,9 +86,9 @@ public class AffiliateService {
                 }
                 return PhoneNumber.of(rawPhone);
             });
-            a = affiliates.save(Affiliate.register(userId, phone, fullName, socialLink, note));
+            a = affiliates.save(Affiliate.register(userId, phone, fullName, socialLink, note, front, back));
         } else if (a.getStatus() == AffiliateStatus.REJECTED) {
-            a.reapply(fullName, socialLink, note);
+            a.reapply(fullName, socialLink, note, front, back);
         } else {
             throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ALREADY_REGISTERED, Map.of("status", String.valueOf(a.getStatus())));
         }

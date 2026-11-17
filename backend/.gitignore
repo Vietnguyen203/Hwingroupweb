@@ -39,3 +39,4 @@ out/
 ### Dự án ###
 .env
 uploads/
+private-uploads/

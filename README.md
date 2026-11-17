@@ -94,6 +94,7 @@ cd ..\frontend; npm run build; npm run lint
 ## Giả định
 
 - Đánh giá sản phẩm: chỉ khách đã nhận hàng (đơn DELIVERED/COMPLETED) được đánh giá, mỗi sản phẩm 1 lần; cờ `visible` để ẩn đánh giá (chưa có màn hình duyệt).
+- Ảnh CCCD (mặt trước + sau) bắt buộc khi đăng ký CTV; lưu ở thư mục riêng `hwin.storage.private-dir` (env `PRIVATE_STORAGE_DIR`, mặc định `./private-uploads`, ngoài `/uploads` nên không có URL công khai), chỉ ADMIN xem qua API và mỗi lần xem có audit. Production cần mount thư mục này vào ổ bền vững và sao lưu.
 - Sản phẩm có 1–5 ảnh; "Mua ngay" thêm vào giỏ rồi chuyển sang giỏ hàng.
 
 - **Khóa chính là UUID v7** (sinh bởi Hibernate `@UuidGenerator(style = VERSION_7)`): có thứ tự theo thời gian nên index gọn, không đoán được số bản ghi, sau này tách microservice không lo trùng id. Database cũng mặc định sinh UUID v7 cho mọi cột `id` (hàm `public.uuid_generate_v7()` – Postgres 17 chưa có `uuidv7()` sẵn).

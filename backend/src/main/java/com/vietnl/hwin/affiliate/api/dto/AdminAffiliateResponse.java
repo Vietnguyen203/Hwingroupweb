@@ -31,4 +31,6 @@ public class AdminAffiliateResponse {
     private Instant createdAt;
     private Instant reviewedAt;
     private UUID reviewedBy;
+    /** Đã nộp ảnh CCCD chưa (ảnh chỉ xem qua API riêng, không lộ khóa file). */
+    private boolean hasIdCard;
 }

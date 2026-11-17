@@ -63,10 +63,14 @@ class AffiliateFlowTests {
     @Autowired ProductSearchService search;
 
     private static final UUID ADMIN = UUID.randomUUID();
+    /** Ảnh JPEG tối thiểu (chỉ cần đúng chữ ký file). */
+    private static final byte[] FAKE_JPEG = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0, 0, 16, 0x4A, 0x46, 0x49, 0x46, 0};
 
     private Affiliate approvedAffiliate(String phone) {
         UUID userId = users.loginByPhone(PhoneNumber.of(phone)).getId();
-        UUID id = affiliateService.register(userId, "CTV " + phone, "https://fb.com/ctv", null, null, Affiliate::getId);
+        String front = affiliateService.uploadIdCard(userId, new java.io.ByteArrayInputStream(FAKE_JPEG), FAKE_JPEG.length, "image/jpeg");
+        String back = affiliateService.uploadIdCard(userId, new java.io.ByteArrayInputStream(FAKE_JPEG), FAKE_JPEG.length, "image/jpeg");
+        UUID id = affiliateService.register(userId, "CTV " + phone, "https://fb.com/ctv", null, null, front, back, Affiliate::getId);
         affiliateAdmin.approve(id, ADMIN, a -> a);
         return affiliates.findById(id).orElseThrow();
     }

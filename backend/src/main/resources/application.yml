@@ -107,6 +107,8 @@ hwin:
   storage:
     local-dir: ${STORAGE_DIR:./uploads}
     public-path: /uploads/
+    # Kho riêng tư (ảnh CCCD): không phục vụ công khai, chỉ đọc qua API có phân quyền
+    private-dir: ${PRIVATE_STORAGE_DIR:./private-uploads}
   ordering:
     shipping-fee: 30000
     return-window-days: 7

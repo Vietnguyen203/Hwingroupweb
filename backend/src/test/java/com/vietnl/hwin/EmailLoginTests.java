@@ -171,8 +171,10 @@ class EmailLoginTests {
         assertThat(user.getPhone().local()).isEqualTo("0955000106");
 
         LoginResult step1 = auth.login("0955 000 106", PASSWORD, null, client("10.1.0.7"));
-        assertThat(step1.sentTo()).isEqualTo("09******06");
-        assertThat(auth.verifyLoginOtp(step1.challengeId(), otp(phone, OtpPurpose.LOGIN), false, client("10.1.0.7"))
+        // đăng nhập bằng SĐT nhưng OTP bảo mật gửi tới email của tài khoản (ưu tiên email, không có mới dùng SĐT)
+        assertThat(step1.sentTo()).isEqualTo("ad******@hwin.vn");
+        OtpTarget email = OtpTarget.email(EmailAddress.of("addphone@hwin.vn"));
+        assertThat(auth.verifyLoginOtp(step1.challengeId(), otp(email, OtpPurpose.LOGIN), false, client("10.1.0.7"))
                 .tokens().userId()).isEqualTo(userId);
 
         assertThatThrownBy(() -> users.requestAddPhoneOtp(userId, "0955000107", "ip-add-phone"))
@@ -198,9 +200,12 @@ class EmailLoginTests {
     @Test
     void emailAccountMustGivePhoneToBecomeCtvAndGetsBankOtpByEmail() {
         UUID userId = registerByEmail("ctv.email@gmail.com", "001095000008", "10.1.0.10");
-        assertThatThrownBy(() -> affiliates.register(userId, "CTV Email", null, null, null, a -> a))
+        byte[] jpeg = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0, 0, 16, 0x4A, 0x46, 0x49, 0x46, 0};
+        String front = affiliates.uploadIdCard(userId, new java.io.ByteArrayInputStream(jpeg), jpeg.length, "image/jpeg");
+        String back = affiliates.uploadIdCard(userId, new java.io.ByteArrayInputStream(jpeg), jpeg.length, "image/jpeg");
+        assertThatThrownBy(() -> affiliates.register(userId, "CTV Email", null, null, null, front, back, a -> a))
                 .hasFieldOrPropertyWithValue("code", "PHONE_REQUIRED");
-        Affiliate a = affiliates.register(userId, "CTV Email", null, null, "0955000002", x -> x);
+        Affiliate a = affiliates.register(userId, "CTV Email", null, null, "0955000002", front, back, x -> x);
         assertThat(a.getPhone().local()).isEqualTo("0955000002");
         affiliates.sendBankChangeOtp(userId, "ip-bank");
         assertThat(inbox.latest(OtpTarget.email(EmailAddress.of("ctv.email@gmail.com")), OtpPurpose.BANK_CHANGE)).isPresent();
