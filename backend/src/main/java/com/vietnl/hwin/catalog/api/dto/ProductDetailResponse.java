@@ -27,6 +27,13 @@ public class ProductDetailResponse {
     private String shortDescription;
     private String description;
     private String unit;
+    private String brand;
+    private String weight;
+    private String packaging;
+    private String origin;
+    private String ingredients;
+    private String features;
+    private String usageInstructions;
     private boolean inStock;
     private int stock;
     private boolean bestseller;

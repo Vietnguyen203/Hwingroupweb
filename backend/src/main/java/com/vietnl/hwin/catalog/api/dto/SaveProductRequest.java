@@ -42,10 +42,29 @@ public class SaveProductRequest {
     private String description;
     @LengthValidator(max = 50, field = "Đơn vị tính")
     private String unit;
+    @NotBlankValidator(field = "Thương hiệu")
+    @LengthValidator(max = 100, field = "Thương hiệu")
+    private String brand;
+    @NotBlankValidator(field = "Khối lượng")
+    @LengthValidator(max = 50, field = "Khối lượng")
+    private String weight;
+    @NotBlankValidator(field = "Đóng gói")
+    @LengthValidator(max = 100, field = "Đóng gói")
+    private String packaging;
+    @NotBlankValidator(field = "Xuất xứ")
+    @LengthValidator(max = 100, field = "Xuất xứ")
+    private String origin;
+    @LengthValidator(max = 5000, field = "Thành phần")
+    private String ingredients;
+    @LengthValidator(max = 5000, field = "Đặc điểm")
+    private String features;
+    @LengthValidator(max = 5000, field = "Hướng dẫn sử dụng")
+    private String usageInstructions;
     @PositiveOrZero
     private Integer initialStock;
     private boolean bestseller;
-    @Size(max = 10)
+    @NotNullValidator(field = "Ảnh sản phẩm")
+    @Size(min = 1, max = 5, message = "Sản phẩm cần từ 1 đến 5 ảnh")
     private List<@NotBlank @Size(max = 500) String> images;
     @Valid
     private FoodInfoResponse foodInfo;

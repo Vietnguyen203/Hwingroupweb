@@ -42,14 +42,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Product extends AggregateRoot<Product> {
 
-    private static final int MAX_IMAGES = 10;
+    /** Mỗi sản phẩm có tối thiểu 1 và tối đa 5 ảnh. */
+    public static final int MIN_IMAGES = 1;
+    public static final int MAX_IMAGES = 5;
 
     @Id
     @GeneratedValue
     @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
     private UUID id;
 
-    @Column(nullable = false)
     private UUID categoryId;
 
     @Column(nullable = false)
@@ -69,6 +70,23 @@ public class Product extends AggregateRoot<Product> {
     private String description;
 
     private String unit;
+
+    /** Thông tin cơ bản hiển thị đầu trang sản phẩm. */
+    private String brand;
+
+    /** Khối lượng / quy cách (500g, 20 cái...). */
+    private String weight;
+
+    private String packaging;
+
+    private String origin;
+
+    /** Nội dung chi tiết: thành phần, đặc điểm, hướng dẫn sử dụng (bảo quản nằm ở FoodInfo). */
+    private String ingredients;
+
+    private String features;
+
+    private String usageInstructions;
 
     private int stock;
 
@@ -90,6 +108,10 @@ public class Product extends AggregateRoot<Product> {
     /** Cột do DB tự sinh (bỏ dấu tên + mô tả ngắn) để tìm kiếm. */
     @Column(name = "search_text", insertable = false, updatable = false)
     private String searchText;
+
+    public void setCategory(UUID categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public static Product create(ProductDetails details, int initialStock, List<String> imageUrls) {
         Product p = new Product();
@@ -121,11 +143,35 @@ public class Product extends AggregateRoot<Product> {
         this.shortDescription = d.shortDescription();
         this.description = d.description();
         this.unit = d.unit();
+        this.brand = required(d.brand(), "Thương hiệu");
+        this.weight = required(d.weight(), "Khối lượng");
+        this.packaging = required(d.packaging(), "Đóng gói");
+        this.origin = required(d.origin(), "Xuất xứ");
+        this.ingredients = blankToNull(d.ingredients());
+        this.features = blankToNull(d.features());
+        this.usageInstructions = blankToNull(d.usageInstructions());
         this.foodInfo = d.foodInfo();
     }
 
+    private static String required(String value, String field) {
+        if (value == null || value.isBlank()) {
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PRODUCT_INFO_REQUIRED,
+                    Map.of("field", field));
+        }
+        return value.trim();
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    /** Thay toàn bộ ảnh: tối thiểu {@link #MIN_IMAGES}, tối đa {@link #MAX_IMAGES}; ảnh đầu tiên là ảnh chính. */
     public void replaceImages(List<String> urls) {
         List<String> clean = urls == null ? List.of() : urls.stream().filter(u -> u != null && !u.isBlank()).toList();
+        if (clean.size() < MIN_IMAGES) {
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PRODUCT_IMAGE_REQUIRED,
+                    Map.of("min", String.valueOf(MIN_IMAGES)));
+        }
         if (clean.size() > MAX_IMAGES) {
             throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.TOO_MANY_IMAGES, Map.of("max", String.valueOf(MAX_IMAGES)));
         }

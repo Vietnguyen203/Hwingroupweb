@@ -46,7 +46,8 @@ public interface ProductMapper {
     default ProductDetails toDetails(SaveProductRequest r) {
         return new ProductDetails(r.getCategoryId(), r.getName(), r.getSlug(), Money.of(r.getPrice()),
                 r.getCompareAtPrice() == null ? null : Money.of(r.getCompareAtPrice()), r.getShortDescription(),
-                r.getDescription(), r.getUnit(), toFoodInfo(r.getFoodInfo()));
+                r.getDescription(), r.getUnit(), r.getBrand(), r.getWeight(), r.getPackaging(), r.getOrigin(),
+                r.getIngredients(), r.getFeatures(), r.getUsageInstructions(), toFoodInfo(r.getFoodInfo()));
     }
 
     default Long moneyToLong(Money money) {
