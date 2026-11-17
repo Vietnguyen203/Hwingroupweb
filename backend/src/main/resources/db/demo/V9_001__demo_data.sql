@@ -134,10 +134,3 @@ insert into audit.audit_logs (module, aggregate_type, aggregate_id, action, acto
     ('affiliate', 'Commission', '01900000-0000-7000-8000-000000000501', 'COMMISSION_CREATED', null, 31000, '{"orderCode":"HWDEMO0001","demo":true}', now() - interval '13 days'),
     ('affiliate', 'Commission', '01900000-0000-7000-8000-000000000501', 'COMMISSION_APPROVED', null, 31000, '{"orderCode":"HWDEMO0001","demo":true}', now() - interval '3 days'),
     ('affiliate', 'Commission', '01900000-0000-7000-8000-000000000502', 'COMMISSION_CREATED', null, 11500, '{"orderCode":"HWDEMO0002","demo":true}', now() - interval '1 day');
-
--- Mật khẩu đăng nhập cho tài khoản mẫu: Hwin@2026 (BCrypt). Đăng nhập = SĐT + mật khẩu + OTP (dev lấy OTP qua /api/dev/otp/latest)
-update identity.user_accounts
-   set password_hash = '$2a$10$9l9i.lQQK9OhUXRCsj0czeNCp.eLfcZjLH9Ro41fXk5BMwjaDlhbO',
-       date_of_birth = date '1990-01-01',
-       address       = 'Hà Nội'
- where password_hash is null and phone is not null;
