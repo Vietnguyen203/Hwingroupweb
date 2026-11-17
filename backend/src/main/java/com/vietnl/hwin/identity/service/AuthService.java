@@ -7,13 +7,16 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.vietnl.hwin.common.domain.EmailAddress;
 import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.common.exception.TooManyRequestsException;
 import com.vietnl.hwin.common.exception.UnauthorizedException;
 import com.vietnl.hwin.common.ratelimit.RateLimiter;
 import com.vietnl.hwin.common.util.Hashing;
 import com.vietnl.hwin.common.web.ClientInfo;
+import com.vietnl.hwin.identity.entity.OtpChannel;
 import com.vietnl.hwin.identity.entity.OtpPurpose;
+import com.vietnl.hwin.identity.entity.OtpTarget;
 import com.vietnl.hwin.identity.entity.UserAccount;
 import com.vietnl.hwin.identity.repository.UserAccountRepository;
 
@@ -48,22 +51,31 @@ public class AuthService {
         this.redis = redis;
     }
 
-    public long requestLoginOtp(String rawPhone, ClientInfo client) {
-        return otpService.send(PhoneNumber.of(rawPhone), OtpPurpose.LOGIN, client.ipHash());
+    /** Gửi OTP đăng nhập tới SĐT (SMS) hoặc email – đúng nơi khách đã nhập. */
+    public OtpDispatch requestLoginOtp(String rawPhone, String rawEmail, ClientInfo client) {
+        OtpTarget target = OtpTarget.of(rawPhone, rawEmail);
+        long ttl = otpService.send(target, OtpPurpose.LOGIN, client.ipHash());
+        return new OtpDispatch(target.channel(), target.masked(), ttl);
     }
 
     /** Đúng OTP -> đăng nhập; chưa có tài khoản thì tạo luôn (dùng ngay trong bước thanh toán). */
-    public IssuedTokens loginWithOtp(String rawPhone, String otp, ClientInfo client) {
-        PhoneNumber phone = PhoneNumber.of(rawPhone);
-        otpService.verify(phone, OtpPurpose.LOGIN, otp);
-        UserAccount user = userAccountService.loginByPhone(phone);
+    public IssuedTokens loginWithOtp(String rawPhone, String rawEmail, String otp, ClientInfo client) {
+        OtpTarget target = OtpTarget.of(rawPhone, rawEmail);
+        otpService.verify(target, OtpPurpose.LOGIN, otp);
+        UserAccount user = target.channel() == OtpChannel.SMS
+                ? userAccountService.loginByPhone(new PhoneNumber(target.value()))
+                : userAccountService.loginByEmail(new EmailAddress(target.value()));
         return tokenService.issue(user, client);
+    }
+
+    /** OTP đã gửi: kênh, nơi nhận (đã che), thời gian hiệu lực (giây). */
+    public record OtpDispatch(OtpChannel channel, String sentTo, long expiresInSeconds) {
     }
 
     /**
      * Bước 1 đăng nhập admin: kiểm tra mật khẩu.
      * - Tài khoản miễn OTP (chỉ dev admin/admin): đăng nhập luôn.
-     * - Còn lại: gửi OTP tới SĐT admin, trả challengeId (sống bằng thời hạn OTP) cho bước 2.
+     * - Còn lại: gửi OTP tới email (hoặc SĐT nếu không có email) của admin, trả challengeId cho bước 2.
      */
     public AdminLoginResult adminLogin(String email, String password, ClientInfo client) {
         // Chống dò mật khẩu: chỉ đếm lần đăng nhập SAI (5 lần / 10 phút / IP)
@@ -84,10 +96,11 @@ public class AuthService {
             userAccountService.recordLogin(user.getId());
             return AdminLoginResult.loggedIn(tokenService.issue(user, client));
         }
-        long ttl = otpService.send(user.getPhone(), OtpPurpose.ADMIN_LOGIN, client.ipHash());
+        OtpTarget target = user.otpTarget();
+        long ttl = otpService.send(target, OtpPurpose.ADMIN_LOGIN, client.ipHash());
         String challengeId = Hashing.randomToken(24);
         redis.opsForValue().set(CHALLENGE_PREFIX + challengeId, user.getId().toString(), Duration.ofSeconds(ttl));
-        return AdminLoginResult.otpRequired(challengeId, user.getPhone().masked(), ttl);
+        return AdminLoginResult.otpRequired(challengeId, target.masked(), ttl);
     }
 
     /** Bước 2 đăng nhập admin: OTP đúng -> cấp phiên. Sai OTP chịu giới hạn 5 lần như OTP khách. */
@@ -97,7 +110,7 @@ public class AuthService {
             throw new UnauthorizedException("CHALLENGE_EXPIRED", "Phiên đăng nhập đã hết hạn, vui lòng nhập lại mật khẩu");
         }
         UserAccount user = userAccountService.get(UUID.fromString(userId));
-        otpService.verify(user.getPhone(), OtpPurpose.ADMIN_LOGIN, otp);
+        otpService.verify(user.otpTarget(), OtpPurpose.ADMIN_LOGIN, otp);
         redis.delete(CHALLENGE_PREFIX + challengeId);
         userAccountService.recordLogin(user.getId());
         return tokenService.issue(user, client);

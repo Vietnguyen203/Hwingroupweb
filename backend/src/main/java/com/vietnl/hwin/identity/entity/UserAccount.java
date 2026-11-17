@@ -22,6 +22,7 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.UuidGenerator;
 
 import com.vietnl.hwin.common.domain.AggregateRoot;
+import com.vietnl.hwin.common.domain.EmailAddress;
 import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.common.exception.DomainException;
 
@@ -31,7 +32,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * Aggregate root: tài khoản người dùng.
- * - Khách/CTV: định danh bằng SĐT, đăng nhập OTP.
+ * - Khách/CTV: định danh bằng SĐT hoặc email, đăng nhập OTP (gửi tới đúng nơi đã nhập).
  * - Admin: định danh bằng email + mật khẩu (BCrypt).
  */
 @Entity
@@ -68,22 +69,49 @@ public class UserAccount extends AggregateRoot<UserAccount> {
     /** Đăng nhập admin không cần OTP – CHỈ tài khoản dev admin/admin (gắn theo tài khoản, không theo role). */
     private boolean otpExempt;
 
-    /** Tạo tài khoản khách khi đăng nhập OTP lần đầu. */
+    /** Tạo tài khoản khách khi đăng nhập OTP bằng SĐT lần đầu. */
     public static UserAccount registerCustomer(PhoneNumber phone) {
-        UserAccount u = new UserAccount();
+        UserAccount u = newCustomer();
         u.phone = phone;
+        return u;
+    }
+
+    /** Tạo tài khoản khách khi đăng nhập OTP bằng email lần đầu (chưa có SĐT). */
+    public static UserAccount registerCustomer(EmailAddress email) {
+        UserAccount u = newCustomer();
+        u.email = email.value();
+        return u;
+    }
+
+    private static UserAccount newCustomer() {
+        UserAccount u = new UserAccount();
         u.status = UserStatus.ACTIVE;
         u.roles.add(Role.CUSTOMER);
         return u;
     }
 
     /**
-     * Tạo tài khoản quản trị – luôn đăng nhập 2 bước (mật khẩu + OTP), nên bắt buộc có SĐT nhận OTP.
-     * {@code email} là email hoặc tên đăng nhập.
+     * Nơi nhận OTP bảo mật (đăng nhập admin, đổi tài khoản ngân hàng):
+     * email nếu tài khoản có email hợp lệ, không thì SĐT.
+     */
+    public OtpTarget otpTarget() {
+        if (EmailAddress.isValid(email)) {
+            return OtpTarget.email(EmailAddress.of(email));
+        }
+        if (phone != null) {
+            return OtpTarget.phone(phone);
+        }
+        throw new DomainException("NO_OTP_CONTACT", "Tài khoản chưa có email hoặc số điện thoại để nhận OTP");
+    }
+
+    /**
+     * Tạo tài khoản quản trị – luôn đăng nhập 2 bước (mật khẩu + OTP), nên bắt buộc có nơi nhận OTP:
+     * {@code email} là email thật, hoặc có SĐT. {@code email} là email hoặc tên đăng nhập.
      */
     public static UserAccount createAdmin(String email, String passwordHash, String fullName, PhoneNumber phone) {
-        if (phone == null) {
-            throw new DomainException("ADMIN_PHONE_REQUIRED", "Admin cần số điện thoại để nhận OTP đăng nhập");
+        if (phone == null && !EmailAddress.isValid(email)) {
+            throw new DomainException("ADMIN_CONTACT_REQUIRED",
+                    "Admin cần email thật hoặc số điện thoại để nhận OTP đăng nhập");
         }
         UserAccount u = newAdmin(email, passwordHash, fullName);
         u.phone = phone;

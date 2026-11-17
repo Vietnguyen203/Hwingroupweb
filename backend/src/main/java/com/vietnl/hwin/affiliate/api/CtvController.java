@@ -61,7 +61,7 @@ public class CtvController {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public AffiliateResponse register(@AuthenticationPrincipal AuthPrincipal me, @Valid @RequestBody RegisterRequest r) {
-        return affiliates.register(me.userId(), r.fullName(), r.socialLink(), r.note(),
+        return affiliates.register(me.userId(), r.fullName(), r.socialLink(), r.note(), r.phone(),
                 a -> mapper.toResponse(a, props.bankChangeLock()));
     }
 

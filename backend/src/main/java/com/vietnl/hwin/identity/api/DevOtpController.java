@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.common.exception.NotFoundException;
 import com.vietnl.hwin.identity.entity.OtpPurpose;
+import com.vietnl.hwin.identity.entity.OtpTarget;
 import com.vietnl.hwin.identity.service.integration.DevOtpInbox;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,10 +31,12 @@ public class DevOtpController {
         this.inbox = inbox;
     }
 
-    /** @param purpose LOGIN | BANK_CHANGE */
+    /** Truyền {@code phone} hoặc {@code email}. @param purpose LOGIN | BANK_CHANGE | ADMIN_LOGIN */
     @GetMapping("/latest")
-    public Map<String, String> latest(@RequestParam String phone, @RequestParam(defaultValue = "LOGIN") OtpPurpose purpose) {
-        return inbox.latest(PhoneNumber.of(phone), purpose).map(code -> Map.of("code", code))
-                .orElseThrow(() -> new NotFoundException("Chưa có OTP cho số này"));
+    public Map<String, String> latest(@RequestParam(required = false) String phone,
+                                      @RequestParam(required = false) String email,
+                                      @RequestParam(defaultValue = "LOGIN") OtpPurpose purpose) {
+        return inbox.latest(OtpTarget.of(phone, email), purpose).map(code -> Map.of("code", code))
+                .orElseThrow(() -> new NotFoundException("Chưa có OTP cho nơi nhận này"));
     }
 }

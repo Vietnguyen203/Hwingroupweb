@@ -108,8 +108,10 @@ cd ..\frontend; npm run build; npm run lint
 - **Vai trò AFFILIATE** cấp qua event khi admin duyệt; có hiệu lực từ access token kế tiếp (`POST /api/auth/refresh` hoặc đăng nhập lại).
 - **Số dư CTV** được tính (hoa hồng APPROVED − rút tiền chưa bị từ chối), không lưu cột số dư → từ chối rút tiền tự trả tiền về. Mỗi CTV tối đa 1 yêu cầu rút đang mở (unique index).
 - **Ngân hàng CTV** mã hóa AES-256-GCM (khóa `AFFILIATE_BANK_KEY`); CTV chỉ thấy 4 số cuối; admin xem bản giải mã khi chi trả (ghi audit). Lần thiết lập đầu không khóa rút, các lần đổi sau khóa 48 giờ.
-- **Đăng nhập admin 2 bước**: mọi tài khoản role ADMIN phải nhập mật khẩu rồi OTP gửi tới SĐT của admin. Miễn OTP gắn theo **tài khoản** (cột `otp_exempt`), chỉ tài khoản dev `admin`/`admin` có và chỉ ở profile dev.
-- **Admin ở môi trường thật**: backend **từ chối khởi động** nếu `ADMIN_PASSWORD` yếu (< 12 ký tự, thiếu chữ/số, chứa "admin"), thiếu `ADMIN_PHONE`, bật miễn OTP, hoặc trong DB còn tài khoản miễn OTP.
+- **Đăng nhập khách / CTV bằng SĐT hoặc email**: OTP gửi tới đúng nơi đã nhập. **Email gửi thật** qua SMTP (dev: Mailpit, xem thư tại http://localhost:18025); **SMS hiện là giả lập** – chỉ dùng được ở dev, môi trường thật báo "vui lòng dùng email". Kế hoạch SMS brandname: `docs/07-otp.md`.
+- **Tài khoản đăng nhập bằng email chưa có SĐT**: đăng ký CTV phải nhập SĐT liên hệ; OTP đổi ngân hàng / đăng nhập admin gửi tới email (không có email thì SĐT).
+- **Đăng nhập admin 2 bước**: mọi tài khoản role ADMIN phải nhập mật khẩu rồi OTP gửi tới email (hoặc SĐT) của admin. Miễn OTP gắn theo **tài khoản** (cột `otp_exempt`), chỉ tài khoản dev `admin`/`admin` có và chỉ ở profile dev.
+- **Admin ở môi trường thật**: backend **từ chối khởi động** nếu `ADMIN_PASSWORD` yếu (< 12 ký tự, thiếu chữ/số, chứa "admin"), không có nơi nhận OTP (`ADMIN_EMAIL` không phải email thật và thiếu `ADMIN_PHONE`), thiếu SMTP (`MAIL_HOST`), bật miễn OTP, hoặc trong DB còn tài khoản miễn OTP.
 - **Tài khoản admin không đăng nhập được bằng OTP khách** (`ADMIN_USE_ADMIN_LOGIN`) – tránh bỏ qua bước mật khẩu.
 - **Chống dò mật khẩu admin**: chỉ đếm lần đăng nhập **sai** (5 lần / 10 phút / IP).
 - **Chỉ ở profile dev**: dữ liệu mẫu (`db/demo`), `GET /api/dev/otp/latest` (lấy OTP cho Postman/test), chạy job duyệt hoa hồng / hủy đơn quá hạn với thời điểm giả lập (`asOf`), nới giới hạn để chạy Postman nhiều lần (OTP theo IP: 50, đặt hàng: 30 đơn / 10 phút).

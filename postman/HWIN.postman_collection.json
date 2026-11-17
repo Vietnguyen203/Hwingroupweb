@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "622a7efe-4856-4932-a6dd-340a004baa0d",
     "name": "Hwin Food – API",
-    "description": "API backend Hwin Food. Chọn environment 'Hwin Food – Local' rồi Run cả collection (folder 01 → 16), hoặc chạy từng folder theo thứ tự. Folder 02 đăng nhập cho cả 3 vai trò; các folder sau dùng lại phiên đó.\nSĐT sinh ngẫu nhiên mỗi lần chạy, OTP tự lấy qua /api/dev/otp/latest (chỉ profile dev). Ba phiên song song: khách (localhost), admin (127.0.0.1), CTV ([::1]).",
+    "description": "API backend Hwin Food. Chọn environment 'Hwin Food – Local' rồi Run cả collection (folder 01 → 16), hoặc chạy từng folder theo thứ tự. Folder 02 đăng nhập cho cả 3 vai trò; các folder sau dùng lại phiên đó.\nSĐT / email sinh ngẫu nhiên mỗi lần chạy (email dev xem tại Mailpit http://localhost:18025), OTP tự lấy qua /api/dev/otp/latest (chỉ profile dev). Ba phiên song song: khách (localhost), admin (127.0.0.1), CTV ([::1]).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "event": [
@@ -89,7 +89,205 @@
           ]
         },
         {
-          "name": "Khách: gửi OTP (SĐT ngẫu nhiên)",
+          "name": "Nhập cả SĐT và email → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "otp"
+              ]
+            },
+            "description": "Chỉ được chọn một: SĐT (OTP qua SMS) hoặc email (OTP qua email).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"0912345678\",\n  \"email\": \"khach@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('code = VALIDATION_FAILED', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_FAILED'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách (email): gửi OTP qua email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "otp"
+              ]
+            },
+            "description": "Sinh email ngẫu nhiên. Dev: email thật được gửi tới Mailpit – xem thư tại http://localhost:18025",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{customerEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const r = String(Math.floor(Math.random() * 1e8)).padStart(8, '0');",
+                  "pm.collectionVariables.set('customerEmail', 'khach' + r + '@example.com');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 202', () => pm.response.to.have.status(202));",
+                  "const r = pm.response.json();",
+                  "pm.test('Gửi qua EMAIL', () => pm.expect(r.channel).to.eql('EMAIL'));",
+                  "pm.test('Email đã che', () => pm.expect(r.sentTo).to.match(/^kh\\*{6}@example\\.com$/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách (email): nhập OTP → đăng nhập (email mới thì tự tạo tài khoản)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/otp/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "otp",
+                "verify"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"otp\": \"{{customerEmailOtp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Tự lấy OTP vừa gửi (endpoint chỉ có ở profile dev)",
+                  "const v = pm.collectionVariables.get('customerEmail');",
+                  "pm.sendRequest(pm.variables.get('baseUrl') + '/api/dev/otp/latest?purpose=LOGIN&email=' + encodeURIComponent(v), (err, res) => {",
+                  "  pm.collectionVariables.set('customerEmailOtp', res.json().code);",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const me = pm.response.json();",
+                  "pm.test('Có role CUSTOMER', () => pm.expect(me.roles).to.include('CUSTOMER'));",
+                  "pm.test('Đúng email, chưa có SĐT', () => { pm.expect(me.email).to.eql(pm.collectionVariables.get('customerEmail')); pm.expect(me.phoneMasked).to.be.null; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách (email): đăng xuất (để đăng nhập tiếp bằng SĐT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách (SĐT): gửi OTP (SĐT ngẫu nhiên)",
           "request": {
             "method": "POST",
             "header": [
@@ -137,14 +335,15 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('HTTP 202', () => pm.response.to.have.status(202));"
+                  "pm.test('HTTP 202', () => pm.response.to.have.status(202));",
+                  "pm.test('Gửi qua SMS (dev: giả lập)', () => pm.expect(pm.response.json().channel).to.eql('SMS'));"
                 ]
               }
             }
           ]
         },
         {
-          "name": "Khách: nhập OTP sai → 422",
+          "name": "Khách (SĐT): nhập OTP sai → 422",
           "request": {
             "method": "POST",
             "header": [
@@ -189,7 +388,7 @@
           ]
         },
         {
-          "name": "Khách: nhập OTP đúng → đăng nhập (SĐT mới thì tự tạo tài khoản)",
+          "name": "Khách (SĐT): nhập OTP đúng → đăng nhập (SĐT mới thì tự tạo tài khoản)",
           "request": {
             "method": "POST",
             "header": [
@@ -249,7 +448,7 @@
           ]
         },
         {
-          "name": "Khách: thông tin của tôi",
+          "name": "Khách (SĐT): thông tin của tôi",
           "request": {
             "method": "GET",
             "header": [],
@@ -280,7 +479,7 @@
           ]
         },
         {
-          "name": "Khách: làm mới phiên (xoay vòng refresh token)",
+          "name": "Khách (SĐT): làm mới phiên (xoay vòng refresh token)",
           "request": {
             "method": "POST",
             "header": [],
@@ -459,7 +658,7 @@
           ]
         }
       ],
-      "description": "Khách và CTV: đăng nhập = đăng ký, chỉ cần SĐT + OTP. Admin: email + mật khẩu (admin thật cần thêm OTP – xem folder 14)."
+      "description": "Khách và CTV: đăng nhập = đăng ký, nhập SĐT (OTP qua SMS – dev giả lập) HOẶC email (OTP qua email – dev xem tại Mailpit http://localhost:18025). Admin: email + mật khẩu (admin thật cần thêm OTP – xem folder 15)."
     },
     {
       "name": "03. Khách – xem sản phẩm",
@@ -6115,7 +6314,8 @@
                 "exec": [
                   "const r = String(Math.floor(Math.random() * 1e8)).padStart(8, '0');",
                   "pm.collectionVariables.set('newAdminEmail', 'ops' + r + '@hwin.vn');",
-                  "pm.collectionVariables.set('newAdminPhone', '09' + r);"
+                  "pm.collectionVariables.set('newAdminPhone', '09' + r);",
+                  "pm.collectionVariables.set('newAdminLogin', 'ops' + r);"
                 ]
               }
             },
@@ -6177,7 +6377,7 @@
           ]
         },
         {
-          "name": "Tạo admin thiếu SĐT → 400",
+          "name": "Tạo admin: tên đăng nhập không phải email + không SĐT → 422",
           "request": {
             "method": "POST",
             "header": [
@@ -6197,10 +6397,10 @@
                 "admins"
               ]
             },
-            "description": "",
+            "description": "Admin phải có nơi nhận OTP: email thật hoặc SĐT.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{newAdminEmail}}\",\n  \"password\": \"Van-hanh-2026-hwin\",\n  \"fullName\": \"Admin vận hành\"\n}",
+              "raw": "{\n  \"email\": \"{{newAdminLogin}}\",\n  \"password\": \"Van-hanh-2026-hwin\",\n  \"fullName\": \"Admin vận hành\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6214,8 +6414,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
-                  "pm.test('code = VALIDATION_FAILED', () => pm.expect(pm.response.json().code).to.eql('VALIDATION_FAILED'));"
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                  "pm.test('code = ADMIN_CONTACT_REQUIRED', () => pm.expect(pm.response.json().code).to.eql('ADMIN_CONTACT_REQUIRED'));"
                 ]
               }
             }
@@ -6328,7 +6528,7 @@
           ]
         },
         {
-          "name": "Admin mới – bước 1: mật khẩu → yêu cầu OTP",
+          "name": "Admin mới – bước 1: mật khẩu → OTP gửi qua email",
           "request": {
             "method": "POST",
             "header": [
@@ -6369,6 +6569,7 @@
                   "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test('Cần OTP', () => pm.expect(r.otpRequired).to.be.true);",
+                  "pm.test('OTP gửi tới email (đã che)', () => pm.expect(r.sentTo).to.match(/^op\\*{6}@hwin\\.vn$/));",
                   "pm.test('Chưa cấp phiên', () => { pm.expect(r.user).to.be.null; pm.expect(pm.response.headers.get('Set-Cookie')).to.be.undefined; });",
                   "pm.collectionVariables.set('challengeId', r.challengeId);"
                 ]
@@ -6493,8 +6694,8 @@
                 "type": "text/javascript",
                 "exec": [
                   "// Tự lấy OTP vừa gửi (endpoint chỉ có ở profile dev)",
-                  "const phone = pm.collectionVariables.get('newAdminPhone');",
-                  "pm.sendRequest(pm.variables.get('baseUrl') + '/api/dev/otp/latest?purpose=ADMIN_LOGIN&phone=' + phone, (err, res) => {",
+                  "const v = pm.collectionVariables.get('newAdminEmail');",
+                  "pm.sendRequest(pm.variables.get('baseUrl') + '/api/dev/otp/latest?purpose=ADMIN_LOGIN&email=' + encodeURIComponent(v), (err, res) => {",
                   "  pm.collectionVariables.set('adminOtp', res.json().code);",
                   "});"
                 ]
@@ -7018,6 +7219,18 @@
     },
     {
       "key": "adminCustomerOtp",
+      "value": ""
+    },
+    {
+      "key": "customerEmail",
+      "value": ""
+    },
+    {
+      "key": "customerEmailOtp",
+      "value": ""
+    },
+    {
+      "key": "newAdminLogin",
       "value": ""
     }
   ]

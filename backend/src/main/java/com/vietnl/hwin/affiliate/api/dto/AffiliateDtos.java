@@ -28,7 +28,9 @@ public final class AffiliateDtos {
             @NotBlank @Size(max = 100) String fullName,
             @Size(max = 500) String socialLink,
             @Size(max = 1000) String note,
-            @AssertTrue(message = "Vui lòng đồng ý điều khoản cộng tác viên") boolean acceptTerms) {
+            @AssertTrue(message = "Vui lòng đồng ý điều khoản cộng tác viên") boolean acceptTerms,
+            // chỉ dùng khi tài khoản đăng ký bằng email (chưa có SĐT)
+            @Pattern(regexp = "^[0-9+ .\\-]{9,16}$", message = "Số điện thoại không hợp lệ") String phone) {
     }
 
     /** Hồ sơ CTV – SĐT đã che, ngân hàng chỉ hiện 4 số cuối. */

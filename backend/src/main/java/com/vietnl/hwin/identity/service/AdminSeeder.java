@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vietnl.hwin.common.domain.EmailAddress;
 import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.common.exception.DomainException;
 import com.vietnl.hwin.identity.entity.UserAccount;
@@ -76,11 +77,12 @@ public class AdminSeeder implements ApplicationRunner {
             } catch (DomainException e) {
                 throw new IllegalStateException("ADMIN_PASSWORD không đạt yêu cầu: " + e.getMessage(), e);
             }
-            if (isBlank(props.phone())) {
-                throw new IllegalStateException("Thiếu ADMIN_PHONE – admin cần số điện thoại để nhận OTP đăng nhập");
+            if (isBlank(props.phone()) && !EmailAddress.isValid(login)) {
+                throw new IllegalStateException(
+                        "ADMIN_EMAIL phải là email thật hoặc phải có ADMIN_PHONE – admin cần nơi nhận OTP đăng nhập");
             }
             admin = UserAccount.createAdmin(login, passwordEncoder.encode(props.password()), props.fullName(),
-                    PhoneNumber.of(props.phone()));
+                    isBlank(props.phone()) ? null : PhoneNumber.of(props.phone()));
             log.info("Đã tạo tài khoản admin {} (đăng nhập mật khẩu + OTP)", login);
         }
         users.save(admin);

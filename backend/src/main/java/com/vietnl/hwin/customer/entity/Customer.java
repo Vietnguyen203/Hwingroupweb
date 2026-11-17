@@ -41,8 +41,10 @@ public class Customer extends AggregateRoot<Customer> {
     @Id
     private UUID id;
 
-    @Column(nullable = false, unique = true)
+    /** SĐT hoặc email – ít nhất một (khách đăng nhập bằng email chưa có SĐT). */
     private PhoneNumber phone;
+
+    private String email;
 
     private String fullName;
 
@@ -50,10 +52,14 @@ public class Customer extends AggregateRoot<Customer> {
     @JoinColumn(name = "customer_id", nullable = false)
     private List<CustomerAddress> addresses = new ArrayList<>();
 
-    public static Customer register(UUID userId, PhoneNumber phone) {
+    public static Customer register(UUID userId, PhoneNumber phone, String email) {
+        if (phone == null && email == null) {
+            throw new DomainException("CONTACT_REQUIRED", "Khách hàng cần số điện thoại hoặc email");
+        }
         Customer c = new Customer();
         c.id = userId;
         c.phone = phone;
+        c.email = email;
         return c;
     }
 

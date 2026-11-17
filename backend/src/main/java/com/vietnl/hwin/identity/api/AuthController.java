@@ -28,7 +28,7 @@ import com.vietnl.hwin.identity.service.UserAccountService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-/** Đăng nhập khách / CTV bằng SĐT + OTP, làm mới và thu hồi phiên. */
+/** Đăng nhập khách / CTV bằng SĐT hoặc email + OTP, làm mới và thu hồi phiên. */
 @Tag(name = "identity")
 @RestController
 @RequestMapping("/api/auth")
@@ -50,13 +50,15 @@ public class AuthController {
     @PostMapping("/otp")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public OtpSentResponse sendOtp(@Valid @RequestBody OtpRequest body, HttpServletRequest request) {
-        return new OtpSentResponse(authService.requestLoginOtp(body.phone(), ClientInfo.from(request)));
+        var sent = authService.requestLoginOtp(body.phone(), body.email(), ClientInfo.from(request));
+        return new OtpSentResponse(sent.channel().name(), sent.sentTo(), sent.expiresInSeconds());
     }
 
     @PostMapping("/otp/verify")
     public MeResponse verifyOtp(@Valid @RequestBody OtpVerifyRequest body, HttpServletRequest request,
                                 HttpServletResponse response) {
-        IssuedTokens tokens = authService.loginWithOtp(body.phone(), body.otp(), ClientInfo.from(request));
+        IssuedTokens tokens = authService.loginWithOtp(body.phone(), body.email(), body.otp(),
+                ClientInfo.from(request));
         cookies.write(response, tokens.accessToken(), tokens.refreshToken());
         return mapper.toMe(userAccountService.get(tokens.userId()));
     }

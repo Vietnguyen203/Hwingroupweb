@@ -14,7 +14,7 @@ public final class CustomerDtos {
     private CustomerDtos() {
     }
 
-    public record ProfileResponse(UUID id, String phone, String fullName, int totalOrders, long totalSpent,
+    public record ProfileResponse(UUID id, String phone, String email, String fullName, int totalOrders, long totalSpent,
                                   Instant firstOrderAt, Instant lastOrderAt) {
     }
 

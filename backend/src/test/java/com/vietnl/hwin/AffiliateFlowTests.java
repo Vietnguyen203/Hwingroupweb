@@ -65,7 +65,7 @@ class AffiliateFlowTests {
 
     private Affiliate approvedAffiliate(String phone) {
         UUID userId = users.loginByPhone(PhoneNumber.of(phone)).getId();
-        UUID id = affiliateService.register(userId, "CTV " + phone, "https://fb.com/ctv", null, Affiliate::getId);
+        UUID id = affiliateService.register(userId, "CTV " + phone, "https://fb.com/ctv", null, null, Affiliate::getId);
         affiliateAdmin.approve(id, ADMIN, a -> a);
         return affiliates.findById(id).orElseThrow();
     }

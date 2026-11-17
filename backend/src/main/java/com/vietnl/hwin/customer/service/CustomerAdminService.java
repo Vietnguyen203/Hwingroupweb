@@ -40,7 +40,7 @@ public class CustomerAdminService {
         this.clock = clock;
     }
 
-    public record CustomerRow(UUID id, String phone, String fullName, int totalOrders, long totalSpent,
+    public record CustomerRow(UUID id, String phone, String email, String fullName, int totalOrders, long totalSpent,
                               Instant firstOrderAt, Instant lastOrderAt, Instant createdAt, CustomerSegment segment) {
     }
 
@@ -81,9 +81,9 @@ public class CustomerAdminService {
         List<CustomerRow> rows = jdbc.query(select() + where + " order by c.created_at desc limit 10000",
                 (rs, i) -> row(rs), args.toArray());
         out.write('﻿');
-        out.write("id,so_dien_thoai,ho_ten,nhom,tong_don,tong_chi_tieu,don_dau_tien,don_gan_nhat,ngay_tao\n");
+        out.write("id,so_dien_thoai,email,ho_ten,nhom,tong_don,tong_chi_tieu,don_dau_tien,don_gan_nhat,ngay_tao\n");
         for (CustomerRow r : rows) {
-            out.write(String.join(",", String.valueOf(r.id()), csv(r.phone()), csv(r.fullName()),
+            out.write(String.join(",", String.valueOf(r.id()), csv(r.phone()), csv(r.email()), csv(r.fullName()),
                     r.segment().name(), String.valueOf(r.totalOrders()), String.valueOf(r.totalSpent()),
                     time(r.firstOrderAt()), time(r.lastOrderAt()), time(r.createdAt())));
             out.write('\n');
@@ -103,7 +103,7 @@ public class CustomerAdminService {
 
     private static String select() {
         return """
-                select c.id, c.phone, c.full_name, c.created_at,
+                select c.id, c.phone, c.email, c.full_name, c.created_at,
                        coalesce(s.total_orders, 0) as total_orders, coalesce(s.total_spent, 0) as total_spent,
                        s.first_order_at, s.last_order_at
                   from customer.customer c
@@ -119,11 +119,13 @@ public class CustomerAdminService {
             if (digits.length() >= 3) {
                 // SĐT lưu dạng +84xxxxxxxxx: bỏ số 0 đầu của chuỗi người dùng nhập
                 String phonePart = digits.startsWith("0") ? digits.substring(1) : digits;
-                w.append(" and (c.phone like ? or lower(c.full_name) like ?)");
+                w.append(" and (c.phone like ? or lower(c.full_name) like ? or c.email like ?)");
                 args.add("%" + phonePart + "%");
                 args.add(name);
+                args.add(name);
             } else {
-                w.append(" and lower(c.full_name) like ?");
+                w.append(" and (lower(c.full_name) like ? or c.email like ?)");
+                args.add(name);
                 args.add(name);
             }
         }
@@ -152,10 +154,14 @@ public class CustomerAdminService {
     private CustomerRow row(java.sql.ResultSet rs) throws java.sql.SQLException {
         Instant last = instant(rs.getTimestamp("last_order_at"));
         int totalOrders = rs.getInt("total_orders");
-        return new CustomerRow(rs.getObject("id", UUID.class), new PhoneNumber(rs.getString("phone")).local(),
+        return new CustomerRow(rs.getObject("id", UUID.class), localPhone(rs.getString("phone")), rs.getString("email"),
                 rs.getString("full_name"), totalOrders, rs.getLong("total_spent"),
                 instant(rs.getTimestamp("first_order_at")), last, instant(rs.getTimestamp("created_at")),
                 segmentOf(totalOrders, last));
+    }
+
+    private static String localPhone(String e164) {
+        return e164 == null ? null : new PhoneNumber(e164).local();
     }
 
     private Instant dormantBefore() {

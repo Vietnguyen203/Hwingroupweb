@@ -18,7 +18,8 @@ public interface CustomerMapper {
     default ProfileResponse toProfile(Profile p) {
         var c = p.customer();
         var s = p.stats();
-        return new ProfileResponse(c.getId(), c.getPhone().local(), c.getFullName(), s.getTotalOrders(),
+        return new ProfileResponse(c.getId(), c.getPhone() == null ? null : c.getPhone().local(), c.getEmail(),
+                c.getFullName(), s.getTotalOrders(),
                 s.getTotalSpent().amount(), s.getFirstOrderAt(), s.getLastOrderAt());
     }
 

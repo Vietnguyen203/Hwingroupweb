@@ -1,4 +1,4 @@
-# Hạ tầng dev: PostgreSQL + Redis.
+# Hạ tầng dev: PostgreSQL + Redis + Mailpit (hộp thư giả nhận email OTP).
 # Dùng cổng 15432 / 16379 để tránh trùng với Postgres/Redis đã cài sẵn trên máy.
 # Giữ tên project cố định (không phụ thuộc tên thư mục) để dùng lại container + volume dữ liệu.
 name: hwin
@@ -18,6 +18,12 @@ services:
     image: 'redis:7-alpine'
     ports:
       - '16379:6379'
+  mailpit:
+    # SMTP 11025, giao diện xem thư http://localhost:18025
+    image: 'axllent/mailpit:latest'
+    ports:
+      - '11025:1025'
+      - '18025:8025'
 
 volumes:
   hwin-pg:

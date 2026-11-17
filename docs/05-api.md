@@ -17,15 +17,15 @@
 
 | Method | Path | Quyền | Mô tả |
 |---|---|---|---|
-| POST | `/api/auth/otp` | public | Gửi OTP đăng nhập `{phone}`. Rate limit 3/10 phút theo SĐT và IP |
-| POST | `/api/auth/otp/verify` | public | `{phone, otp}` → tạo tài khoản nếu chưa có, set cookie JWT |
+| POST | `/api/auth/otp` | public | Gửi OTP đăng nhập: `{phone}` (SMS – hiện giả lập, chỉ dev) **hoặc** `{email}` (email thật). Trả `{channel, sentTo, expiresInSeconds}`. Rate limit 3/10 phút theo nơi nhận và IP |
+| POST | `/api/auth/otp/verify` | public | `{phone, otp}` hoặc `{email, otp}` → tạo tài khoản nếu chưa có, set cookie JWT |
 | POST | `/api/auth/refresh` | cookie `hwin_rt` | Xoay vòng refresh token, set cookie mới |
 | POST | `/api/auth/logout` | auth | Thu hồi refresh token hiện tại, xóa cookie |
 | GET | `/api/auth/me` | auth | `{id, phone (che), fullName, roles}` – frontend & proxy.ts dùng |
-| POST | `/api/admin/auth/login` | public | Bước 1: `{email, password}`. Tài khoản thường → `{otpRequired: true, challengeId}` (OTP gửi tới SĐT admin); riêng tài khoản dev `admin` miễn OTP → cookie JWT ngay. Chỉ đếm lần sai: 5/10 phút/IP |
+| POST | `/api/admin/auth/login` | public | Bước 1: `{email, password}`. Tài khoản thường → `{otpRequired: true, challengeId}` (OTP gửi tới email của admin, không có email thật thì tới SĐT; `sentTo` = nơi nhận đã che); riêng tài khoản dev `admin` miễn OTP → cookie JWT ngay. Chỉ đếm lần sai: 5/10 phút/IP |
 | POST | `/api/admin/auth/login/verify` | public | Bước 2: `{challengeId, otp}` → cookie JWT |
 | GET | `/api/admin/admins` | ADMIN | Danh sách tài khoản quản trị |
-| POST | `/api/admin/admins` | ADMIN | Tạo admin `{email, password, fullName, phone}` – mật khẩu ≥ 12 ký tự có chữ + số, SĐT bắt buộc; luôn đăng nhập 2 bước |
+| POST | `/api/admin/admins` | ADMIN | Tạo admin `{email, password, fullName, phone?}` – mật khẩu ≥ 12 ký tự có chữ + số; cần email thật hoặc SĐT để nhận OTP (`ADMIN_CONTACT_REQUIRED`); luôn đăng nhập 2 bước |
 
 ## catalog
 
@@ -95,13 +95,13 @@
 | Method | Path | Quyền | Mô tả |
 |---|---|---|---|
 | POST | `/api/affiliate/clicks` | public | `{code, landingPath}` → ghi click (không đếm trùng IP + mã trong 24h), mã hợp lệ thì set cookie `hwin_ref` 30 ngày. Luôn 204 |
-| POST | `/api/ctv/register` | CUSTOMER | Đăng ký CTV `{fullName, socialLink, note, acceptTerms}` (đăng ký lại nếu đã bị từ chối) |
+| POST | `/api/ctv/register` | CUSTOMER | Đăng ký CTV `{fullName, socialLink, note, acceptTerms, phone?}` – `phone` bắt buộc nếu tài khoản đăng nhập bằng email (`PHONE_REQUIRED`); đăng ký lại nếu đã bị từ chối |
 | GET | `/api/ctv/me` | CUSTOMER | Hồ sơ CTV + trạng thái + lý do (404 nếu chưa đăng ký) |
 | GET | `/api/ctv/dashboard` | AFFILIATE | Mã, link chia sẻ, click (tổng / 30 ngày), khách đã gắn, hoa hồng theo trạng thái, số dư khả dụng, đã rút, khóa rút đến |
 | GET | `/api/ctv/commissions` | AFFILIATE | Hoa hồng của tôi (mã đơn, cơ sở tính, số tiền, trạng thái, mốc duyệt) |
 | GET | `/api/ctv/customers` | AFFILIATE | Khách đã gắn (SĐT đã che, ngày gắn) |
 | GET | `/api/ctv/bank-account` | AFFILIATE | Ngân hàng (chỉ 4 số cuối) + `withdrawLockedUntil` |
-| POST | `/api/ctv/bank-account/otp` | AFFILIATE | Gửi OTP `BANK_CHANGE` tới SĐT của CTV |
+| POST | `/api/ctv/bank-account/otp` | AFFILIATE | Gửi OTP `BANK_CHANGE` tới email của tài khoản (không có thì SĐT) |
 | PUT | `/api/ctv/bank-account` | AFFILIATE | `{bankName, accountNo, accountHolder, otp}` – mã hóa AES-GCM; đổi (không phải lần đầu) khóa rút 48h |
 | GET | `/api/ctv/payouts` | AFFILIATE | Lịch sử rút tiền |
 | POST | `/api/ctv/payouts` | AFFILIATE | Yêu cầu rút `{amount}` (≥ 200.000, ≤ số dư, 1 yêu cầu mở / CTV) |
@@ -123,7 +123,7 @@
 
 | Method | Path | Mô tả |
 |---|---|---|
-| GET | `/api/dev/otp/latest?phone=&purpose=LOGIN\|BANK_CHANGE` | OTP vừa gửi – để Postman/test tự đăng nhập. Môi trường khác không có endpoint này (404) |
+| GET | `/api/dev/otp/latest?phone=\|email=&purpose=LOGIN\|BANK_CHANGE\|ADMIN_LOGIN` | OTP vừa gửi – để Postman/test tự đăng nhập. Môi trường khác không có endpoint này (404) |
 
 ## common / vận hành
 

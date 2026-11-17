@@ -43,13 +43,21 @@ public class AffiliateService {
         this.clock = clock;
     }
 
-    /** Đăng ký CTV (hoặc đăng ký lại nếu đã bị từ chối). SĐT lấy từ tài khoản – không nhận từ client. */
+    /**
+     * Đăng ký CTV (hoặc đăng ký lại nếu đã bị từ chối).
+     * SĐT ưu tiên lấy từ tài khoản; tài khoản đăng ký bằng email thì CTV phải nhập SĐT liên hệ ({@code rawPhone}).
+     */
     @Transactional
-    public <T> T register(UUID userId, String fullName, String socialLink, String note, Function<Affiliate, T> mapper) {
+    public <T> T register(UUID userId, String fullName, String socialLink, String note, String rawPhone,
+                          Function<Affiliate, T> mapper) {
         Affiliate a = affiliates.findByUserId(userId).orElse(null);
         if (a == null) {
-            PhoneNumber phone = users.findPhone(userId)
-                    .orElseThrow(() -> new DomainException("PHONE_REQUIRED", "Tài khoản cần có số điện thoại để đăng ký CTV"));
+            PhoneNumber phone = users.findPhone(userId).orElseGet(() -> {
+                if (rawPhone == null || rawPhone.isBlank()) {
+                    throw new DomainException("PHONE_REQUIRED", "Vui lòng nhập số điện thoại liên hệ để đăng ký CTV");
+                }
+                return PhoneNumber.of(rawPhone);
+            });
             a = affiliates.save(Affiliate.register(userId, phone, fullName, socialLink, note));
         } else if (a.getStatus() == AffiliateStatus.REJECTED) {
             a.reapply(fullName, socialLink, note);
@@ -64,10 +72,11 @@ public class AffiliateService {
         return mapper.apply(load(userId));
     }
 
-    /** Gửi OTP tới SĐT của CTV trước khi đổi tài khoản ngân hàng. */
+    /** Gửi OTP (tới email hoặc SĐT của tài khoản) trước khi đổi tài khoản ngân hàng. */
     @Transactional(readOnly = true)
     public long sendBankChangeOtp(UUID userId, String ipHash) {
-        return otp.sendBankChangeOtp(load(userId).getPhone(), ipHash);
+        load(userId); // phải là CTV
+        return otp.sendBankChangeOtp(userId, ipHash);
     }
 
     /** Đổi tài khoản ngân hàng: kiểm tra OTP -> mã hóa -> lưu -> audit. Đổi (không phải lần đầu) khóa rút 48h. */
@@ -75,7 +84,7 @@ public class AffiliateService {
     public <T> T changeBankAccount(UUID userId, String bankName, String accountNo, String holder, String otpCode,
                                    Function<Affiliate, T> mapper) {
         Affiliate a = load(userId);
-        otp.verifyBankChangeOtp(a.getPhone(), otpCode);
+        otp.verifyBankChangeOtp(userId, otpCode);
         boolean firstTime = a.getBankAccount() == null;
         BankAccount account = crypto.encrypt(bankName, accountNo, holder);
         Instant now = clock.instant();

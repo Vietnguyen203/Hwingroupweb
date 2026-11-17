@@ -23,9 +23,9 @@ import com.vietnl.hwin.affiliate.repository.CommissionRepository;
 import com.vietnl.hwin.affiliate.repository.CustomerBindingRepository;
 import com.vietnl.hwin.affiliate.repository.PayoutRepository;
 import com.vietnl.hwin.affiliate.repository.ReferralClickRepository;
-import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.common.exception.DomainException;
 import com.vietnl.hwin.common.exception.NotFoundException;
+import com.vietnl.hwin.identity.service.UserContact;
 import com.vietnl.hwin.identity.service.UserQueryService;
 
 /** Dashboard CTV: link, click, đơn, hoa hồng theo trạng thái, số dư, khách đã gắn. */
@@ -97,14 +97,14 @@ public class AffiliateDashboardService {
                 Sort.by(Sort.Order.desc("createdAt")))).map(mapper);
     }
 
-    /** Khách đã gắn với CTV – chỉ hiện SĐT đã che (không lộ thông tin khách). */
+    /** Khách đã gắn với CTV – chỉ hiện SĐT / email đã che (không lộ thông tin khách). */
     @Transactional(readOnly = true)
     public Page<BoundCustomer> customers(UUID userId, int page, int size) {
         Affiliate a = loadActive(userId);
         Page<CustomerBinding> result = bindings.findByAffiliateId(a.getId(), PageRequest.of(Math.max(page, 0),
                 Math.clamp(size, 1, 50), Sort.by(Sort.Order.desc("boundAt"))));
         return result.map(b -> new BoundCustomer(
-                users.findPhone(b.getCustomerId()).map(PhoneNumber::masked).orElse("–"), b.getBoundAt()));
+                users.findContact(b.getCustomerId()).map(UserContact::masked).orElse("–"), b.getBoundAt()));
     }
 
     private Affiliate loadActive(UUID userId) {

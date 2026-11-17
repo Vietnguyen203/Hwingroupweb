@@ -38,11 +38,11 @@ public class AdminAccountService {
                         Function<UserAccount, T> mapper) {
         String login = email == null ? "" : email.trim().toLowerCase();
         PasswordPolicy.validate(password, login);
-        PhoneNumber phone = PhoneNumber.of(rawPhone);
+        PhoneNumber phone = rawPhone == null || rawPhone.isBlank() ? null : PhoneNumber.of(rawPhone);
         if (users.existsByEmail(login)) {
             throw new DomainException("EMAIL_IN_USE", "Email / tên đăng nhập đã được dùng");
         }
-        if (users.findByPhone(phone).isPresent()) {
+        if (phone != null && users.findByPhone(phone).isPresent()) {
             throw new DomainException("PHONE_IN_USE", "Số điện thoại đã gắn với tài khoản khác");
         }
         UserAccount admin = users.save(UserAccount.createAdmin(login, passwordEncoder.encode(password), fullName, phone));

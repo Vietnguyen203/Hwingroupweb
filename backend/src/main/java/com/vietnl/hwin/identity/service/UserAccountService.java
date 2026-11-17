@@ -11,6 +11,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vietnl.hwin.common.domain.EmailAddress;
 import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.common.exception.DomainException;
 import com.vietnl.hwin.common.exception.NotFoundException;
@@ -42,17 +43,36 @@ public class UserAccountService {
     public UserAccount loginByPhone(PhoneNumber phone) {
         Instant now = clock.instant();
         UserAccount user = users.findByPhone(phone).orElse(null);
-        if (user != null && user.isAdmin()) {
-            // Không cho tài khoản quản trị vào bằng OTP khách (bỏ qua bước mật khẩu)
-            throw new DomainException("ADMIN_USE_ADMIN_LOGIN", "Tài khoản quản trị phải đăng nhập tại trang quản trị");
-        }
+        ensureNotAdmin(user);
         if (user == null) {
             user = users.save(UserAccount.registerCustomer(phone));
-            events.publishEvent(UserRegistered.of(user.getId(), phone.value(), now));
+            events.publishEvent(UserRegistered.of(user.getId(), phone.value(), null, now));
             log.info("Tạo tài khoản mới cho {}", phone.masked());
         }
         user.recordLogin(now);
         return user;
+    }
+
+    /** Như {@link #loginByPhone} nhưng định danh bằng email. */
+    @Transactional
+    public UserAccount loginByEmail(EmailAddress email) {
+        Instant now = clock.instant();
+        UserAccount user = users.findByEmail(email.value()).orElse(null);
+        ensureNotAdmin(user);
+        if (user == null) {
+            user = users.save(UserAccount.registerCustomer(email));
+            events.publishEvent(UserRegistered.of(user.getId(), null, email.value(), now));
+            log.info("Tạo tài khoản mới cho {}", email.masked());
+        }
+        user.recordLogin(now);
+        return user;
+    }
+
+    /** Không cho tài khoản quản trị vào bằng OTP khách (bỏ qua bước mật khẩu). */
+    private static void ensureNotAdmin(UserAccount user) {
+        if (user != null && user.isAdmin()) {
+            throw new DomainException("ADMIN_USE_ADMIN_LOGIN", "Tài khoản quản trị phải đăng nhập tại trang quản trị");
+        }
     }
 
     @Transactional

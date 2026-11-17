@@ -12,13 +12,13 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vietnl.hwin.common.domain.Address;
-import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.common.exception.NotFoundException;
 import com.vietnl.hwin.customer.entity.Customer;
 import com.vietnl.hwin.customer.entity.CustomerAddress;
 import com.vietnl.hwin.customer.entity.CustomerStats;
 import com.vietnl.hwin.customer.repository.CustomerRepository;
 import com.vietnl.hwin.customer.repository.CustomerStatsRepository;
+import com.vietnl.hwin.identity.service.UserContact;
 import com.vietnl.hwin.identity.service.UserQueryService;
 
 /**
@@ -47,17 +47,20 @@ public class CustomerService {
      * trường hợp khách thao tác trước khi event kịp xử lý).
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void ensureCustomer(UUID userId, PhoneNumber knownPhone) {
+    public void ensureCustomer(UUID userId) {
         if (customers.existsById(userId)) {
             return;
         }
-        PhoneNumber phone = knownPhone != null ? knownPhone : users.findPhone(userId)
-                .orElseThrow(() -> new NotFoundException("Tài khoản không có số điện thoại"));
-        customers.save(Customer.register(userId, phone));
-        if (!stats.existsById(userId)) {
-            stats.save(CustomerStats.empty(userId, clock.instant()));
+        UserContact contact = users.findContact(userId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản"));
+        Customer c = Customer.register(userId, contact.phone(),
+                contact.email() == null ? null : contact.email().value()); // kiểm tra bất biến
+        int created = customers.insertIfAbsent(c.getId(), c.getPhone() == null ? null : c.getPhone().value(),
+                c.getEmail());
+        customers.insertStatsIfAbsent(userId);
+        if (created == 1) {
+            log.info("Tạo hồ sơ khách {}", contact.masked());
         }
-        log.info("Tạo hồ sơ khách {}", phone.masked());
     }
 
     @Transactional(readOnly = true)
@@ -103,7 +106,7 @@ public class CustomerService {
     }
 
     private Customer load(UUID customerId) {
-        ensureCustomer(customerId, null);
+        ensureCustomer(customerId);
         return customers.findById(customerId).orElseThrow(() -> new NotFoundException("Không tìm thấy khách hàng"));
     }
 

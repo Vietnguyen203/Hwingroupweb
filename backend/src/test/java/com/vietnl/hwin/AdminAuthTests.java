@@ -11,10 +11,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.vietnl.hwin.common.domain.EmailAddress;
 import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.common.exception.DomainException;
 import com.vietnl.hwin.common.web.ClientInfo;
 import com.vietnl.hwin.identity.entity.OtpPurpose;
+import com.vietnl.hwin.identity.entity.OtpTarget;
 import com.vietnl.hwin.identity.entity.UserAccount;
 import com.vietnl.hwin.identity.service.AdminAccountService;
 import com.vietnl.hwin.identity.service.AdminLoginResult;
@@ -26,6 +28,7 @@ import com.vietnl.hwin.identity.service.integration.DevOtpInbox;
 
 /**
  * Đăng nhập admin 2 bước: role ADMIN luôn cần mật khẩu + OTP (miễn OTP chỉ gắn với tài khoản dev admin/admin).
+ * OTP gửi tới email nếu tên đăng nhập là email thật, không thì tới SĐT.
  */
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
@@ -51,11 +54,11 @@ class AdminAuthTests {
         AdminLoginResult step1 = auth.adminLogin(login, PASSWORD, client);
         assertThat(step1.otpRequired()).isTrue();
         assertThat(step1.tokens()).isNull();
-        assertThat(step1.phoneMasked()).isEqualTo("09******01");
+        assertThat(step1.sentTo()).isEqualTo("op******@hwin.vn");
 
         assertThatThrownBy(() -> auth.verifyAdminOtp(step1.challengeId(), "000000", client))
                 .hasFieldOrPropertyWithValue("code", "OTP_INVALID");
-        String otp = otpInbox.latest(PhoneNumber.of("0944000001"), OtpPurpose.ADMIN_LOGIN).orElseThrow();
+        String otp = otpInbox.latest(OtpTarget.email(EmailAddress.of("ops@hwin.vn")), OtpPurpose.ADMIN_LOGIN).orElseThrow();
         IssuedTokens tokens = auth.verifyAdminOtp(step1.challengeId(), otp, client);
         assertThat(tokens.accessToken()).isNotBlank();
 
@@ -69,7 +72,7 @@ class AdminAuthTests {
         String login = createAdmin("ops2@hwin.vn", "0944000002");
         assertThatThrownBy(() -> auth.adminLogin(login, "Sai-mat-khau-123", new ClientInfo("10.0.0.2", "junit")))
                 .hasFieldOrPropertyWithValue("code", "BAD_CREDENTIALS");
-        assertThat(otpInbox.latest(PhoneNumber.of("0944000002"), OtpPurpose.ADMIN_LOGIN)).isEmpty();
+        assertThat(otpInbox.latest(OtpTarget.email(EmailAddress.of("ops2@hwin.vn")), OtpPurpose.ADMIN_LOGIN)).isEmpty();
     }
 
     @Test
@@ -94,8 +97,18 @@ class AdminAuthTests {
         UserAccount real = UserAccount.createAdmin("ops@hwin.vn", "hash", "Ops", PhoneNumber.of("0944000009"));
         assertThat(dev.isOtpExempt()).isTrue();
         assertThat(real.isOtpExempt()).isFalse();
-        assertThatThrownBy(() -> UserAccount.createAdmin("x@hwin.vn", "hash", "X", null))
-                .hasFieldOrPropertyWithValue("code", "ADMIN_PHONE_REQUIRED");
+        // tên đăng nhập không phải email + không có SĐT -> không có nơi nhận OTP
+        assertThatThrownBy(() -> UserAccount.createAdmin("van-hanh", "hash", "X", null))
+                .hasFieldOrPropertyWithValue("code", "ADMIN_CONTACT_REQUIRED");
+        assertThat(UserAccount.createAdmin("x@hwin.vn", "hash", "X", null).otpTarget().masked()).isEqualTo("x******@hwin.vn");
+    }
+
+    @Test
+    void adminWithUsernameGetsOtpByPhone() {
+        String login = admins.create("van-hanh-01", PASSWORD, "Admin SĐT", "0944000006", UUID.randomUUID(), UserAccount::getEmail);
+        AdminLoginResult step1 = auth.adminLogin(login, PASSWORD, new ClientInfo("10.0.0.6", "junit"));
+        assertThat(step1.sentTo()).isEqualTo("09******06");
+        assertThat(otpInbox.latest(OtpTarget.phone(PhoneNumber.of("0944000006")), OtpPurpose.ADMIN_LOGIN)).isPresent();
     }
 
     @Test

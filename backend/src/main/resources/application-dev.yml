@@ -7,6 +7,12 @@ spring:
     out-of-order: true
   datasource:
     password: ${DB_PASSWORD:hwin_dev}
+  mail:                          # dev: Mailpit (compose.yaml) – xem thư tại http://localhost:18025
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:11025}
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
 
 hwin:
   admin-seed:                    # dev: tài khoản admin/admin MIỄN OTP (chỉ tồn tại ở dev)

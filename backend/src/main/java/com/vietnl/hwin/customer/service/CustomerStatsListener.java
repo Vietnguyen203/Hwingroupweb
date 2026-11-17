@@ -44,7 +44,7 @@ public class CustomerStatsListener {
         if (!firstTime(e.eventId())) {
             return;
         }
-        customerService.ensureCustomer(e.customerId(), null);
+        customerService.ensureCustomer(e.customerId());
         CustomerStats s = load(e.customerId());
         s.onOrderPlaced(e.total(), e.occurredAt());
         stats.save(s);
