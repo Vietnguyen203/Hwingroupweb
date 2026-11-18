@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FolderPlus, Gift, Layers, Plus, Sparkles, Trash2 } from "lucide-react";
+import { BadgePercent, Eye, EyeOff, FolderPlus, Gift, Layers, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
@@ -18,8 +19,9 @@ import type { CategoryResponse } from "@/lib/types";
 import { CategoryForm, CategoryFormModal, EMPTY_CATEGORY_FORM } from "./admin-categories";
 import { AdminComboBuilder } from "./admin-combo-builder";
 import { ImageUploader } from "@/components/ui/image-uploader";
+import { BulkSaleDialog } from "./bulk-sale-dialog";
 import { ProductSaleDialog } from "./product-sale-dialog";
-import { ActionButton, AdminPage, FilterBar, Loading, Select, Table } from "./admin-ui";
+import { AdminPage, FilterBar, IconButton, Loading, Select, Table } from "./admin-ui";
 
 type FoodInfo = {
   manufacturer: string;
@@ -115,7 +117,11 @@ const EMPTY: Form = {
   foodInfo: EMPTY_FOOD,
 };
 
-/** Quản lý sản phẩm: tìm / lọc danh mục, thêm / sửa, điều chỉnh tồn kho, ẩn / hiện, gán danh mục trực tiếp. */
+/**
+ * Quản lý sản phẩm: tìm / lọc danh mục, thêm / sửa, giảm giá, ẩn / hiện, xóa. Cột thao tác dùng biểu tượng cho gọn;
+ * tích ô vuông để chọn nhiều sản phẩm rồi xem / sửa (chọn 1), thêm voucher giảm giá hoặc xóa hàng loạt.
+ * (Điều chỉnh tồn kho tạm ẩn: xem đoạn comment "TẠM ẨN" ở cột thao tác.)
+ */
 export function AdminProducts() {
   const qc = useQueryClient();
   const [salePicking, setSalePicking] = useState<AdminProductResponse | null>(null);
@@ -128,6 +134,19 @@ export function AdminProducts() {
   const [categoryModalForm, setCategoryModalForm] = useState<CategoryForm | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<AdminProductResponse | null>(null);
   const [showComboBuilder, setShowComboBuilder] = useState(false);
+  const router = useRouter();
+  const [bulkSaleOpen, setBulkSaleOpen] = useState(false);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+
+  // Sản phẩm đang được tích chọn; đổi trang / từ khóa / danh mục thì danh sách chọn tự về rỗng (không giữ id của trang khác)
+  const scopeKey = `${page}|${filters.q ?? ""}|${filters.category ?? ""}`;
+  const [selection, setSelection] = useState<{ scope: string; ids: string[] }>({ scope: scopeKey, ids: [] });
+  const selectedIds = selection.scope === scopeKey ? selection.ids : [];
+  const setSelectedIds = (ids: string[]) => setSelection({ scope: scopeKey, ids });
+  const rows = query.data?.content ?? [];
+  const selectedProducts = rows.filter((r) => selectedIds.includes(r.id));
+  const allSelected = rows.length > 0 && selectedProducts.length === rows.length;
+  const toggleOne = (id: string) => setSelectedIds(selectedIds.includes(id) ? selectedIds.filter((x) => x !== id) : [...selectedIds, id]);
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["admin", "/api/admin/products"] });
   const patch = useMutation({
@@ -154,6 +173,24 @@ export function AdminProducts() {
         type: "error",
         title: "Không thể xóa",
         message: errorMessage(err),
+      });
+    },
+  });
+
+  const bulkDelete = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const results = await Promise.allSettled(ids.map((id) => api(`/api/admin/products/${id}`, { method: "DELETE" })));
+      const failed = results.filter((r) => r.status === "rejected").length;
+      return { ok: ids.length - failed, failed };
+    },
+    onSuccess: ({ ok, failed }) => {
+      refresh();
+      setSelectedIds([]);
+      setBulkDeleteOpen(false);
+      showToast({
+        type: failed ? "error" : "success",
+        title: failed ? "Xóa chưa hoàn tất" : "Đã xóa",
+        message: failed ? `Đã xóa ${ok} sản phẩm, ${failed} sản phẩm không xóa được.` : `Đã xóa ${ok} sản phẩm.`,
       });
     },
   });
@@ -313,9 +350,73 @@ export function AdminProducts() {
         <p className="text-sm text-destructive">{errorMessage(query.error)}</p>
       ) : (
         <>
-          <Table head={["Sản phẩm", "Danh mục", "Giá", "Tồn kho", "Đã bán", "Trạng thái", "Thao tác"]}>
+          {selectedProducts.length > 0 && (
+            <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-brand/30 bg-brand-soft/60 px-4 py-2.5">
+              <span className="text-sm font-semibold text-slate-800">Đã chọn {selectedProducts.length} sản phẩm</span>
+              <button
+                type="button"
+                onClick={() => setSelectedIds([])}
+                className="text-xs font-semibold text-slate-500 underline-offset-2 hover:text-slate-800 hover:underline"
+              >
+                Bỏ chọn
+              </button>
+              <div className="ml-auto flex flex-wrap items-center gap-1.5">
+                <BulkButton
+                  icon={<Eye className="size-4" />}
+                  disabled={selectedProducts.length !== 1}
+                  title="Xem sản phẩm trên trang bán hàng (chọn 1 sản phẩm)"
+                  onClick={() => router.push(`/products/${selectedProducts[0].slug}`)}
+                >
+                  Xem
+                </BulkButton>
+                <BulkButton
+                  icon={<Pencil className="size-4" />}
+                  disabled={selectedProducts.length !== 1}
+                  title="Sửa sản phẩm (chọn 1 sản phẩm)"
+                  onClick={() => edit(selectedProducts[0])}
+                >
+                  Sửa
+                </BulkButton>
+                <BulkButton
+                  icon={<BadgePercent className="size-4" />}
+                  title="Đặt % giảm giá thêm (voucher) cho các sản phẩm đã chọn"
+                  onClick={() => setBulkSaleOpen(true)}
+                >
+                  Thêm voucher
+                </BulkButton>
+                <BulkButton icon={<Trash2 className="size-4" />} tone="danger" title="Xóa các sản phẩm đã chọn" onClick={() => setBulkDeleteOpen(true)}>
+                  Xóa
+                </BulkButton>
+              </div>
+            </div>
+          )}
+
+          <Table
+            head={["Sản phẩm", "Giá", "Tồn kho", "Đã bán", "Trạng thái", "Thao tác"]}
+            leading={
+              <input
+                type="checkbox"
+                aria-label="Chọn tất cả sản phẩm trong trang"
+                checked={allSelected}
+                ref={(el) => {
+                  if (el) el.indeterminate = selectedProducts.length > 0 && !allSelected;
+                }}
+                onChange={() => setSelectedIds(allSelected ? [] : rows.map((r) => r.id))}
+                className="size-4 cursor-pointer rounded border-slate-300 accent-brand"
+              />
+            }
+          >
             {query.data.content.map((p) => (
-              <tr key={p.id} className="hover:bg-slate-50/70 transition-colors">
+              <tr key={p.id} className={`transition-colors hover:bg-slate-50/70 ${selectedIds.includes(p.id) ? "bg-brand-soft/40" : ""}`}>
+                <td className="w-10 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    aria-label={`Chọn ${p.name}`}
+                    checked={selectedIds.includes(p.id)}
+                    onChange={() => toggleOne(p.id)}
+                    className="size-4 cursor-pointer rounded border-slate-300 accent-brand"
+                  />
+                </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -334,45 +435,6 @@ export function AdminProducts() {
                       {p.unit && <div className="text-[11px] text-slate-400">{p.unit}</div>}
                     </div>
                   </div>
-                </td>
-                <td className="px-4 py-3">
-                  {/* Dropdown gán danh mục trực tiếp cho sản phẩm */}
-                  <select
-                    value={p.categoryId || ""}
-                    onChange={(e) => {
-                      const newCatId = e.target.value;
-                      const catObj = cats.find((c) => c.id === newCatId);
-                      patch.mutate(
-                        {
-                          id: p.id,
-                          path: "category",
-                          body: { categoryId: newCatId || null },
-                        },
-                        {
-                          onSuccess: () => {
-                            showToast({
-                              type: "success",
-                              message: catObj
-                                ? `Đã chuyển "${p.name}" vào danh mục "${catObj.name}"!`
-                                : `Đã hủy gán danh mục cho "${p.name}"!`,
-                            });
-                          },
-                        }
-                      );
-                    }}
-                    className={`h-8 max-w-[170px] truncate rounded-lg border px-2 text-xs font-medium shadow-2xs transition outline-none ${
-                      p.categoryId
-                        ? "border-slate-200 bg-white text-slate-800 focus:border-brand"
-                        : "border-amber-300 bg-amber-50 text-amber-800 font-semibold"
-                    }`}
-                  >
-                    <option value="">-- Chưa gán danh mục --</option>
-                    {cats.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
                 </td>
                 <td className="px-4 py-3 font-semibold text-slate-800">
                   {p.salePercent > 0 ? (
@@ -399,37 +461,51 @@ export function AdminProducts() {
                     {p.active ? "Đang bán" : "Đã ẩn"}
                   </span>
                 </td>
-                <td className="space-x-1.5 px-4 py-3 whitespace-nowrap">
-                  <ActionButton onClick={() => edit(p)}>Sửa</ActionButton>
-                  <ActionButton onClick={() => setSalePicking(p)} title="Đặt % giảm giá thêm (cả combo)">Giảm giá</ActionButton>
-                  <ActionButton
-                    onClick={() => {
-                      const v = window.prompt("Điều chỉnh tồn kho (+ nhập thêm, - xuất bớt)", "10");
-                      if (v && Number(v)) patch.mutate({ id: p.id, path: "stock", body: { delta: Number(v) } });
-                    }}
-                  >
-                    Kho
-                  </ActionButton>
-                  <ActionButton
-                    tone={p.active ? "danger" : "default"}
-                    onClick={() => patch.mutate({ id: p.id, path: "active", body: { active: !p.active } })}
-                  >
-                    {p.active ? "Ẩn" : "Hiện"}
-                  </ActionButton>
-                  <ActionButton
-                    tone="danger"
-                    title="Xóa vĩnh viễn sản phẩm"
-                    onClick={() => setDeletingProduct(p)}
-                    disabled={deleteProduct.isPending}
-                  >
-                    <Trash2 className="size-3.5 text-rose-500" />
-                  </ActionButton>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="inline-flex items-center gap-1.5">
+                    <IconButton label="Sửa sản phẩm" onClick={() => edit(p)}>
+                      <Pencil className="size-4" />
+                    </IconButton>
+                    <IconButton label="Đặt % giảm giá thêm (cả combo)" onClick={() => setSalePicking(p)}>
+                      <BadgePercent className="size-4" />
+                    </IconButton>
+                    {/* TẠM ẨN: điều chỉnh tồn kho (Kho). Bỏ comment và thêm `Boxes` vào import lucide-react khi cần dùng lại.
+                    <IconButton
+                      label="Điều chỉnh tồn kho"
+                      onClick={() => {
+                        const v = window.prompt("Điều chỉnh tồn kho (+ nhập thêm, - xuất bớt)", "10");
+                        if (v && Number(v)) patch.mutate({ id: p.id, path: "stock", body: { delta: Number(v) } });
+                      }}
+                    >
+                      <Boxes className="size-4" />
+                    </IconButton>
+                    */}
+                    <IconButton
+                      label={p.active ? "Ẩn sản phẩm khỏi trang bán hàng" : "Hiện sản phẩm trên trang bán hàng"}
+                      onClick={() => patch.mutate({ id: p.id, path: "active", body: { active: !p.active } })}
+                    >
+                      {p.active ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </IconButton>
+                    <IconButton label="Xóa vĩnh viễn sản phẩm" tone="danger" onClick={() => setDeletingProduct(p)} disabled={deleteProduct.isPending}>
+                      <Trash2 className="size-4" />
+                    </IconButton>
+                  </div>
                 </td>
               </tr>
             ))}
           </Table>
           <Pager page={page} totalPages={query.data.totalPages} onChange={setPage} />
           {salePicking && <ProductSaleDialog product={salePicking} onClose={() => setSalePicking(null)} onSaved={refresh} />}
+          {bulkSaleOpen && selectedProducts.length > 0 && (
+            <BulkSaleDialog
+              products={selectedProducts}
+              onClose={() => setBulkSaleOpen(false)}
+              onSaved={() => {
+                refresh();
+                setSelectedIds([]);
+              }}
+            />
+          )}
         </>
       )}
 
@@ -458,6 +534,27 @@ export function AdminProducts() {
         }}
       />
 
+      {/* Hộp thoại xác nhận xóa nhiều sản phẩm đã chọn */}
+      <ConfirmModal
+        isOpen={bulkDeleteOpen}
+        title="Xác nhận xóa các sản phẩm đã chọn"
+        message={
+          <div>
+            Bạn có chắc chắn muốn xóa vĩnh viễn <strong className="font-bold text-slate-900">{selectedProducts.length} sản phẩm</strong> sau không?
+            <ul className="mt-2 max-h-32 space-y-0.5 overflow-y-auto rounded-lg bg-slate-50 p-2.5 text-sm text-slate-700">
+              {selectedProducts.map((sp) => <li key={sp.id} className="truncate">• {sp.name}</li>)}
+            </ul>
+            <p className="mt-2 text-xs leading-relaxed text-slate-500">Các sản phẩm sẽ bị gỡ bỏ hoàn toàn khỏi hệ thống bán hàng và cơ sở dữ liệu.</p>
+          </div>
+        }
+        confirmText={`Xóa ${selectedProducts.length} sản phẩm`}
+        cancelText="Hủy bỏ"
+        tone="danger"
+        loading={bulkDelete.isPending}
+        onCancel={() => setBulkDeleteOpen(false)}
+        onConfirm={() => bulkDelete.mutate(selectedProducts.map((sp) => sp.id))}
+      />
+
       {/* Modal tạo gói Combo từ các sản phẩm thành phần (-10%) */}
       <AdminComboBuilder
         isOpen={showComboBuilder}
@@ -468,6 +565,33 @@ export function AdminProducts() {
         }}
       />
     </AdminPage>
+  );
+}
+
+/** Nút trên thanh thao tác hàng loạt (hiện khi đã tích chọn sản phẩm). */
+function BulkButton({ icon, children, onClick, disabled, title, tone = "default" }: {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+  title: string;
+  tone?: "default" | "danger";
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold shadow-xs transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
+        tone === "danger"
+          ? "border-rose-200 bg-rose-50 text-rose-700 hover:border-rose-300 hover:bg-rose-100"
+          : "border-slate-200 bg-white text-slate-700 hover:border-brand hover:bg-brand-soft hover:text-brand"
+      }`}
+    >
+      {icon}
+      {children}
+    </button>
   );
 }
 

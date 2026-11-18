@@ -66,13 +66,15 @@ export function Select({
 }
 
 /** Bảng dữ liệu chuẩn Enterprise: viền bo tròn, màu nền tương phản dịu mắt, cuộn ngang an toàn */
-export function Table({ head, children }: { head: string[]; children: React.ReactNode }) {
+/** `leading`: ô đầu tiên của hàng tiêu đề (VD ô tích chọn tất cả); các hàng tự thêm ô tương ứng. */
+export function Table({ head, leading, children }: { head: string[]; leading?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[700px] text-left text-sm">
           <thead className="border-b border-slate-200 bg-slate-50/90 text-xs font-semibold uppercase tracking-wider text-slate-500">
             <tr>
+              {leading !== undefined && <th className="w-10 px-4 py-3.5">{leading}</th>}
               {head.map((h) => (
                 <th key={h} className="px-4 py-3.5 whitespace-nowrap">
                   {h}
@@ -113,6 +115,39 @@ export function ActionButton({
           : tone === "primary"
           ? "border-transparent bg-brand text-white hover:bg-brand-hover shadow-sm shadow-brand/20"
           : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** Nút chỉ có biểu tượng cho cột thao tác (gọn); `label` vừa là chú thích khi rê chuột vừa là tên cho trình đọc màn hình. */
+export function IconButton({
+  label,
+  onClick,
+  tone = "default",
+  disabled,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  tone?: "default" | "danger";
+  disabled?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={label}
+      aria-label={label}
+      className={cn(
+        "inline-flex size-8 items-center justify-center rounded-lg border shadow-xs transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-40",
+        tone === "danger"
+          ? "border-rose-200 bg-rose-50 text-rose-600 hover:border-rose-300 hover:bg-rose-100"
+          : "border-slate-200 bg-white text-slate-600 hover:border-brand hover:bg-brand-soft hover:text-brand"
       )}
     >
       {children}
