@@ -13,7 +13,7 @@ import { ShareLink } from "../affiliate-dashboard";
 
 /** Trang Link Affiliate: mã giới thiệu, link chia sẻ (chép 1 chạm) và cách hoạt động. */
 export function AffiliateLinks() {
-  const { profile } = useAffiliateProfile();
+  const { profile } = useAffiliateProfile({ syncRole: false });
   const dash = useQuery({
     queryKey: ["affiliate-dashboard"],
     queryFn: () => api<AffiliateDashboard>("/api/affiliates/me/dashboard"),

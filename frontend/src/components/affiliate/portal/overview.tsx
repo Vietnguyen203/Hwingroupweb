@@ -25,7 +25,7 @@ function monthTrend(current: number, previous: number, show: (n: number) => stri
 
 /** Trang Tổng quan cổng CTV: lời chào + CTA, 4 KPI, thu nhập & rút tiền, hoạt động gần đây. */
 export function Overview() {
-  const { profile } = useAffiliateProfile();
+  const { profile } = useAffiliateProfile({ syncRole: false });
   const dash = useQuery({
     queryKey: ["affiliate-dashboard"],
     queryFn: () => api<AffiliateDashboard>("/api/affiliates/me/dashboard"),

@@ -24,7 +24,7 @@ export function Earnings() {
   const wanted = useSearchParams().get("tab");
   const [tab, setTab] = useState<Tab>(TABS.find((t) => t.key === wanted)?.key ?? "commissions");
   const id = useId();
-  const { profile } = useAffiliateProfile();
+  const { profile } = useAffiliateProfile({ syncRole: false });
   const dash = useQuery({
     queryKey: ["affiliate-dashboard"],
     queryFn: () => api<AffiliateDashboard>("/api/affiliates/me/dashboard"),

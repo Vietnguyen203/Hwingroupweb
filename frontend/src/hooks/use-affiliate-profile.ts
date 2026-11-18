@@ -9,10 +9,13 @@ import type { AffiliateResponse } from "@/lib/affiliate";
 
 /**
  * Hồ sơ CTV của người đang đăng nhập (data = null nghĩa là chưa đăng ký CTV).
- * Nếu hồ sơ vừa được duyệt mà phiên cũ chưa có vai trò AFFILIATE thì tự làm mới phiên để nhận vai trò.
+ * Nếu hồ sơ vừa được duyệt mà phiên cũ chưa có vai trò AFFILIATE thì tự làm mới phiên để nhận vai trò;
  * `needsRole` = true trong lúc chờ làm mới – nơi gọi nên hiện skeleton thay vì gọi API CTV.
+ *
+ * Refresh token xoay vòng nên chỉ MỘT nơi trên màn hình được làm mới phiên (AffiliateHome, PortalGate);
+ * các nơi chỉ đọc hồ sơ (sidebar, trang con) phải truyền `syncRole: false`.
  */
-export function useAffiliateProfile() {
+export function useAffiliateProfile({ syncRole = true }: { syncRole?: boolean } = {}) {
   const me = useMe();
   const qc = useQueryClient();
   const profile = useQuery({
@@ -30,9 +33,9 @@ export function useAffiliateProfile() {
 
   const needsRole = profile.data?.status === "APPROVED" && !!me.data && !me.data.roles.includes("AFFILIATE");
   useEffect(() => {
-    if (!needsRole) return;
+    if (!syncRole || !needsRole) return;
     fetch("/api/auth/refresh", { method: "POST" }).finally(() => qc.invalidateQueries({ queryKey: ["me"] }));
-  }, [needsRole, qc]);
+  }, [syncRole, needsRole, qc]);
 
   return { me, profile, needsRole };
 }

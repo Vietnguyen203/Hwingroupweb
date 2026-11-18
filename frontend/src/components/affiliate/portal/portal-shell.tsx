@@ -5,21 +5,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 
-import { buttonVariants } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useAffiliateProfile } from "@/hooks/use-affiliate-profile";
-import { errorMessage } from "@/lib/api";
 import { initials } from "@/lib/affiliate-stats";
-import { cn } from "@/lib/utils";
 import { Sidebar } from "./sidebar";
 
 /**
  * Khung cổng CTV: sidebar cố định bên trái (desktop) hoặc thanh trên + ngăn kéo (mobile), nội dung bên phải nền xám nhạt.
- * Chỉ CTV đã được duyệt mới thấy nội dung; các trường hợp còn lại hiện thông báo kèm lối đi.
+ * Luôn render `children`; việc chỉ cho CTV đã duyệt xem nội dung do PortalGate ở từng trang đảm nhiệm.
  */
 export function PortalShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { me, profile, needsRole } = useAffiliateProfile();
+  const { profile } = useAffiliateProfile({ syncRole: false }); // chỉ đọc tên cho sidebar; PortalGate lo làm mới phiên
   const [open, setOpen] = useState(false);
   const [lastPath, setLastPath] = useState(pathname);
 
@@ -70,21 +66,7 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
           </span>
         </header>
 
-        <main className="mx-auto w-full max-w-7xl p-4 sm:p-6 lg:p-8">
-          {me.isPending || (me.data && profile.isPending) || needsRole ? (
-            <PortalSkeleton />
-          ) : !me.data ? (
-            <Notice title="Bạn cần đăng nhập" text="Đăng nhập tài khoản cộng tác viên để xem cổng CTV." href="/login?next=%2Faffiliate%2Fdashboard" action="Đăng nhập" />
-          ) : profile.error ? (
-            <Notice title="Không tải được hồ sơ CTV" text={errorMessage(profile.error)} href="/affiliate" action="Về trang CTV" />
-          ) : !a ? (
-            <Notice title="Bạn chưa là cộng tác viên" text="Đăng ký chương trình để có link giới thiệu riêng và nhận hoa hồng trên mỗi đơn." href="/affiliate/register" action="Đăng ký làm CTV" />
-          ) : a.status !== "APPROVED" ? (
-            <Notice title="Hồ sơ CTV chưa hoạt động" text="Hồ sơ của bạn chưa ở trạng thái được duyệt. Xem chi tiết tại trang CTV." href="/affiliate" action="Xem trạng thái hồ sơ" />
-          ) : (
-            children
-          )}
-        </main>
+        <main className="mx-auto w-full max-w-7xl p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
 
       {/* Ngăn kéo menu – mobile */}
@@ -96,30 +78,6 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function PortalSkeleton() {
-  return (
-    <div className="space-y-6" aria-busy="true" aria-label="Đang tải">
-      <Skeleton className="h-10 w-2/3 bg-gray-200" />
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-32 rounded-xl bg-gray-200" />)}
-      </div>
-      <Skeleton className="h-64 rounded-xl bg-gray-200" />
-    </div>
-  );
-}
-
-function Notice({ title, text, href, action }: { title: string; text: string; href: string; action: string }) {
-  return (
-    <div className="mx-auto max-w-lg rounded-xl border border-gray-100 bg-white p-6 text-center shadow-sm">
-      <h1 className="text-lg font-bold text-gray-900">{title}</h1>
-      <p className="mt-1.5 text-sm text-gray-500">{text}</p>
-      <Link href={href} className={cn(buttonVariants(), "mt-5 h-10 bg-brand-red px-5 text-sm font-semibold text-white hover:bg-brand-red/90")}>
-        {action}
-      </Link>
     </div>
   );
 }
