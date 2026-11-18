@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/otp", "/api/auth/register", "/api/auth/login", "/api/auth/login/verify", "/api/auth/refresh",
                                 "/api/auth/logout", "/api/admin/auth/login", "/api/admin/auth/login/verify").permitAll()
                         // Catalog công khai
-                        .requestMatchers(HttpMethod.GET, "/api/categories/**", "/api/products/**", "/api/product-reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/categories/**", "/api/products/**", "/api/product-reviews/**", "/api/certificates/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         // Giỏ ẩn danh tính giá + cấu hình thanh toán
                         .requestMatchers(HttpMethod.POST, "/api/cart-quotes").permitAll()
