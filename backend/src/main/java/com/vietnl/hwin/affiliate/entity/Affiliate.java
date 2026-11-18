@@ -179,6 +179,12 @@ public class Affiliate extends AggregateRoot<Affiliate> {
         return userId.equals(customerUserId) || (customerPhone != null && phone.equals(customerPhone));
     }
 
+    /** Xóa tham chiếu ảnh CCCD (tệp được dọn bởi job). Dùng khi hết thời hạn lưu giữ của hồ sơ bị từ chối. */
+    public void purgeIdCard() {
+        this.idCardFrontKey = null;
+        this.idCardBackKey = null;
+    }
+
     public boolean hasIdCard() {
         return idCardFrontKey != null && idCardBackKey != null;
     }

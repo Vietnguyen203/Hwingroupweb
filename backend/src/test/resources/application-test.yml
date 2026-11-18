@@ -22,3 +22,4 @@ hwin:
     simulated-time-enabled: true
   storage:
     local-dir: build/test-uploads
+    private-dir: build/test-private-uploads   # test không được đụng thư mục ảnh CCCD của máy dev

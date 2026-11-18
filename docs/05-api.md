@@ -117,7 +117,7 @@
 | Method | Path | Quyền | Mô tả |
 |---|---|---|---|
 | POST | `/api/referral-clicks` | public | `{code, landingPath}` → ghi click (không đếm trùng IP + mã trong 24h), mã hợp lệ thì set cookie `hwin_ref` 30 ngày. Luôn 204 |
-| POST | `/api/affiliates/id-card-uploads` | CUSTOMER | Tải 1 ảnh CCCD (multipart `file`, JPG/PNG/WebP ≤ 5MB) vào kho riêng tư, trả `{key}`; gọi 2 lần (mặt trước, mặt sau) |
+| POST | `/api/affiliates/id-card-uploads` | CUSTOMER | Tải 1 ảnh CCCD (multipart `file`, JPG/PNG/WebP ≤ 5MB) vào kho riêng tư, trả `{key}`; gọi 2 lần (mặt trước, mặt sau). Tối đa 10 lần/giờ/người (quá hạn mức: 429 `ID_CARD_UPLOAD_LIMIT`) |
 | POST | `/api/affiliates/me` | CUSTOMER | Đăng ký CTV `{fullName, socialLink, note, acceptTerms, phone?, idCardFrontKey, idCardBackKey}` (2 khóa ảnh bắt buộc, phải do chính mình tải lên: `ID_CARD_REQUIRED` / `ID_CARD_INVALID`) – `phone` bắt buộc nếu tài khoản đăng nhập bằng email (`PHONE_REQUIRED`); đăng ký lại nếu đã bị từ chối |
 | GET | `/api/affiliates/me` | CUSTOMER | Hồ sơ CTV + trạng thái + lý do (404 nếu chưa đăng ký) |
 | GET | `/api/affiliates/me/dashboard` | AFFILIATE | Mã, link chia sẻ, click (tổng / 30 ngày), khách đã gắn, hoa hồng theo trạng thái, số dư khả dụng, đã rút, khóa rút đến |

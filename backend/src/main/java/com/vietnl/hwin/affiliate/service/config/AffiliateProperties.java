@@ -22,6 +22,8 @@ import com.vietnl.hwin.common.domain.Money;
  * @param bankEncryptionKey     khóa AES-256 (base64, 32 byte) mã hóa thông tin ngân hàng
  * @param shareBaseUrl          domain frontend dùng để tạo link chia sẻ
  * @param simulatedTimeEnabled  cho phép admin chạy job duyệt hoa hồng với thời điểm giả lập (chỉ dev)
+ * @param idCardUploadsPerHour  số lần tải ảnh CCCD tối đa mỗi người mỗi giờ (mặc định 10; chống tải tràn đĩa)
+ * @param idCardRetentionDays   số ngày giữ ảnh CCCD của hồ sơ CTV bị từ chối trước khi xóa (mặc định 30)
  */
 @Validated
 @ConfigurationProperties(prefix = "hwin.affiliate")
@@ -34,10 +36,21 @@ public record AffiliateProperties(
         int bankChangeLockHours,
         @NotBlank String bankEncryptionKey,
         String shareBaseUrl,
-        boolean simulatedTimeEnabled) {
+        boolean simulatedTimeEnabled,
+        int idCardUploadsPerHour,
+        int idCardRetentionDays) {
+
+    public AffiliateProperties {
+        idCardUploadsPerHour = idCardUploadsPerHour <= 0 ? 10 : idCardUploadsPerHour;
+        idCardRetentionDays = idCardRetentionDays <= 0 ? 30 : idCardRetentionDays;
+    }
 
     public Duration hold() {
         return Duration.ofDays(holdDays);
+    }
+
+    public Duration idCardRetention() {
+        return Duration.ofDays(idCardRetentionDays);
     }
 
     public Duration bankChangeLock() {

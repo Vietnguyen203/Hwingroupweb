@@ -166,7 +166,7 @@ class AffiliateDomainTest {
     @Test
     void bankAccountEncryptedWithAesGcm() {
         var crypto = new BankAccountCrypto(new AffiliateProperties(RATE, 7, 200_000, 30, 24, 48,
-                "dGVzdC1vbmx5LWFlcy1nY20ta2V5LTMyLWJ5dGVzISE=", null, false));
+                "dGVzdC1vbmx5LWFlcy1nY20ta2V5LTMyLWJ5dGVzISE=", null, false, 10, 30));
         BankAccount enc = crypto.encrypt("VCB", "0123 456 789", "Nguyen Van A");
         assertThat(enc.accountNoEncrypted()).doesNotContain("0123456789");
         assertThat(enc.accountNoLast4()).isEqualTo("6789");

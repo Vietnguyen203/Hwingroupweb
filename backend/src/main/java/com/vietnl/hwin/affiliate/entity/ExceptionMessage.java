@@ -28,6 +28,7 @@ public enum ExceptionMessage implements BaseErrorMessage {
     ID_CARD_REQUIRED("Vui lòng tải lên ảnh CCCD mặt trước và mặt sau"),
     ID_CARD_INVALID("Ảnh CCCD không hợp lệ, vui lòng tải lại"),
     ID_CARD_NOT_FOUND("CTV chưa có ảnh CCCD"),
+    ID_CARD_UPLOAD_LIMIT("Bạn tải ảnh quá nhiều lần, vui lòng thử lại sau 1 giờ"),
     ALREADY_REGISTERED("Bạn đã đăng ký CTV (trạng thái #status#)"),
     PAYOUT_OPEN("Bạn đang có một yêu cầu rút tiền chưa xử lý xong"),
     PAYOUT_NOT_FOUND("Không tìm thấy yêu cầu rút tiền");

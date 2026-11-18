@@ -1,6 +1,9 @@
 package com.vietnl.hwin.affiliate.service;
 
 import java.io.InputStream;
+import java.time.Duration;
+import com.vietnl.hwin.affiliate.service.config.AffiliateProperties;
+import com.vietnl.hwin.common.ratelimit.RateLimiter;
 import java.util.Map;
 import com.vietnl.hwin.common.storage.PrivateFileStore;
 import com.vietnl.hwin.affiliate.entity.ExceptionMessage;
@@ -36,21 +39,29 @@ public class AffiliateService {
     private final BankAccountCrypto crypto;
     private final AuditLogger audit;
     private final PrivateFileStore files;
+    private final RateLimiter rateLimiter;
+    private final AffiliateProperties props;
     private final Clock clock;
 
     public AffiliateService(AffiliateRepository affiliates, UserQueryService users, OtpService otp,
-                            BankAccountCrypto crypto, AuditLogger audit, PrivateFileStore files, Clock clock) {
+                            BankAccountCrypto crypto, AuditLogger audit, PrivateFileStore files, RateLimiter rateLimiter,
+                            AffiliateProperties props, Clock clock) {
         this.affiliates = affiliates;
         this.users = users;
         this.otp = otp;
         this.crypto = crypto;
         this.audit = audit;
         this.files = files;
+        this.rateLimiter = rateLimiter;
+        this.props = props;
         this.clock = clock;
     }
 
     /** Nhận 1 ảnh CCCD vào kho riêng tư, trả về khóa để đính kèm khi đăng ký CTV. */
     public String uploadIdCard(UUID userId, InputStream content, long size, String contentType) {
+        // Chặn tải tràn: mỗi người tối đa N lần / giờ (tính cả lần bị từ chối vì sai định dạng)
+        rateLimiter.acquireOrThrow("rl:idcard-upload:" + userId, props.idCardUploadsPerHour(), Duration.ofHours(1),
+                ExceptionMessage.ID_CARD_UPLOAD_LIMIT);
         return files.store(idCardFolder(userId), content, size, contentType);
     }
 

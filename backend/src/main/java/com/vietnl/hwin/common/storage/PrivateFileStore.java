@@ -6,9 +6,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -57,6 +61,32 @@ public class PrivateFileStore {
         }
     }
 
+    /** Liệt kê mọi tệp trong thư mục con {@code folder} (đệ quy) kèm thời điểm sửa cuối. */
+    public List<StoredEntry> list(String folder) {
+        Path dir = resolve(folder);
+        if (!Files.isDirectory(dir)) {
+            return List.of();
+        }
+        List<StoredEntry> result = new ArrayList<>();
+        try (Stream<Path> walk = Files.walk(dir)) {
+            for (Path p : (Iterable<Path>) walk.filter(Files::isRegularFile)::iterator) {
+                result.add(new StoredEntry(root.relativize(p).toString().replace('\\', '/'), Files.getLastModifiedTime(p).toInstant()));
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Không liệt kê được thư mục " + folder, e);
+        }
+        return result;
+    }
+
+    /** Xóa một tệp theo khóa; @return true nếu đã xóa. */
+    public boolean delete(String key) {
+        try {
+            return Files.deleteIfExists(resolve(key));
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
     public boolean exists(String key) {
         try {
             return Files.isRegularFile(resolve(key));
@@ -99,5 +129,8 @@ public class PrivateFileStore {
     }
 
     public record StoredFile(byte[] content, String contentType) {
+    }
+
+    public record StoredEntry(String key, Instant lastModified) {
     }
 }

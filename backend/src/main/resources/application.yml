@@ -133,3 +133,5 @@ hwin:
     bank-encryption-key: ${AFFILIATE_BANK_KEY}
     share-base-url: ${FRONTEND_ORIGIN:http://localhost:3100}
     simulated-time-enabled: false
+    id-card-uploads-per-hour: 10      # chống tải ảnh CCCD tràn đĩa (mỗi người / giờ)
+    id-card-retention-days: 30        # xóa ảnh CCCD của hồ sơ bị từ chối sau số ngày này
