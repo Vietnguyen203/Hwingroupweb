@@ -29,6 +29,7 @@ public class ResponseException extends RuntimeException {
         super(replaceKeywords(messageCode.val(), data));
         this.statusCode = statusCode;
         this.messageCode = messageCode;
+        this.details.putAll(data); // số liệu của câu thông báo cũng trả về frontend để dịch theo mã lỗi
     }
 
     /** Mã lỗi dạng chuỗi (tên hằng enum) – frontend và test dùng. */
