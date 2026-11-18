@@ -1,14 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { BadgePercent, Link2, Wallet } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
-import { useMe } from "@/hooks/use-me";
-import { api, ApiError, errorMessage } from "@/lib/api";
-import type { AffiliateResponse } from "@/lib/affiliate";
+import { useAffiliateProfile } from "@/hooks/use-affiliate-profile";
+import { errorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { AffiliateDashboardView } from "./affiliate-dashboard";
 
@@ -18,27 +15,7 @@ import { AffiliateDashboardView } from "./affiliate-dashboard";
  * APPROVED -> dashboard CTV.
  */
 export function AffiliateHome() {
-  const me = useMe();
-  const qc = useQueryClient();
-  const profile = useQuery({
-    queryKey: ["affiliate-me"],
-    queryFn: async () => {
-      try {
-        return await api<AffiliateResponse>("/api/affiliates/me");
-      } catch (e) {
-        if (e instanceof ApiError && e.status === 404) return null; // chưa đăng ký CTV
-        throw e;
-      }
-    },
-    enabled: !!me.data,
-  });
-
-  // Vừa được duyệt nhưng phiên cũ chưa có vai trò AFFILIATE -> làm mới phiên để nhận vai trò
-  const needsRole = profile.data?.status === "APPROVED" && me.data && !me.data.roles.includes("AFFILIATE");
-  useEffect(() => {
-    if (!needsRole) return;
-    fetch("/api/auth/refresh", { method: "POST" }).finally(() => qc.invalidateQueries({ queryKey: ["me"] }));
-  }, [needsRole, qc]);
+  const { me, profile, needsRole } = useAffiliateProfile();
 
   if (me.isPending || (me.data && profile.isPending) || needsRole) {
     return <div className="m-3 h-64 animate-pulse rounded-2xl bg-neutral-200" />;

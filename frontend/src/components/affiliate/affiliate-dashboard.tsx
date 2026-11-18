@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Copy } from "lucide-react";
+import { ArrowRight, Check, Copy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,9 @@ export function AffiliateDashboardView({ profile }: { profile: AffiliateResponse
         <p className="text-sm text-white/80">Xin chào {profile.fullName} · Mã giới thiệu</p>
         <p className="text-2xl font-bold tracking-wider">{profile.referralCode}</p>
         {d && <ShareLink link={d.shareLink} />}
+        <Link href="/affiliate/dashboard" className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-white underline-offset-4 hover:underline">
+          Mở cổng CTV mới <ArrowRight className="size-4" />
+        </Link>
       </section>
 
       {d ? (
