@@ -129,6 +129,7 @@ cd ..\frontend; npm run build; npm run lint
 - **Admin ở môi trường thật**: backend **từ chối khởi động** nếu `ADMIN_PASSWORD` yếu (< 12 ký tự, thiếu chữ/số, chứa "admin"), không có nơi nhận OTP (`ADMIN_EMAIL` không phải email thật và thiếu `ADMIN_PHONE`), thiếu SMTP (`MAIL_HOST`), bật miễn OTP, hoặc trong DB còn tài khoản miễn OTP.
 - **Tài khoản admin không đăng nhập được bằng OTP khách** (`ADMIN_USE_ADMIN_LOGIN`) – tránh bỏ qua bước mật khẩu.
 - **Chống dò mật khẩu admin**: chỉ đếm lần đăng nhập **sai** (5 lần / 10 phút / IP).
+- **Chống dò tài khoản ở đăng nhập chung**: trước khi mật khẩu được xác thực, mọi trường hợp (không tồn tại, chưa có mật khẩu, là admin, sai mật khẩu) đều trả cùng lỗi `INVALID_LOGIN` và tốn cùng một lượt BCrypt nên thời gian phản hồi cũng giống nhau; chỉ ai nhập đúng mật khẩu admin mới được báo dùng cổng quản trị. Tài khoản admin không bị khóa theo tên đăng nhập (tránh bị khóa từ xa), vẫn bị giới hạn theo IP và luôn cần OTP.
 - **Chỉ ở profile dev**: dữ liệu mẫu (`db/demo`), `GET /api/dev/otp/latest` (lấy OTP cho Postman/test), chạy job duyệt hoa hồng / hủy đơn quá hạn với thời điểm giả lập (`asOf`), nới giới hạn để chạy Postman nhiều lần (OTP theo IP: 50, đặt hàng: 30 đơn / 10 phút).
 - **Ảnh VietQR** sinh theo cấu hình `BANK_QR_*` trong `.env` (mặc định là tài khoản giả).
 - **Jackson 3** (Spring Boot 4) mặc định báo lỗi khi JSON thiếu field `boolean`/`int` – đã tắt (`spring.jackson.deserialization.fail-on-null-for-primitives=false`), field thiếu nhận giá trị mặc định.

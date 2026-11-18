@@ -47,6 +47,8 @@ public class AuthService {
     private final TokenService tokenService;
     private final UserAccountRepository users;
     private final PasswordEncoder passwordEncoder;
+    /** Hash giả cùng độ khó: so khớp với nó khi tài khoản không tồn tại / chưa có mật khẩu, để thời gian phản hồi không lộ gì. */
+    private final String dummyPasswordHash;
     private final RateLimiter rateLimiter;
     private final StringRedisTemplate redis;
     private final TrustedDeviceService trustedDevices;
@@ -60,6 +62,7 @@ public class AuthService {
         this.tokenService = tokenService;
         this.users = users;
         this.passwordEncoder = passwordEncoder;
+        this.dummyPasswordHash = passwordEncoder.encode(Hashing.randomToken(24));
         this.rateLimiter = rateLimiter;
         this.redis = redis;
         this.trustedDevices = trustedDevices;
@@ -108,17 +111,24 @@ public class AuthService {
             } catch (Exception ignored) {
             }
         }
-        if (user != null && user.isAdmin()) {
-            // admin luôn đăng nhập ở trang quản trị (mật khẩu + OTP), không đi đường khách
-            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ADMIN_USE_ADMIN_LOGIN);
-        }
-        if (user != null && !user.hasPassword()) {
-            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.PASSWORD_NOT_SET);
-        }
-        if (user == null || !passwordEncoder.matches(password, user.getPasswordHash())) {
+        // Chống dò tài khoản: KHÔNG tiết lộ gì trước khi mật khẩu được xác thực. Không tồn tại / chưa có mật khẩu / là admin /
+        // sai mật khẩu đều trả cùng một lỗi INVALID_LOGIN. Luôn chạy đúng một lượt BCrypt (với hash giả nếu không có tài khoản)
+        // để thời gian phản hồi cũng không phân biệt được các trường hợp.
+        boolean hasPassword = user != null && user.hasPassword();
+        boolean passwordOk = passwordEncoder.matches(password == null ? "" : password, hasPassword ? user.getPasswordHash() : dummyPasswordHash)
+                && hasPassword;
+        if (!passwordOk) {
             rateLimiter.hit(ipKey, identity.loginFailWindow());
-            rateLimiter.hit(accountKey, identity.loginFailWindow());
+            // Tài khoản admin không bị khóa theo tên đăng nhập: nếu không, ai biết email admin cũng có thể khóa admin từ xa.
+            // Admin vẫn bị chặn theo IP, và đăng nhập admin luôn cần OTP.
+            if (user == null || !user.isAdmin()) {
+                rateLimiter.hit(accountKey, identity.loginFailWindow());
+            }
             throw new ResponseException(HttpStatus.UNAUTHORIZED, ExceptionMessage.INVALID_LOGIN);
+        }
+        if (user.isAdmin()) {
+            // Admin luôn đăng nhập ở cổng quản trị (mật khẩu + OTP). Chỉ báo điều này cho người đã nhập ĐÚNG mật khẩu.
+            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ADMIN_USE_ADMIN_LOGIN);
         }
         user.ensureActive();
 
@@ -167,14 +177,18 @@ public class AuthService {
         if (rateLimiter.isExhausted(key, ADMIN_LOGIN_LIMIT)) {
             throw new ResponseException(HttpStatus.TOO_MANY_REQUESTS, ExceptionMessage.ADMIN_LOGIN_LOCKED);
         }
-        UserAccount user = users.findByEmail(email == null ? "" : email.trim().toLowerCase())
+        UserAccount candidate = users.findByEmail(email == null ? "" : email.trim().toLowerCase())
                 .filter(UserAccount::isAdmin)
-                .filter(u -> u.getPasswordHash() != null && passwordEncoder.matches(password, u.getPasswordHash()))
                 .orElse(null);
-        if (user == null) {
+        // Luôn chạy một lượt BCrypt (hash giả nếu không có tài khoản) để thời gian phản hồi không lộ tài khoản admin có tồn tại hay không
+        boolean hasPassword = candidate != null && candidate.getPasswordHash() != null;
+        boolean passwordOk = passwordEncoder.matches(password == null ? "" : password, hasPassword ? candidate.getPasswordHash() : dummyPasswordHash)
+                && hasPassword;
+        if (!passwordOk) {
             rateLimiter.hit(key, ADMIN_LOGIN_WINDOW);
             throw new ResponseException(HttpStatus.UNAUTHORIZED, ExceptionMessage.BAD_CREDENTIALS);
         }
+        UserAccount user = candidate;
         user.ensureActive();
         if (user.isOtpExempt()) {
             userAccountService.recordLogin(user.getId());

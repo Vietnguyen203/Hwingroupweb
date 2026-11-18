@@ -27,7 +27,7 @@
 | Method | Path | Quyền | Mô tả |
 |---|---|---|---|
 | POST | `/api/auth/otp` | public | Gửi OTP: `{phone}` (SMS – hiện giả lập, chỉ dev) **hoặc** `{email}` (email thật), `purpose`: `LOGIN` (mặc định – tài khoản phải có, không thì `ACCOUNT_NOT_FOUND`) \| `REGISTER` (phải chưa có, không thì `ACCOUNT_EXISTS`). Trả `{channel, sentTo, expiresInSeconds}`. Rate limit 3/10 phút theo nơi nhận và IP; kiểm tra tài khoản 20 lần/10 phút/IP |
-| POST | `/api/auth/login` | public | Bước 1: `{identifier (SĐT hoặc email), password}`. Thiết bị lạ → `{otpRequired: true, challengeId, sentTo}` và gửi OTP; thiết bị đã ghi nhớ → `{otpRequired: false, user}` + cookie JWT. Tài khoản admin → `ADMIN_USE_ADMIN_LOGIN` (dùng `/api/admin/auth/login`) |
+| POST | `/api/auth/login` | public | Bước 1: `{identifier (SĐT hoặc email), password}`. Thiết bị lạ → `{otpRequired: true, challengeId, sentTo}` và gửi OTP; thiết bị đã ghi nhớ → `{otpRequired: false, user}` + cookie JWT. Chống dò tài khoản: không tồn tại / chưa có mật khẩu / là admin / sai mật khẩu đều trả chung `401 INVALID_LOGIN` (cùng thời gian phản hồi); chỉ khi nhập ĐÚNG mật khẩu admin mới trả `422 ADMIN_USE_ADMIN_LOGIN` (dùng `/api/admin/auth/login`) |
 | POST | `/api/auth/login/verify` | public | Bước 2: `{challengeId, otp, rememberDevice}` → cookie JWT; `rememberDevice=true` ghi nhớ thiết bị 30 ngày (không hỏi OTP lại) |
 | POST | `/api/auth/register` | public | Đăng ký: `{phone\|email, otp, fullName, dateOfBirth (quá khứ), address, citizenId (12 số), password}` (OTP purpose REGISTER; mật khẩu theo chính sách: 8–64 ký tự, hoa + thường + số + ký tự đặc biệt, không chứa email/SĐT) → tạo tài khoản CUSTOMER, set cookie JWT (201) |
 | POST | `/api/auth/refresh` | cookie `hwin_rt` | Xoay vòng refresh token, set cookie mới |

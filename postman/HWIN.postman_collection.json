@@ -7422,7 +7422,7 @@
           ]
         },
         {
-          "name": "Đăng nhập khách bằng SĐT của admin → 422 ADMIN_USE_ADMIN_LOGIN",
+          "name": "Đăng nhập khách bằng SĐT của admin + mật khẩu SAI → 401 INVALID_LOGIN (không lộ đó là admin)",
           "request": {
             "method": "POST",
             "header": [
@@ -7442,10 +7442,55 @@
                 "login"
               ]
             },
-            "description": "Tài khoản admin chỉ đăng nhập ở cổng admin (mật khẩu + OTP); đi cổng khách bị chặn.",
+            "description": "Chống dò tài khoản: chưa xác thực được mật khẩu thì mọi trường hợp (không tồn tại, chưa có mật khẩu, là admin, sai mật khẩu) đều trả cùng một lỗi.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"identifier\": \"{{newAdminPhone}}\",\n  \"password\": \"Postman@2026!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));",
+                  "pm.test('code = INVALID_LOGIN', () => pm.expect(pm.response.json().messageCode).to.eql('INVALID_LOGIN'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Đăng nhập khách bằng SĐT của admin + mật khẩu ĐÚNG → 422 ADMIN_USE_ADMIN_LOGIN",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ctvUrl}}/api/auth/login",
+              "host": [
+                "{{ctvUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Chỉ người nhập đúng mật khẩu admin mới được báo \"dùng cổng quản trị\" (giao diện tự chuyển sang /api/admin/auth/login).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{newAdminPhone}}\",\n  \"password\": \"Van-hanh-2026-hwin\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
