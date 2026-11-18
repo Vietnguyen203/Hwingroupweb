@@ -4,6 +4,8 @@ import Link from "next/link";
 import { HandCoins } from "lucide-react";
 
 import { useAffiliateCode } from "@/hooks/use-affiliate-code";
+import { useMyId } from "@/hooks/use-my-id";
+import { portalPath } from "@/lib/portal-path";
 import { cn } from "@/lib/utils";
 
 export interface AffiliateCtaProps {
@@ -16,7 +18,8 @@ export function AffiliateCta({ className, variant = "vertical" }: AffiliateCtaPr
   const code = useAffiliateCode();
   const label = code ? "Trang CTV" : "Đăng ký CTV";
   // CTV đã duyệt vào thẳng cổng CTV; khách chưa là CTV vào trang giới thiệu / đăng ký
-  const href = code ? "/affiliate/dashboard" : "/affiliate";
+  const myId = useMyId();
+  const href = code ? portalPath("dashboard", myId) : "/affiliate";
 
   if (variant === "vertical") {
     return (

@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { BadgeCheck, Banknote, CircleX, ShoppingBag, type LucideIcon } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { timeAgo, type ActivityItem } from "@/lib/affiliate-stats";
 import { formatVnd } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { PortalLink } from "./portal-link";
 
 const TONE = {
   success: "bg-green-50 text-green-700",
@@ -23,7 +23,7 @@ export function RecentActivity({ items, loading }: { items?: ActivityItem[]; loa
     <section className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-base font-bold text-gray-900">Hoạt động gần đây</h2>
-        <Link href="/affiliate/earnings" className="text-sm font-semibold text-brand-link hover:underline">Xem tất cả</Link>
+        <PortalLink slug="earnings" className="text-sm font-semibold text-brand-link hover:underline">Xem tất cả</PortalLink>
       </div>
 
       {loading || !items ? (

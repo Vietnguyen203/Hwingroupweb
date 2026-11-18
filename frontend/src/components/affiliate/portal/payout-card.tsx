@@ -1,7 +1,6 @@
 "use client";
 
 import { useId, useState } from "react";
-import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, PiggyBank, Wallet } from "lucide-react";
 
@@ -14,6 +13,7 @@ import { PAYOUT_STATUS, type AffiliateDashboard, type PayoutResponse } from "@/l
 import { withdrawBlock } from "@/lib/affiliate-stats";
 import { formatVnd } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { PortalLink } from "./portal-link";
 
 type Props = {
   dash?: AffiliateDashboard;
@@ -124,7 +124,7 @@ export function PayoutCard({ dash, latest }: Props) {
           {block && (
             <p id={`${inputId}-why`} className="mt-2 text-xs text-amber-700">
               {block.reason}{" "}
-              {block.needsBank && <Link href="/affiliate/earnings?tab=bank" className="font-semibold underline underline-offset-2">Thêm tài khoản</Link>}
+              {block.needsBank && <PortalLink slug="earnings" search="?tab=bank" className="font-semibold underline underline-offset-2">Thêm tài khoản</PortalLink>}
             </p>
           )}
           {request.isSuccess && (

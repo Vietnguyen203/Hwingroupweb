@@ -2,16 +2,27 @@ import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 
 import type { AffiliateDashboard } from "@/lib/affiliate";
+import type { PortalSlug } from "@/lib/portal-path";
 import { cn } from "@/lib/utils";
+import { PortalLink } from "./portal-link";
 
-type Step = { title: string; text: string; done: boolean; href: string; action: string };
+type Step = {
+  title: string;
+  text: string;
+  done: boolean;
+  action: string;
+  /** Đích trong cổng CTV (link có id) hoặc đường dẫn thường. */
+  to: { slug: PortalSlug; search?: string } | { href: string };
+};
+
+const ACTION_CLASS = "group mt-2 inline-flex items-center gap-1 text-xs font-bold text-brand-red";
 
 /** Checklist "Bắt đầu nhanh" cho CTV mới – tự ẩn khi đã hoàn thành cả 3 bước (suy ra từ dữ liệu thật). */
 export function GettingStarted({ dash, orders }: { dash: AffiliateDashboard; orders: number }) {
   const steps: Step[] = [
-    { title: "Chia sẻ link giới thiệu", text: "Gửi link của bạn cho bạn bè, nhóm Facebook, Zalo.", done: dash.clicksTotal > 0, href: "/affiliate/links", action: "Lấy link" },
-    { title: "Thêm tài khoản ngân hàng", text: "Để nhận hoa hồng về tài khoản của bạn.", done: dash.hasBankAccount, href: "/affiliate/earnings?tab=bank", action: "Thêm ngay" },
-    { title: "Nhận đơn hàng đầu tiên", text: "Khách mua qua link của bạn là có hoa hồng.", done: orders > 0, href: "/products", action: "Chọn sản phẩm" },
+    { title: "Chia sẻ link giới thiệu", text: "Gửi link của bạn cho bạn bè, nhóm Facebook, Zalo.", done: dash.clicksTotal > 0, to: { slug: "links" }, action: "Lấy link" },
+    { title: "Thêm tài khoản ngân hàng", text: "Để nhận hoa hồng về tài khoản của bạn.", done: dash.hasBankAccount, to: { slug: "earnings", search: "?tab=bank" }, action: "Thêm ngay" },
+    { title: "Nhận đơn hàng đầu tiên", text: "Khách mua qua link của bạn là có hoa hồng.", done: orders > 0, to: { href: "/products" }, action: "Chọn sản phẩm" },
   ];
   const finished = steps.filter((s) => s.done).length;
   if (finished === steps.length) return null;
@@ -59,12 +70,18 @@ export function GettingStarted({ dash, orders }: { dash: AffiliateDashboard; ord
             <div className="min-w-0">
               <p className={cn("text-sm font-semibold", s.done ? "text-gray-500 line-through" : "text-gray-900")}>{s.title}</p>
               <p className="mt-0.5 text-xs text-gray-500">{s.text}</p>
-              {!s.done && (
-                <Link href={s.href} className="group mt-2 inline-flex items-center gap-1 text-xs font-bold text-brand-red">
-                  {s.action}
-                  <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />
-                </Link>
-              )}
+              {!s.done &&
+                ("slug" in s.to ? (
+                  <PortalLink slug={s.to.slug} search={s.to.search} className={ACTION_CLASS}>
+                    {s.action}
+                    <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />
+                  </PortalLink>
+                ) : (
+                  <Link href={s.to.href} className={ACTION_CLASS}>
+                    {s.action}
+                    <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />
+                  </Link>
+                ))}
             </div>
           </li>
         ))}

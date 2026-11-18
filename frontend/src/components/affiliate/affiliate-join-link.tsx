@@ -4,6 +4,8 @@ import Link from "next/link";
 
 import { useAffiliateCode } from "@/hooks/use-affiliate-code";
 import { useMounted } from "@/hooks/use-mounted";
+import { useMyId } from "@/hooks/use-my-id";
+import { portalPath } from "@/lib/portal-path";
 
 /** true khi người xem là CTV đã duyệt. Lần render đầu (hydrate) luôn false để khớp HTML server. */
 function useIsAffiliate() {
@@ -15,8 +17,9 @@ function useIsAffiliate() {
 /** Nút mời làm CTV: khách thấy lời mời đăng ký, CTV đã duyệt thấy lối vào cổng CTV. */
 export function AffiliateJoinLink({ className, guestLabel, guestHref = "/affiliate" }: { className?: string; guestLabel: string; guestHref?: string }) {
   const member = useIsAffiliate();
+  const myId = useMyId();
   return (
-    <Link href={member ? "/affiliate/dashboard" : guestHref} className={className}>
+    <Link href={member ? portalPath("dashboard", myId) : guestHref} className={className}>
       {member ? "Vào cổng CTV" : guestLabel}
     </Link>
   );

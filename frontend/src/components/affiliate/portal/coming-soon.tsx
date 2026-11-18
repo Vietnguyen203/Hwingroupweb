@@ -1,15 +1,17 @@
 import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
+import type { PortalSlug } from "@/lib/portal-path";
 import { cn } from "@/lib/utils";
 import { PORTAL_NAV } from "./nav";
+import { PortalLink } from "./portal-link";
 import { Reveal } from "./reveal";
 
 const BARS = [38, 62, 48, 80, 56, 92, 70, 100, 76, 88];
 
 /** Trang giữ chỗ cho mục menu chưa có chức năng riêng (backend chưa có dữ liệu tương ứng), kèm hình phác thảo sắp có. */
-export function ComingSoon({ href }: { href: string }) {
-  const item = PORTAL_NAV.find((n) => n.href === href);
+export function ComingSoon({ slug }: { slug: PortalSlug }) {
+  const item = PORTAL_NAV.find((n) => n.slug === slug);
   if (!item) return null;
 
   return (
@@ -26,9 +28,9 @@ export function ComingSoon({ href }: { href: string }) {
           </p>
           <p className="mx-auto mt-3 max-w-md text-sm text-gray-500">{item.description}</p>
           <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
-            <Link href="/affiliate/dashboard" className={cn(buttonVariants(), "h-10 bg-brand-red px-5 font-semibold text-white hover:bg-brand-red/90")}>
+            <PortalLink slug="dashboard" className={cn(buttonVariants(), "h-10 bg-brand-red px-5 font-semibold text-white hover:bg-brand-red/90")}>
               Về Tổng quan
-            </Link>
+            </PortalLink>
             {item.fallback && (
               <Link href={item.fallback.href} className={cn(buttonVariants({ variant: "outline" }), "h-10 px-5 font-semibold")}>
                 {item.fallback.label}

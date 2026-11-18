@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Suspense, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ChevronRight, Menu } from "lucide-react";
 
@@ -9,24 +8,19 @@ import { NotificationBell } from "@/components/notifications/notification-bell";
 import { useAffiliateProfile } from "@/hooks/use-affiliate-profile";
 import { useMounted } from "@/hooks/use-mounted";
 import { initials } from "@/lib/affiliate-stats";
+import { activeSlug } from "@/lib/portal-path";
 import { PORTAL_NAV } from "./nav";
+import { PortalLink } from "./portal-link";
 import { Sidebar } from "./sidebar";
 
 /**
  * Khung cổng CTV: sidebar cố định bên trái (desktop) hoặc thanh trên + ngăn kéo (mobile), nội dung bên phải nền xám nhạt.
  * Luôn render `children`; việc chỉ cho CTV đã duyệt xem nội dung do PortalGate ở từng trang đảm nhiệm.
+ * Ngăn kéo tự đóng khi bấm một mục (onClose của Sidebar), nên không cần theo dõi pathname ở đây.
  */
 export function PortalShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
   const { profile } = useAffiliateProfile({ syncRole: false }); // chỉ đọc tên cho sidebar; PortalGate lo làm mới phiên
   const [open, setOpen] = useState(false);
-  const [lastPath, setLastPath] = useState(pathname);
-
-  // Điều hướng xong thì đóng ngăn kéo (chỉnh state ngay khi render, không cần effect)
-  if (pathname !== lastPath) {
-    setLastPath(pathname);
-    setOpen(false);
-  }
 
   // Ngăn kéo mở: Esc để đóng, khóa cuộn nền
   useEffect(() => {
@@ -43,7 +37,6 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
 
   const mounted = useMounted();
   const a = mounted ? profile.data : undefined; // lần render đầu (hydrate) chưa có tên để khớp HTML server
-  const current = PORTAL_NAV.find((n) => pathname === n.href || pathname.startsWith(`${n.href}/`));
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -58,7 +51,9 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
           <nav aria-label="Vị trí hiện tại" className="flex items-center gap-1.5 text-sm">
             <span className="text-gray-400">Cổng CTV</span>
             <ChevronRight className="size-4 text-gray-300" aria-hidden />
-            <span className="font-semibold text-gray-800">{current?.label ?? "Tổng quan"}</span>
+            <Suspense fallback={<span className="font-semibold text-gray-800">&nbsp;</span>}>
+              <CurrentCrumb />
+            </Suspense>
           </nav>
           <div className="flex items-center gap-4">
             <NotificationBell variant="admin" />
@@ -85,9 +80,9 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
           >
             <Menu className="size-5" />
           </button>
-          <Link href="/affiliate/dashboard" className="flex-1 text-base font-extrabold tracking-tight text-brand-deep">
+          <PortalLink slug="dashboard" className="flex-1 text-base font-extrabold tracking-tight text-brand-deep">
             HWIN <span className="text-brand-red">Affiliate</span>
-          </Link>
+          </PortalLink>
           <span aria-hidden className="flex size-8 items-center justify-center rounded-full bg-brand-soft text-xs font-bold text-brand">
             {initials(a?.fullName)}
           </span>
@@ -107,4 +102,11 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
       )}
     </div>
   );
+}
+
+/** Tên mục hiện tại; đọc pathname nên nằm trong Suspense (URL có id động). */
+function CurrentCrumb() {
+  const slug = activeSlug(usePathname());
+  const label = PORTAL_NAV.find((n) => n.slug === slug)?.label ?? "Tổng quan";
+  return <span className="font-semibold text-gray-800">{label}</span>;
 }

@@ -18,7 +18,7 @@ export function AccountLink({ vertical = true, className }: AccountLinkProps) {
   const me = useMe().data;
   const user = mounted ? me : null;
   const name = user ? user.fullName || user.email || user.phoneMasked || "Tài khoản" : null;
-  const href = user?.roles?.includes("ADMIN") ? "/admin/orders" : user ? "/account" : "/login";
+  const href = user?.roles?.includes("ADMIN") ? "/admin/orders" : user ? `/account/${user.id}` : "/login";
 
   if (vertical) {
     return (
