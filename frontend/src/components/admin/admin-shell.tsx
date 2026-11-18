@@ -138,20 +138,7 @@ export function AdminSidebarContent({ onClose }: { onClose?: () => void }) {
       </div>
 
       {/* Bottom Footer Area */}
-      <div className="border-t border-slate-800 bg-slate-950/60 p-4 space-y-3">
-        <a
-          href="/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/90 px-3.5 py-2.5 text-xs font-medium text-slate-300 transition-colors hover:border-slate-700 hover:bg-slate-800 hover:text-white"
-        >
-          <span className="flex items-center gap-2">
-            <ExternalLink className="size-3.5 text-slate-400" />
-            Xem trang bán hàng
-          </span>
-          <span className="text-[10px] text-slate-400">Mở tab mới ↗</span>
-        </a>
-
+      <div className="border-t border-slate-800 bg-slate-950/60 p-4">
         {/* Current user & Logout */}
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-center gap-2.5">
