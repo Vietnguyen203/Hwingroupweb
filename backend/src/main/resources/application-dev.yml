@@ -17,6 +17,7 @@ spring:
 hwin:
   identity:
     pii-encryption-key: ${IDENTITY_PII_KEY:ZGV2LW9ubHktcGlpLWtleS0zMi1ieXRlcy1jaGFuZ2U=}  # chỉ dev
+    login-fail-limit: 50          # dev: nới để chạy Postman nhiều lần (thật: 5 lần sai / 15 phút)
   admin-seed:                    # dev: tài khoản admin/admin MIỄN OTP (chỉ tồn tại ở dev)
     email: ${ADMIN_EMAIL:admin}
     password: ${ADMIN_PASSWORD:admin}

@@ -254,6 +254,213 @@
           ]
         },
         {
+          "name": "Khách (email): thêm SĐT – gửi OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/me/phone/otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "phone",
+                "otp"
+              ]
+            },
+            "description": "Tài khoản đăng ký bằng email thêm SĐT (xác minh OTP) – SĐT sau đó dùng làm tên đăng nhập.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{addedPhone}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const rnd = () => '09' + String(Math.floor(Math.random() * 1e8)).padStart(8, '0');",
+                  "pm.collectionVariables.set('addedPhone', rnd());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 202', () => pm.response.to.have.status(202));",
+                  "pm.test('Gửi qua SMS', () => pm.expect(pm.response.json().channel).to.eql('SMS'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách (email): thêm SĐT – OTP sai → 422",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/me/phone",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "phone"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{addedPhone}}\",\n  \"otp\": \"000000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                  "pm.test('code = OTP_INVALID', () => pm.expect(pm.response.json().messageCode).to.eql('OTP_INVALID'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách (email): thêm SĐT – OTP đúng",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/me/phone",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "phone"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{addedPhone}}\",\n  \"otp\": \"{{addedPhoneOtp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Tự lấy OTP vừa gửi (endpoint chỉ có ở profile dev)",
+                  "const v = pm.collectionVariables.get('addedPhone');",
+                  "pm.sendRequest(pm.variables.get('baseUrl') + '/api/dev/otp/latest?purpose=ADD_PHONE&phone=' + encodeURIComponent(v), (err, res) => {",
+                  "  pm.collectionVariables.set('addedPhoneOtp', res.json().code);",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const me = pm.response.json();",
+                  "pm.test('Đã có SĐT (che bớt)', () => pm.expect(me.phoneMasked).to.be.a('string').and.not.empty);",
+                  "pm.test('Vẫn giữ email', () => pm.expect(me.email).to.eql(pm.collectionVariables.get('customerEmail')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách (email): thêm SĐT lần 2 → 422 PHONE_ALREADY_SET",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/me/phone/otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "phone",
+                "otp"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{addedPhone}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                  "pm.test('code = PHONE_ALREADY_SET', () => pm.expect(pm.response.json().messageCode).to.eql('PHONE_ALREADY_SET'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Khách (email): đăng ký lại cùng email → 422 ACCOUNT_EXISTS",
           "request": {
             "method": "POST",
@@ -2312,6 +2519,55 @@
           ]
         },
         {
+          "name": "Sửa địa chỉ thứ 2 (đổi số nhà)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/me/addresses/{{address2Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "addresses",
+                "{{address2Id}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipientName\": \"Nguyễn Văn Test\",\n  \"recipientPhone\": \"{{customerPhone}}\",\n  \"province\": \"Hà Nội\",\n  \"district\": \"Hoàn Kiếm\",\n  \"ward\": \"Tràng Tiền\",\n  \"street\": \"99 Tràng Tiền\",\n  \"makeDefault\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const list = pm.response.json();",
+                  "const a = list.find(x => x.id === pm.collectionVariables.get('address2Id'));",
+                  "pm.test('Địa chỉ đã đổi', () => pm.expect(a.street).to.eql('99 Tràng Tiền'));",
+                  "pm.test('Không nhân đôi địa chỉ', () => pm.expect(list.filter(x => x.id === a.id).length).to.eql(1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Sổ địa chỉ (đúng 1 mặc định)",
           "request": {
             "method": "GET",
@@ -2841,6 +3097,257 @@
           ]
         },
         {
+          "name": "Sửa sản phẩm (đổi tên + mô tả)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/products/{{newProductId}}",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "products",
+                "{{newProductId}}"
+              ]
+            },
+            "description": "Ghi đè toàn bộ thông tin (cùng body với tạo sản phẩm); giá giữ nguyên để các bước giảm giá phía sau không đổi.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryId\": \"{{categoryId}}\",\n  \"name\": \"Chả lụa test Postman (đã sửa)\",\n  \"slug\": \"cha-lua-test-postman-da-sua-{{$timestamp}}\",\n  \"price\": 99000,\n  \"compareAtPrice\": 120000,\n  \"shortDescription\": \"Mô tả ngắn đã sửa\",\n  \"description\": \"Mô tả chi tiết\",\n  \"unit\": \"đòn\",\n  \"brand\": \"HWIN Food\",\n  \"weight\": \"500g\",\n  \"packaging\": \"Gói hút chân không\",\n  \"origin\": \"Việt Nam\",\n  \"ingredients\": \"Thịt heo, gia vị\",\n  \"features\": \"Thơm ngon\",\n  \"usageInstructions\": \"Dùng ngay hoặc chiên sơ\",\n  \"initialStock\": 50,\n  \"bestseller\": false,\n  \"images\": [\n    \"/sample/products/cha-lua-truyen-thong-500g.svg\"\n  ],\n  \"foodInfo\": {\n    \"manufacturer\": \"Công ty test\",\n    \"shelfLife\": \"30 ngày\",\n    \"storageInstructions\": \"Ngăn mát 0–5°C\",\n    \"declarationNumber\": \"TCB-999/2025\",\n    \"foodSafetyCertNumber\": \"ATTP-TEST\",\n    \"foodSafetyCertUrl\": null\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Xem lại sau khi sửa",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/products/{{newProductId}}",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "products",
+                "{{newProductId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const p = pm.response.json();",
+                  "pm.test('Tên mới', () => pm.expect(p.name).to.eql('Chả lụa test Postman (đã sửa)'));",
+                  "pm.test('Mô tả ngắn mới', () => pm.expect(p.shortDescription).to.eql('Mô tả ngắn đã sửa'));",
+                  "pm.test('Giá không đổi', () => pm.expect(p.price).to.eql(99000));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Chuyển sản phẩm sang danh mục test",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/products/{{newProductId}}/category",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "products",
+                "{{newProductId}}",
+                "category"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"categoryId\": \"{{newCategoryId}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sản phẩm đã nằm trong danh mục test",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/products/{{newProductId}}",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "products",
+                "{{newProductId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Đúng danh mục', () => pm.expect(pm.response.json().categoryId).to.eql(pm.collectionVariables.get('newCategoryId')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Chuyển về danh mục ban đầu",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/products/{{newProductId}}/category",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "products",
+                "{{newProductId}}",
+                "category"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"categoryId\": \"{{categoryId}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Chuyển sang danh mục không tồn tại → 422",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/products/{{newProductId}}/category",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "products",
+                "{{newProductId}}",
+                "category"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"categoryId\": \"00000000-0000-7000-8000-000000000000\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                  "pm.test('code = CATEGORY_NOT_EXISTS', () => pm.expect(pm.response.json().messageCode).to.eql('CATEGORY_NOT_EXISTS'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Giảm giá thêm 15% cho sản phẩm",
           "request": {
             "method": "PATCH",
@@ -3116,6 +3623,69 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Xóa sản phẩm test",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/products/{{newProductId}}",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "products",
+                "{{newProductId}}"
+              ]
+            },
+            "description": "Xóa hẳn (chỉ dùng cho sản phẩm chưa từng được đặt)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Xóa lại sản phẩm đã xóa → 404",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/products/{{newProductId}}",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "products",
+                "{{newProductId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+                  "pm.test('code = PRODUCT_NOT_FOUND', () => pm.expect(pm.response.json().messageCode).to.eql('PRODUCT_NOT_FOUND'));"
                 ]
               }
             }
@@ -4526,6 +5096,41 @@
           ]
         },
         {
+          "name": "Chi tiết CTV (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/affiliates/{{affiliateId}}",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "affiliates",
+                "{{affiliateId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const a = pm.response.json();",
+                  "pm.test('Đúng CTV', () => pm.expect(a.id).to.eql(pm.collectionVariables.get('affiliateId')));",
+                  "pm.test('Đã có mã giới thiệu', () => pm.expect(a.referralCode).to.be.a('string').and.not.empty);",
+                  "pm.test('Có ảnh CCCD', () => pm.expect(a.hasIdCard).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Duyệt lại lần nữa → 422",
           "request": {
             "method": "POST",
@@ -4892,6 +5497,40 @@
                   "const a = pm.response.json();",
                   "pm.test('Chỉ hiện 4 số cuối', () => pm.expect(a.bankAccountNoMasked).to.eql('****6789'));",
                   "pm.test('Lần đầu không khóa rút tiền', () => pm.expect(a.withdrawLockedUntil).to.be.null);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Xem tài khoản ngân hàng (số tài khoản đã che)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ctvUrl}}/api/affiliates/me/bank-account",
+              "host": [
+                "{{ctvUrl}}"
+              ],
+              "path": [
+                "api",
+                "affiliates",
+                "me",
+                "bank-account"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const a = pm.response.json();",
+                  "pm.test('Có tên ngân hàng', () => pm.expect(a.bankName).to.be.a('string').and.not.empty);",
+                  "pm.test('Số tài khoản đã che', () => { pm.expect(a.bankAccountNoMasked).to.include('*'); pm.expect(a.bankAccountNoMasked).to.not.eql('0123456789'); });"
                 ]
               }
             }
@@ -6207,6 +6846,100 @@
           ]
         },
         {
+          "name": "Từ chối yêu cầu đã chi trả → 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/payouts/{{payoutId}}/reject",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "payouts",
+                "{{payoutId}}",
+                "reject"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reason\": \"Test từ chối\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                  "pm.test('code = INVALID_STATE_TRANSITION', () => pm.expect(pm.response.json().messageCode).to.eql('INVALID_STATE_TRANSITION'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Từ chối thiếu lý do → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/payouts/{{payoutId}}/reject",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "payouts",
+                "{{payoutId}}",
+                "reject"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reason\": \"\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('code = VALIDATION_FAILED', () => pm.expect(pm.response.json().messageCode).to.eql('VALIDATION_FAILED'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Admin: danh sách hoa hồng của CTV",
           "request": {
             "method": "GET",
@@ -6246,7 +6979,528 @@
       ]
     },
     {
-      "name": "13. Admin – nhật ký & đơn chuyển khoản quá hạn",
+      "name": "13. Khách – đánh giá sản phẩm",
+      "description": "Khách đã nhận hàng (đơn ~2 triệu ở folder 12 vừa giao) mới được đánh giá; mỗi sản phẩm 1 lần; admin ẩn/hiện.",
+      "item": [
+        {
+          "name": "Chưa mua sản phẩm → không đủ điều kiện",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/me/product-reviews/eligibility?productId=00000000-0000-7000-8000-000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "product-reviews",
+                "eligibility"
+              ],
+              "query": [
+                {
+                  "key": "productId",
+                  "value": "00000000-0000-7000-8000-000000000000"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const e = pm.response.json();",
+                  "pm.test('Chưa mua, không đánh giá được', () => { pm.expect(e.purchased).to.be.false; pm.expect(e.canReview).to.be.false; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Đã nhận hàng → đủ điều kiện đánh giá",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/me/product-reviews/eligibility?productId={{productA}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "product-reviews",
+                "eligibility"
+              ],
+              "query": [
+                {
+                  "key": "productId",
+                  "value": "{{productA}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const e = pm.response.json();",
+                  "pm.test('Đủ điều kiện', () => { pm.expect(e.purchased).to.be.true; pm.expect(e.alreadyReviewed).to.be.false; pm.expect(e.canReview).to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Đánh giá sản phẩm chưa nhận → 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/me/product-reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "product-reviews"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productB}}\",\n  \"rating\": 5,\n  \"comment\": \"Chưa mua\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                  "pm.test('code = REVIEW_NOT_PURCHASED', () => pm.expect(pm.response.json().messageCode).to.eql('REVIEW_NOT_PURCHASED'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Số sao ngoài 1–5 → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/me/product-reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "product-reviews"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productA}}\",\n  \"rating\": 6,\n  \"comment\": \"Sai số sao\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('code = VALIDATION_FAILED', () => pm.expect(pm.response.json().messageCode).to.eql('VALIDATION_FAILED'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Gửi đánh giá 5 sao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/me/product-reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "product-reviews"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productA}}\",\n  \"rating\": 5,\n  \"comment\": \"Ngon, giao nhanh (Postman)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const r = pm.response.json();",
+                  "pm.collectionVariables.set('myReviewId', r.id);",
+                  "pm.test('Đúng số sao + nội dung', () => { pm.expect(r.rating).to.eql(5); pm.expect(r.comment).to.eql('Ngon, giao nhanh (Postman)'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Đánh giá lần 2 cùng sản phẩm → 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/me/product-reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "product-reviews"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productA}}\",\n  \"rating\": 4,\n  \"comment\": \"Lần 2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
+                  "pm.test('code = REVIEW_ALREADY_EXISTS', () => pm.expect(pm.response.json().messageCode).to.eql('REVIEW_ALREADY_EXISTS'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Danh sách đánh giá công khai có đánh giá của tôi",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/product-reviews?productId={{productA}}&page_size=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "product-reviews"
+              ],
+              "query": [
+                {
+                  "key": "productId",
+                  "value": "{{productA}}"
+                },
+                {
+                  "key": "page_size",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const p = pm.response.json();",
+                  "pm.test('Có đánh giá vừa gửi', () => pm.expect(p.content.map(x => x.id)).to.include(pm.collectionVariables.get('myReviewId')));",
+                  "pm.test('Tên người đánh giá đã che bớt', () => { const n = p.content.find(x => x.id === pm.collectionVariables.get('myReviewId')).reviewerName; pm.expect(n).to.be.a('string').and.not.empty; pm.expect(n).to.not.eql('Nguyễn Văn Test'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tổng hợp số sao",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/product-reviews/summary?productId={{productA}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "product-reviews",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "productId",
+                  "value": "{{productA}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const s = pm.response.json();",
+                  "pm.test('Có ít nhất 1 đánh giá', () => pm.expect(s.total).to.be.at.least(1));",
+                  "pm.test('Có lượt 5 sao', () => pm.expect(s.countByRating['5']).to.be.at.least(1));",
+                  "pm.test('Điểm trung bình 1–5', () => pm.expect(s.average).to.be.within(1, 5));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Đã đánh giá → không đánh giá thêm được",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/me/product-reviews/eligibility?productId={{productA}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me",
+                "product-reviews",
+                "eligibility"
+              ],
+              "query": [
+                {
+                  "key": "productId",
+                  "value": "{{productA}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const e = pm.response.json();",
+                  "pm.test('Đã đánh giá', () => { pm.expect(e.alreadyReviewed).to.be.true; pm.expect(e.canReview).to.be.false; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin ẩn đánh giá vừa gửi",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/product-reviews/{{myReviewId}}/visibility",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "product-reviews",
+                "{{myReviewId}}",
+                "visibility"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visible\": false,\n  \"reason\": \"Test ẩn đánh giá\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Đã ẩn', () => pm.expect(pm.response.json().visible).to.be.false);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Đánh giá bị ẩn không hiện công khai",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/product-reviews?productId={{productA}}&page_size=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "product-reviews"
+              ],
+              "query": [
+                {
+                  "key": "productId",
+                  "value": "{{productA}}"
+                },
+                {
+                  "key": "page_size",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Không còn trong danh sách', () => pm.expect(pm.response.json().content.map(x => x.id)).to.not.include(pm.collectionVariables.get('myReviewId')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin hiện lại đánh giá",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{adminUrl}}/api/admin/product-reviews/{{myReviewId}}/visibility",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "product-reviews",
+                "{{myReviewId}}",
+                "visibility"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visible\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Đã hiện', () => pm.expect(pm.response.json().visible).to.be.true);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "14. Admin – nhật ký & đơn chuyển khoản quá hạn",
       "item": [
         {
           "name": "Nhật ký: chi trả rút tiền",
@@ -6606,7 +7860,7 @@
       ]
     },
     {
-      "name": "14. Admin – khóa / mở khóa CTV",
+      "name": "15. Admin – khóa / mở khóa CTV",
       "item": [
         {
           "name": "Tạm khóa CTV",
@@ -6896,7 +8150,7 @@
       ]
     },
     {
-      "name": "15. Admin – tài khoản quản trị & đăng nhập 2 bước",
+      "name": "16. Admin – tài khoản quản trị & đăng nhập 2 bước",
       "item": [
         {
           "name": "Đăng nhập admin/admin (dev, miễn OTP)",
@@ -7544,7 +8798,7 @@
       ]
     },
     {
-      "name": "16. Phân quyền & đăng xuất",
+      "name": "17. Phân quyền & đăng xuất",
       "item": [
         {
           "name": "Khách gọi API admin → 403",
@@ -7864,6 +9118,18 @@
     },
     {
       "key": "reviewId",
+      "value": ""
+    },
+    {
+      "key": "addedPhone",
+      "value": ""
+    },
+    {
+      "key": "addedPhoneOtp",
+      "value": ""
+    },
+    {
+      "key": "myReviewId",
       "value": ""
     }
   ]

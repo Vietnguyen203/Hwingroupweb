@@ -49,10 +49,11 @@ Không cần thao tác tay:
 | 10. Admin – duyệt CTV | Duyệt → sinh mã giới thiệu |
 | 11. CTV – nhận quyền & tài khoản ngân hàng | Nhận vai trò AFFILIATE, dashboard, đổi ngân hàng bằng OTP, lỗi rút tiền |
 | 12. CTV – link giới thiệu → hoa hồng → rút tiền | Click link (cookie ref), khách đặt đơn ~2 triệu, hoa hồng 10%, chặn tự giới thiệu, job duyệt +8 ngày, rút 200.000, admin duyệt + chi trả |
-| 13. Admin – nhật ký & đơn chuyển khoản quá hạn | Nhật ký kiểm toán; đơn QR chưa thanh toán bị hủy sau 24h (giả lập +25h) |
-| 14. Admin – khóa / mở khóa CTV | Link bị khóa không đặt cookie, CTV mất vai trò, mở khóa giữ mã |
-| 15. Admin – tài khoản quản trị & đăng nhập 2 bước | Tạo admin (chặn mật khẩu yếu, thiếu SĐT), đăng nhập mật khẩu → OTP, admin không vào được bằng OTP khách |
-| 16. Phân quyền & đăng xuất | Khách gọi API admin bị 403, đăng xuất, 401 |
+| 13. Khách – đánh giá sản phẩm | Chỉ khách đã nhận hàng mới đánh giá, 1 lần / sản phẩm, danh sách + tổng hợp số sao, admin ẩn/hiện |
+| 14. Admin – nhật ký & đơn chuyển khoản quá hạn | Nhật ký kiểm toán; đơn QR chưa thanh toán bị hủy sau 24h (giả lập +25h) |
+| 15. Admin – khóa / mở khóa CTV | Link bị khóa không đặt cookie, CTV mất vai trò, mở khóa giữ mã |
+| 16. Admin – tài khoản quản trị & đăng nhập 2 bước | Tạo admin (chặn mật khẩu yếu, thiếu SĐT), đăng nhập mật khẩu → OTP, admin không vào được bằng OTP khách |
+| 17. Phân quyền & đăng xuất | Khách gọi API admin bị 403, đăng xuất, 401 |
 
 ## Chạy bằng Postman CLI
 
