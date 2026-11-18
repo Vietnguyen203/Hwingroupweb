@@ -84,7 +84,7 @@ export function RegisterAffiliateForm() {
         </label>
         <div className="space-y-2 rounded-xl bg-neutral-50 p-3">
           <p className="text-sm font-medium">Ảnh căn cước công dân (CCCD)</p>
-          <p className="text-xs text-muted-foreground">Dùng để xác minh danh tính khi chi trả hoa hồng. Ảnh được lưu riêng tư, chỉ quản trị viên xem được. JPG/PNG/WebP, tối đa 5MB.</p>
+          <p className="text-xs text-muted-foreground">Chụp trực tiếp hoặc tải ảnh lên. Dùng để xác minh danh tính khi chi trả hoa hồng; ảnh được lưu riêng tư, chỉ quản trị viên xem được. JPG/PNG/WebP, tối đa 5MB (ảnh lớn tự thu nhỏ).</p>
           <div className="grid grid-cols-2 gap-3">
             <IdCardPicker label="Mặt trước" file={front} onChange={setFront} onError={setError} />
             <IdCardPicker label="Mặt sau" file={back} onChange={setBack} onError={setError} />

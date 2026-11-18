@@ -12,11 +12,12 @@ import { Pager } from "@/components/ui/pager";
 import { showToast } from "@/components/ui/toast";
 import { useAdminList } from "@/hooks/use-admin-list";
 import { useQueryParam } from "@/hooks/use-query-param";
-import { api, ApiError, errorMessage } from "@/lib/api";
+import { api, errorMessage } from "@/lib/api";
 import { formatVnd } from "@/lib/format";
 import type { CategoryResponse } from "@/lib/types";
 import { CategoryForm, CategoryFormModal, EMPTY_CATEGORY_FORM } from "./admin-categories";
 import { AdminComboBuilder } from "./admin-combo-builder";
+import { ImageUploader } from "@/components/ui/image-uploader";
 import { ProductSaleDialog } from "./product-sale-dialog";
 import { ActionButton, AdminPage, FilterBar, Loading, Select, Table } from "./admin-ui";
 
@@ -222,7 +223,7 @@ export function AdminProducts() {
               onClick={() => setShowComboBuilder(true)}
               className="gap-2 bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 font-bold text-white shadow-md shadow-rose-500/20 hover:from-rose-700 hover:to-amber-600"
             >
-              <Gift className="size-4" /> + Tạo Combo từ SP (-10%)
+              <Gift className="size-4" /> + Tạo Combo từ SP
             </Button>
             <Button
               onClick={() => setForm({ ...EMPTY, categoryId: cats[0]?.id ?? "" })}
@@ -494,18 +495,6 @@ function ProductForm({
 
   const imageList = form.images.split("\n").map((x) => x.trim()).filter(Boolean);
 
-  async function upload(file: File) {
-    if (imageList.length >= MAX_IMAGES) {
-      throw new Error(`Tối đa ${MAX_IMAGES} ảnh mỗi sản phẩm`);
-    }
-    const fd = new FormData();
-    fd.append("file", file);
-    const res = await fetch("/api/admin/uploads", { method: "POST", body: fd });
-    const body = await res.json().catch(() => ({}));
-    if (!res.ok) throw new ApiError(res.status, body.messageCode, body.message ?? "Tải ảnh thất bại");
-    setForm({ ...form, images: [form.images.trim(), body.url].filter(Boolean).join("\n") });
-  }
-
   async function save(e: React.FormEvent) {
     e.preventDefault();
     if (!form.categoryId) {
@@ -683,30 +672,20 @@ function ProductForm({
         </label>
       ))}
 
-      <label className="block space-y-1">
+      <div className="space-y-1.5">
         <span className="text-xs font-medium text-slate-700">
-          Ảnh * (mỗi dòng một URL, ảnh đầu là ảnh chính) –{" "}
+          Ảnh sản phẩm * – ảnh đầu tiên là ảnh chính –{" "}
           <b className={imageList.length < MIN_IMAGES || imageList.length > MAX_IMAGES ? "text-destructive" : "text-green-700"}>
             {imageList.length}/{MAX_IMAGES} ảnh (tối thiểu {MIN_IMAGES})
           </b>
         </span>
-        <textarea
-          rows={3}
-          value={form.images}
-          onChange={(e) => set("images", e.target.value)}
-          className="w-full rounded-xl border border-input p-3 font-mono text-xs outline-none focus-visible:border-ring"
+        <ImageUploader
+          value={imageList}
+          onChange={(urls) => set("images", urls.join("\n"))}
+          max={MAX_IMAGES}
+          onError={setError}
         />
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          className="text-xs mt-1"
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) upload(f).catch((err) => setError(errorMessage(err)));
-            e.target.value = "";
-          }}
-        />
-      </label>
+      </div>
 
       <details className="rounded-xl border border-slate-200 p-3">
         <summary className="cursor-pointer text-sm font-medium text-slate-800">Thông tin thực phẩm (ATTP, HSD, bảo quản)</summary>

@@ -4,14 +4,15 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, FolderPlus, FolderTree, Image as ImageIcon, Layers, Pencil, Plus, Trash2, Upload } from "lucide-react";
+import { Check, FolderPlus, FolderTree, Image as ImageIcon, Layers, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { Input } from "@/components/ui/input";
 import { showToast } from "@/components/ui/toast";
-import { api, ApiError, errorMessage } from "@/lib/api";
+import { api, errorMessage } from "@/lib/api";
 import type { CategoryResponse } from "@/lib/types";
+import { ImageUploader } from "@/components/ui/image-uploader";
 import { CategoryAddProductsModal } from "./category-add-products-modal";
 import { ActionButton, AdminPage, FilterBar, Loading, Table } from "./admin-ui";
 
@@ -340,19 +341,6 @@ export function CategoryFormModal({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  async function uploadIcon(file: File) {
-    const fd = new FormData();
-    fd.append("file", file);
-    try {
-      const res = await fetch("/api/admin/uploads", { method: "POST", body: fd });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok) throw new ApiError(res.status, body.messageCode, body.message ?? "Tải ảnh thất bại");
-      setForm({ ...form, iconUrl: body.url });
-    } catch (err) {
-      setError(errorMessage(err));
-    }
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -449,27 +437,21 @@ export function CategoryFormModal({
             })}
           </div>
 
-          {/* Nhập URL hoặc tải ảnh lên */}
-          <div className="mt-3 flex flex-wrap items-center gap-2">
+          {/* Tải ảnh riêng (xem trước ngay) hoặc dán URL */}
+          <div className="mt-3 flex flex-wrap items-start gap-4">
+            <ImageUploader
+              value={form.iconUrl ? [form.iconUrl] : []}
+              onChange={(urls) => setForm({ ...form, iconUrl: urls[0] ?? "" })}
+              max={1}
+              onError={setError}
+              hint="Tải ảnh biểu tượng riêng (JPG, PNG, WebP tối đa 5MB) hoặc chọn mẫu ở trên."
+            />
             <Input
               placeholder="Hoặc dán URL icon (VD: /sample/icons/cha-gio.svg)"
               value={form.iconUrl}
               onChange={(e) => setForm({ ...form, iconUrl: e.target.value })}
-              className="h-9 flex-1 min-w-[240px] text-xs font-mono"
+              className="h-9 min-w-[240px] flex-1 text-xs font-mono"
             />
-            <label className="flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
-              <Upload className="size-3.5" /> Tải ảnh icon
-              <input
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) uploadIcon(f);
-                  e.target.value = "";
-                }}
-              />
-            </label>
           </div>
         </div>
 
