@@ -119,7 +119,7 @@ export function PayoutCard({ dash, latest }: Props) {
           {block && (
             <p id={`${inputId}-why`} className="mt-2 text-xs text-amber-700">
               {block.reason}{" "}
-              {block.needsBank && <Link href="/affiliate" className="font-semibold underline underline-offset-2">Thêm tài khoản</Link>}
+              {block.needsBank && <Link href="/affiliate/earnings?tab=bank" className="font-semibold underline underline-offset-2">Thêm tài khoản</Link>}
             </p>
           )}
           {request.isSuccess && (

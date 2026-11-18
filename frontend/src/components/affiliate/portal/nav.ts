@@ -10,7 +10,7 @@ export type PortalNavItem = {
   fallback?: { href: string; label: string };
 };
 
-/** Menu cổng CTV – dùng chung cho sidebar và các trang giữ chỗ. */
+/** Menu cổng CTV – dùng chung cho sidebar và các trang giữ chỗ (Chiến dịch, Sản phẩm, Hiệu suất chưa có chức năng). */
 export const PORTAL_NAV: PortalNavItem[] = [
   { href: "/affiliate/dashboard", label: "Tổng quan", icon: LayoutDashboard, description: "Số liệu tổng quan hoạt động cộng tác viên." },
   {
@@ -24,8 +24,7 @@ export const PORTAL_NAV: PortalNavItem[] = [
   },
   {
     href: "/affiliate/links", label: "Link Affiliate", icon: Link2,
-    description: "Tạo và quản lý link giới thiệu riêng cho từng sản phẩm, chiến dịch.",
-    fallback: { href: "/affiliate", label: "Xem link giới thiệu hiện tại" },
+    description: "Mã giới thiệu và link chia sẻ riêng của bạn.",
   },
   {
     href: "/affiliate/performance", label: "Hiệu suất", icon: BarChart3,
@@ -34,6 +33,5 @@ export const PORTAL_NAV: PortalNavItem[] = [
   {
     href: "/affiliate/earnings", label: "Hoa hồng & Thanh toán", icon: Wallet,
     description: "Chi tiết hoa hồng từng đơn, lịch sử rút tiền và tài khoản ngân hàng.",
-    fallback: { href: "/affiliate", label: "Mở trang hoa hồng hiện tại" },
   },
 ];

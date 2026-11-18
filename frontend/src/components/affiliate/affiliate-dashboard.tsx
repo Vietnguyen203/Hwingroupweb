@@ -86,7 +86,7 @@ function Stat({ label, value, strong }: { label: string; value: string; strong?:
   );
 }
 
-function ShareLink({ link }: { link: string }) {
+export function ShareLink({ link }: { link: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/15 p-2">
@@ -115,7 +115,7 @@ function Empty({ text }: { text: string }) {
   return <p className="py-6 text-center text-sm text-muted-foreground">{text}</p>;
 }
 
-function Commissions() {
+export function Commissions() {
   const { q, page, setPage } = usePaged<CommissionResponse>("affiliate-commissions", "/api/affiliates/me/commissions");
   if (q.isPending) return <div className="h-24 animate-pulse rounded-lg bg-neutral-100" />;
   if (q.error) return <p className="text-sm text-destructive">{errorMessage(q.error)}</p>;
@@ -144,7 +144,7 @@ function Commissions() {
   );
 }
 
-function Customers() {
+export function Customers() {
   const { q, page, setPage } = usePaged<BoundCustomer>("affiliate-customers", "/api/affiliates/me/customers");
   if (q.isPending) return <div className="h-24 animate-pulse rounded-lg bg-neutral-100" />;
   if (q.error) return <p className="text-sm text-destructive">{errorMessage(q.error)}</p>;
@@ -161,7 +161,7 @@ function Customers() {
   );
 }
 
-function Payouts({ dash }: { dash: AffiliateDashboard }) {
+export function Payouts({ dash }: { dash: AffiliateDashboard }) {
   const qc = useQueryClient();
   const { q, page, setPage } = usePaged<PayoutResponse>("affiliate-payouts", "/api/affiliates/me/payouts");
   const [amount, setAmount] = useState("");
@@ -209,7 +209,7 @@ function Payouts({ dash }: { dash: AffiliateDashboard }) {
   );
 }
 
-function Bank({ profile }: { profile: AffiliateResponse }) {
+export function Bank({ profile }: { profile: AffiliateResponse }) {
   const qc = useQueryClient();
   const [form, setForm] = useState({ bankName: "", accountNo: "", accountHolder: "", otp: "" });
   const [sentTo, setSentTo] = useState(false);

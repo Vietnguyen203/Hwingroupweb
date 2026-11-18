@@ -1,9 +1,15 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 
-import { ComingSoon } from "@/components/affiliate/portal/coming-soon";
+import { Earnings } from "@/components/affiliate/portal/earnings-page";
 
 export const metadata: Metadata = { title: "Hoa hồng & Thanh toán" };
 
 export default function AffiliateEarningsPage() {
-  return <ComingSoon href="/affiliate/earnings" />;
+  // useSearchParams (đọc ?tab=) cần Suspense khi prerender
+  return (
+    <Suspense fallback={null}>
+      <Earnings />
+    </Suspense>
+  );
 }

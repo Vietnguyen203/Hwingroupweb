@@ -23,7 +23,7 @@ export function RecentActivity({ items, loading }: { items?: ActivityItem[]; loa
     <section className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-base font-bold text-gray-900">Hoạt động gần đây</h2>
-        <Link href="/affiliate" className="text-sm font-semibold text-brand-link hover:underline">Xem tất cả</Link>
+        <Link href="/affiliate/earnings" className="text-sm font-semibold text-brand-link hover:underline">Xem tất cả</Link>
       </div>
 
       {loading || !items ? (
