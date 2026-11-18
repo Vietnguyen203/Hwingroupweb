@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1130" width="800" height="1130">
+  <defs>
+    <linearGradient id="goldBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c59b27" />
+      <stop offset="50%" stop-color="#fdf0cd" />
+      <stop offset="100%" stop-color="#b8860b" />
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.15" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="1130" fill="#fffdf9" />
+  
+  <!-- Outer Decorative Border -->
+  <rect x="25" y="25" width="750" height="1080" fill="none" stroke="url(#goldBorder)" stroke-width="10" rx="6" />
+  <rect x="40" y="40" width="720" height="1050" fill="none" stroke="#b8860b" stroke-width="1.5" />
+  <rect x="46" y="46" width="708" height="1038" fill="none" stroke="#243c84" stroke-width="0.8" stroke-dasharray="4,3" />
+
+  <!-- Corner Ornaments -->
+  <g fill="#b8860b">
+    <path d="M40 70 C40 50 50 40 70 40 L70 44 C53 44 44 53 44 70 Z" />
+    <path d="M760 70 C760 50 750 40 730 40 L730 44 C747 44 756 53 756 70 Z" />
+    <path d="M40 1060 C40 1080 50 1090 70 1090 L70 1086 C53 1086 44 1077 44 1060 Z" />
+    <path d="M760 1060 C760 1080 750 1090 730 1090 L730 1086 C747 1086 756 1077 756 1060 Z" />
+  </g>
+
+  <!-- National Emblem / Header -->
+  <text x="400" y="90" font-family="'Times New Roman', serif" font-size="14" font-weight="bold" fill="#1e293b" text-anchor="middle" letter-spacing="0.5">
+    CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+  </text>
+  <text x="400" y="112" font-family="'Times New Roman', serif" font-size="13" font-weight="bold" fill="#334155" text-anchor="middle">
+    Độc lập - Tự do - Hạnh phúc
+  </text>
+  <line x1="330" y1="124" x2="470" y2="124" stroke="#475569" stroke-width="1.5" />
+
+  <text x="400" y="165" font-family="'Times New Roman', serif" font-size="12" fill="#64748b" text-anchor="middle">
+    ỦY BAN NHÂN DÂN THÀNH PHỐ HÀ NỘI
+  </text>
+  <text x="400" y="185" font-family="'Times New Roman', serif" font-size="13" font-weight="bold" fill="#1e293b" text-anchor="middle">
+    CHI CỤC AN TOÀN VỆ SINH THỰC PHẨM
+  </text>
+
+  <!-- Certificate Emblem Badge -->
+  <circle cx="400" cy="250" r="42" fill="#fef2f2" stroke="#dc2626" stroke-width="3" />
+  <circle cx="400" cy="250" r="36" fill="none" stroke="#dc2626" stroke-width="1" stroke-dasharray="3,2" />
+  <text x="400" y="246" font-family="'Times New Roman', serif" font-size="11" font-weight="bold" fill="#dc2626" text-anchor="middle">ATTP</text>
+  <text x="400" y="262" font-family="'Times New Roman', serif" font-size="9" font-weight="bold" fill="#991b1b" text-anchor="middle">VIỆT NAM</text>
+
+  <!-- Title -->
+  <text x="400" y="340" font-family="'Times New Roman', serif" font-size="26" font-weight="bold" fill="#b91c1c" text-anchor="middle" letter-spacing="1.5">
+    GIẤY CHỨNG NHẬN
+  </text>
+  <text x="400" y="375" font-family="'Times New Roman', serif" font-size="18" font-weight="bold" fill="#1e3a8a" text-anchor="middle">
+    CƠ SỞ ĐỦ ĐIỀU KIỆN AN TOÀN THỰC PHẨM
+  </text>
+
+  <!-- Number -->
+  <text x="400" y="415" font-family="'Times New Roman', serif" font-size="13" font-style="italic" fill="#475569" text-anchor="middle">
+    Số: 188/2024/ATTP-CNĐK
+  </text>
+
+  <!-- Body Content -->
+  <g font-family="'Times New Roman', serif" font-size="14" fill="#1e293b">
+    <text x="100" y="475">Chứng nhận cơ sở:</text>
+    <text x="270" y="475" font-weight="bold" font-size="16" fill="#1e3a8a">CÔNG TY CỔ PHẦN TẬP ĐOÀN HWIN</text>
+
+    <text x="100" y="520">Tên thương mại:</text>
+    <text x="270" y="520" font-weight="bold">HWIN FOOD</text>
+
+    <text x="100" y="565">Mã số doanh nghiệp:</text>
+    <text x="270" y="565" font-weight="bold">0109887766</text>
+
+    <text x="100" y="610">Địa chỉ sản xuất / kinh doanh:</text>
+    <text x="100" y="635" font-weight="bold">Khu đô thị The Manor Central Park, Phường Định Công, TP. Hà Nội</text>
+
+    <text x="100" y="680">Ngành nghề sản xuất, chế biến:</text>
+    <text x="100" y="705" font-weight="bold" fill="#047857">Chế biến và bảo quản các sản phẩm từ thịt, chả lụa truyền thống, xúc xích,</text>
+    <text x="100" y="728" font-weight="bold" fill="#047857">lạp xưởng, thịt sấy và các mặt hàng thực phẩm chế biến đóng gói.</text>
+
+    <text x="100" y="780">Đủ điều kiện an toàn thực phẩm theo quy định tại:</text>
+    <text x="100" y="805" font-style="italic">Luật An toàn thực phẩm số 55/2010/QH12 &amp; Nghị định số 15/2018/NĐ-CP của Chính phủ.</text>
+  </g>
+
+  <!-- Validity box -->
+  <rect x="100" y="840" width="600" height="50" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+  <text x="400" y="871" font-family="'Times New Roman', serif" font-size="14" font-weight="bold" fill="#b91c1c" text-anchor="middle">
+    Có giá trị đến ngày 15 tháng 03 năm 2027
+  </text>
+
+  <!-- Stamp & Signatures -->
+  <g font-family="'Times New Roman', serif">
+    <text x="580" y="930" font-size="13" font-style="italic" fill="#475569" text-anchor="middle">
+      Hà Nội, ngày 15 tháng 03 năm 2024
+    </text>
+    <text x="580" y="952" font-size="14" font-weight="bold" fill="#1e293b" text-anchor="middle">
+      CHI CỤC TRƯỞNG
+    </text>
+
+    <!-- Red Official Seal -->
+    <circle cx="560" cy="1000" r="46" fill="none" stroke="#dc2626" stroke-width="3" opacity="0.85" />
+    <circle cx="560" cy="1000" r="40" fill="none" stroke="#dc2626" stroke-width="1.2" stroke-dasharray="2,2" opacity="0.85" />
+    <text x="560" y="980" font-size="8" font-weight="bold" fill="#dc2626" text-anchor="middle" opacity="0.9">SỞ Y TẾ HÀ NỘI</text>
+    <text x="560" y="1005" font-size="10" font-weight="bold" fill="#dc2626" text-anchor="middle" opacity="0.9">CHI CỤC ATTP</text>
+    <text x="560" y="1025" font-size="8" font-weight="bold" fill="#dc2626" text-anchor="middle" opacity="0.9">★ ĐÃ KÝ DUYỆT ★</text>
+
+    <!-- Signature line -->
+    <path d="M530 1000 Q560 970 600 1020 Q620 990 640 1005" fill="none" stroke="#1e3a8a" stroke-width="2.5" opacity="0.75" />
+    <text x="580" y="1065" font-size="14" font-weight="bold" fill="#1e293b" text-anchor="middle">
+      TS. Nguyễn Văn Hùng
+    </text>
+  </g>
+</svg>

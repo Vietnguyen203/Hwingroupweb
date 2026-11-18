@@ -36,9 +36,12 @@ export function SiteFooter() {
             <p className="font-bold text-white uppercase">Theo dõi HWIN trên mạng xã hội</p>
             <SocialLinks />
           </div>
-          <FooterCol title="Hỗ trợ khách hàng" links={[
-            ["Chính sách đổi trả", "#"], ["Chính sách bảo mật", "#"], ["Hướng dẫn mua hàng", "#"],
-            ["Thanh toán & vận chuyển", "#"], ["Câu hỏi thường gặp", "#"],
+          <FooterCol title="Chính sách & Pháp lý" links={[
+            ["Giấy chứng nhận VSATTP", "/chinh-sach?tab=vsattp"],
+            ["Chính sách đổi trả 7 ngày", "/chinh-sach?tab=doi-tra"],
+            ["Chính sách bảo mật (NĐ 13)", "/chinh-sach?tab=bao-mat"],
+            ["Kiểm hàng & Vận chuyển", "/chinh-sach?tab=kiem-hang"],
+            ["Điều khoản giao dịch TMĐT", "/chinh-sach?tab=dieu-khoan"],
           ]} />
           <FooterCol title="Về HWIN" links={[
             ["Giới thiệu", siteConfig.aboutUrl], ["Cộng tác viên", "/affiliate"], ["Tài khoản của tôi", "/account"], ["Tìm sản phẩm", "/search"],

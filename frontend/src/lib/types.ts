@@ -67,3 +67,18 @@ export type PageResponse<T> = {
 };
 
 export type ProductSort = "NEWEST" | "PRICE_ASC" | "PRICE_DESC" | "BESTSELLER";
+
+export type CertificateResponse = {
+  id: string;
+  title: string | null;
+  certNumber: string | null;
+  issuer: string | null;
+  issueDate: string | null;
+  expiryDate: string | null;
+  imageUrl: string;
+  category: "FOOD_SAFETY" | "ISO_HACCP" | "TEST_REPORT" | "BUSINESS_LICENSE" | string;
+  description: string | null;
+  active: boolean;
+  sortOrder: number;
+  createdAt: string;
+};

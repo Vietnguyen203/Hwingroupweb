@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1130" width="800" height="1130">
+  <rect width="800" height="1130" fill="#ffffff" />
+  <rect x="25" y="25" width="750" height="1080" fill="none" stroke="#475569" stroke-width="2" rx="4" />
+  <rect x="35" y="35" width="730" height="1060" fill="none" stroke="#94a3b8" stroke-width="1" />
+
+  <!-- Header -->
+  <text x="100" y="75" font-family="'Times New Roman', serif" font-size="12" font-weight="bold" fill="#0f172a">BỘ Y TẾ</text>
+  <text x="100" y="95" font-family="'Times New Roman', serif" font-size="13" font-weight="bold" fill="#1e3a8a">VIỆN KIỂM NGHIỆM AN TOÀN VỆ SINH THỰC PHẨM QUỐC GIA</text>
+  <text x="100" y="112" font-family="'Times New Roman', serif" font-size="11" fill="#64748b">National Institute for Food Control (NIFC)</text>
+
+  <text x="650" y="75" font-family="'Times New Roman', serif" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</text>
+  <text x="650" y="93" font-family="'Times New Roman', serif" font-size="11" fill="#334155" text-anchor="middle">Độc lập - Tự do - Hạnh phúc</text>
+
+  <line x1="50" y1="130" x2="750" y2="130" stroke="#cbd5e1" stroke-width="1.5" />
+
+  <!-- Title -->
+  <text x="400" y="180" font-family="'Times New Roman', serif" font-size="24" font-weight="bold" fill="#0f172a" text-anchor="middle">
+    PHIẾU KẾT QUẢ KIỂM NGHIỆM
+  </text>
+  <text x="400" y="205" font-family="'Times New Roman', serif" font-size="13" font-style="italic" fill="#64748b" text-anchor="middle">
+    Số phiếu: KN-NIFC-2024-8891
+  </text>
+
+  <!-- Info Table -->
+  <g font-family="'Times New Roman', serif" font-size="13" fill="#1e293b">
+    <text x="80" y="250">Tên mẫu kiểm nghiệm:</text>
+    <text x="250" y="250" font-weight="bold">Chả lụa truyền thống HWIN Food</text>
+
+    <text x="80" y="280">Đơn vị gửi mẫu:</text>
+    <text x="250" y="280" font-weight="bold">Công ty CP Tập đoàn HWIN</text>
+
+    <text x="80" y="310">Tình trạng mẫu:</text>
+    <text x="250" y="310">Gói hút chân không 500g nguyên vẹn, bảo quản lạnh 4°C</text>
+
+    <text x="80" y="340">Ngày nhận mẫu:</text>
+    <text x="250" y="340">01/06/2024</text>
+    <text x="450" y="340">Ngày hoàn thành:</text>
+    <text x="580" y="340" font-weight="bold">05/06/2024</text>
+  </g>
+
+  <!-- Results Table Header -->
+  <rect x="70" y="380" width="660" height="35" fill="#f1f5f9" stroke="#cbd5e1" />
+  <text x="90" y="403" font-family="'Times New Roman', serif" font-size="12" font-weight="bold">TT</text>
+  <text x="140" y="403" font-family="'Times New Roman', serif" font-size="12" font-weight="bold">Tên chỉ tiêu kiểm nghiệm</text>
+  <text x="380" y="403" font-family="'Times New Roman', serif" font-size="12" font-weight="bold">Phương pháp thử</text>
+  <text x="530" y="403" font-family="'Times New Roman', serif" font-size="12" font-weight="bold">Kết quả</text>
+  <text x="640" y="403" font-family="'Times New Roman', serif" font-size="12" font-weight="bold">Giới hạn QCVN</text>
+
+  <!-- Table Rows -->
+  <g font-family="'Times New Roman', serif" font-size="12" fill="#334155">
+    <!-- Row 1 -->
+    <rect x="70" y="415" width="660" height="35" fill="#ffffff" stroke="#e2e8f0" />
+    <text x="90" y="437">1</text>
+    <text x="140" y="437">Hàn the (Borax/Axit Boric)</text>
+    <text x="380" y="437">TCVN 8060:2009</text>
+    <text x="530" y="437" font-weight="bold" fill="#047857">Không phát hiện</text>
+    <text x="640" y="437">Không được có</text>
+
+    <!-- Row 2 -->
+    <rect x="70" y="450" width="660" height="35" fill="#f8fafc" stroke="#e2e8f0" />
+    <text x="90" y="472">2</text>
+    <text x="140" y="472">Chì (Pb) (mg/kg)</text>
+    <text x="380" y="472">AOAC 2015.01</text>
+    <text x="530" y="472" font-weight="bold" fill="#047857">&lt; 0.05</text>
+    <text x="640" y="472">≤ 0.5</text>
+
+    <!-- Row 3 -->
+    <rect x="70" y="485" width="660" height="35" fill="#ffffff" stroke="#e2e8f0" />
+    <text x="90" y="507">3</text>
+    <text x="140" y="507">Cadmi (Cd) (mg/kg)</text>
+    <text x="380" y="507">AOAC 2015.01</text>
+    <text x="530" y="507" font-weight="bold" fill="#047857">&lt; 0.01</text>
+    <text x="640" y="507">≤ 0.05</text>
+
+    <!-- Row 4 -->
+    <rect x="70" y="520" width="660" height="35" fill="#f8fafc" stroke="#e2e8f0" />
+    <text x="90" y="542">4</text>
+    <text x="140" y="542">E. coli (CFU/g)</text>
+    <text x="380" y="542">ISO 16649-2:2001</text>
+    <text x="530" y="542" font-weight="bold" fill="#047857">&lt; 10</text>
+    <text x="640" y="542">≤ 10</text>
+
+    <!-- Row 5 -->
+    <rect x="70" y="555" width="660" height="35" fill="#ffffff" stroke="#e2e8f0" />
+    <text x="90" y="577">5</text>
+    <text x="140" y="577">Salmonella (/25g)</text>
+    <text x="380" y="577">ISO 6579-1:2017</text>
+    <text x="530" y="577" font-weight="bold" fill="#047857">Không phát hiện</text>
+    <text x="640" y="577">Không được có</text>
+
+    <!-- Row 6 -->
+    <rect x="70" y="590" width="660" height="35" fill="#f8fafc" stroke="#e2e8f0" />
+    <text x="90" y="612">6</text>
+    <text x="140" y="612">Chất bảo quản Benzoat/Sorbat</text>
+    <text x="380" y="612">TCVN 8414:2010</text>
+    <text x="530" y="612" font-weight="bold" fill="#047857">Không phát hiện</text>
+    <text x="640" y="612">Không được có</text>
+  </g>
+
+  <!-- Conclusion Box -->
+  <rect x="70" y="650" width="660" height="55" rx="6" fill="#ecfdf5" stroke="#10b981" />
+  <text x="90" y="682" font-family="'Times New Roman', serif" font-size="14" font-weight="bold" fill="#065f46">
+    KẾT LUẬN: Mẫu kiểm nghiệm ĐẠT tất cả các chỉ tiêu an toàn vệ sinh thực phẩm theo QCVN 8-2:2011/BYT.
+  </text>
+
+  <!-- Signatures -->
+  <g font-family="'Times New Roman', serif">
+    <circle cx="580" cy="880" r="48" fill="none" stroke="#dc2626" stroke-width="2.5" opacity="0.85" />
+    <text x="580" y="865" font-size="8" font-weight="bold" fill="#dc2626" text-anchor="middle">BỘ Y TẾ</text>
+    <text x="580" y="885" font-size="10" font-weight="bold" fill="#dc2626" text-anchor="middle">VIỆN NIFC</text>
+    <text x="580" y="905" font-size="8" font-weight="bold" fill="#dc2626" text-anchor="middle">★ ĐÃ KIỂM ĐỊNH ★</text>
+
+    <path d="M550 880 Q580 840 620 890 Q640 860 660 885" fill="none" stroke="#0f172a" stroke-width="2" opacity="0.75" />
+    <text x="580" y="960" font-size="13" font-weight="bold" fill="#0f172a" text-anchor="middle">Trưởng Phòng Kiểm Nghiệm</text>
+  </g>
+</svg>

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1130" width="800" height="1130">
+  <defs>
+    <linearGradient id="blueBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a" />
+      <stop offset="50%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1e40af" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="1130" fill="#ffffff" />
+  
+  <!-- Outer Decorative Border -->
+  <rect x="25" y="25" width="750" height="1080" fill="none" stroke="url(#blueBorder)" stroke-width="8" rx="8" />
+  <rect x="38" y="38" width="724" height="1054" fill="none" stroke="#e2e8f0" stroke-width="2" />
+
+  <!-- Organization Logo & Header -->
+  <circle cx="400" cy="120" r="45" fill="#f8fafc" stroke="#1e3a8a" stroke-width="2" />
+  <text x="400" y="115" font-family="'Arial', sans-serif" font-size="20" font-weight="900" fill="#1e3a8a" text-anchor="middle">TQC</text>
+  <text x="400" y="132" font-family="'Arial', sans-serif" font-size="8" font-weight="bold" fill="#64748b" text-anchor="middle">INTERNATIONAL CERTIFICATION</text>
+
+  <text x="400" y="210" font-family="'Arial', sans-serif" font-size="28" font-weight="900" fill="#1e3a8a" text-anchor="middle" letter-spacing="2">
+    CERTIFICATE
+  </text>
+  <text x="400" y="240" font-family="'Times New Roman', serif" font-size="16" font-style="italic" fill="#475569" text-anchor="middle">
+    Chứng chỉ Hệ thống Quản lý An toàn Thực phẩm
+  </text>
+
+  <text x="400" y="290" font-family="'Times New Roman', serif" font-size="14" fill="#64748b" text-anchor="middle">
+    Chứng nhận rằng hệ thống quản lý của:
+  </text>
+  <text x="400" y="330" font-family="'Arial', sans-serif" font-size="22" font-weight="bold" fill="#0f172a" text-anchor="middle">
+    CÔNG TY CỔ PHẦN TẬP ĐOÀN HWIN
+  </text>
+  <text x="400" y="360" font-family="'Arial', sans-serif" font-size="13" fill="#64748b" text-anchor="middle">
+    Địa chỉ: KĐT The Manor Central Park, P. Định Công, TP. Hà Nội, Việt Nam
+  </text>
+
+  <!-- ISO Standard Badge -->
+  <rect x="150" y="400" width="500" height="90" rx="12" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5" />
+  <text x="400" y="440" font-family="'Arial', sans-serif" font-size="24" font-weight="900" fill="#1d4ed8" text-anchor="middle">
+    ISO 22000:2018
+  </text>
+  <text x="400" y="468" font-family="'Times New Roman', serif" font-size="13" font-weight="bold" fill="#1e3a8a" text-anchor="middle">
+    Hệ thống Quản lý An toàn Thực phẩm - Yêu cầu đối với tổ chức trong chuỗi thực phẩm
+  </text>
+
+  <!-- Scope -->
+  <g font-family="'Times New Roman', serif" font-size="14" fill="#334155">
+    <text x="120" y="540" font-weight="bold" fill="#0f172a">Phạm vi chứng nhận (Scope of Certification):</text>
+    <text x="120" y="575">Sơ chế, chế biến, bảo quản lạnh và đóng gói thực phẩm chế biến sẵn</text>
+    <text x="120" y="600">(Chả lụa truyền thống, xúc xích, lạp xưởng, giò thủ, thực phẩm sấy khô).</text>
+
+    <text x="120" y="660">Mã số chứng nhận:</text>
+    <text x="300" y="660" font-weight="bold" font-family="monospace" font-size="15" fill="#1e3a8a">ISO-22000-HWIN-2023</text>
+
+    <text x="120" y="705">Ngày cấp chứng chỉ:</text>
+    <text x="300" y="705" font-weight="bold">10/08/2023</text>
+
+    <text x="120" y="750">Ngày hết hạn:</text>
+    <text x="300" y="750" font-weight="bold" fill="#b91c1c">10/08/2026</text>
+  </g>
+
+  <!-- Stamp and Verification -->
+  <g font-family="'Times New Roman', serif">
+    <!-- Blue Official Seal -->
+    <circle cx="560" cy="880" r="50" fill="none" stroke="#1d4ed8" stroke-width="2.5" opacity="0.85" />
+    <circle cx="560" cy="880" r="43" fill="none" stroke="#1d4ed8" stroke-width="1" stroke-dasharray="3,2" opacity="0.85" />
+    <text x="560" y="860" font-size="8" font-weight="bold" fill="#1d4ed8" text-anchor="middle">TỔ CHỨC CHỨNG NHẬN</text>
+    <text x="560" y="885" font-size="11" font-weight="bold" fill="#1d4ed8" text-anchor="middle">TQC QUỐC TẾ</text>
+    <text x="560" y="905" font-size="8" font-weight="bold" fill="#1d4ed8" text-anchor="middle">★ ACCREDITED ★</text>
+
+    <path d="M530 890 Q560 850 610 900 Q630 880 650 895" fill="none" stroke="#0f172a" stroke-width="2.5" opacity="0.8" />
+    <text x="580" y="970" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle">Tổng Giám Đốc</text>
+  </g>
+</svg>

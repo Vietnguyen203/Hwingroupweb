@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1130" width="800" height="1130">
+  <defs>
+    <linearGradient id="emeraldBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#047857" />
+      <stop offset="50%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#065f46" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="1130" fill="#ffffff" />
+  <rect x="25" y="25" width="750" height="1080" fill="none" stroke="url(#emeraldBorder)" stroke-width="8" rx="8" />
+  <rect x="38" y="38" width="724" height="1054" fill="none" stroke="#e2e8f0" stroke-width="2" />
+
+  <!-- Organization Logo & Header -->
+  <circle cx="400" cy="120" r="45" fill="#ecfdf5" stroke="#059669" stroke-width="2" />
+  <text x="400" y="115" font-family="'Arial', sans-serif" font-size="18" font-weight="900" fill="#047857" text-anchor="middle">QUACERT</text>
+  <text x="400" y="132" font-family="'Arial', sans-serif" font-size="8" font-weight="bold" fill="#065f46" text-anchor="middle">TRUNG TÂM CHỨNG NHẬN</text>
+
+  <text x="400" y="210" font-family="'Arial', sans-serif" font-size="28" font-weight="900" fill="#047857" text-anchor="middle" letter-spacing="2">
+    CHỨNG CHỈ HACCP
+  </text>
+  <text x="400" y="240" font-family="'Times New Roman', serif" font-size="16" font-style="italic" fill="#475569" text-anchor="middle">
+    Hệ thống phân tích mối nguy và điểm kiểm soát tới hạn (Codex Alimentarius)
+  </text>
+
+  <text x="400" y="290" font-family="'Times New Roman', serif" font-size="14" fill="#64748b" text-anchor="middle">
+    Cấp cho doanh nghiệp:
+  </text>
+  <text x="400" y="330" font-family="'Arial', sans-serif" font-size="22" font-weight="bold" fill="#0f172a" text-anchor="middle">
+    CÔNG TY CỔ PHẦN TẬP ĐOÀN HWIN
+  </text>
+
+  <rect x="150" y="390" width="500" height="85" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="1.5" />
+  <text x="400" y="430" font-family="'Arial', sans-serif" font-size="22" font-weight="900" fill="#047857" text-anchor="middle">
+    HACCP CODEX CXC 1-1969
+  </text>
+  <text x="400" y="458" font-family="'Times New Roman', serif" font-size="13" font-weight="bold" fill="#065f46" text-anchor="middle">
+    Tiêu chuẩn kiểm soát an toàn vệ sinh thực phẩm quốc tế
+  </text>
+
+  <g font-family="'Times New Roman', serif" font-size="14" fill="#334155">
+    <text x="120" y="530" font-weight="bold" fill="#0f172a">Quy trình sản xuất được chứng nhận:</text>
+    <text x="120" y="565">Dây chuyền sản xuất khép kín, kiểm soát nhiệt độ từ lò nướng, giã giò,</text>
+    <text x="120" y="590">hút chân không và cấp đông sâu thực phẩm truyền thống.</text>
+
+    <text x="120" y="650">Số chứng chỉ:</text>
+    <text x="300" y="650" font-weight="bold" font-family="monospace" font-size="15" fill="#047857">HACCP-HWIN-0921</text>
+
+    <text x="120" y="695">Ngày cấp:</text>
+    <text x="300" y="695" font-weight="bold">20/11/2023</text>
+
+    <text x="120" y="740">Hiệu lực đến:</text>
+    <text x="300" y="740" font-weight="bold" fill="#b91c1c">20/11/2026</text>
+  </g>
+
+  <!-- Stamp -->
+  <g font-family="'Times New Roman', serif">
+    <circle cx="560" cy="880" r="50" fill="none" stroke="#047857" stroke-width="2.5" opacity="0.85" />
+    <circle cx="560" cy="880" r="43" fill="none" stroke="#047857" stroke-width="1" stroke-dasharray="3,2" opacity="0.85" />
+    <text x="560" y="860" font-size="8" font-weight="bold" fill="#047857" text-anchor="middle">TRUNG TÂM QUACERT</text>
+    <text x="560" y="885" font-size="11" font-weight="bold" fill="#047857" text-anchor="middle">HACCP CERTIFIED</text>
+    <text x="560" y="905" font-size="8" font-weight="bold" fill="#047857" text-anchor="middle">★ CHỨNG NHẬN ★</text>
+
+    <path d="M530 890 Q570 850 610 895 Q630 875 650 890" fill="none" stroke="#0f172a" stroke-width="2.5" opacity="0.8" />
+    <text x="580" y="970" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle">Giám Đốc Chứng Nhận</text>
+  </g>
+</svg>
