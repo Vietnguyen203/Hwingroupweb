@@ -23,6 +23,8 @@ import com.vietnl.hwin.identity.service.config.OtpProperties;
  * Không cấu hình SMTP (MAIL_HOST trống):
  * - dev/test (log-code=true): chỉ log, mã lấy từ log / hộp thư dev;
  * - môi trường thật: backend từ chối khởi động (không thì không ai nhận được OTP).
+ * Địa chỉ ở tên miền dành riêng (RFC 2606: example.com/net/org, .test, .example, .invalid, .localhost) KHÔNG bao giờ gửi thật:
+ * chỉ log. Postman và các lần thử dùng địa chỉ kiểu này; gửi thật chỉ tạo thư báo lỗi (bounce) về hộp thư SMTP của người dùng.
  */
 @Component
 public class EmailOtpSender implements OtpSender {
@@ -56,6 +58,10 @@ public class EmailOtpSender implements OtpSender {
             log.info("[Email giả lập – chưa cấu hình SMTP] {} tới {}", purpose, masked);
             return;
         }
+        if (isReservedDomain(destination)) {
+            log.info("[Email giả lập – tên miền dành riêng, không gửi thật] {} tới {}", purpose, masked);
+            return;
+        }
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setFrom(from);
         msg.setTo(destination);
@@ -75,6 +81,24 @@ public class EmailOtpSender implements OtpSender {
             throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.OTP_SEND_FAILED);
         }
     }
+
+    /** Tên miền dành riêng theo RFC 2606 / 6761: không có hộp thư thật, gửi tới chỉ tạo thư báo lỗi. */
+    static boolean isReservedDomain(String email) {
+        int at = email == null ? -1 : email.lastIndexOf('@');
+        if (at < 0) {
+            return false;
+        }
+        String domain = email.substring(at + 1).trim().toLowerCase();
+        for (String reserved : RESERVED_DOMAINS) {
+            if (domain.equals(reserved) || domain.endsWith("." + reserved)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static final java.util.List<String> RESERVED_DOMAINS =
+            java.util.List.of("example.com", "example.net", "example.org", "example", "test", "invalid", "localhost");
 
     private static String purposeText(OtpPurpose purpose) {
         return switch (purpose) {
