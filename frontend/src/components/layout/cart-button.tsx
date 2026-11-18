@@ -29,7 +29,7 @@ export function CartButton() {
       type="button"
       onClick={openDrawer}
       aria-label="Giỏ hàng"
-      className="relative inline-flex size-10 shrink-0 items-center justify-center rounded-full text-neutral-800 transition-all hover:bg-neutral-100 hover:scale-105 active:scale-95"
+      className="relative inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-800 transition-all hover:scale-105 hover:bg-brand-soft hover:text-brand active:scale-95"
     >
       <ShoppingCart className={cn("size-6 transition-transform", bouncing && "scale-115 text-brand")} />
       {count > 0 && (

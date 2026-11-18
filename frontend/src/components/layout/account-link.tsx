@@ -15,10 +15,12 @@ export function AccountLink() {
   const name = user ? user.fullName || user.email || user.phoneMasked || "Tài khoản" : null;
   const href = user?.roles?.includes("ADMIN") ? "/admin/orders" : user ? "/account" : "/login";
   return (
-    <Link href={href} className="hidden items-center gap-1.5 text-sm text-neutral-700 md:flex">
-      <UserRound className="size-6" />
+    <Link href={href} className="group/acc hidden items-center gap-2 text-sm text-neutral-700 md:flex">
+      <span className="flex size-10 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 transition duration-200 group-hover/acc:bg-brand-soft group-hover/acc:text-brand">
+        <UserRound className="size-5" />
+      </span>
       <span className="hidden max-w-36 leading-tight xl:block">
-        <span className="block truncate">{name ?? "Đăng nhập"}</span>
+        <span className="block truncate font-semibold text-neutral-900">{name ?? "Đăng nhập"}</span>
         <span className="text-xs text-muted-foreground">{user?.roles?.includes("ADMIN") ? "Quản trị" : "Tài khoản"}</span>
       </span>
     </Link>
