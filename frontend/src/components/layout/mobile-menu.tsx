@@ -5,12 +5,14 @@ import Link from "next/link";
 import { ChevronRight, FileText, Headset, Info, Menu, Phone, ShieldCheck, X } from "lucide-react";
 
 import { Logo } from "@/components/brand/logo";
+import { useAffiliateCode } from "@/hooks/use-affiliate-code";
 import { siteConfig } from "@/lib/config";
 import type { CategoryResponse } from "@/lib/types";
 
 /** Nút ☰ trên mobile – mở ngăn trượt danh mục và chính sách. */
 export function MobileMenu({ categories }: { categories: CategoryResponse[] }) {
   const [open, setOpen] = useState(false);
+  const isAffiliate = !!useAffiliateCode();
   return (
     <>
       <button type="button" aria-label="Mở menu" onClick={() => setOpen(true)} className="-ml-1 p-1 text-brand md:hidden">
@@ -95,8 +97,8 @@ export function MobileMenu({ categories }: { categories: CategoryResponse[] }) {
               </ul>
             </div>
             <div className="border-t p-4">
-              <Link href="/affiliate" onClick={() => setOpen(false)} className="block rounded-full bg-gradient-to-r from-brand to-brand-dark py-2.5 text-center text-sm font-bold text-white shadow-md shadow-brand/25">
-                Đăng ký cộng tác viên
+              <Link href={isAffiliate ? "/affiliate/dashboard" : "/affiliate"} onClick={() => setOpen(false)} className="block rounded-full bg-gradient-to-r from-brand to-brand-dark py-2.5 text-center text-sm font-bold text-white shadow-md shadow-brand/25">
+                {isAffiliate ? "Trang cộng tác viên" : "Đăng ký cộng tác viên"}
               </Link>
             </div>
           </nav>

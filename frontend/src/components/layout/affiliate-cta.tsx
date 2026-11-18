@@ -15,11 +15,13 @@ export interface AffiliateCtaProps {
 export function AffiliateCta({ className, variant = "vertical" }: AffiliateCtaProps) {
   const code = useAffiliateCode();
   const label = code ? "Trang CTV" : "Đăng ký CTV";
+  // CTV đã duyệt vào thẳng cổng CTV; khách chưa là CTV vào trang giới thiệu / đăng ký
+  const href = code ? "/affiliate/dashboard" : "/affiliate";
 
   if (variant === "vertical") {
     return (
       <Link
-        href="/affiliate"
+        href={href}
         className={cn(
           "group hidden flex-col items-center gap-1 text-neutral-700 transition hover:text-brand md:flex",
           className
@@ -35,7 +37,7 @@ export function AffiliateCta({ className, variant = "vertical" }: AffiliateCtaPr
 
   return (
     <Link
-      href="/affiliate"
+      href={href}
       className={cn(
         "hidden shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors md:block",
         variant === "outline"
