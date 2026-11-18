@@ -71,32 +71,37 @@ export function CheckoutView() {
   }
 
   /** Quy tắc kiểm tra từng ô; chỉ kiểm tra địa chỉ khi đang nhập địa chỉ mới, và VAT khi bật xuất hóa đơn. */
-  function fieldRule(key: string): string | null {
+  function ruleFor(key: string, value: string): string | null {
     switch (key) {
-      case "recipientName": return validateRequired(form.recipientName, "Người nhận", 100);
-      case "recipientPhone": return validatePhone(form.recipientPhone);
-      case "province": return validateRequired(form.province, "Tỉnh / Thành phố", 100);
-      case "district": return validateRequired(form.district, "Quận / Huyện", 100);
-      case "ward": return validateRequired(form.ward, "Phường / Xã", 100);
-      case "street": return validateRequired(form.street, "Số nhà, đường", 255);
-      case "vat.companyName": return validateRequired(vat.companyName, "Tên công ty", 255);
-      case "vat.taxCode": return validateTaxCode(vat.taxCode);
-      case "vat.address": return validateRequired(vat.address, "Địa chỉ công ty", 500);
-      case "vat.email": return validateEmail(vat.email);
+      case "recipientName": return validateRequired(value, "Người nhận", 100);
+      case "recipientPhone": return validatePhone(value);
+      case "province": return validateRequired(value, "Tỉnh / Thành phố", 100);
+      case "district": return validateRequired(value, "Quận / Huyện", 100);
+      case "ward": return validateRequired(value, "Phường / Xã", 100);
+      case "street": return validateRequired(value, "Số nhà, đường", 255);
+      case "vat.companyName": return validateRequired(value, "Tên công ty", 255);
+      case "vat.taxCode": return validateTaxCode(value);
+      case "vat.address": return validateRequired(value, "Địa chỉ công ty", 500);
+      case "vat.email": return validateEmail(value);
       default: return null;
     }
   }
+  /** Giá trị hiện tại của một ô theo khóa (vat.* nằm trong form VAT). */
+  const valueOf = (key: string) => (key.startsWith("vat.") ? vat[key.slice(4) as keyof Vat] : form[key as keyof AddressForm]);
+  const fieldRule = (key: string) => ruleFor(key, valueOf(key));
   const ADDRESS_KEYS = ["recipientName", "recipientPhone", "province", "district", "ward", "street"];
   const VAT_KEYS = ["vat.companyName", "vat.taxCode", "vat.address", "vat.email"];
   const activeKeys = () => [...(selected === NEW ? ADDRESS_KEYS : []), ...(vatOn ? VAT_KEYS : [])];
-  const blurCheck = (key: string) => setErrors((prev) => {
-    const msg = fieldRule(key);
+  /** Đặt / xóa lỗi của một ô theo giá trị truyền vào (dùng khi rời ô và khi đang gõ vào ô đang báo lỗi). */
+  const recheck = (key: string, value: string) => setErrors((prev) => {
+    const msg = ruleFor(key, value);
     const next = { ...prev };
     if (msg) next[key] = msg; else delete next[key];
     // Hết lỗi ở mọi ô thì tắt dòng cảnh báo chung
     if (Object.keys(next).length === 0) setError((e) => (e === VALIDATION_MESSAGE ? null : e));
     return next;
   });
+  const blurCheck = (key: string) => recheck(key, valueOf(key));
 
   async function placeOrder(e: React.FormEvent) {
     e.preventDefault();
@@ -148,9 +153,13 @@ export function CheckoutView() {
     </label>
   );
   const input = (key: keyof AddressForm, label: string, props: React.ComponentProps<"input"> = {}) =>
-    field(key, label, (p) => <Input value={form[key]} onChange={(e) => setForm({ ...form, [key]: e.target.value })} {...p} {...props} />);
+    field(key, label, (p) => (
+      <Input value={form[key]} onChange={(e) => { setForm({ ...form, [key]: e.target.value }); if (errors[key]) recheck(key, e.target.value); }} {...p} {...props} />
+    ));
   const vatInput = (key: keyof Vat, label: string, props: React.ComponentProps<"input"> = {}) =>
-    field(`vat.${key}`, label, (p) => <Input value={vat[key]} onChange={(e) => setVat({ ...vat, [key]: e.target.value })} {...p} className={cn(p.className, "bg-white")} {...props} />);
+    field(`vat.${key}`, label, (p) => (
+      <Input value={vat[key]} onChange={(e) => { setVat({ ...vat, [key]: e.target.value }); if (errors[`vat.${key}`]) recheck(`vat.${key}`, e.target.value); }} {...p} className={cn(p.className, "bg-white")} {...props} />
+    ));
   const view = quote.data;
 
   const itemCount = lines.reduce((n, l) => n + l.quantity, 0);
