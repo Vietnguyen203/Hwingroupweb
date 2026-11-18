@@ -5,10 +5,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  ArrowLeft,
   BadgePercent,
   Boxes,
   ChevronRight,
-  ExternalLink,
   FolderTree,
   LogOut,
   Menu,
@@ -95,6 +95,18 @@ export function AdminSidebarContent({ onClose }: { onClose?: () => void }) {
             <X className="size-5" />
           </button>
         )}
+      </div>
+
+      {/* Quay về trang bán hàng (cùng tab, không mở tab mới) */}
+      <div className="px-3 pt-4">
+        <Link
+          href="/"
+          onClick={onClose}
+          className="group flex items-center gap-2.5 rounded-xl border border-slate-700 bg-slate-800/60 px-3.5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:border-brand hover:bg-slate-800 hover:text-white"
+        >
+          <ArrowLeft className="size-4 text-slate-400 transition group-hover:-translate-x-0.5 group-hover:text-white" />
+          Về trang bán hàng
+        </Link>
       </div>
 
       {/* Navigation Groups */}
@@ -201,16 +213,6 @@ export function AdminHeader({ onOpenMobileMenu }: { onOpenMobileMenu: () => void
 
       {/* Right: Quick actions */}
       <div className="flex items-center gap-3">
-        <a
-          href="/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 sm:inline-flex"
-        >
-          <ExternalLink className="size-3.5" />
-          <span>Xem website</span>
-        </a>
-
         <NotificationBell variant="admin" />
 
         <div className="hidden h-5 w-px bg-slate-200 sm:block" />
