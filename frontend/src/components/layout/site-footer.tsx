@@ -16,11 +16,11 @@ export function SiteFooter() {
             <p className="text-lg font-bold uppercase">Đăng ký cộng tác viên HWIN</p>
             <p className="text-sm text-white/80">Phát triển cùng HWIN</p>
           </div>
-          <form action="/affiliate" method="get" className="flex w-full max-w-md gap-2">
-            <input name="phone" type="tel" inputMode="numeric" placeholder="Số điện thoại của bạn" maxLength={15}
-                   className="h-11 min-w-0 flex-1 rounded-full bg-white px-4 text-sm text-neutral-900 outline-none" />
-            <button className="h-11 shrink-0 rounded-full bg-[#6c64d9] px-5 text-sm font-semibold">Đăng ký ngay</button>
-          </form>
+          {/* Vào thẳng form đăng ký CTV (chưa có tài khoản thì tự sang đăng ký tài khoản) */}
+          <Link href="/affiliate/register"
+                className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-[#6c64d9] px-8 text-sm font-semibold transition hover:brightness-110">
+            Đăng ký ngay
+          </Link>
         </div>
       </section>
 

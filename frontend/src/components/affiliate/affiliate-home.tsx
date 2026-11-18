@@ -43,10 +43,10 @@ export function AffiliateHome() {
   if (me.isPending || (me.data && profile.isPending) || needsRole) {
     return <div className="m-3 h-64 animate-pulse rounded-2xl bg-neutral-200" />;
   }
-  if (!me.data) return <Landing loggedIn={false} />;
+  if (!me.data) return <Landing />;
   if (profile.error) return <p className="m-3 rounded-2xl bg-white p-4 text-sm text-destructive">{errorMessage(profile.error)}</p>;
   const a = profile.data;
-  if (!a) return <Landing loggedIn />;
+  if (!a) return <Landing />;
   if (a.status === "APPROVED") return <AffiliateDashboardView profile={a} />;
 
   const notice = {
@@ -67,20 +67,20 @@ export function AffiliateHome() {
   );
 }
 
-function Landing({ loggedIn }: { loggedIn: boolean }) {
+function Landing() {
   const perks = [
     { icon: Link2, title: "Chia sẻ link riêng", text: "Mỗi CTV có mã giới thiệu và link riêng, theo dõi lượt click." },
     { icon: BadgePercent, title: "Hoa hồng 10%", text: "Tính trên giá trị đơn (trước phí ship), khách gắn với bạn vĩnh viễn." },
     { icon: Wallet, title: "Rút tiền về ngân hàng", text: "Hoa hồng được duyệt sau 7 ngày kể từ khi giao hàng thành công." },
   ];
-  const href = loggedIn ? "/affiliate/register" : "/login?next=/affiliate/register";
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-3 md:py-10">
       <section className="rounded-2xl bg-brand p-6 text-white shadow-sm">
         <h1 className="text-2xl font-bold">Cộng tác viên HWIN</h1>
         <p className="mt-1 text-white/85">Phát triển cùng HWIN – giới thiệu thực phẩm sạch, nhận hoa hồng trên mỗi đơn thành công.</p>
-        <Link href={href} className="mt-4 inline-block rounded-full bg-brand-cta px-6 py-2.5 font-semibold">
-          {loggedIn ? "Đăng ký làm CTV" : "Đăng nhập để đăng ký"}
+        {/* Chưa có tài khoản: proxy đưa thẳng tới đăng ký tài khoản rồi tự quay lại form CTV */}
+        <Link href="/affiliate/register" className="mt-4 inline-block rounded-full bg-brand-cta px-6 py-2.5 font-semibold">
+          Đăng ký làm CTV
         </Link>
       </section>
       <div className="grid gap-3 md:grid-cols-3">

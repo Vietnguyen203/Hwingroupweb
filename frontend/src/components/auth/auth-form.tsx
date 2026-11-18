@@ -43,6 +43,12 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const next = safeNext(useQueryParam("next"));
   const queryClient = useQueryClient();
   const me = useMe();
+  /**
+   * Đi tiếp SAU KHI vừa đăng nhập / đăng ký xong: tải lại trang thay vì router.replace. Router của Next nhớ kết quả
+   * "chuyển hướng về /login hay /register" của các trang cần đăng nhập (/admin, /affiliate) từ lúc còn là khách
+   * (VD vừa bấm banner "Đăng ký CTV"), nên chuyển trang kiểu SPA sẽ đứng yên và nút kẹt ở "Đang xác thực...".
+   */
+  const goNext = (to: string) => window.location.replace(to);
 
   // Đăng nhập
   const [identifier, setIdentifier] = useState("");
@@ -112,9 +118,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       } else if (res.user) {
         queryClient.setQueryData(["me"], res.user);
         if (res.user.roles?.includes("ADMIN") && (!next || next === "/account")) {
-          router.replace("/admin/orders");
+          goNext("/admin/orders");
         } else {
-          router.replace(next);
+          goNext(next);
         }
       }
     } catch (err) {
@@ -143,7 +149,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         setCooldown(RESEND_SECONDS);
       } else if (res.user) {
         queryClient.setQueryData(["me"], res.user);
-        router.replace(next === "/account" ? "/admin/orders" : next);
+        goNext(next === "/account" ? "/admin/orders" : next);
       }
     } catch (err) {
       setError(errorMessage(err));
@@ -226,7 +232,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           body: { challengeId: sent?.challengeId || "", otp },
         });
         queryClient.setQueryData(["me"], user);
-        router.replace(next === "/account" ? "/admin/orders" : next);
+        goNext(next === "/account" ? "/admin/orders" : next);
         return;
       } else {
         const user = await api("/api/auth/login/verify", {
@@ -235,7 +241,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         });
         queryClient.setQueryData(["me"], user);
       }
-      router.replace(next);
+      goNext(next);
     } catch (err) {
       setError(errorMessage(err));
       setBusy(false);
@@ -258,7 +264,11 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       <div className="rounded-2xl bg-white p-5 shadow-sm md:p-7">
         <h1 className="text-xl font-bold text-brand">{isRegister ? "Đăng ký tài khoản" : "Đăng nhập"}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {isRegister ? "Điền đầy đủ thông tin và xác thực bằng mã OTP." : "Nhập tên đăng nhập và mật khẩu để tiếp tục."}
+          {isRegister
+            ? next === "/affiliate/register"
+              ? ""
+              : "Điền đầy đủ thông tin và xác thực bằng mã OTP."
+            : "Nhập tên đăng nhập và mật khẩu để tiếp tục."}
         </p>
 
         {!isRegister ? (

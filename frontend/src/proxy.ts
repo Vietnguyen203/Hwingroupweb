@@ -20,8 +20,14 @@ export function proxy(request: NextRequest) {
 
   if (!loggedIn || (required && !roles.includes(required))) {
     const url = request.nextUrl.clone();
-    url.pathname = loginPath;
-    url.search = `?next=${encodeURIComponent(pathname + search)}`;
+    if (pathname === "/affiliate/register") {
+      // Khách bấm "Đăng ký CTV": vào thẳng form đăng ký tài khoản (xong tự sang form CTV), không vòng qua trang đăng nhập.
+      url.pathname = "/register";
+      url.search = `?next=${encodeURIComponent(pathname)}`;
+    } else {
+      url.pathname = loginPath;
+      url.search = `?next=${encodeURIComponent(pathname + search)}`;
+    }
     return NextResponse.redirect(url);
   }
   return NextResponse.next();

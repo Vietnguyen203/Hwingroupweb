@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { IdCardPicker } from "@/components/affiliate/id-card-picker";
@@ -24,7 +24,33 @@ export function RegisterAffiliateForm() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!mounted || !me.data) return <div className="mx-auto my-6 h-72 max-w-md animate-pulse rounded-2xl bg-neutral-200" />;
+  // Đã đăng ký CTV (chờ duyệt / đã duyệt / tạm khóa) thì về trang CTV; chỉ hồ sơ bị từ chối mới được đăng ký lại
+  const profile = useQuery({
+    queryKey: ["affiliate-me"],
+    queryFn: async () => {
+      try {
+        return await api<AffiliateResponse>("/api/affiliates/me");
+      } catch (e) {
+        if (e instanceof ApiError && e.status === 404) return null; // chưa đăng ký CTV
+        throw e;
+      }
+    },
+    enabled: !!me.data,
+  });
+  const alreadyApplied = !!profile.data && profile.data.status !== "REJECTED";
+  useEffect(() => {
+    if (alreadyApplied) router.replace("/affiliate");
+  }, [alreadyApplied, router]);
+
+  // Điền sẵn họ tên (đã nhập lúc tạo tài khoản); đặt state ngay lúc render, không cần effect
+  const [nameFilled, setNameFilled] = useState(false);
+  if (me.data?.fullName && !nameFilled) {
+    const name = me.data.fullName;
+    setNameFilled(true);
+    setForm((f) => ({ ...f, fullName: name }));
+  }
+
+  if (!mounted || !me.data || profile.isPending || alreadyApplied) return <div className="mx-auto my-6 h-72 max-w-md animate-pulse rounded-2xl bg-neutral-200" />;
   const needsPhone = !me.data.phoneMasked;
 
   /** Ảnh CCCD vào kho riêng tư của backend; chỉ nhận lại khóa file để đính kèm phiếu đăng ký. */
