@@ -5,6 +5,7 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAffiliateProfile } from "@/hooks/use-affiliate-profile";
+import { useMounted } from "@/hooks/use-mounted";
 import { errorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -16,9 +17,11 @@ import { cn } from "@/lib/utils";
  */
 export function PortalGate({ children }: { children: React.ReactNode }) {
   const { me, profile, needsRole } = useAffiliateProfile();
+  const mounted = useMounted();
   const a = profile.data;
 
-  if (me.isPending || (me.data && profile.isPending) || needsRole) return <PortalSkeleton />;
+  // Chưa mounted: luôn skeleton để khớp HTML server (React hydrate từng phần, lúc đó cache đăng nhập có thể đã có sẵn)
+  if (!mounted || me.isPending || (me.data && profile.isPending) || needsRole) return <PortalSkeleton />;
   if (!me.data) {
     return <Notice title="Bạn cần đăng nhập" text="Đăng nhập tài khoản cộng tác viên để xem cổng CTV." href="/login?next=%2Faffiliate%2Fdashboard" action="Đăng nhập" />;
   }

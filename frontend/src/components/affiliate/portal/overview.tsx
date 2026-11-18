@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Coins, Compass, MousePointerClick, Percent, ShoppingBag } from "lucide-react";
+import { Coins, MousePointerClick, Percent, ShoppingBag } from "lucide-react";
 
 import { useAffiliateProfile } from "@/hooks/use-affiliate-profile";
 import { api, errorMessage } from "@/lib/api";
@@ -10,10 +9,13 @@ import type { AffiliateDashboard, CommissionResponse, PayoutResponse } from "@/l
 import { buildActivity, formatNumber, formatPercent, monthlyTotals, percentChange } from "@/lib/affiliate-stats";
 import { formatVnd } from "@/lib/format";
 import type { PageResponse } from "@/lib/types";
+import { GettingStarted } from "./getting-started";
 import { IncomeSummary } from "./income-summary";
 import { KpiCard, type KpiTrend } from "./kpi-card";
 import { PayoutCard } from "./payout-card";
 import { RecentActivity } from "./recent-activity";
+import { Reveal } from "./reveal";
+import { WelcomeHero } from "./welcome-hero";
 
 const COMPARE_LABEL = "so với cùng kỳ tháng trước";
 
@@ -23,7 +25,10 @@ function monthTrend(current: number, previous: number, show: (n: number) => stri
   return percent === null ? { percent: null, label: `Tháng này: ${show(current)}` } : { percent, label: COMPARE_LABEL };
 }
 
-/** Trang Tổng quan cổng CTV: lời chào + CTA, 4 KPI, thu nhập & rút tiền, hoạt động gần đây. */
+const whole = (n: number) => formatNumber(Math.round(n));
+const money = (n: number) => formatVnd(Math.round(n));
+
+/** Trang Tổng quan cổng CTV: hero chào mừng, 4 KPI, bắt đầu nhanh, thu nhập & rút tiền, hoạt động gần đây. */
 export function Overview() {
   const { profile } = useAffiliateProfile({ syncRole: false });
   const dash = useQuery({
@@ -53,22 +58,9 @@ export function Overview() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">
-            Chào mừng quay trở lại, <span className="text-brand-red">{profile.data?.fullName ?? "bạn"}</span>!
-          </h1>
-          <p className="mt-1 text-sm text-gray-500">Đây là tổng quan hoạt động cộng tác viên của bạn.</p>
-        </div>
-        <Link
-          href="/products"
-          className="group inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-red px-5 text-sm font-semibold text-white shadow-md shadow-brand-red/25 transition-all hover:bg-brand-red/90 hover:shadow-lg"
-        >
-          <Compass className="size-4.5" aria-hidden />
-          Khám phá sản phẩm
-          <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
-        </Link>
-      </header>
+      <Reveal>
+        <WelcomeHero name={profile.data?.fullName ?? "bạn"} referralCode={profile.data?.referralCode ?? d?.referralCode} shareLink={d?.shareLink} />
+      </Reveal>
 
       {dash.error && (
         <div role="alert" className="flex items-center justify-between gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -80,18 +72,22 @@ export function Overview() {
       <section aria-label="Chỉ số chính" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <KpiCard
           label="Tổng lượt Click"
-          value={formatNumber(d?.clicksTotal ?? 0)}
+          value={d?.clicksTotal ?? 0}
+          format={whole}
           icon={MousePointerClick}
           tone="purple"
           loading={dash.isPending}
+          delay={80}
           trend={{ percent: null, label: `${formatNumber(d?.clicks30Days ?? 0)} lượt trong 30 ngày qua` }}
         />
         <KpiCard
           label="Đơn hàng hợp lệ"
-          value={formatNumber(orders)}
+          value={orders}
+          format={whole}
           icon={ShoppingBag}
           tone="orange"
           loading={dash.isPending}
+          delay={150}
           trend={
             monthly
               ? monthTrend(monthly.orders, monthly.prevOrders, (n) => `${n} đơn`)
@@ -100,18 +96,22 @@ export function Overview() {
         />
         <KpiCard
           label="Tỷ lệ chuyển đổi"
-          value={formatPercent(conversion)}
+          value={conversion}
+          format={formatPercent}
           icon={Percent}
           tone="navy"
           loading={dash.isPending}
+          delay={220}
           trend={{ percent: null, label: `${formatNumber(orders)} đơn / ${formatNumber(d?.clicksTotal ?? 0)} click` }}
         />
         <KpiCard
           label="Thu nhập ước tính"
-          value={formatVnd(estimated)}
+          value={estimated}
+          format={money}
           icon={Coins}
           tone="green"
           loading={dash.isPending}
+          delay={290}
           trend={
             monthly
               ? monthTrend(monthly.income, monthly.prevIncome, formatVnd)
@@ -120,12 +120,24 @@ export function Overview() {
         />
       </section>
 
+      {d && (
+        <Reveal delay={330}>
+          <GettingStarted dash={d} orders={orders} />
+        </Reveal>
+      )}
+
       <div className="grid gap-4 lg:grid-cols-2">
-        <IncomeSummary dash={d} loading={dash.isPending} />
-        <PayoutCard dash={d} latest={latestPayout} />
+        <Reveal delay={380} className="h-full">
+          <IncomeSummary dash={d} loading={dash.isPending} />
+        </Reveal>
+        <Reveal delay={440} className="h-full">
+          <PayoutCard dash={d} latest={latestPayout} />
+        </Reveal>
       </div>
 
-      <RecentActivity items={activity} loading={commissions.isPending || payouts.isPending} />
+      <Reveal delay={500}>
+        <RecentActivity items={activity} loading={commissions.isPending || payouts.isPending} />
+      </Reveal>
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useId, useState } from "react";
 import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Check, Wallet } from "lucide-react";
+import { Check, PiggyBank, Wallet } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -41,18 +41,23 @@ export function PayoutCard({ dash, latest }: Props) {
   const block = dash ? withdrawBlock(dash) : null;
 
   return (
-    <section className="flex flex-col rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+    <section className="flex h-full flex-col rounded-xl border border-gray-100 bg-gradient-to-br from-white to-orange-50/60 p-5 shadow-sm">
       <h2 className="text-base font-bold text-gray-900">Rút tiền</h2>
       <p className="mt-0.5 text-sm text-gray-500">
         Số dư có thể rút
         {dash && <> · tối thiểu {formatVnd(dash.minPayout)}</>}
       </p>
 
-      {dash ? (
-        <p className="mt-2 text-3xl font-extrabold tracking-tight text-brand-red tabular-nums">{formatVnd(dash.availableBalance)}</p>
-      ) : (
-        <Skeleton className="mt-2 h-9 w-40 bg-gray-200" />
-      )}
+      <div className="mt-2 flex items-center justify-between gap-3">
+        {dash ? (
+          <p className="text-3xl font-extrabold tracking-tight text-brand-red tabular-nums">{formatVnd(dash.availableBalance)}</p>
+        ) : (
+          <Skeleton className="h-9 w-40 bg-gray-200" />
+        )}
+        <span aria-hidden className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-accent to-brand-red text-white shadow-md shadow-brand-red/25">
+          <PiggyBank className="size-6" />
+        </span>
+      </div>
 
       {open && dash ? (
         <form

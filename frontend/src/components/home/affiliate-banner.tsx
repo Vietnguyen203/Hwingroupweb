@@ -1,5 +1,6 @@
-import Link from "next/link";
 import { Link2, Share2, Wallet } from "lucide-react";
+
+import { AffiliateJoinLink } from "@/components/affiliate/affiliate-join-link";
 
 const STEPS = [
   { icon: Link2, title: "Đăng ký miễn phí", text: "Nhận mã giới thiệu và link riêng sau khi được duyệt." },
@@ -16,9 +17,10 @@ export function AffiliateBanner() {
           <p className="text-sm font-semibold tracking-widest text-brand-accent uppercase">Cộng tác viên HWIN</p>
           <h2 className="mt-2 text-2xl leading-tight font-black md:text-4xl">Chia sẻ món ngon,<br />nhận hoa hồng mỗi đơn</h2>
           <p className="mt-3 text-white/80">Không cần vốn, không cần ôm hàng – HWIN lo sản phẩm, giao hàng và chăm sóc khách.</p>
-          <Link href="/affiliate" className="mt-6 inline-block rounded-full bg-brand-accent px-7 py-3 font-extrabold text-neutral-950 shadow-lg shadow-brand-accent/30 transition duration-200 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0">
-            Đăng ký CTV ngay
-          </Link>
+          <AffiliateJoinLink
+            guestLabel="Đăng ký CTV ngay"
+            className="mt-6 inline-block rounded-full bg-brand-accent px-7 py-3 font-extrabold text-neutral-950 shadow-lg shadow-brand-accent/30 transition duration-200 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0"
+          />
         </div>
         <ol className="grid gap-3 md:grid-cols-3">
           {STEPS.map(({ icon: Icon, title, text }, i) => (

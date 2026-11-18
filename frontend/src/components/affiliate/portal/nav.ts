@@ -8,17 +8,19 @@ export type PortalNavItem = {
   description: string;
   /** Lối đi tạm tới chức năng đã có sẵn ở nơi khác. */
   fallback?: { href: string; label: string };
+  /** Hình phác thảo ở trang "sắp ra mắt". */
+  preview?: "chart" | "cards";
 };
 
 /** Menu cổng CTV – dùng chung cho sidebar và các trang giữ chỗ (Chiến dịch, Sản phẩm, Hiệu suất chưa có chức năng). */
 export const PORTAL_NAV: PortalNavItem[] = [
   { href: "/affiliate/dashboard", label: "Tổng quan", icon: LayoutDashboard, description: "Số liệu tổng quan hoạt động cộng tác viên." },
   {
-    href: "/affiliate/campaigns", label: "Chiến dịch", icon: Megaphone,
+    href: "/affiliate/campaigns", label: "Chiến dịch", icon: Megaphone, preview: "cards",
     description: "Các chương trình khuyến mãi, chiến dịch dành riêng cho cộng tác viên.",
   },
   {
-    href: "/affiliate/products", label: "Sản phẩm", icon: Package,
+    href: "/affiliate/products", label: "Sản phẩm", icon: Package, preview: "cards",
     description: "Danh mục sản phẩm kèm mức hoa hồng để bạn chọn quảng bá.",
     fallback: { href: "/products", label: "Xem sản phẩm trên cửa hàng" },
   },
@@ -27,7 +29,7 @@ export const PORTAL_NAV: PortalNavItem[] = [
     description: "Mã giới thiệu và link chia sẻ riêng của bạn.",
   },
   {
-    href: "/affiliate/performance", label: "Hiệu suất", icon: BarChart3,
+    href: "/affiliate/performance", label: "Hiệu suất", icon: BarChart3, preview: "chart",
     description: "Biểu đồ lượt click, đơn hàng và tỷ lệ chuyển đổi theo thời gian.",
   },
   {

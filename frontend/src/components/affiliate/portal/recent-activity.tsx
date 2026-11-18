@@ -37,7 +37,7 @@ export function RecentActivity({ items, loading }: { items?: ActivityItem[]; loa
           {items.map((a) => {
             const Icon = iconOf(a);
             return (
-              <li key={a.id} className="flex items-center gap-3 py-3">
+              <li key={a.id} className="-mx-2 flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hoverable:hover:bg-gray-50">
                 <span className={cn("flex size-10 shrink-0 items-center justify-center rounded-full", TONE[a.tone])}>
                   <Icon className="size-5" aria-hidden />
                 </span>

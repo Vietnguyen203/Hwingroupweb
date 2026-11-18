@@ -3,10 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
+import { ChevronRight, Menu } from "lucide-react";
 
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { useAffiliateProfile } from "@/hooks/use-affiliate-profile";
+import { useMounted } from "@/hooks/use-mounted";
 import { initials } from "@/lib/affiliate-stats";
+import { PORTAL_NAV } from "./nav";
 import { Sidebar } from "./sidebar";
 
 /**
@@ -38,7 +41,9 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
     };
   }, [open]);
 
-  const a = profile.data;
+  const mounted = useMounted();
+  const a = mounted ? profile.data : undefined; // lần render đầu (hydrate) chưa có tên để khớp HTML server
+  const current = PORTAL_NAV.find((n) => pathname === n.href || pathname.startsWith(`${n.href}/`));
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -48,6 +53,28 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="lg:pl-64">
+        {/* Thanh trên – desktop: vị trí hiện tại, thông báo, người dùng */}
+        <header className="sticky top-0 z-30 hidden h-16 items-center justify-between border-b border-gray-200/80 bg-white/80 px-8 backdrop-blur-md lg:flex">
+          <nav aria-label="Vị trí hiện tại" className="flex items-center gap-1.5 text-sm">
+            <span className="text-gray-400">Cổng CTV</span>
+            <ChevronRight className="size-4 text-gray-300" aria-hidden />
+            <span className="font-semibold text-gray-800">{current?.label ?? "Tổng quan"}</span>
+          </nav>
+          <div className="flex items-center gap-4">
+            <NotificationBell variant="admin" />
+            <span aria-hidden className="h-6 w-px bg-gray-200" />
+            <div className="flex items-center gap-2.5">
+              <span aria-hidden className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-dark text-sm font-bold text-white shadow-sm">
+                {initials(a?.fullName)}
+              </span>
+              <div className="leading-tight">
+                <p className="text-sm font-semibold text-gray-900">{a?.fullName ?? "Cộng tác viên"}</p>
+                <p className="text-xs text-gray-500">{a?.referralCode ? `Mã ${a.referralCode}` : "Cộng tác viên HWIN"}</p>
+              </div>
+            </div>
+          </div>
+        </header>
+
         {/* Thanh trên – mobile */}
         <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-gray-200 bg-white/95 px-4 backdrop-blur lg:hidden">
           <button

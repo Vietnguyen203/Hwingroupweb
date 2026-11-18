@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 
+import { GuestOnly } from "@/components/affiliate/affiliate-join-link";
 import { Commitments } from "@/components/home/commitments";
 import { Logo } from "@/components/brand/logo";
 import { siteConfig } from "@/lib/config";
@@ -10,6 +11,7 @@ import { SocialLinks } from "./social-links";
 export function SiteFooter() {
   return (
     <footer className="mt-10 pb-16 md:pb-0">
+      <GuestOnly>
       <section className="bg-gradient-to-r from-brand via-brand-dark to-brand-deep text-white">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-7 md:flex-row md:items-center md:justify-between">
           <div>
@@ -23,6 +25,7 @@ export function SiteFooter() {
           </Link>
         </div>
       </section>
+      </GuestOnly>
 
       <div className="bg-white py-6">
         <Commitments />

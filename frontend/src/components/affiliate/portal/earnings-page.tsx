@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAffiliateProfile } from "@/hooks/use-affiliate-profile";
 import { api } from "@/lib/api";
 import type { AffiliateDashboard } from "@/lib/affiliate";
+import { formatVnd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Bank, Commissions, Customers, Payouts } from "../affiliate-dashboard";
 
@@ -36,6 +37,26 @@ export function Earnings() {
         <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">Hoa hồng &amp; Thanh toán</h1>
         <p className="mt-1 text-sm text-gray-500">Theo dõi hoa hồng từng đơn, rút tiền và quản lý tài khoản nhận tiền.</p>
       </header>
+
+      <section aria-label="Tóm tắt thu nhập" className="grid grid-cols-3 gap-2 sm:gap-4">
+        {[
+          { label: "Có thể rút", value: dash.data?.availableBalance, tone: "text-brand-red", dot: "bg-brand-red" },
+          { label: "Chờ xác nhận", value: dash.data?.commissions.PENDING?.amount ?? (dash.data ? 0 : undefined), tone: "text-gray-900", dot: "bg-amber-400" },
+          { label: "Đã nhận", value: dash.data?.paidOut, tone: "text-gray-900", dot: "bg-green-500" },
+        ].map((s) => (
+          <div key={s.label} className="rounded-xl border border-gray-100 bg-white p-3 shadow-sm sm:p-4">
+            <p className="flex items-center gap-1.5 text-xs font-medium text-gray-500 sm:text-sm">
+              <span aria-hidden className={cn("size-2 rounded-full", s.dot)} />
+              {s.label}
+            </p>
+            {s.value === undefined ? (
+              <Skeleton className="mt-2 h-6 w-20 bg-gray-200" />
+            ) : (
+              <p className={cn("mt-1 text-base font-extrabold tracking-tight tabular-nums sm:text-xl", s.tone)}>{formatVnd(s.value)}</p>
+            )}
+          </div>
+        ))}
+      </section>
 
       <div role="tablist" aria-label="Hoa hồng và thanh toán" className="no-scrollbar flex gap-2 overflow-x-auto">
         {TABS.map((t) => (
