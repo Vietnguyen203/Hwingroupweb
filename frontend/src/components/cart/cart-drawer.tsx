@@ -267,7 +267,7 @@ export function CartDrawer() {
               <button
                 type="button"
                 onClick={handleCheckout}
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-cta text-sm font-bold text-white shadow-md shadow-red-500/20 hover:bg-red-600 transition-all active:scale-[0.98]"
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-cta text-sm font-bold text-white shadow-md shadow-brand/25 hover:bg-brand-dark transition-all active:scale-[0.98]"
               >
                 Tiến hành thanh toán
                 <ArrowRight className="size-4" />

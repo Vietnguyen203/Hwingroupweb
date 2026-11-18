@@ -16,9 +16,9 @@ export function Pagination({ basePath, params, page, totalPages }: {
   };
   return (
     <nav className="flex items-center justify-center gap-3 py-6 text-sm" aria-label="Phân trang">
-      {page > 0 ? <Link className="rounded-lg border bg-white px-3 py-2" href={href(page - 1)}>‹ Trước</Link> : <span />}
-      <span>Trang {page + 1}/{totalPages}</span>
-      {page < totalPages - 1 ? <Link className="rounded-lg border bg-white px-3 py-2" href={href(page + 1)}>Sau ›</Link> : <span />}
+      {page > 0 ? <Link className="rounded-full bg-white px-5 py-2.5 font-semibold shadow-card ring-1 ring-black/[0.06] transition hover:-translate-y-0.5 hover:text-brand hover:shadow-card-hover" href={href(page - 1)}>‹ Trước</Link> : <span />}
+      <span className="font-semibold text-neutral-600">Trang {page + 1}/{totalPages}</span>
+      {page < totalPages - 1 ? <Link className="rounded-full bg-white px-5 py-2.5 font-semibold shadow-card ring-1 ring-black/[0.06] transition hover:-translate-y-0.5 hover:text-brand hover:shadow-card-hover" href={href(page + 1)}>Sau ›</Link> : <span />}
     </nav>
   );
 }

@@ -42,7 +42,7 @@ export function ProductTabs({ productId, description, ingredients, features, usa
   const current = sections.find((s) => s.key === active) ?? sections[0];
 
   return (
-    <section id="chi-tiet" className="mt-6 rounded-2xl bg-white shadow-sm">
+    <section id="chi-tiet" className="mt-6 rounded-3xl bg-white shadow-card ring-1 ring-black/[0.04]">
       <div role="tablist" className="no-scrollbar flex overflow-x-auto border-b">
         {sections.map((s) => (
           <button
@@ -50,7 +50,7 @@ export function ProductTabs({ productId, description, ingredients, features, usa
             role="tab"
             aria-selected={s.key === current.key}
             onClick={() => setActive(s.key)}
-            className={cn("shrink-0 border-b-2 px-4 py-3.5 text-sm font-semibold whitespace-nowrap transition md:px-6 md:text-base",
+            className={cn("shrink-0 border-b-[3px] px-4 py-4 text-sm font-bold whitespace-nowrap transition md:px-6 md:text-base",
               s.key === current.key ? "border-brand text-brand" : "border-transparent text-neutral-600 hover:text-brand")}
           >
             {s.label}

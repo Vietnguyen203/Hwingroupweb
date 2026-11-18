@@ -13,7 +13,7 @@ export function Price({ price, compareAtPrice, size = "sm" }: {
       <span className={cn("text-neutral-400 line-through", size === "lg" ? "text-base" : "min-h-4 text-xs")}>
         {hasCompare ? formatVnd(compareAtPrice) : ""}
       </span>
-      <span className={cn("font-bold text-brand-red", size === "lg" ? "text-2xl" : "text-[17px]")}>{formatVnd(price)}</span>
+      <span className={cn("font-extrabold tracking-tight text-brand-red", size === "lg" ? "text-3xl" : "text-[17px]")}>{formatVnd(price)}</span>
     </div>
   );
 }

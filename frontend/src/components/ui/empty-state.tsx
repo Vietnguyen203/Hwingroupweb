@@ -12,7 +12,7 @@ export function EmptyState({ icon: Icon, title, description, actions, className 
 }) {
   return (
     <div className={cn("mx-auto flex max-w-md flex-col items-center px-4 py-14 text-center md:py-20", className)}>
-      <span className="flex size-20 items-center justify-center rounded-full bg-red-50 text-brand-red">
+      <span className="flex size-20 items-center justify-center rounded-full bg-brand-soft text-brand">
         <Icon className="size-10 stroke-[1.5]" />
       </span>
       <h1 className="mt-5 text-xl font-bold text-neutral-900 md:text-2xl">{title}</h1>
@@ -24,6 +24,6 @@ export function EmptyState({ icon: Icon, title, description, actions, className 
 
 /** Nút hành động dùng trong EmptyState (chính = nền thương hiệu, phụ = viền). */
 export const emptyStateButton = {
-  primary: "inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-sm font-semibold text-white transition hover:brightness-110",
+  primary: "inline-flex h-11 items-center justify-center rounded-full bg-brand px-6 text-sm font-bold text-white shadow-md shadow-brand/25 transition hover:bg-brand-dark",
   secondary: "inline-flex h-11 items-center justify-center rounded-full border border-neutral-300 bg-white px-6 text-sm font-semibold text-neutral-800 transition hover:bg-neutral-50",
 };

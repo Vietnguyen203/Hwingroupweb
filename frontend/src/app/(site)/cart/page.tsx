@@ -52,7 +52,7 @@ export default function CartPage() {
   if (lines.length === 0) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-16 text-center">
-        <div className="mx-auto flex size-24 items-center justify-center rounded-full bg-red-50 text-brand-red">
+        <div className="mx-auto flex size-24 items-center justify-center rounded-full bg-brand-soft text-brand">
           <ShoppingCart className="size-12 stroke-[1.5]" />
         </div>
         <h1 className="mt-5 text-xl font-bold text-neutral-800 md:text-2xl">
@@ -64,7 +64,7 @@ export default function CartPage() {
         <div className="mt-8 flex flex-wrap justify-center gap-4">
           <Link
             href="/"
-            className={cn(buttonVariants(), "h-11 rounded-full px-8 bg-brand hover:bg-brand/90 font-medium")}
+            className={cn(buttonVariants(), "h-11 rounded-full px-8 bg-brand text-white shadow-lg shadow-brand/25 hover:bg-brand-dark font-bold")}
           >
             Khám phá thực đơn
           </Link>
@@ -347,7 +347,7 @@ export default function CartPage() {
               aria-disabled={!checkoutReady}
               className={cn(
                 buttonVariants(),
-                "flex h-12 w-full items-center justify-center gap-2 rounded-xl text-base font-bold bg-brand-cta text-white shadow-lg shadow-red-500/25 hover:bg-red-600 transition-all active:scale-[0.98]",
+                "flex h-12 w-full items-center justify-center gap-2 rounded-xl text-base font-bold bg-brand-cta text-white shadow-lg shadow-brand/30 hover:-translate-y-0.5 hover:bg-brand-dark transition-all active:translate-y-0 active:scale-[0.98]",
                 !checkoutReady && "pointer-events-none opacity-50 shadow-none"
               )}
             >

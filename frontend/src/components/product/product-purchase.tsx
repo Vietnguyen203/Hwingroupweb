@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Check, Minus, Plus, RotateCcw, ShoppingCart, Snowflake, Wallet, Zap } from "lucide-react";
 
 import { AffiliateProductTools } from "@/components/affiliate/affiliate-product-tools";
+import { WishlistButton } from "@/components/product/wishlist-button";
 import { Button } from "@/components/ui/button";
 import { formatVnd } from "@/lib/format";
 import { useCart, type CartLine } from "@/stores/cart-store";
@@ -57,7 +58,7 @@ export function ProductPurchase({ product, stock, slug }: { product: Omit<CartLi
       <div ref={panelRef} className="space-y-3">
         <div className="flex items-center gap-4">
           <span className="w-24 text-sm text-muted-foreground">Số lượng</span>
-          <div className="flex h-11 items-center rounded-full border bg-white">
+          <div className="flex h-11 items-center rounded-full border border-neutral-200 bg-white">
             <button type="button" aria-label="Giảm" disabled={qty <= 1} onClick={() => setQty((q) => Math.max(1, q - 1))} className="px-3 disabled:opacity-40">
               <Minus className="size-4" />
             </button>
@@ -79,17 +80,18 @@ export function ProductPurchase({ product, stock, slug }: { product: Omit<CartLi
         </div>
 
         <div className="flex gap-3">
-          <Button type="button" variant="outline" className="h-12 flex-1 rounded-full border-brand-cta text-base text-brand-cta hover:bg-red-50" onClick={onAdd}>
+          <Button type="button" variant="outline" className="h-12 flex-1 rounded-full border-2 border-brand bg-white text-base font-bold text-brand transition hover:bg-brand-soft active:scale-[0.98]" onClick={onAdd}>
             {added ? <Check /> : <ShoppingCart />}
             {added ? "Đã thêm vào giỏ" : "Thêm vào giỏ"}
           </Button>
-          <Button type="button" className="h-12 flex-1 rounded-full bg-brand-cta text-base text-white hover:brightness-110" onClick={onBuyNow}>
+          <Button type="button" className="h-12 flex-1 rounded-full bg-brand-cta text-base font-bold text-white shadow-lg shadow-brand/30 transition hover:-translate-y-0.5 hover:bg-brand-dark active:translate-y-0 active:scale-[0.98]" onClick={onBuyNow}>
             <Zap /> Mua ngay
           </Button>
+          <WishlistButton productId={product.productId} name={product.name} className="size-12 shrink-0 bg-white shadow-none ring-2 ring-neutral-200 hover:ring-brand-red/40" />
         </div>
 
         {/* Cam kết giao hàng / đổi trả / thanh toán */}
-        <ul className="grid gap-2 rounded-xl border border-neutral-200/80 bg-neutral-50/70 p-3 text-xs text-neutral-700 sm:grid-cols-3">
+        <ul className="grid gap-2 rounded-2xl bg-neutral-50 p-3.5 text-xs text-neutral-700 ring-1 ring-black/[0.04] sm:grid-cols-3">
           <li className="flex items-center gap-2"><Snowflake className="size-4 shrink-0 text-brand" /> Giao hàng giữ lạnh toàn quốc</li>
           <li className="flex items-center gap-2"><RotateCcw className="size-4 shrink-0 text-brand" /> Đổi trả trong 7 ngày nếu lỗi</li>
           <li className="flex items-center gap-2"><Wallet className="size-4 shrink-0 text-brand" /> COD hoặc chuyển khoản QR</li>
@@ -113,11 +115,11 @@ export function ProductPurchase({ product, stock, slug }: { product: Omit<CartLi
                 <span className="ml-2 text-xs text-muted-foreground">× {qty}</span>
               </p>
             </div>
-            <Button type="button" variant="outline" className="h-10 rounded-full border-brand-cta px-4 text-brand-cta hover:bg-red-50" onClick={onAdd}>
+            <Button type="button" variant="outline" className="h-10 rounded-full border-2 border-brand px-4 font-bold text-brand hover:bg-brand-soft" onClick={onAdd}>
               {added ? <Check /> : <ShoppingCart />}
               <span className="hidden sm:inline">{added ? "Đã thêm" : "Thêm vào giỏ"}</span>
             </Button>
-            <Button type="button" className="h-10 rounded-full bg-brand-cta px-5 text-white hover:brightness-110" onClick={onBuyNow}>
+            <Button type="button" className="h-10 rounded-full bg-brand-cta px-5 font-bold text-white hover:bg-brand-dark" onClick={onBuyNow}>
               <Zap /> Mua ngay
             </Button>
           </div>

@@ -26,9 +26,9 @@ async function SearchContent({ searchParams }: PageProps<"/search">) {
 
   return (
     <>
-      <h1 className="px-3 pt-4 pb-3 text-lg font-bold">
+      <h1 className="px-3 pt-5 pb-3 text-2xl font-extrabold tracking-tight md:px-0 md:text-3xl">
         {q ? <>Kết quả cho “{q}”</> : "Tất cả sản phẩm"}{" "}
-        <span className="text-sm font-normal text-muted-foreground">({result.totalElements})</span>
+        <span className="ml-1 rounded-full bg-brand-soft px-2.5 py-0.5 align-middle text-sm font-bold text-brand">{result.totalElements}</span>
       </h1>
       <SortTabs basePath="/search" params={{ q }} current={sort} />
       <ProductGrid products={result.content} />

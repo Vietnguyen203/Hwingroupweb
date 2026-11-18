@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
-import { Roboto } from "next/font/google";
+import { Be_Vietnam_Pro } from "next/font/google";
 
 import "./globals.css";
 import { Providers } from "@/components/providers";
@@ -8,10 +8,11 @@ import { SessionSync } from "@/components/session-sync";
 import { ToastContainer } from "@/components/ui/toast";
 import { siteConfig } from "@/lib/config";
 
-const font = Roboto({
+// Be Vietnam Pro: phông hiện đại thiết kế riêng cho tiếng Việt, tiêu đề đậm gọn
+const font = Be_Vietnam_Pro({
   variable: "--font-sans",
   subsets: ["vietnamese", "latin"],
-  weight: ["400", "500", "700", "900"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#ffffff",
+  themeColor: "#6c3bff",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

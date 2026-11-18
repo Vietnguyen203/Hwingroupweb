@@ -31,19 +31,19 @@ async function CategoryContent({ params, searchParams }: PageProps<"/categories/
 
   return (
     <>
-      <div className="no-scrollbar flex gap-2 overflow-x-auto px-3 pt-3 pb-2">
+      <div className="no-scrollbar flex gap-2 overflow-x-auto px-3 pt-4 pb-3 md:px-0">
         {categories.map((c) => (
           <a
             key={c.id}
             href={`/categories/${c.slug}`}
-            className={`shrink-0 rounded-full px-3 py-1.5 text-sm ${c.slug === slug ? "bg-brand-soft font-semibold text-brand" : "bg-white"}`}
+            className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ring-1 transition duration-200 active:scale-95 ${c.slug === slug ? "bg-brand text-white shadow-md shadow-brand/25 ring-brand" : "bg-white text-neutral-700 ring-black/[0.08] hover:text-brand hover:ring-brand/40"}`}
           >
             {c.name}
           </a>
         ))}
       </div>
-      <h1 className="px-3 pt-2 pb-3 text-xl font-bold">
-        {category.name} <span className="text-sm font-normal text-muted-foreground">({result.totalElements} sản phẩm)</span>
+      <h1 className="px-3 pt-2 pb-3 text-2xl font-extrabold tracking-tight md:px-0 md:text-3xl">
+        {category.name} <span className="ml-1 rounded-full bg-brand-soft px-2.5 py-0.5 align-middle text-sm font-bold text-brand">{result.totalElements} sản phẩm</span>
       </h1>
       <SortTabs basePath={`/categories/${slug}`} params={{}} current={sort} />
       <ProductGrid products={result.content} />

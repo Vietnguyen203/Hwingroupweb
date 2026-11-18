@@ -320,7 +320,7 @@ export function CheckoutView() {
             )}
             {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-destructive">{error}</p>}
 
-            <Button type="submit" disabled={busy || !view?.checkoutReady} className="h-12 w-full rounded-xl bg-brand-cta text-base font-bold text-white shadow-lg shadow-red-500/25 hover:bg-red-600">
+            <Button type="submit" disabled={busy || !view?.checkoutReady} className="h-12 w-full rounded-xl bg-brand-cta text-base font-bold text-white shadow-lg shadow-brand/30 transition hover:-translate-y-0.5 hover:bg-brand-dark">
               {busy ? "Đang đặt hàng..." : <>Đặt hàng · {view ? formatVnd(view.total) : ""}</>}
             </Button>
             <p className="flex items-center justify-center gap-1.5 text-center text-xs text-neutral-500">

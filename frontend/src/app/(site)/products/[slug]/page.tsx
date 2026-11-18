@@ -66,13 +66,13 @@ async function ProductContent({ params }: PageProps<"/products/[slug]">) {
       />
 
       <div className="gap-6 md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-        <div className="bg-white p-3 md:rounded-2xl md:p-5 md:shadow-sm">
+        <div className="bg-white p-3 md:rounded-3xl md:p-5 md:shadow-card md:ring-1 md:ring-black/[0.04]">
           <ProductGallery images={product.images.slice(0, 5)} alt={product.name} />
         </div>
 
-        <div className="space-y-4 bg-white p-4 md:rounded-2xl md:p-6 md:shadow-sm">
+        <div className="space-y-4 bg-white p-4 md:rounded-3xl md:p-7 md:shadow-card md:ring-1 md:ring-black/[0.04]">
           <div>
-            <h1 className="text-xl leading-snug font-bold uppercase md:text-2xl">{product.name}</h1>
+            <h1 className="text-2xl leading-tight font-extrabold tracking-tight md:text-3xl">{product.name}</h1>
             <a href="#chi-tiet" className="mt-2 flex items-center gap-2 text-sm">
               <StarRating value={summary.average} />
               <span className="font-semibold text-[#e59500]">{summary.total > 0 ? summary.average.toFixed(1) : "Chưa có đánh giá"}</span>
@@ -81,10 +81,10 @@ async function ProductContent({ params }: PageProps<"/products/[slug]">) {
             </a>
           </div>
 
-          <div className="flex items-center gap-3 rounded-xl bg-neutral-50 p-4">
+          <div className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-brand-soft to-brand-soft/30 p-4 ring-1 ring-brand/10">
             <Price price={product.price} compareAtPrice={product.compareAtPrice} size="lg" />
             {product.discountPercent > 0 && (
-              <span className="rounded bg-brand-red px-2 py-0.5 text-sm font-bold text-white">-{product.discountPercent}%</span>
+              <span className="rounded-lg bg-brand-red px-2.5 py-1 text-sm font-extrabold text-white">-{product.discountPercent}%</span>
             )}
           </div>
 
@@ -160,8 +160,8 @@ function FoodInfoTable({ info }: { info: NonNullable<Awaited<ReturnType<typeof g
     ["Giấy chứng nhận ATTP", info.foodSafetyCertNumber],
   ];
   return (
-    <section className="mt-4 rounded-2xl bg-white p-4 shadow-sm md:p-6">
-      <h2 className="mb-2 font-bold">Thông tin an toàn thực phẩm</h2>
+    <section className="mt-4 rounded-3xl bg-white p-4 shadow-card ring-1 ring-black/[0.04] md:p-6">
+      <h2 className="mb-2 text-lg font-extrabold">Thông tin an toàn thực phẩm</h2>
       <table className="w-full text-sm">
         <tbody>
           {rows.filter(([, v]) => v).map(([k, v]) => (

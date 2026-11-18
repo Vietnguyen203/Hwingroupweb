@@ -10,15 +10,15 @@ import { SocialLinks } from "./social-links";
 export function SiteFooter() {
   return (
     <footer className="mt-10 pb-16 md:pb-0">
-      <section className="bg-brand text-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 md:flex-row md:items-center md:justify-between">
+      <section className="bg-gradient-to-r from-brand via-brand-dark to-brand-deep text-white">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-7 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-lg font-bold uppercase">Đăng ký cộng tác viên HWIN</p>
             <p className="text-sm text-white/80">Phát triển cùng HWIN</p>
           </div>
           {/* Vào thẳng form đăng ký CTV (chưa có tài khoản thì tự sang đăng ký tài khoản) */}
           <Link href="/affiliate/register"
-                className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-[#6c64d9] px-8 text-sm font-semibold transition hover:brightness-110">
+                className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-brand-accent px-8 text-sm font-extrabold text-neutral-950 shadow-lg shadow-black/20 transition duration-200 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0">
             Đăng ký ngay
           </Link>
         </div>
@@ -28,7 +28,7 @@ export function SiteFooter() {
         <Commitments />
       </div>
 
-      <section className="bg-brand text-sm text-white/85">
+      <section className="bg-brand-deep text-sm text-white/80">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4">
             <Logo tone="light" className="[&_img]:h-20" />
@@ -72,7 +72,7 @@ function FooterCol({ title, links }: { title: string; links: [string, string][] 
       <p className="mb-3 font-semibold text-white uppercase">{title}</p>
       <ul className="space-y-2">
         {links.map(([label, href]) => (
-          <li key={label}><Link href={href} className="hover:text-white">{label}</Link></li>
+          <li key={label}><Link href={href} className="transition-colors hover:text-brand-accent">{label}</Link></li>
         ))}
       </ul>
     </div>

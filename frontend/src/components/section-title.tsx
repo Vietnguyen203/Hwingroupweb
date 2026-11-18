@@ -1,13 +1,21 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
-/** Tiêu đề khối: mobile căn trái + "Xem tất cả ›" xanh; desktop chữ in hoa navy căn giữa. */
+/**
+ * Tiêu đề khối: mobile căn trái có thanh nhấn cam + "Xem tất cả"; desktop chữ in hoa căn giữa, gạch chân cam,
+ * "Xem tất cả" dạng nút nhỏ ở mép phải.
+ */
 export function SectionTitle({ title, href }: { title: string; href?: string }) {
   return (
-    <div className="flex items-center justify-between px-3 pt-7 pb-3 md:justify-center md:px-0 md:pt-10 md:pb-5 md:relative">
-      <h2 className="text-lg font-bold text-neutral-900 md:text-2xl md:text-brand md:uppercase">{title}</h2>
+    <div className="flex items-center justify-between px-3 pt-8 pb-4 md:relative md:justify-center md:px-0 md:pt-12 md:pb-6">
+      <h2 className="flex items-center gap-2.5 text-lg font-extrabold text-neutral-900 md:flex-col md:gap-2 md:text-3xl md:tracking-tight md:text-brand-deep md:uppercase">
+        <span aria-hidden className="h-5 w-1.5 rounded-full bg-brand-accent md:hidden" />
+        {title}
+        <span aria-hidden className="hidden h-1 w-14 rounded-full bg-brand-accent md:block" />
+      </h2>
       {href && (
-        <Link href={href} className="text-sm text-brand-link md:absolute md:right-0">
-          Xem tất cả ›
+        <Link href={href} className="group/all inline-flex items-center gap-1 text-sm font-bold text-brand-link transition hover:text-brand-dark md:absolute md:right-0 md:rounded-full md:bg-white md:px-4 md:py-2 md:shadow-card md:hover:shadow-card-hover">
+          Xem tất cả <ArrowRight className="size-3.5 transition group-hover/all:translate-x-0.5" />
         </Link>
       )}
     </div>

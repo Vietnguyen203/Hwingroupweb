@@ -13,10 +13,10 @@ import { cn } from "@/lib/utils";
 export function ComboFeature({ product, className }: { product: ProductCardResponse; className?: string }) {
   const hasCompare = product.compareAtPrice != null && product.compareAtPrice > product.price;
   return (
-    <article className={cn("group flex overflow-hidden rounded-2xl border border-amber-200/70 bg-gradient-to-br from-amber-50 via-white to-orange-50 shadow-sm transition hover:shadow-[0_12px_28px_rgba(229,50,45,0.15)]", className)}>
+    <article className={cn("group flex overflow-hidden rounded-2xl border border-amber-200/70 bg-gradient-to-br from-amber-50 via-white to-orange-50 shadow-card transition duration-300 ease-out-expo hover:-translate-y-1 hover:shadow-card-hover", className)}>
       <Link href={`/products/${product.slug}`} className="relative block w-[42%] shrink-0 overflow-hidden bg-neutral-50 sm:w-2/5">
         {product.discountPercent > 0 && (
-          <span className="absolute top-3 left-3 z-10 rounded-lg bg-gradient-to-r from-red-600 to-amber-500 px-2.5 py-1 text-xs font-black text-white shadow-md">
+          <span className="absolute top-3 left-3 z-10 rounded-lg bg-brand-red px-2.5 py-1 text-xs font-extrabold text-white shadow-md">
             -{product.discountPercent}%
           </span>
         )}

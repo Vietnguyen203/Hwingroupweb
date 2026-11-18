@@ -15,10 +15,10 @@ export function BottomNav() {
   const count = useCartCount();
   const openDrawer = useCart((s) => s.openDrawer);
   const item = (active: boolean) =>
-    cn("flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px]", active ? "text-brand-link" : "text-neutral-600");
+    cn("relative flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition active:scale-95", active ? "font-bold text-brand" : "text-neutral-500");
 
   return (
-    <nav aria-label="Điều hướng" className="fixed inset-x-0 bottom-0 z-50 flex h-14 border-t border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
+    <nav aria-label="Điều hướng" className="fixed inset-x-0 bottom-0 z-50 flex h-14 border-t border-neutral-200/80 bg-white/90 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_-12px_rgb(23_23_23/0.18)] backdrop-blur-xl md:hidden">
       <Link href="/" className={item(pathname === "/")}><House className="size-5" />Trang chủ</Link>
       <Link href="/categories" className={item(pathname.startsWith("/categories") || pathname.startsWith("/categories/"))}>
         <LayoutGrid className="size-5" />Danh mục

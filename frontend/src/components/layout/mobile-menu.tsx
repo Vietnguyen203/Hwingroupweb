@@ -95,7 +95,7 @@ export function MobileMenu({ categories }: { categories: CategoryResponse[] }) {
               </ul>
             </div>
             <div className="border-t p-4">
-              <Link href="/affiliate" onClick={() => setOpen(false)} className="block rounded-full bg-brand-cta py-2.5 text-center text-sm font-semibold text-white">
+              <Link href="/affiliate" onClick={() => setOpen(false)} className="block rounded-full bg-gradient-to-r from-brand to-brand-dark py-2.5 text-center text-sm font-bold text-white shadow-md shadow-brand/25">
                 Đăng ký cộng tác viên
               </Link>
             </div>

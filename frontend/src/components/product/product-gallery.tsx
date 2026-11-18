@@ -26,7 +26,7 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
   return (
     <div className="space-y-3">
       {/* Khung ảnh chính */}
-      <div className="group relative overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-sm">
+      <div className="group relative overflow-hidden rounded-2xl bg-neutral-50 ring-1 ring-black/[0.06]">
         <div
           ref={scrollRef}
           className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto"
@@ -41,7 +41,7 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
               className="aspect-square w-full shrink-0 snap-center cursor-zoom-in"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={src} alt={`${alt} – ảnh ${i + 1}`} className="size-full object-cover" />
+              <img src={src} alt={`${alt} – ảnh ${i + 1}`} className="size-full object-cover transition duration-700 ease-out-expo group-hover:scale-105" />
             </button>
           ))}
         </div>
@@ -65,8 +65,8 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
               onClick={() => selectImage(i)}
               aria-label={`Xem ảnh ${i + 1}`}
               className={cn(
-                "relative size-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200",
-                index === i ? "scale-105 border-brand shadow-sm" : "border-transparent opacity-70 hover:border-neutral-300 hover:opacity-100",
+                "relative size-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200 md:size-[72px]",
+                index === i ? "border-brand shadow-md shadow-brand/20" : "border-transparent opacity-70 hover:border-neutral-300 hover:opacity-100",
               )}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
