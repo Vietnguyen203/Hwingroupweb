@@ -334,7 +334,7 @@
           ]
         },
         {
-          "name": "Khách (SĐT): đăng nhập khi chưa có tài khoản → 422 ACCOUNT_NOT_FOUND",
+          "name": "Khách (SĐT): đăng nhập tài khoản chưa có → 401 INVALID_LOGIN",
           "request": {
             "method": "POST",
             "header": [
@@ -344,20 +344,20 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/auth/otp",
+              "raw": "{{baseUrl}}/api/auth/login",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "auth",
-                "otp"
+                "login"
               ]
             },
-            "description": "Sinh ngẫu nhiên SĐT khách + SĐT CTV cho lần chạy này. OTP được tự lấy ở bước xác thực (profile dev).",
+            "description": "Đăng nhập đi qua /api/auth/login. Sai tên đăng nhập hoặc mật khẩu đều trả cùng một lỗi (không lộ tài khoản có tồn tại hay không).",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"{{customerPhone}}\",\n  \"purpose\": \"LOGIN\"\n}",
+              "raw": "{\n  \"identifier\": \"{{customerPhone}}\",\n  \"password\": \"Postman@2026!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -382,8 +382,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('HTTP 422', () => pm.response.to.have.status(422));",
-                  "pm.test('code = ACCOUNT_NOT_FOUND', () => pm.expect(pm.response.json().messageCode).to.eql('ACCOUNT_NOT_FOUND'));"
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));",
+                  "pm.test('code = INVALID_LOGIN', () => pm.expect(pm.response.json().messageCode).to.eql('INVALID_LOGIN'));"
                 ]
               }
             }
@@ -1640,7 +1640,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
-                  "pm.test('Cùng mã đơn', () => pm.expect(pm.response.json().messageCode).to.eql(pm.collectionVariables.get('codCode')));"
+                  "pm.test('Cùng mã đơn', () => pm.expect(pm.response.json().code).to.eql(pm.collectionVariables.get('codCode')));"
                 ]
               }
             }
@@ -1962,7 +1962,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set('cancelCode', pm.response.json().messageCode);"
+                  "pm.collectionVariables.set('cancelCode', pm.response.json().code);"
                 ]
               }
             }
@@ -3217,7 +3217,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"categoryId\": \"{{categoryId}}\",\n  \"name\": \"Sai giá\",\n  \"price\": 100000,\n  \"compareAtPrice\": 90000\n}",
+              "raw": "{\n  \"categoryId\": \"{{categoryId}}\",\n  \"name\": \"Sai giá\",\n  \"price\": 100000,\n  \"compareAtPrice\": 90000,\n  \"brand\": \"HWIN Food\",\n  \"weight\": \"500g\",\n  \"packaging\": \"Gói\",\n  \"origin\": \"Việt Nam\",\n  \"initialStock\": 5,\n  \"images\": [\n    \"/sample/products/cha-lua-truyen-thong-500g.svg\"\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4220,14 +4220,14 @@
                 "id-card-uploads"
               ]
             },
-            "description": "Chọn file ảnh JPG/PNG/WebP (≤ 5MB) ở trường file. Ảnh lưu riêng tư; response chỉ trả khóa file.",
+            "description": "Tệp mẫu postman/files/sample.png (PNG). Chạy bằng Postman CLI: thêm --working-dir <thư mục gốc dự án>.",
             "body": {
               "mode": "formdata",
               "formdata": [
                 {
                   "key": "file",
                   "type": "file",
-                  "src": []
+                  "src": "postman/files/sample.png"
                 }
               ]
             }
@@ -4261,14 +4261,14 @@
                 "id-card-uploads"
               ]
             },
-            "description": "Chọn file ảnh JPG/PNG/WebP (≤ 5MB) ở trường file. Ảnh lưu riêng tư; response chỉ trả khóa file.",
+            "description": "Tệp mẫu postman/files/sample.png (PNG). Chạy bằng Postman CLI: thêm --working-dir <thư mục gốc dự án>.",
             "body": {
               "mode": "formdata",
               "formdata": [
                 {
                   "key": "file",
                   "type": "file",
-                  "src": []
+                  "src": "postman/files/sample.png"
                 }
               ]
             }
@@ -4357,7 +4357,7 @@
             "description": "",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"CTV Test\",\n  \"acceptTerms\": true\n}",
+              "raw": "{\n  \"fullName\": \"CTV Test\",\n  \"acceptTerms\": true,\n  \"idCardFrontKey\": \"{{idCardFrontKey}}\",\n  \"idCardBackKey\": \"{{idCardBackKey}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5255,7 +5255,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set('refOrderCode', pm.response.json().messageCode);",
+                  "pm.collectionVariables.set('refOrderCode', pm.response.json().code);",
                   "pm.collectionVariables.set('refOrderSubtotal', pm.response.json().subtotal);"
                 ]
               }
@@ -6444,7 +6444,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set('timeoutCode', pm.response.json().messageCode);"
+                  "pm.collectionVariables.set('timeoutCode', pm.response.json().code);"
                 ]
               }
             }
@@ -7422,7 +7422,7 @@
           ]
         },
         {
-          "name": "Gửi OTP đăng nhập khách tới SĐT của admin → 422 (không gửi OTP)",
+          "name": "Đăng nhập khách bằng SĐT của admin → 422 ADMIN_USE_ADMIN_LOGIN",
           "request": {
             "method": "POST",
             "header": [
@@ -7432,20 +7432,20 @@
               }
             ],
             "url": {
-              "raw": "{{ctvUrl}}/api/auth/otp",
+              "raw": "{{ctvUrl}}/api/auth/login",
               "host": [
                 "{{ctvUrl}}"
               ],
               "path": [
                 "api",
                 "auth",
-                "otp"
+                "login"
               ]
             },
-            "description": "",
+            "description": "Tài khoản admin chỉ đăng nhập ở cổng admin (mật khẩu + OTP); đi cổng khách bị chặn.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"{{newAdminPhone}}\",\n  \"purpose\": \"LOGIN\"\n}",
+              "raw": "{\n  \"identifier\": \"{{newAdminPhone}}\",\n  \"password\": \"Postman@2026!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

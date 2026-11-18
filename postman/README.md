@@ -12,6 +12,17 @@
 3. Góc trên bên phải chọn environment **Hwin Food – Local** (không chọn sẽ lỗi `ENOTFOUND {{baseUrl}}`).
 4. Chạy **theo thứ tự folder 01 → 16** (Run collection, hoặc bấm tay từng request).
 
+### Chạy bằng Postman CLI (không cần mở app)
+
+```bash
+postman collection run HWIN.postman_collection.json -e HWIN-local.postman_environment.json --working-dir <thư mục gốc dự án>
+```
+
+`--working-dir` cần thiết vì các request tải ảnh dùng tệp mẫu `postman/files/sample.png` (đường dẫn tính từ thư mục gốc dự án).
+Chạy cục bộ không cần `postman login`. Lần chạy gần nhất: 191 request, 338 kiểm tra, 0 lỗi.
+
+> Đăng nhập khách/CTV dùng `POST /api/auth/login` (mật khẩu, OTP chỉ khi bật `otpOnLogin`). `POST /api/auth/otp` chỉ dành cho **đăng ký**.
+
 Không cần thao tác tay:
 
 - **SĐT khách và CTV sinh ngẫu nhiên** mỗi lần chạy folder 02.
