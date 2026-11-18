@@ -631,7 +631,6 @@ function ProductForm({
           )}
         </div>
 
-        {input("slug", "Slug (để trống = tự sinh)", { maxLength: 255 })}
         {input("price", "Giá bán (đ) *", { required: true, type: "number", min: 1 })}
         {input("compareAtPrice", "Giá gốc gạch ngang (đ, không bắt buộc)", { type: "number", min: 1 })}
         {input("unit", "Đơn vị tính", { maxLength: 50, placeholder: "VD: đòn, hộp, gói" })}

@@ -15,7 +15,7 @@ export async function CategoryNav() {
 
   return (
     <nav aria-label="Danh mục sản phẩm" className="hidden border-b border-gray-100 bg-white md:block">
-      <div className="container mx-auto flex items-center gap-3 px-4 py-2 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-6xl items-center gap-3 px-3 py-2">
         <Link
           href="/search"
           className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand-soft px-4 py-1.5 text-sm font-bold text-brand transition-colors duration-200 hover:bg-brand hover:text-white"

@@ -188,7 +188,7 @@ export function AdminCategories() {
 
       <FilterBar>
         <Input
-          placeholder="Tìm theo tên hoặc slug..."
+          placeholder="Tìm theo tên danh mục..."
           value={filterQuery}
           onChange={(e) => setFilterQuery(e.target.value)}
           className="h-10 w-72"
@@ -224,7 +224,7 @@ export function AdminCategories() {
           </Button>
         </div>
       ) : (
-        <Table head={["Icon", "Tên danh mục", "Đường dẫn (Slug)", "Thứ tự", "Số sản phẩm", "Trạng thái", "Thao tác"]}>
+        <Table head={["Icon", "Tên danh mục", "Thứ tự", "Số sản phẩm", "Trạng thái", "Thao tác"]}>
           {list.map((c) => (
             <tr key={c.id} className="hover:bg-slate-50/70 transition-colors">
               <td className="px-4 py-3">
@@ -237,11 +237,6 @@ export function AdminCategories() {
                 </div>
               </td>
               <td className="px-4 py-3 font-semibold text-slate-800">{c.name}</td>
-              <td className="px-4 py-3">
-                <code className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-mono text-slate-600">
-                  /{c.slug}
-                </code>
-              </td>
               <td className="px-4 py-3 font-semibold text-slate-700">{c.sortOrder}</td>
               <td className="px-4 py-3">
                 <Link
@@ -377,7 +372,7 @@ export function CategoryFormModal({
             {form.id ? "Chỉnh sửa danh mục" : "Tạo danh mục sản phẩm mới"}
           </h2>
           <p className="text-xs text-slate-500">
-            Điền tên danh mục để phân loại sản phẩm trên toàn hệ thống (đường dẫn slug tự sinh tự động)
+            Điền tên danh mục để phân loại sản phẩm trên toàn hệ thống
           </p>
         </div>
         <button

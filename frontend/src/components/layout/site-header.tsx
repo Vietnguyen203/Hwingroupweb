@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { Flame, Headset, Info, Menu, Phone, RotateCcw, Search, ShieldCheck, Snowflake } from "lucide-react";
+import { FileText, Menu, Phone, Search } from "lucide-react";
 
 import { Logo } from "@/components/brand/logo";
 import { NotificationBell } from "@/components/notifications/notification-bell";
@@ -12,109 +12,122 @@ import { CartButton } from "./cart-button";
 import { CategoryNav } from "./category-nav";
 import { MobileMenu } from "./mobile-menu";
 
-const TOP_LINK = "inline-flex items-center gap-1.5 whitespace-nowrap transition-colors hover:text-brand";
-
 /**
- * Header 3 tầng, nền sáng, dùng chung một khung {@code container mx-auto} (cùng lề trái / phải ở cả ba tầng nên luôn thẳng hàng):
- * 1. Thanh trên (desktop / tablet): nền xám siêu nhạt, chữ nhỏ; cam kết giao hàng giữ lạnh / đổi trả / VSATTP bên trái,
- *    hotline, chính sách, khuyến mãi, Zalo bên phải. Cuộn trang thì thanh này cuộn đi.
- * 2. Header chính (kính mờ, DÍNH đầu trang): logo · ô tìm kiếm (rộng tối đa, căn giữa) · nút "Đăng ký CTV" dạng viền (phụ) ·
- *    cụm icon tài khoản / thông báo / giỏ hàng (mỗi icon bọc p-2 rounded-full, rê chuột nền xám). Nút "Tìm" là nút chính duy nhất.
- *    Mobile: ☰ · logo · tìm kiếm · giỏ hàng.
- * 3. Hàng danh mục (desktop / tablet): xem {@link CategoryNav}; cuộn ngang khi nhiều danh mục, cuộn đi cùng trang.
- * Trả về fragment để chỉ header chính dính đầu trang (dính theo khung trang của SiteChrome).
+ * SiteHeader đồng bộ chuẩn hệ màu thương hiệu HWIN:
+ * 1. Top Bar: Nền tím than đậm đặc trưng (--brand-deep / #1f1450), đồng bộ với footer HWIN:
+ *    - Freeship đơn từ 500.000đ (nhấn màu vàng hổ phách) · Giao hàng giữ lạnh tận nơi
+ *    - 100% Thực phẩm sạch – Đầy đủ giấy tờ VSATTP, ISO 22000
+ *    - Hotline & Zalo tư vấn 8:00 – 22:00 (cả T7, CN)
+ *    - Mép phải: [icon] Hỗ trợ & chính sách (gạch chân)
+ * 2. Main Header: Nền trắng thanh lịch:
+ *    - Logo HWIN + slogan nhỏ
+ *    - Thanh tìm kiếm viền tím thương hiệu (border-brand), nút "Tìm kiếm" màu brand (bg-brand hover:bg-brand-dark)
+ *    - Hotline: Icon trong vòng tròn tím nhạt (bg-brand-soft) + số điện thoại tím đậm (text-brand)
+ *    - Đăng ký CTV: Icon + chữ đồng bộ màu brand
+ *    - Tài khoản: Icon + chữ
+ *    - Giỏ hàng: Icon + badge đỏ + chữ
+ * 3. CategoryNav: Dòng danh mục cuộn ngang dùng chung token màu brand-soft / brand.
  */
 export function SiteHeader() {
   return (
     <>
-      {/* 1. Thanh trên */}
-      <div className="hidden border-b border-gray-200 bg-gray-50 text-xs text-gray-600 md:block lg:text-sm">
-        <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-2 sm:px-6 lg:px-8">
-          <ul className="flex items-center gap-5 whitespace-nowrap">
-            <li className="inline-flex items-center gap-1.5">
-              <Snowflake className="size-4 text-sky-500" /> Giao hàng giữ lạnh
-            </li>
-            <li className="hidden items-center gap-1.5 xl:inline-flex">
-              <RotateCcw className="size-4 text-brand" /> Đổi trả trong 7 ngày
-            </li>
-            <li>
-              <Link href="/chinh-sach?tab=vsattp" className="inline-flex items-center gap-1.5 font-medium text-emerald-700 transition-colors hover:text-emerald-800">
-                <ShieldCheck className="size-4" /> Chuẩn VSATTP
-              </Link>
-            </li>
-          </ul>
+      {/* 1. TOP BAR NỀN TÍM THAN ĐẬM THƯƠNG HIỆU HWIN */}
+      <div className="hidden bg-brand-deep py-2 text-xs text-white/85 md:block">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4">
+          <div className="flex items-center gap-6">
+            <span>
+              Freeship đơn từ <strong className="font-bold text-amber-400">500.000đ</strong> · Giao hàng giữ lạnh tận nơi
+            </span>
+            <span className="text-white/20">|</span>
+            <span>Chính hãng 100% – Đạt chuẩn VSATTP, ISO 22000</span>
+            <span className="text-white/20">|</span>
+            <span className="hidden lg:inline">Chuyên gia tư vấn miễn phí 8:00 – 22:00 (cả T7, CN)</span>
+          </div>
 
-          <ul className="flex items-center gap-5 whitespace-nowrap">
-            <li>
-              <a href={`tel:${siteConfig.hotline}`} className="inline-flex items-center gap-1.5 font-semibold text-gray-900 transition-colors hover:text-brand">
-                <Phone className="size-4 text-brand" /> Hotline: {siteConfig.hotline}
-              </a>
-            </li>
-            <li className="hidden xl:block">
-              <Link href="/chinh-sach" className={TOP_LINK}>Chính sách & Pháp lý</Link>
-            </li>
-            <li className="hidden lg:block">
-              <Link href="/search?sort=PRICE_ASC" className={`${TOP_LINK} font-semibold text-brand-red`}>
-                <Flame className="size-4" /> Khuyến mãi
-              </Link>
-            </li>
-            <li className="hidden 2xl:block">
-              <a href={siteConfig.aboutUrl} target="_blank" rel="noopener noreferrer" className={TOP_LINK}>
-                <Info className="size-4 text-gray-400" /> Về HWIN
-              </a>
-            </li>
-            <li>
-              <a href={siteConfig.zaloUrl} target="_blank" rel="noopener noreferrer" className={TOP_LINK}>
-                <Headset className="size-4 text-gray-400" /> Hỗ trợ Zalo
-              </a>
-            </li>
-          </ul>
+          <Link
+            href="/chinh-sach"
+            className="flex items-center gap-1.5 font-medium text-white/90 underline decoration-white/40 underline-offset-4 transition hover:text-amber-400 hover:decoration-amber-400"
+          >
+            <FileText className="size-3.5 text-amber-400" />
+            <span>Hỗ trợ &amp; chính sách</span>
+          </Link>
         </div>
       </div>
 
-      {/* 2. Header chính (dính đầu trang) */}
-      <header className="sticky top-0 z-40 w-full bg-white/90 shadow-[0_1px_0_rgb(23_23_23/0.06)] backdrop-blur-xl">
-        <div className="container mx-auto flex items-center gap-3 px-4 py-2 sm:px-6 md:gap-6 md:py-3 lg:px-8">
-          <div className="flex shrink-0 items-center gap-2">
+      {/* 2. MAIN HEADER NỀN TRẮNG */}
+      <header className="sticky top-0 z-40 w-full border-b border-neutral-100 bg-white/95 shadow-xs backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
+          {/* Logo thương hiệu + Slogan */}
+          <div className="flex shrink-0 items-center gap-3">
             <Suspense fallback={<Menu className="size-6 text-brand md:hidden" />}>
               <MobileMenuLoader />
             </Suspense>
-            <Logo />
+            <div className="flex flex-col">
+              <Logo />
+              <span className="hidden text-[10px] text-neutral-500 font-medium tracking-tight sm:block -mt-1">
+                Thực phẩm sạch chế biến sẵn
+              </span>
+            </div>
           </div>
 
-          <form action="/search" method="get" role="search" className="mx-auto w-full max-w-xl min-w-0 flex-1 lg:max-w-2xl">
-            <label className="flex h-10 items-center rounded-full border border-gray-200 bg-gray-50 pr-1 pl-3.5 transition focus-within:border-brand focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgb(108_59_255/0.12)] md:h-11">
-              <Search className="size-4 shrink-0 text-gray-400" />
+          {/* Thanh tìm kiếm viền màu Brand (#6c3bff) và nút Tìm kiếm màu Brand */}
+          <form
+            action="/search"
+            method="get"
+            role="search"
+            className="mx-2 min-w-0 flex-1 max-w-xl lg:max-w-2xl"
+          >
+            <label className="flex h-11 items-center rounded-full border-2 border-brand bg-white pl-4 pr-0 overflow-hidden shadow-2xs transition focus-within:border-brand-dark focus-within:shadow-[0_0_0_4px_rgb(108_59_255/0.12)]">
               <input
                 name="q"
                 type="search"
-                placeholder="Tìm kiếm sản phẩm, thực phẩm sạch..."
+                placeholder="Tìm sản phẩm: nem chua, tôm khô, thịt gác bếp, lạp xưởng..."
                 maxLength={100}
-                className="h-full min-w-0 flex-1 bg-transparent px-2.5 text-sm outline-none placeholder:text-gray-400 focus-visible:outline-none"
+                className="h-full min-w-0 flex-1 bg-transparent pr-2 text-sm text-neutral-800 outline-none placeholder:text-neutral-400"
               />
               <button
                 type="submit"
                 aria-label="Tìm kiếm"
-                className="hidden h-9 shrink-0 items-center justify-center gap-1.5 rounded-full bg-brand px-5 text-sm font-bold text-white shadow-sm transition hover:bg-brand-dark active:scale-95 md:flex"
+                className="flex h-full shrink-0 items-center justify-center gap-1.5 bg-brand px-5 sm:px-6 text-sm font-bold text-white transition hover:bg-brand-dark active:scale-95 cursor-pointer"
               >
                 <Search className="size-4" />
-                <span>Tìm</span>
+                <span className="hidden sm:inline">Tìm kiếm</span>
               </button>
             </label>
           </form>
 
-          <div className="flex shrink-0 items-center gap-2 md:gap-4">
-            <AffiliateCta />
-            <div className="flex items-center gap-0.5 md:gap-1">
-              <AccountLink />
-              <NotificationBell />
-              <CartButton />
-            </div>
+          {/* Cụm 4 Action bên phải: Hotline, CTV, Tài khoản, Giỏ hàng */}
+          <div className="flex shrink-0 items-center gap-4 sm:gap-6">
+            {/* 1. Hotline tư vấn - tông màu Brand */}
+            <a
+              href={`tel:${siteConfig.hotline}`}
+              className="hidden items-center gap-2.5 text-neutral-800 transition hover:opacity-90 xl:flex"
+            >
+              <div className="flex size-9 items-center justify-center rounded-full bg-brand-soft text-brand">
+                <Phone className="size-4.5" />
+              </div>
+              <div className="flex flex-col leading-tight">
+                <span className="font-extrabold text-sm text-brand tracking-tight">{siteConfig.hotline}</span>
+                <span className="text-[11px] text-neutral-500 font-medium">Tư vấn miễn phí</span>
+              </div>
+            </a>
+
+            {/* 2. Đăng ký CTV */}
+            <AffiliateCta variant="vertical" />
+
+            {/* 3. Tài khoản */}
+            <AccountLink vertical={true} />
+
+            {/* Thông báo (nếu đăng nhập) */}
+            <NotificationBell />
+
+            {/* 4. Giỏ hàng */}
+            <CartButton showLabel={true} />
           </div>
         </div>
       </header>
 
-      {/* 3. Hàng danh mục */}
+      {/* 3. Dòng danh mục cuộn ngang (đã đồng bộ cùng màu brand) */}
       <Suspense fallback={<div className="hidden h-[3.25rem] border-b border-gray-100 bg-white md:block" aria-hidden />}>
         <CategoryNav />
       </Suspense>

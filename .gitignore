@@ -1,0 +1,5 @@
+# Local IDE / AI assistant config
+.claude/
+.mcp.json
+ai/
+.gemini/

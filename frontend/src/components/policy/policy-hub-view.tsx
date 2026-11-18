@@ -61,10 +61,10 @@ export function PolicyHubView() {
         {/* Cột phải (trên): đường dẫn + banner */}
         <div className="min-w-0 space-y-8 lg:col-start-2 lg:row-start-1">
           {/* Breadcrumb */}
-          <nav aria-label="Đường dẫn" className="flex items-center gap-1.5 text-xs text-neutral-500">
-            <Link href="/" className="hover:text-brand transition-colors">Trang chủ</Link>
-            <ChevronRight className="size-3.5" />
-            <span className="font-semibold text-neutral-800">Chính sách &amp; Pháp lý</span>
+          <nav aria-label="Đường dẫn" className="flex items-center gap-2 text-sm text-neutral-600 sm:text-base">
+            <Link href="/" className="font-medium transition-colors hover:text-brand">Trang chủ</Link>
+            <ChevronRight className="size-4 shrink-0 text-neutral-400" />
+            <span className="font-semibold text-neutral-900">Chính sách &amp; Pháp lý</span>
           </nav>
 
           {/* Hero Banner */}
