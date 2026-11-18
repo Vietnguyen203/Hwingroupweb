@@ -17,5 +17,11 @@ public record SecurityProperties(
         Duration accessTokenTtl,
         Duration refreshTokenTtl,
         boolean cookieSecure,
-        List<String> corsOrigins) {
+        List<String> corsOrigins,
+        List<String> corsOriginPatterns) {
+
+    /** Mẫu origin (có ký tự *) – chỉ đặt ở dev để mở web qua IP mạng LAN; để trống thì không áp dụng. */
+    public List<String> corsOriginPatterns() {
+        return corsOriginPatterns == null ? List.of() : corsOriginPatterns;
+    }
 }

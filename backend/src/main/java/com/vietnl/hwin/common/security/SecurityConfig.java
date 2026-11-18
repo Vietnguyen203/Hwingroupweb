@@ -87,6 +87,9 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource(SecurityProperties props) {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(props.corsOrigins());
+        if (!props.corsOriginPatterns().isEmpty()) {
+            config.setAllowedOriginPatterns(props.corsOriginPatterns()); // dev: IP mạng LAN (điện thoại/máy khác)
+        }
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Content-Type", "X-Requested-With"));
         config.setAllowCredentials(true);

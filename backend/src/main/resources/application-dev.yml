@@ -23,6 +23,8 @@ hwin:
     otp-exempt: true
   security:
     cookie-secure: ${COOKIE_SECURE:false}
+    # dev: cho phép mở web qua IP mạng LAN (khớp allowedDevOrigins của frontend) để thử trên điện thoại
+    cors-origin-patterns: http://192.168.*.*:3100,http://10.*.*.*:3100
   otp:
     log-code: true
     ip-send-limit: 50          # dev: nới giới hạn theo IP để chạy Postman nhiều lần
