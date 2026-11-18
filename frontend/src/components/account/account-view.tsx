@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronRight, LogOut, MapPin, Package, Pencil, Plus, Trash2, UserRound } from "lucide-react";
+import { Check, ChevronRight, Copy, LogOut, MapPin, Package, Pencil, Plus, Trash2, UserRound } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMe } from "@/hooks/use-me";
 import { api, errorMessage } from "@/lib/api";
+import { copyText } from "@/lib/clipboard";
 import {
   formatDateTime, ORDER_STATUS,
   type AddressResponse, type SaveAddressRequest, type OrderSummaryResponse, type ProfileResponse,
@@ -77,7 +78,10 @@ function ProfileCard() {
     },
   });
 
+  const me = useMe();
   const p = profile.data;
+  const accountId = p?.id || me.data?.id;
+
   return (
     <Card
       title="Tài khoản"
@@ -92,18 +96,33 @@ function ProfileCard() {
         <div className="h-24 animate-pulse rounded-lg bg-neutral-100" />
       ) : (
         <div className="space-y-2 text-sm">
-          {editing ? (
-            <form onSubmit={(e) => { e.preventDefault(); save.mutate(); }} className="space-y-2">
-              <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={100} placeholder="Họ và tên" className="h-10" autoFocus />
-              {save.error && <p className="text-destructive">{errorMessage(save.error)}</p>}
-              <div className="flex gap-2">
-                <Button type="submit" disabled={save.isPending}>Lưu</Button>
-                <Button type="button" variant="outline" onClick={() => setEditing(false)}>Hủy</Button>
+          <div>
+            {editing ? (
+              <form onSubmit={(e) => { e.preventDefault(); save.mutate(); }} className="space-y-2">
+                <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={100} placeholder="Họ và tên" className="h-10" autoFocus />
+                {save.error && <p className="text-destructive">{errorMessage(save.error)}</p>}
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={save.isPending}>Lưu</Button>
+                  <Button type="button" variant="outline" onClick={() => setEditing(false)}>Hủy</Button>
+                </div>
+              </form>
+            ) : (
+              <p className="text-base font-semibold text-neutral-900">{p.fullName || "Chưa có tên"}</p>
+            )}
+
+            {accountId && (
+              <div className="mt-1 flex items-center gap-1.5 text-xs text-neutral-500">
+                <span className="font-medium text-neutral-400">ID:</span>
+                <code
+                  className="rounded bg-brand-soft px-1.5 py-0.5 font-mono text-[11px] font-bold text-brand select-all"
+                  title={`ID đầy đủ: ${accountId}`}
+                >
+                  #{accountId.slice(0, 8).toUpperCase()}
+                </code>
+                <CopyIdButton id={accountId} />
               </div>
-            </form>
-          ) : (
-            <p className="text-base font-semibold">{p.fullName || "Chưa có tên"}</p>
-          )}
+            )}
+          </div>
           {p.email && <p className="text-muted-foreground">Email: {p.email}</p>}
           {p.phone ? <p className="text-muted-foreground">SĐT: {p.phone}</p> : <AddPhoneForm />}
           <div className="grid grid-cols-2 gap-2 pt-2">
@@ -113,6 +132,34 @@ function ProfileCard() {
         </div>
       )}
     </Card>
+  );
+}
+
+function CopyIdButton({ id }: { id: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      title="Sao chép ID tài khoản"
+      aria-label="Sao chép ID tài khoản"
+      onClick={async () => {
+        if (await copyText(id)) {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500);
+        }
+      }}
+      className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] text-neutral-400 hover:bg-neutral-100 hover:text-brand transition cursor-pointer"
+    >
+      {copied ? (
+        <span className="flex items-center gap-1 text-emerald-600 font-semibold">
+          <Check className="size-3" /> Đã chép
+        </span>
+      ) : (
+        <span className="flex items-center gap-1 hover:text-brand">
+          <Copy className="size-3" /> Chép ID
+        </span>
+      )}
+    </button>
   );
 }
 

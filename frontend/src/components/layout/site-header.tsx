@@ -41,7 +41,7 @@ export function SiteHeader() {
             <span className="text-white/20">|</span>
             <span>Chính hãng 100% – Đạt chuẩn VSATTP, ISO 22000</span>
             <span className="text-white/20">|</span>
-            <span className="hidden lg:inline">Chuyên gia tư vấn miễn phí 8:00 – 22:00 (cả T7, CN)</span>
+            <span className="hidden lg:inline">Chuyên gia tư vấn miễn phí 8:00 – 22:00 Các ngày trong tuần</span>
           </div>
 
           <Link
