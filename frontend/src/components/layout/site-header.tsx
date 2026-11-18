@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Headset, Info, Menu, Newspaper, Phone, Search } from "lucide-react";
 
 import { Logo } from "@/components/brand/logo";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { getCategories } from "@/lib/catalog";
 import { siteConfig } from "@/lib/config";
 import { AccountLink } from "./account-link";
@@ -55,6 +56,7 @@ export function SiteHeader() {
         </div>
         <AffiliateCta />
         <AccountLink />
+        <NotificationBell />
         <CartButton />
       </div>
     </header>

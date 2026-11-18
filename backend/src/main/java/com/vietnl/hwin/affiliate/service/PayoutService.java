@@ -8,6 +8,7 @@ import com.vietnl.hwin.common.exception.ResponseException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -24,6 +25,8 @@ import com.vietnl.hwin.affiliate.repository.AffiliateRepository;
 import com.vietnl.hwin.affiliate.repository.CommissionRepository;
 import com.vietnl.hwin.affiliate.repository.PayoutRepository;
 import com.vietnl.hwin.common.audit.AuditLogger;
+import com.vietnl.hwin.common.notification.NotificationService;
+import com.vietnl.hwin.common.notification.NotificationType;
 import com.vietnl.hwin.common.domain.Money;
 
 /**
@@ -40,16 +43,19 @@ public class PayoutService {
     private final BankAccountCrypto crypto;
     private final AffiliateProperties props;
     private final AuditLogger audit;
+    private final NotificationService notifications;
     private final Clock clock;
 
     public PayoutService(PayoutRepository payouts, CommissionRepository commissions, AffiliateRepository affiliates,
-                         BankAccountCrypto crypto, AffiliateProperties props, AuditLogger audit, Clock clock) {
+                         BankAccountCrypto crypto, AffiliateProperties props, AuditLogger audit, NotificationService notifications,
+                         Clock clock) {
         this.payouts = payouts;
         this.commissions = commissions;
         this.affiliates = affiliates;
         this.crypto = crypto;
         this.props = props;
         this.audit = audit;
+        this.notifications = notifications;
         this.clock = clock;
     }
 
@@ -74,6 +80,8 @@ public class PayoutService {
         Payout p = payouts.saveAndFlush(Payout.request(a.getId(), Money.of(amount), availableBalance(a.getId()),
                 props.minPayoutMoney(), a.getBankAccount(), now));
         audit.log("affiliate", "Payout", p.getId(), "PAYOUT_REQUESTED", userId, amount, null);
+        notifications.notifyAdmins(NotificationType.PAYOUT_REQUESTED, Map.of("amount", amount, "fullName", String.valueOf(a.getFullName())),
+                "/admin/payouts", null);
         return mapper.apply(p);
     }
 
@@ -108,6 +116,7 @@ public class PayoutService {
         Payout p = load(id);
         p.approve(adminId, clock.instant());
         audit.log("affiliate", "Payout", id, "PAYOUT_APPROVED", adminId, p.getAmount().amount(), null);
+        notifyAffiliate(p, NotificationType.PAYOUT_APPROVED);
         return mapper.apply(payouts.save(p));
     }
 
@@ -115,6 +124,7 @@ public class PayoutService {
     public <T> T markPaid(UUID id, String transactionRef, UUID adminId, Function<Payout, T> mapper) {
         Payout p = load(id);
         p.markPaid(transactionRef, adminId, clock.instant());
+        notifyAffiliate(p, NotificationType.PAYOUT_PAID);
         audit.log("affiliate", "Payout", id, "PAYOUT_PAID", adminId, p.getAmount().amount(),
                 "{\"transactionRef\":\"" + p.getTransactionRef().replace("\"", "") + "\"}");
         return mapper.apply(payouts.save(p));
@@ -125,7 +135,14 @@ public class PayoutService {
         Payout p = load(id);
         p.reject(reason, adminId, clock.instant());
         audit.log("affiliate", "Payout", id, "PAYOUT_REJECTED", adminId, p.getAmount().amount(), null);
+        notifyAffiliate(p, NotificationType.PAYOUT_REJECTED);
         return mapper.apply(payouts.save(p));
+    }
+
+    /** Báo cho CTV (chủ yêu cầu rút tiền) biết kết quả xử lý. */
+    private void notifyAffiliate(Payout p, NotificationType type) {
+        affiliates.findById(p.getAffiliateId()).ifPresent(a -> notifications.notifyUser(a.getUserId(), type,
+                Map.of("amount", p.getAmount().amount()), "/affiliate", null));
     }
 
     private Payout load(UUID id) {

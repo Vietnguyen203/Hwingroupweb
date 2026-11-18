@@ -3,6 +3,7 @@ package com.vietnl.hwin.affiliate.service.listener;
 import com.vietnl.hwin.affiliate.service.AttributionService;
 import com.vietnl.hwin.affiliate.service.config.AffiliateProperties;
 import java.time.Clock;
+import java.util.Map;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Component;
 import com.vietnl.hwin.affiliate.entity.Commission;
 import com.vietnl.hwin.affiliate.repository.CommissionRepository;
 import com.vietnl.hwin.common.audit.AuditLogger;
+import com.vietnl.hwin.common.notification.NotificationService;
+import com.vietnl.hwin.common.notification.NotificationType;
 import com.vietnl.hwin.common.domain.Money;
 import com.vietnl.hwin.ordering.entity.event.OrderCancelledEvent;
 import com.vietnl.hwin.ordering.entity.event.OrderDeliveredEvent;
@@ -33,14 +36,17 @@ public class OrderCommissionEventListener {
     private final CommissionRepository commissions;
     private final AffiliateProperties props;
     private final AuditLogger audit;
+    private final NotificationService notifications;
     private final Clock clock;
 
     public OrderCommissionEventListener(AttributionService attribution, CommissionRepository commissions,
-                                  AffiliateProperties props, AuditLogger audit, Clock clock) {
+                                  AffiliateProperties props, AuditLogger audit, NotificationService notifications,
+                                  Clock clock) {
         this.attribution = attribution;
         this.commissions = commissions;
         this.props = props;
         this.audit = audit;
+        this.notifications = notifications;
         this.clock = clock;
     }
 
@@ -55,6 +61,9 @@ public class OrderCommissionEventListener {
             audit.log("affiliate", "Commission", c.getId(), "COMMISSION_CREATED", null, c.getAmount().amount(),
                     "{\"orderCode\":\"" + e.orderCode() + "\",\"referralCode\":\"" + affiliate.getReferralCode() + "\"}");
             log.info("Hoa hồng {}đ cho CTV {} – đơn {}", c.getAmount().amount(), affiliate.getReferralCode(), e.orderCode());
+            notifications.notifyUser(affiliate.getUserId(), NotificationType.COMMISSION_EARNED,
+                    Map.of("orderCode", e.orderCode(), "amount", c.getAmount().amount()), "/affiliate",
+                    "commission-earned:" + e.orderId());
         });
     }
 

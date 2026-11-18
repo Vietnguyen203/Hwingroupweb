@@ -22,6 +22,8 @@ import com.vietnl.hwin.affiliate.entity.Affiliate;
 import com.vietnl.hwin.affiliate.entity.BankAccount;
 import com.vietnl.hwin.affiliate.repository.AffiliateRepository;
 import com.vietnl.hwin.common.audit.AuditLogger;
+import com.vietnl.hwin.common.notification.NotificationService;
+import com.vietnl.hwin.common.notification.NotificationType;
 import com.vietnl.hwin.common.domain.PhoneNumber;
 import com.vietnl.hwin.identity.service.OtpService;
 import com.vietnl.hwin.identity.service.UserQueryService;
@@ -38,6 +40,7 @@ public class AffiliateService {
     private final OtpService otp;
     private final BankAccountCrypto crypto;
     private final AuditLogger audit;
+    private final NotificationService notifications;
     private final PrivateFileStore files;
     private final RateLimiter rateLimiter;
     private final AffiliateProperties props;
@@ -45,12 +48,13 @@ public class AffiliateService {
 
     public AffiliateService(AffiliateRepository affiliates, UserQueryService users, OtpService otp,
                             BankAccountCrypto crypto, AuditLogger audit, PrivateFileStore files, RateLimiter rateLimiter,
-                            AffiliateProperties props, Clock clock) {
+                            AffiliateProperties props, NotificationService notifications, Clock clock) {
         this.affiliates = affiliates;
         this.users = users;
         this.otp = otp;
         this.crypto = crypto;
         this.audit = audit;
+        this.notifications = notifications;
         this.files = files;
         this.rateLimiter = rateLimiter;
         this.props = props;
@@ -103,6 +107,8 @@ public class AffiliateService {
         } else {
             throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.ALREADY_REGISTERED, Map.of("status", String.valueOf(a.getStatus())));
         }
+        notifications.notifyAdmins(NotificationType.AFFILIATE_APPLIED, Map.of("fullName", String.valueOf(a.getFullName())),
+                "/admin/affiliates", null);
         return mapper.apply(a);
     }
 

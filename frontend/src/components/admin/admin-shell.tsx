@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -220,6 +221,8 @@ export function AdminHeader({ onOpenMobileMenu }: { onOpenMobileMenu: () => void
           <ExternalLink className="size-3.5" />
           <span>Xem website</span>
         </a>
+
+        <NotificationBell variant="admin" />
 
         <div className="hidden h-5 w-px bg-slate-200 sm:block" />
 

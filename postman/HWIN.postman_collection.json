@@ -7500,7 +7500,329 @@
       ]
     },
     {
-      "name": "14. Admin – nhật ký & đơn chuyển khoản quá hạn",
+      "name": "14. Thông báo trong ứng dụng",
+      "description": "Chuông thông báo: mỗi người chỉ thấy / đọc thông báo của mình (khách, CTV, admin). Backend chỉ trả type + data; giao diện dịch sang tiếng Việt.",
+      "item": [
+        {
+          "name": "Khách: số thông báo chưa đọc",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/unread-count",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "unread-count"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const n = pm.response.json().unread;",
+                  "pm.test('Có thông báo chưa đọc (đơn được xác nhận / giao...)', () => pm.expect(n).to.be.at.least(1));",
+                  "pm.collectionVariables.set('unreadBefore', n);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách: danh sách chưa đọc (mới nhất trước)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications?unread=true&page_size=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "unread",
+                  "value": "true"
+                },
+                {
+                  "key": "page_size",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const p = pm.response.json();",
+                  "pm.test('Có thông báo', () => pm.expect(p.content.length).to.be.at.least(1));",
+                  "const n = p.content[0];",
+                  "pm.test('Đủ trường: id, type, data, createdAt, read=false', () => { pm.expect(n.id).to.be.a('string'); pm.expect(n.type).to.be.a('string'); pm.expect(n.data).to.be.an('object'); pm.expect(n.createdAt).to.be.a('string'); pm.expect(n.read).to.be.false; });",
+                  "pm.test('Loại thông báo của khách là ORDER_*', () => pm.expect(n.type).to.match(/^ORDER_/));",
+                  "pm.test('Có mã đơn + đường dẫn tới đơn', () => { pm.expect(n.data.orderCode).to.be.a('string'); pm.expect(n.link).to.eql('/account/orders/' + n.data.orderCode); });",
+                  "pm.test('Mới nhất trước', () => { const t = p.content.map(x => Date.parse(x.createdAt)); pm.expect(t).to.eql([...t].sort((a, b) => b - a)); });",
+                  "pm.collectionVariables.set('notiId', n.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách: đánh dấu đã đọc một thông báo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/{{notiId}}/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "{{notiId}}",
+                "read"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Số chưa đọc giảm 1', () => pm.expect(pm.response.json().unread).to.eql(Number(pm.collectionVariables.get('unreadBefore')) - 1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách: đánh dấu đã đọc thông báo không phải của mình → không đổi",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/00000000-0000-7000-8000-000000000000/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "00000000-0000-7000-8000-000000000000",
+                "read"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Số chưa đọc giữ nguyên', () => pm.expect(pm.response.json().unread).to.eql(Number(pm.collectionVariables.get('unreadBefore')) - 1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách: đọc tất cả",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/read-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "read-all"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Không còn chưa đọc', () => pm.expect(pm.response.json().unread).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Khách: sau khi đọc tất cả",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/unread-count",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "unread-count"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('0 chưa đọc', () => pm.expect(pm.response.json().unread).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin: có thông báo đơn mới",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/api/notifications?page_size=50",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "page_size",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const c = pm.response.json().content;",
+                  "const placed = c.find(n => n.type === 'ORDER_PLACED');",
+                  "pm.test('Có ORDER_PLACED kèm mã đơn + số tiền', () => { pm.expect(placed).to.exist; pm.expect(placed.data.orderCode).to.be.a('string'); pm.expect(placed.data.total).to.be.a('number'); });",
+                  "pm.test('Bấm vào mở trang chi tiết đơn của admin', () => pm.expect(placed.link).to.match(/^\\/admin\\/orders\\/.+/));",
+                  "pm.test('Có CTV mới chờ duyệt và yêu cầu rút tiền', () => { pm.expect(c.some(n => n.type === 'AFFILIATE_APPLIED')).to.be.true; pm.expect(c.some(n => n.type === 'PAYOUT_REQUESTED')).to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin: đọc tất cả",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/api/notifications/read-all",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "read-all"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Không còn chưa đọc', () => pm.expect(pm.response.json().unread).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CTV: có thông báo hoa hồng và duyệt hồ sơ",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ctvUrl}}/api/notifications?page_size=50",
+              "host": [
+                "{{ctvUrl}}"
+              ],
+              "path": [
+                "api",
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "page_size",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const c = pm.response.json().content;",
+                  "pm.test('Có COMMISSION_EARNED kèm mã đơn + số tiền', () => { const e = c.find(n => n.type === 'COMMISSION_EARNED'); pm.expect(e).to.exist; pm.expect(e.data.orderCode).to.be.a('string'); pm.expect(e.data.amount).to.be.a('number'); });",
+                  "pm.test('Có AFFILIATE_APPROVED', () => pm.expect(c.some(n => n.type === 'AFFILIATE_APPROVED')).to.be.true);",
+                  "pm.test('Có thông báo rút tiền được duyệt / chi trả', () => pm.expect(c.some(n => n.type === 'PAYOUT_APPROVED' || n.type === 'PAYOUT_PAID')).to.be.true);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "15. Admin – nhật ký & đơn chuyển khoản quá hạn",
       "item": [
         {
           "name": "Nhật ký: chi trả rút tiền",
@@ -7860,7 +8182,7 @@
       ]
     },
     {
-      "name": "15. Admin – khóa / mở khóa CTV",
+      "name": "16. Admin – khóa / mở khóa CTV",
       "item": [
         {
           "name": "Tạm khóa CTV",
@@ -8150,7 +8472,7 @@
       ]
     },
     {
-      "name": "16. Admin – tài khoản quản trị & đăng nhập 2 bước",
+      "name": "17. Admin – tài khoản quản trị & đăng nhập 2 bước",
       "item": [
         {
           "name": "Đăng nhập admin/admin (dev, miễn OTP)",
@@ -8798,7 +9120,7 @@
       ]
     },
     {
-      "name": "17. Phân quyền & đăng xuất",
+      "name": "18. Phân quyền & đăng xuất",
       "item": [
         {
           "name": "Khách gọi API admin → 403",
@@ -8915,6 +9237,37 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Thông báo sau đăng xuất → 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/unread-count",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "unread-count"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));",
+                  "pm.test('code = UNAUTHORIZED', () => pm.expect(pm.response.json().messageCode).to.eql('UNAUTHORIZED'));"
                 ]
               }
             }
@@ -9130,6 +9483,14 @@
     },
     {
       "key": "myReviewId",
+      "value": ""
+    },
+    {
+      "key": "unreadBefore",
+      "value": ""
+    },
+    {
+      "key": "notiId",
       "value": ""
     }
   ]

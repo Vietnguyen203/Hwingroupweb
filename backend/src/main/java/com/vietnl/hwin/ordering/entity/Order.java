@@ -5,6 +5,7 @@ import com.vietnl.hwin.ordering.entity.event.OrderReturnedEvent;
 import com.vietnl.hwin.ordering.entity.event.OrderDeliveredEvent;
 import com.vietnl.hwin.ordering.entity.event.OrderCompletedEvent;
 import com.vietnl.hwin.ordering.entity.event.OrderConfirmedEvent;
+import com.vietnl.hwin.ordering.entity.event.OrderShippedEvent;
 import com.vietnl.hwin.ordering.entity.event.OrderCancelledEvent;
 import com.vietnl.hwin.ordering.entity.event.OrderItemSnapshot;
 import java.util.Map;
@@ -210,6 +211,7 @@ public class Order extends AggregateRoot<Order> {
         requireStatus(Set.of(OrderStatus.CONFIRMED), "giao cho vận chuyển");
         transition(OrderStatus.SHIPPING, actorId, null, now);
         this.shippedAt = now;
+        registerEvent(new OrderShippedEvent(UUID.randomUUID(), now, id, orderCode, customerId));
     }
 
     /** Giao thành công. Đơn COD coi như đã thu tiền. */

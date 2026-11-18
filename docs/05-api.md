@@ -143,6 +143,41 @@
 | POST | `/api/admin/payouts/{id}/pay` | ADMIN | `{transactionRef}` → PAID |
 | POST | `/api/admin/payouts/{id}/reject` | ADMIN | `{reason}` → REJECTED (tiền tự trở lại số dư) |
 
+## notification
+
+Thông báo trong ứng dụng (chuông). Mọi vai trò đã đăng nhập đều dùng được; luôn theo `userId` trong token, KHÔNG nhận `userId` từ client.
+Backend chỉ trả `type` (enum `NotificationType`) + `data`; giao diện dịch sang tiếng Việt theo `type`.
+
+| Method | Path | Quyền | Mô tả |
+|---|---|---|---|
+| GET | `/api/notifications` | đăng nhập | Phân trang `page` (từ 1), `page_size` (≤ 50), `unread=true` chỉ lấy chưa đọc. Mỗi dòng: `{id, type, data, link, createdAt, read}`, mới nhất trước |
+| GET | `/api/notifications/unread-count` | đăng nhập | `{unread}` |
+| POST | `/api/notifications/{id}/read` | đăng nhập | Đánh dấu đã đọc (chỉ thông báo của mình) → `{unread}` |
+| POST | `/api/notifications/read-all` | đăng nhập | Đánh dấu đã đọc tất cả → `{unread}` |
+| WS | `/api/realtime` | đăng nhập (cookie `hwin_at`) | WebSocket đẩy tin xuống trình duyệt. Chưa đăng nhập: 401; origin ngoài danh sách CORS: 403 |
+
+Tin WebSocket (JSON, chỉ server → client; client gửi chuỗi `ping` mỗi 30 giây để giữ kết nối):
+
+| `type` | Nội dung |
+|---|---|
+| `hello` | Vừa kết nối (client tải lại số chưa đọc phòng lỡ tin lúc mất kết nối) |
+| `notification` | `{notification: {id, type, data, link, createdAt, read}, unreadCount}` – có thông báo mới |
+| `unread` | `{unreadCount}` – số chưa đọc đổi (đọc ở tab khác) |
+| `pong` | Trả lời `ping` |
+
+Loại thông báo và người nhận:
+
+| `type` | Người nhận | `data` | Nguồn |
+|---|---|---|---|
+| `ORDER_PLACED` | tất cả admin | `orderCode, total` | `OrderPlacedEvent` |
+| `AFFILIATE_APPLIED` | tất cả admin | `fullName` | CTV gửi hồ sơ |
+| `PAYOUT_REQUESTED` | tất cả admin | `amount, fullName` | CTV yêu cầu rút tiền |
+| `ORDER_CONFIRMED` / `ORDER_SHIPPED` / `ORDER_DELIVERED` / `ORDER_RETURNED` | khách của đơn | `orderCode` | `OrderConfirmedEvent` / `OrderShippedEvent` / `OrderDeliveredEvent` / `OrderReturnedEvent` |
+| `ORDER_CANCELLED` | khách của đơn (không báo khi chính khách hủy) | `orderCode, reason` | `OrderCancelledEvent` |
+| `COMMISSION_EARNED` / `COMMISSION_APPROVED` | CTV | `orderCode, amount` | đơn qua link CTV / job duyệt hoa hồng |
+| `PAYOUT_APPROVED` / `PAYOUT_PAID` / `PAYOUT_REJECTED` | CTV | `amount` | admin xử lý yêu cầu rút |
+| `AFFILIATE_APPROVED` / `AFFILIATE_REJECTED` | người đăng ký CTV | `reason?` | admin duyệt / từ chối hồ sơ |
+
 ## Chỉ có ở profile dev
 
 | Method | Path | Mô tả |

@@ -170,3 +170,18 @@
 .animate-cart-pop {
   animation: cart-bounce 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+
+/* Chuông thông báo lắc khi có thông báo mới */
+@keyframes bell-ring {
+  0%, 100% { transform: rotate(0); }
+  15% { transform: rotate(16deg); }
+  30% { transform: rotate(-14deg); }
+  45% { transform: rotate(10deg); }
+  60% { transform: rotate(-8deg); }
+  75% { transform: rotate(4deg); }
+}
+
+.animate-bell-ring {
+  transform-origin: 50% 0;
+  animation: bell-ring 0.8s ease-in-out;
+}

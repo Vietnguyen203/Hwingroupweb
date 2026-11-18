@@ -493,9 +493,30 @@ erDiagram
 - `audit.audit_logs` **chỉ ghi thêm**: trigger `BEFORE UPDATE OR DELETE … RAISE EXCEPTION`, và user ứng dụng chỉ có quyền `INSERT, SELECT`.
 - `public.event_publication`: bảng chuẩn của Spring Modulith (cột chính xác theo phiên bản Modulith 2.x, tạo bằng Flyway).
 
+
 ---
 
-## 7. Tổng hợp tham chiếu xuyên schema (chỉ ID, KHÔNG FK)
+## 7. Schema `notification`
+
+Thông báo trong ứng dụng (module shared kernel `common.notification`), migration `V7_001`.
+
+| Bảng `notification.notifications` | Kiểu | Ghi chú |
+|---|---|---|
+| `id` | uuid PK | |
+| `recipient_id` | uuid | `identity.user_accounts.id` – chỉ ID, KHÔNG FK |
+| `type` | varchar(40) | `NotificationType` (ORDER_PLACED, ORDER_SHIPPED, COMMISSION_EARNED...) |
+| `data` | jsonb | Dữ liệu điền vào câu (mã đơn, số tiền...); câu tiếng Việt dựng ở giao diện |
+| `link` | varchar(200) | Đường dẫn giao diện mở ra khi bấm |
+| `dedupe_key` | varchar(120) | Chống trùng khi sự kiện bị xử lý lại; unique theo (`recipient_id`, `dedupe_key`) |
+| `created_at` | timestamptz | |
+| `read_at` | timestamptz | null = chưa đọc |
+
+Index: `(recipient_id, created_at desc, id desc)` cho danh sách, `(recipient_id) where read_at is null` cho đếm chưa đọc.
+Job dọn mỗi ngày 03:20: xóa thông báo đã đọc quá 30 ngày hoặc bất kỳ thông báo nào quá 90 ngày.
+
+---
+
+## 8. Tổng hợp tham chiếu xuyên schema (chỉ ID, KHÔNG FK)
 
 | Cột | Trỏ tới | Tính nhất quán đảm bảo bởi |
 |---|---|---|

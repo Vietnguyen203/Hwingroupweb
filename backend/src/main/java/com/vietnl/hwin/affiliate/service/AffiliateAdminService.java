@@ -7,6 +7,7 @@ import com.vietnl.hwin.common.exception.ResponseException;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -24,6 +25,8 @@ import com.vietnl.hwin.affiliate.entity.AffiliateStatus;
 import com.vietnl.hwin.affiliate.entity.ReferralCode;
 import com.vietnl.hwin.affiliate.repository.AffiliateRepository;
 import com.vietnl.hwin.common.audit.AuditLogger;
+import com.vietnl.hwin.common.notification.NotificationService;
+import com.vietnl.hwin.common.notification.NotificationType;
 import com.vietnl.hwin.common.domain.PhoneNumber;
 
 /** Admin duyệt / từ chối / tạm khóa / mở khóa CTV. */
@@ -32,12 +35,15 @@ public class AffiliateAdminService {
 
     private final AffiliateRepository affiliates;
     private final AuditLogger audit;
+    private final NotificationService notifications;
     private final PrivateFileStore files;
     private final Clock clock;
 
-    public AffiliateAdminService(AffiliateRepository affiliates, AuditLogger audit, PrivateFileStore files, Clock clock) {
+    public AffiliateAdminService(AffiliateRepository affiliates, AuditLogger audit, NotificationService notifications,
+                                 PrivateFileStore files, Clock clock) {
         this.affiliates = affiliates;
         this.audit = audit;
+        this.notifications = notifications;
         this.files = files;
         this.clock = clock;
     }
@@ -78,6 +84,7 @@ public class AffiliateAdminService {
         a.approve(uniqueCode(), adminId, clock.instant());
         audit.log("affiliate", "Affiliate", id, "AFFILIATE_APPROVED", adminId, null,
                 "{\"referralCode\":\"" + a.getReferralCode() + "\"}");
+        notifications.notifyUser(a.getUserId(), NotificationType.AFFILIATE_APPROVED, Map.of(), "/affiliate", null);
         return mapper.apply(affiliates.save(a));
     }
 
@@ -85,6 +92,8 @@ public class AffiliateAdminService {
     public <T> T reject(UUID id, String reason, UUID adminId, Function<Affiliate, T> mapper) {
         Affiliate a = load(id);
         a.reject(reason, adminId, clock.instant());
+        notifications.notifyUser(a.getUserId(), NotificationType.AFFILIATE_REJECTED,
+                reason == null || reason.isBlank() ? Map.of() : Map.of("reason", reason), "/affiliate", null);
         return mapper.apply(affiliates.save(a));
     }
 

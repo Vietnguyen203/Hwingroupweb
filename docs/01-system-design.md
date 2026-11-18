@@ -406,3 +406,20 @@ hwin:
 | Mã giao dịch chuyển khoản | `transactionRef` | |
 | Tài khoản ngân hàng | `BankAccount` | Mã hóa AES-GCM |
 | Nhật ký kiểm toán | `AuditLog` | Chỉ ghi thêm |
+
+---
+
+## 9. Thông báo thời gian thực (chuông thông báo + WebSocket)
+
+- **Gửi:** module nghiệp vụ gọi `NotificationService.notifyUser / notifyAdmins` (shared kernel `common.notification`, cùng kiểu với `AuditLogger`).
+  Việc ghi DB + đẩy tin chạy **sau khi transaction của người gọi commit** (rollback thì không có thông báo ma), trong transaction riêng,
+  lỗi chỉ ghi log và không làm hỏng nghiệp vụ. Sự kiện bị xử lý lại không tạo trùng nhờ `dedupe_key`.
+- **Nguồn:** đơn hàng nghe domain event của chính module (`OrderNotificationEventListener`, có thêm `OrderShippedEvent`);
+  CTV / hoa hồng / rút tiền gọi trực tiếp trong service và job của module `affiliate`. Danh sách admin lấy qua interface `AdminDirectory` (identity cài đặt).
+- **Đẩy:** `RealtimeHub` giữ các kết nối WebSocket theo người dùng (tối đa 8 tab / người), endpoint `/api/realtime`
+  xác thực bằng cookie `hwin_at` qua bộ lọc Spring Security, kiểm tra origin theo danh sách CORS. Frontend gọi cùng tên miền nên đi qua rewrite `/api/*` của Next.js.
+- **Ngôn ngữ:** backend chỉ gửi `type` + `data`; giao diện dịch sang tiếng Việt, chọn biểu tượng và đường dẫn theo `type` (`frontend/src/lib/notifications.ts`).
+- **Giao diện:** `NotificationBell` (header cửa hàng + thanh admin) hiện số chưa đọc và bảng danh sách, đánh dấu đã đọc; `RealtimeProvider` giữ kết nối
+  (tự nối lại giãn cách; mất kết nối thì hỏi số chưa đọc mỗi 60 giây), phát âm báo (Web Audio, người dùng bật/tắt được), hiện toast,
+  tải lại dữ liệu trang đang mở và thêm số chưa đọc vào tiêu đề tab.
+- **Giới hạn:** hub chỉ nằm trong bộ nhớ một tiến trình; chạy nhiều bản backend thì cần thêm kênh chung (Redis pub/sub).
