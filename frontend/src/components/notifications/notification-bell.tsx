@@ -124,8 +124,8 @@ export function NotificationBell({ variant = "site" }: { variant?: "site" | "adm
         aria-haspopup="dialog"
         className={cn(
           "relative inline-flex shrink-0 items-center justify-center rounded-full transition hover:scale-105 active:scale-95",
-          admin ? "size-9 border border-slate-200 text-slate-600 hover:bg-slate-100" : "size-10 bg-neutral-100 text-neutral-800 hover:bg-brand-soft hover:text-brand",
-          open && (admin ? "bg-slate-100" : "bg-brand-soft text-brand"),
+          admin ? "size-9 border border-slate-200 text-slate-600 hover:bg-slate-100" : "size-10 text-gray-800 hover:bg-gray-100",
+          open && (admin ? "bg-slate-100" : "bg-gray-100"),
         )}
       >
         <Bell className={cn(admin ? "size-5" : "size-6", ringing && "animate-bell-ring")} />
