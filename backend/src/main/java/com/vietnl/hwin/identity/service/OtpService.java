@@ -95,6 +95,16 @@ public class OtpService {
 
     /** Kiểm tra OTP; đúng thì xóa (dùng 1 lần), sai thì tăng bộ đếm và có thể khóa. */
     public void verify(OtpTarget target, OtpPurpose purpose, String code) {
+        check(target, purpose, code);
+        consume(target, purpose);
+    }
+
+    /**
+     * Kiểm tra OTP nhưng CHƯA xóa: dùng khi còn bước sau có thể lỗi (VD đăng ký trùng CCCD) để người dùng sửa thông tin
+     * mà không phải xin OTP mới. Gọi {@link #consume} khi hoàn tất, hoặc {@link #countFailedUse} khi bước sau lỗi.
+     * Sai OTP vẫn tăng bộ đếm và có thể khóa như {@link #verify}.
+     */
+    public void check(OtpTarget target, OtpPurpose purpose, String code) {
         ensureNotLocked(target);
         String key = otpKey(target, purpose);
         Object stored = redis.opsForHash().get(key, FIELD_HASH);
@@ -102,7 +112,6 @@ public class OtpService {
             throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.OTP_EXPIRED);
         }
         if (code != null && Hashing.constantTimeEquals(stored.toString(), hash(target, purpose, code))) {
-            redis.delete(key);
             return;
         }
         long attempts = redis.opsForHash().increment(key, FIELD_ATTEMPTS, 1);
@@ -112,6 +121,23 @@ public class OtpService {
             throw new ResponseException(HttpStatus.TOO_MANY_REQUESTS, ExceptionMessage.OTP_LOCKED, Map.of("maxAttempts", String.valueOf(props.maxAttempts()), "lockDuration", String.valueOf(props.lockDuration().toMinutes())));
         }
         throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.OTP_INVALID, Map.of("remaining", String.valueOf((props.maxAttempts() - attempts))));
+    }
+
+    /** Xóa OTP (dùng 1 lần) sau khi hành động hoàn tất. */
+    public void consume(OtpTarget target, OtpPurpose purpose) {
+        redis.delete(otpKey(target, purpose));
+    }
+
+    /** OTP đúng nhưng bước sau thất bại: tính như 1 lần thử để chặn dò thông tin (hết lượt thì xóa OTP). */
+    public void countFailedUse(OtpTarget target, OtpPurpose purpose) {
+        String key = otpKey(target, purpose);
+        if (!Boolean.TRUE.equals(redis.hasKey(key))) {
+            return; // đã hết hạn: không tạo lại khóa không có TTL
+        }
+        long attempts = redis.opsForHash().increment(key, FIELD_ATTEMPTS, 1);
+        if (attempts >= props.maxAttempts()) {
+            redis.delete(key);
+        }
     }
 
     private OtpTarget targetOf(UUID userId) {

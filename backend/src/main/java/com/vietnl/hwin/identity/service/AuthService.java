@@ -86,8 +86,18 @@ public class AuthService {
     public IssuedTokens registerWithOtp(String rawPhone, String rawEmail, String otp, RegisterAccountCommand cmd,
                                         ClientInfo client) {
         OtpTarget target = OtpTarget.of(rawPhone, rawEmail);
-        otpService.verify(target, OtpPurpose.REGISTER, otp);
-        return tokenService.issue(userAccountService.register(target, cmd), client);
+        // OTP chỉ bị xóa khi tạo tài khoản thành công: nếu lỗi (CCCD trùng, mật khẩu yếu...) người dùng sửa rồi gửi lại
+        // với cùng OTP; mỗi lần lỗi tính 1 lần thử để không dò được thông tin hàng loạt.
+        otpService.check(target, OtpPurpose.REGISTER, otp);
+        UserAccount user;
+        try {
+            user = userAccountService.register(target, cmd);
+        } catch (ResponseException e) {
+            otpService.countFailedUse(target, OtpPurpose.REGISTER);
+            throw e;
+        }
+        otpService.consume(target, OtpPurpose.REGISTER);
+        return tokenService.issue(user, client);
     }
 
     /**
