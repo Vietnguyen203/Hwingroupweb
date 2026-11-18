@@ -1,9 +1,11 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { LayoutGrid } from "lucide-react";
 
 import { Pagination } from "@/components/pagination";
 import { ProductGrid, ProductGridSkeleton } from "@/components/product/product-card";
-import { SortTabs } from "@/components/sort-tabs";
+import { SortSelect } from "@/components/sort-select";
+import { NavSelect } from "@/components/ui/nav-select";
 import { getCategories, searchProducts } from "@/lib/catalog";
 import { parsePage, parseSort } from "@/lib/format";
 
@@ -31,21 +33,18 @@ async function CategoryContent({ params, searchParams }: PageProps<"/categories/
 
   return (
     <>
-      <div className="no-scrollbar flex gap-2 overflow-x-auto px-3 pt-4 pb-3 md:px-0">
-        {categories.map((c) => (
-          <a
-            key={c.id}
-            href={`/categories/${c.slug}`}
-            className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ring-1 transition duration-200 active:scale-95 ${c.slug === slug ? "bg-brand text-white shadow-md shadow-brand/25 ring-brand" : "bg-white text-neutral-700 ring-black/[0.08] hover:text-brand hover:ring-brand/40"}`}
-          >
-            {c.name}
-          </a>
-        ))}
-      </div>
-      <h1 className="px-3 pt-2 pb-3 text-2xl font-extrabold tracking-tight md:px-0 md:text-3xl">
+      <h1 className="px-3 pt-4 pb-3 text-2xl font-extrabold tracking-tight md:px-0 md:text-3xl">
         {category.name} <span className="ml-1 rounded-full bg-brand-soft px-2.5 py-0.5 align-middle text-sm font-bold text-brand">{result.totalElements} sản phẩm</span>
       </h1>
-      <SortTabs basePath={`/categories/${slug}`} params={{}} current={sort} />
+      <div className="flex flex-wrap items-center gap-3 px-3 pb-4 md:px-0">
+        <NavSelect
+          label="Danh mục"
+          icon={<LayoutGrid aria-hidden className="size-4" />}
+          value={slug}
+          options={categories.map((c) => ({ value: c.slug, label: `${c.name} (${c.productCount})`, href: `/categories/${c.slug}` }))}
+        />
+        <SortSelect basePath={`/categories/${slug}`} params={{}} current={sort} />
+      </div>
       <ProductGrid products={result.content} />
       <Pagination basePath={`/categories/${slug}`} params={{ sort }} page={result.page} totalPages={result.totalPages} />
     </>

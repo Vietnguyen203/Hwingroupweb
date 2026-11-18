@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { Pagination } from "@/components/pagination";
 import { ProductGrid, ProductGridSkeleton } from "@/components/product/product-card";
-import { SortTabs } from "@/components/sort-tabs";
+import { SortSelect } from "@/components/sort-select";
 import { searchProducts } from "@/lib/catalog";
 import { parsePage, parseSort } from "@/lib/format";
 
@@ -30,7 +30,9 @@ async function SearchContent({ searchParams }: PageProps<"/search">) {
         {q ? <>Kết quả cho “{q}”</> : "Tất cả sản phẩm"}{" "}
         <span className="ml-1 rounded-full bg-brand-soft px-2.5 py-0.5 align-middle text-sm font-bold text-brand">{result.totalElements}</span>
       </h1>
-      <SortTabs basePath="/search" params={{ q }} current={sort} />
+      <div className="px-3 pb-4 md:px-0">
+        <SortSelect basePath="/search" params={{ q }} current={sort} />
+      </div>
       <ProductGrid products={result.content} />
       <Pagination basePath="/search" params={{ q, sort }} page={result.page} totalPages={result.totalPages} />
     </>
