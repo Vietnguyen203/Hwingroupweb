@@ -15,7 +15,8 @@ type BannerId = "freeship" | "affiliate";
 const SHOW_ON = /^\/(?:$|(?:categories|products|search)(?:\/|$))/;
 
 /**
- * Banner dọc hai bên, chỉ có từ màn 2xl (>= 1536px) trở lên – lúc đó hai bên nội dung (max-w-6xl) có lề trống >= 192px.
+ * Banner dọc hai bên, chỉ có từ màn 2xl (>= 1536px) trở lên – lúc đó hai bên nội dung (max-w-6xl) có lề trống >= 192px;
+ * banner rộng ra theo lề (130 – 240px, xem SideBanner).
  * Nằm giữa phần lề của mỗi bên, cố định khi cuộn; chừa phía dưới (24rem tính từ đáy) cho cụm nút nổi Zalo / Hotline ở góc trái.
  * Mỗi banner có nút X để đóng (nhớ trong phiên làm việc).
  */
@@ -28,17 +29,17 @@ export function StickySideBanners() {
     <>
       {!closed.has("freeship") && (
         <SideBanner side="left" tone="from-brand-accent via-brand-red to-[#b42a05]" onClose={() => closeBanner("freeship")}>
-          <span className="fx-float flex size-12 items-center justify-center rounded-2xl bg-white/20 ring-1 ring-white/30">
-            <Truck className="size-6" />
+          <span className="fx-float flex size-12 @min-[12rem]:size-16 items-center justify-center rounded-2xl bg-white/20 ring-1 ring-white/30">
+            <Truck className="size-6 @min-[12rem]:size-8" />
           </span>
           <div>
-            <p className="text-xs font-bold tracking-widest uppercase opacity-90">Miễn phí</p>
-            <p className="text-2xl leading-none font-black uppercase">Ship</p>
-            <p className="mt-2 text-xs leading-snug text-white/85">Giao hàng giữ lạnh tận nơi cho đơn đủ điều kiện</p>
+            <p className="text-xs @min-[12rem]:text-sm font-bold tracking-widest uppercase opacity-90">Miễn phí</p>
+            <p className="text-2xl @min-[12rem]:text-5xl leading-none font-black uppercase">Ship</p>
+            <p className="mt-2 @min-[12rem]:mt-3 text-xs @min-[12rem]:text-sm leading-snug text-white/85">Giao hàng giữ lạnh tận nơi cho đơn đủ điều kiện</p>
           </div>
           <Link
             href="/search"
-            className="fx-shine inline-block rounded-full bg-white px-3.5 py-1.5 text-xs font-bold text-brand-red shadow transition hover:scale-105 active:scale-95"
+            className="fx-shine inline-block rounded-full bg-white px-3.5 py-1.5 @min-[12rem]:px-6 @min-[12rem]:py-2.5 text-xs @min-[12rem]:text-sm font-bold text-brand-red shadow transition hover:scale-105 active:scale-95"
           >
             Mua ngay
           </Link>
@@ -47,17 +48,17 @@ export function StickySideBanners() {
 
       {!closed.has("affiliate") && (
         <SideBanner side="right" tone="from-brand via-brand-dark to-brand-deep" onClose={() => closeBanner("affiliate")}>
-          <span className="fx-float flex size-12 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25">
-            <HandCoins className="size-6 text-brand-accent" />
+          <span className="fx-float flex size-12 @min-[12rem]:size-16 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25">
+            <HandCoins className="size-6 @min-[12rem]:size-8 text-brand-accent" />
           </span>
           <div>
-            <p className="text-xs font-bold tracking-widest text-brand-accent uppercase">Cộng tác viên</p>
-            <p className="text-3xl leading-none font-black">{Math.round(siteConfig.commissionRate * 100)}%</p>
-            <p className="mt-2 text-xs leading-snug text-white/85">Hoa hồng cho mỗi đơn giao thành công</p>
+            <p className="text-xs @min-[12rem]:text-sm font-bold tracking-widest text-brand-accent uppercase">Cộng tác viên</p>
+            <p className="text-3xl @min-[12rem]:text-6xl leading-none font-black">{Math.round(siteConfig.commissionRate * 100)}%</p>
+            <p className="mt-2 @min-[12rem]:mt-3 text-xs @min-[12rem]:text-sm leading-snug text-white/85">Hoa hồng cho mỗi đơn giao thành công</p>
           </div>
           <AffiliateJoinLink
             guestLabel="Đăng ký CTV"
-            className="fx-shine inline-block rounded-full bg-brand-accent px-3.5 py-1.5 text-xs font-extrabold text-neutral-950 shadow transition hover:scale-105 active:scale-95"
+            className="fx-shine inline-block rounded-full bg-brand-accent px-3.5 py-1.5 @min-[12rem]:px-6 @min-[12rem]:py-2.5 text-xs @min-[12rem]:text-sm font-extrabold text-neutral-950 shadow transition hover:scale-105 active:scale-95"
           />
         </SideBanner>
       )}
@@ -66,9 +67,12 @@ export function StickySideBanners() {
 }
 
 /**
- * Khung banner 130 x 340. Căn giữa trong phần lề trống bên trái / phải của nội dung:
- * lề = 50% - 36rem (nửa của max-w-6xl) nên vị trí = (lề - rộng banner) / 2.
+ * Rộng banner = lề trống của nội dung (50% - 36rem, nửa của max-w-6xl) trừ 24px mỗi bên, giữ trong khoảng 130 – 240px:
+ * màn 1536px rộng 144px, màn 1920px rộng 240px. Cao theo tỉ lệ 13:34, thấp hơn khi màn thấp (chừa chỗ cho nút nổi Zalo / Hotline).
+ * Căn giữa trong phần lề: vị trí = (lề - rộng banner) / 2. Là container nên chữ, icon, nút to lên khi banner đủ rộng (>= 12rem).
  */
+const BANNER_WIDTH = "clamp(130px, calc(50% - 39rem), 240px)";
+
 function SideBanner({
   side,
   tone,
@@ -83,23 +87,23 @@ function SideBanner({
   return (
     <aside
       aria-label="Khuyến mãi"
-      style={{ [side]: "calc((50% - 36rem - 130px) / 2)" }}
-      className="fixed top-48 z-30 hidden h-[340px] max-h-[calc(100dvh-24rem)] w-[130px] 2xl:flex"
+      style={{ "--bw": BANNER_WIDTH, width: "var(--bw)", [side]: "calc((50% - 36rem - var(--bw)) / 2)" } as React.CSSProperties}
+      className="@container fixed top-48 z-30 hidden aspect-[13/34] max-h-[calc(100dvh-24rem)] 2xl:flex"
     >
       <div
         className={cn(
-          "fx-gradient-flow relative flex size-full flex-col items-center justify-between overflow-hidden rounded-2xl bg-gradient-to-b px-3 pt-8 pb-4 text-center text-white shadow-[0_14px_30px_-12px_rgb(0_0_0/0.45)] ring-1 ring-white/20 transition duration-300 ease-out-expo hover:-translate-y-1",
+          "fx-gradient-flow relative flex w-full flex-col items-center justify-between overflow-hidden rounded-2xl @min-[12rem]:rounded-3xl bg-gradient-to-b px-3 @min-[12rem]:px-5 pt-8 @min-[12rem]:pt-12 pb-4 @min-[12rem]:pb-7 text-center text-white shadow-[0_14px_30px_-12px_rgb(0_0_0/0.45)] ring-1 ring-white/20 transition duration-300 ease-out-expo hover:-translate-y-1",
           tone,
         )}
       >
-        <span aria-hidden className="pointer-events-none absolute -top-10 -right-10 size-32 rounded-full bg-white/15 blur-2xl" />
+        <span aria-hidden className="pointer-events-none absolute -top-10 -right-10 size-32 @min-[12rem]:size-48 rounded-full bg-white/15 blur-2xl" />
         <button
           type="button"
           onClick={onClose}
           aria-label="Đóng banner"
-          className="absolute top-1.5 right-1.5 z-10 flex size-5 items-center justify-center rounded-full bg-black/25 text-white/90 transition hover:bg-black/50 hover:text-white"
+          className="absolute top-1.5 right-1.5 @min-[12rem]:top-2.5 @min-[12rem]:right-2.5 z-10 flex size-5 @min-[12rem]:size-7 items-center justify-center rounded-full bg-black/25 text-white/90 transition hover:bg-black/50 hover:text-white"
         >
-          <X className="size-3" />
+          <X className="size-3 @min-[12rem]:size-4" />
         </button>
         {children}
       </div>
