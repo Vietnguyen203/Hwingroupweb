@@ -37,7 +37,7 @@ export function SiteFooter() {
           <FooterCol title="Chính sách & Pháp lý" links={[
             ["Giấy chứng nhận VSATTP", "/chinh-sach?tab=vsattp"],
             ["Chính sách đổi trả 7 ngày", "/chinh-sach?tab=doi-tra"],
-            ["Chính sách bảo mật (NĐ 13)", "/chinh-sach?tab=bao-mat"],
+            ["Chính sách bảo mật", "/chinh-sach?tab=bao-mat"],
             ["Kiểm hàng & Vận chuyển", "/chinh-sach?tab=kiem-hang"],
             ["Điều khoản giao dịch TMĐT", "/chinh-sach?tab=dieu-khoan"],
           ]} />

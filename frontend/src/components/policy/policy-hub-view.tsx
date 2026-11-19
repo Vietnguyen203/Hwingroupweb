@@ -24,7 +24,7 @@ type TabKey = "vsattp" | "bao-mat" | "doi-tra" | "kiem-hang" | "dieu-khoan";
 
 const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { key: "vsattp", label: "Chứng nhận VSATTP & Kiểm định", icon: Award },
-  { key: "bao-mat", label: "Chính sách bảo mật (NĐ 13)", icon: Lock },
+  { key: "bao-mat", label: "Chính sách bảo mật", icon: Lock },
   { key: "doi-tra", label: "Chính sách đổi trả 7 ngày", icon: RotateCcw },
   { key: "kiem-hang", label: "Kiểm hàng & Vận chuyển", icon: Truck },
   { key: "dieu-khoan", label: "Điều khoản giao dịch TMĐT", icon: Scale },
