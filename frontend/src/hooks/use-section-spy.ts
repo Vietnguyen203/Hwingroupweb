@@ -6,17 +6,26 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const READING_BAND_BOTTOM = "-65%";
 /** Sau khi bấm nhảy tới mục, bỏ qua IntersectionObserver trong lúc trang đang cuộn (tránh tab nhấp nháy qua các mục đi ngang). */
 const JUMP_LOCK_MS = 1500;
+/** Khoảng hở (px) giữa thanh dính và đầu mục sau khi nhảy tới. */
+const JUMP_GAP = 8;
 
 /**
  * Theo dõi các mục (theo id) trên trang:
  * - present: id nào đang có thật trong DOM (mục có điều kiện như Combo có thể không có; mục về trễ do streaming sẽ tự được thêm vào).
  * - active: mục đang được xem, tính bằng IntersectionObserver.
- * - jump(id): cuộn mượt tới mục (tôn trọng "giảm chuyển động") và đặt active ngay.
+ * - jump(id): cuộn mượt tới mục (tôn trọng "giảm chuyển động") và đặt active ngay. Vị trí cuộn do JS tự tính từ chiều cao
+ *   thanh dính đo trực tiếp lúc bấm (không dựa vào CSS scroll-margin) để tiêu đề của mục luôn nằm dưới thanh, không bị che.
  *
- * `ids` phải là mảng cố định (hằng số ở module); `topOffset` là chiều cao các thanh dính phía trên (px).
+ * `ids` phải là mảng cố định (hằng số ở module); `topOffset` là chiều cao các thanh dính phía trên (px) dùng cho dải "đang đọc";
+ * `measureTopOffset` đo lại đúng chiều cao đó ngay lúc bấm.
  * `alwaysPresent`: id chắc chắn có – hiện ngay từ lần render đầu (khớp HTML server); id còn lại chỉ hiện khi tìm thấy trong DOM.
  */
-export function useSectionSpy(ids: readonly string[], alwaysPresent: readonly string[], topOffset: number) {
+export function useSectionSpy(
+  ids: readonly string[],
+  alwaysPresent: readonly string[],
+  topOffset: number,
+  measureTopOffset: () => number,
+) {
   const [present, setPresent] = useState<readonly string[]>(alwaysPresent);
   const [active, setActive] = useState<string | null>(null);
   const lockUntil = useRef(0);
@@ -60,17 +69,30 @@ export function useSectionSpy(ids: readonly string[], alwaysPresent: readonly st
     return () => io.disconnect();
   }, [present, topOffset]);
 
-  const jump = useCallback((id: string) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    lockUntil.current = performance.now() + JUMP_LOCK_MS;
-    setActive(id);
-    // scrollIntoView tôn trọng scroll-margin-top (.scroll-mt-sticky) nên mục không bị thanh dính che
-    el.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
-    // Cuộn xong thì mở khóa sớm (trình duyệt hỗ trợ scrollend), nếu không thì hết JUMP_LOCK_MS tự mở
-    window.addEventListener("scrollend", () => (lockUntil.current = 0), { once: true });
-  }, []);
+  const jump = useCallback(
+    (id: string) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      // Đầu mục nằm ngay dưới thanh dính (+ JUMP_GAP); phần đệm của tiêu đề mục làm tiêu đề hiện rõ bên dưới
+      const targetTop = () => el.getBoundingClientRect().top + window.scrollY - measureTopOffset() - JUMP_GAP;
+
+      lockUntil.current = performance.now() + JUMP_LOCK_MS;
+      setActive(id);
+      window.scrollTo({ top: targetTop(), behavior: reduced ? "auto" : "smooth" });
+      // Cuộn xong thì mở khóa sớm (trình duyệt hỗ trợ scrollend; nếu không thì hết JUMP_LOCK_MS tự mở)
+      // và nếu bố cục đổi giữa chừng (ảnh tải xong…) làm lệch thì cuộn bù một lần.
+      window.addEventListener(
+        "scrollend",
+        () => {
+          lockUntil.current = 0;
+          if (Math.abs(targetTop() - window.scrollY) > 3) window.scrollTo({ top: targetTop(), behavior: "auto" });
+        },
+        { once: true },
+      );
+    },
+    [measureTopOffset],
+  );
 
   return { present, active, jump };
 }

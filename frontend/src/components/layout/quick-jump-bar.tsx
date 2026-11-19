@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Flame, Gift, HandCoins, LayoutGrid, ShieldCheck, Sparkles, Zap, type LucideIcon } from "lucide-react";
@@ -42,7 +42,7 @@ export interface QuickJumpBarProps {
 export function QuickJumpBar({ hasCategories = false, loading = false, children }: QuickJumpBarProps) {
   const isHome = usePathname() === "/";
   const navRef = useRef<HTMLElement>(null);
-  const stickyHeight = useStickyOffsets(navRef, isHome);
+  const { stickyHeight, measureStack } = useStickyOffsets(navRef, isHome);
 
   if (!isHome && !hasCategories) {
     return loading ? <div className="hidden h-[3.25rem] border-b border-gray-100 bg-white md:block" aria-hidden /> : null;
@@ -70,7 +70,7 @@ export function QuickJumpBar({ hasCategories = false, loading = false, children 
           <LayoutGrid className="size-4" /> Tất cả
         </Link>
 
-        {isHome ? <HomeTabs topOffset={stickyHeight} /> : children}
+        {isHome ? <HomeTabs topOffset={stickyHeight} measureTopOffset={measureStack} /> : children}
 
         <Link
           href="/search?sort=PRICE_ASC"
@@ -84,8 +84,8 @@ export function QuickJumpBar({ hasCategories = false, loading = false, children 
 }
 
 /** Các tab nhảy tới khối trang chủ + tô sáng khối đang xem (IntersectionObserver, xem useSectionSpy). */
-function HomeTabs({ topOffset }: { topOffset: number }) {
-  const { present, active, jump } = useSectionSpy(ALL_IDS, ALWAYS_IDS, topOffset);
+function HomeTabs({ topOffset, measureTopOffset }: { topOffset: number; measureTopOffset: () => number }) {
+  const { present, active, jump } = useSectionSpy(ALL_IDS, ALWAYS_IDS, topOffset, measureTopOffset);
   const listRef = useRef<HTMLUListElement>(null);
 
   // Tab đang sáng được đưa vào giữa hàng (khi hàng phải trượt ngang, ví dụ trên điện thoại)
@@ -129,10 +129,16 @@ function HomeTabs({ topOffset }: { topOffset: number }) {
 
 /**
  * Đo chiều cao header và header + thanh này, ghi ra biến CSS để định vị thanh dính và chừa chỗ khi cuộn tới mục:
- * --header-h (đặt `top` cho thanh này), --sticky-h (dùng trong .scroll-mt-sticky). Trả về --sticky-h để tính dải "đang đọc".
+ * --header-h (đặt `top` cho thanh này), --sticky-h (dùng trong .scroll-mt-sticky cho liên kết #id khi chưa có JS).
+ * Trả về stickyHeight (để tính dải "đang đọc") và measureStack (đo lại tức thì khi bấm tab, không phụ thuộc CSS).
  */
 function useStickyOffsets(navRef: React.RefObject<HTMLElement | null>, enabled: boolean) {
   const [stickyHeight, setStickyHeight] = useState(0);
+
+  const measureStack = useCallback(() => {
+    const header = document.querySelector<HTMLElement>("[data-site-header]");
+    return (header?.offsetHeight ?? 0) + (navRef.current?.offsetHeight ?? 0);
+  }, [navRef]);
 
   useEffect(() => {
     const nav = navRef.current;
@@ -141,9 +147,8 @@ function useStickyOffsets(navRef: React.RefObject<HTMLElement | null>, enabled: 
 
     const root = document.documentElement;
     const measure = () => {
-      const headerHeight = header.offsetHeight;
-      const total = headerHeight + nav.offsetHeight;
-      root.style.setProperty("--header-h", `${headerHeight}px`);
+      const total = measureStack();
+      root.style.setProperty("--header-h", `${header.offsetHeight}px`);
       root.style.setProperty("--sticky-h", `${total}px`);
       setStickyHeight(total);
     };
@@ -151,7 +156,7 @@ function useStickyOffsets(navRef: React.RefObject<HTMLElement | null>, enabled: 
     ro.observe(header);
     ro.observe(nav);
     return () => ro.disconnect();
-  }, [enabled, navRef]);
+  }, [enabled, navRef, measureStack]);
 
-  return stickyHeight;
+  return { stickyHeight, measureStack };
 }
