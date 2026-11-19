@@ -9,7 +9,7 @@ import type { ProductCardResponse } from "@/lib/types";
 export function SaleStrip({ products }: { products: ProductCardResponse[] }) {
   if (products.length === 0) return null;
   return (
-    <section className="fx-gradient-flow relative mx-3 mt-10 overflow-hidden rounded-3xl bg-gradient-to-br from-[#b42a05] via-brand-red to-brand-accent p-3 shadow-[0_18px_40px_-14px_rgb(214_54_10/0.55)] md:mx-0 md:p-6">
+    <section id="on-sale" className="scroll-mt-sticky fx-gradient-flow relative mx-3 mt-10 overflow-hidden rounded-3xl bg-gradient-to-br from-[#b42a05] via-brand-red to-brand-accent p-3 shadow-[0_18px_40px_-14px_rgb(214_54_10/0.55)] md:mx-0 md:p-6">
       <span aria-hidden className="pointer-events-none absolute -top-20 -right-10 size-72 rounded-full bg-white/15 blur-3xl" />
       <div className="relative flex items-center justify-between px-1 pb-3 text-white md:pb-5">
         <h2 className="flex items-center gap-2 text-lg font-black tracking-tight uppercase md:text-3xl">

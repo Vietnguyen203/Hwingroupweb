@@ -183,6 +183,9 @@
     scroll-behavior: auto !important;
   }
 }
+/* Mục trang chủ mà thanh "đi nhanh" cuộn tới: chừa chỗ cho header + thanh dính (--sticky-h do QuickJumpBar đo) */
+.scroll-mt-sticky { scroll-margin-top: calc(var(--sticky-h, 8rem) + 0.5rem); }
+
 /* Ẩn thanh cuộn ngang của các hàng trượt trên mobile */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }

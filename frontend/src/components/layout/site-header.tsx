@@ -11,6 +11,7 @@ import { AffiliateCta } from "./affiliate-cta";
 import { CartButton } from "./cart-button";
 import { CategoryNav } from "./category-nav";
 import { MobileMenu } from "./mobile-menu";
+import { QuickJumpBar } from "./quick-jump-bar";
 
 /**
  * SiteHeader đồng bộ chuẩn hệ màu thương hiệu HWIN:
@@ -26,7 +27,8 @@ import { MobileMenu } from "./mobile-menu";
  *    - Đăng ký CTV: Icon + chữ đồng bộ màu brand
  *    - Tài khoản: Icon + chữ
  *    - Giỏ hàng: Icon + badge đỏ + chữ
- * 3. CategoryNav: Dòng danh mục cuộn ngang dùng chung token màu brand-soft / brand.
+ * 3. CategoryNav / QuickJumpBar: dòng danh mục cuộn ngang dùng chung token màu brand-soft / brand;
+ *    ở trang chủ là thanh dính dưới header, bấm để nhảy tới từng khối của trang.
  */
 export function SiteHeader() {
   return (
@@ -55,7 +57,7 @@ export function SiteHeader() {
       </div>
 
       {/* 2. MAIN HEADER NỀN TRẮNG */}
-      <header className="sticky top-0 z-40 w-full border-b border-neutral-100 bg-white/95 shadow-xs backdrop-blur-md">
+      <header data-site-header className="sticky top-0 z-40 w-full border-b border-neutral-100 bg-white/95 shadow-xs backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
           {/* Logo thương hiệu + Slogan */}
           <div className="flex shrink-0 items-center gap-3">
@@ -127,8 +129,15 @@ export function SiteHeader() {
         </div>
       </header>
 
-      {/* 3. Dòng danh mục cuộn ngang (đã đồng bộ cùng màu brand) */}
-      <Suspense fallback={<div className="hidden h-[3.25rem] border-b border-gray-100 bg-white md:block" aria-hidden />}>
+      {/* 3. Hàng danh mục cuộn ngang; ở trang chủ là thanh "đi nhanh" dính dưới header (xem QuickJumpBar) */}
+      {/* Fallback dùng usePathname nên phải nằm trong Suspense riêng; trang động chưa biết đường dẫn thì giữ chỗ bằng khung tĩnh */}
+      <Suspense
+        fallback={
+          <Suspense fallback={<div className="hidden h-[3.25rem] border-b border-gray-100 bg-white md:block" aria-hidden />}>
+            <QuickJumpBar loading />
+          </Suspense>
+        }
+      >
         <CategoryNav />
       </Suspense>
     </>

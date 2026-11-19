@@ -16,6 +16,8 @@ import { cn } from "@/lib/utils";
  * Trang chủ (bố cục theo hwingroup.com), ưu tiên mua sắm:
  * banner – ô truy cập nhanh – danh mục – đang giảm giá – combo – bán chạy – khối CTV – sản phẩm mới – vì sao chọn HWIN.
  * Web phục vụ cộng tác viên nên khối CTV nằm giữa trang (sau các món bán chạy), không bị đẩy xuống cuối.
+ * Mỗi khối có `id` để thanh "đi nhanh" dưới header (QuickJumpBar) nhảy tới: categories, on-sale, combos, bestsellers,
+ * affiliate, newest, why-hwin. Thêm / đổi khối thì sửa danh sách HOME_SECTIONS ở quick-jump-bar.tsx cho khớp.
  */
 export default function HomePage() {
   return (
@@ -25,10 +27,12 @@ export default function HomePage() {
       </Suspense>
       <QuickTiles />
 
-      <SectionTitle title="Danh mục sản phẩm" />
-      <Suspense fallback={<div className="mx-3 h-40 animate-pulse rounded-xl bg-neutral-200 md:mx-0" />}>
-        <Categories />
-      </Suspense>
+      <section id="categories" className="scroll-mt-sticky">
+        <SectionTitle title="Danh mục sản phẩm" />
+        <Suspense fallback={<div className="mx-3 h-40 animate-pulse rounded-xl bg-neutral-200 md:mx-0" />}>
+          <Categories />
+        </Suspense>
+      </section>
 
       <Suspense fallback={<div className="mx-3 mt-8 h-72 animate-pulse rounded-2xl bg-neutral-200 md:mx-0" />}>
         <OnSale />
@@ -39,20 +43,26 @@ export default function HomePage() {
         <Combos />
       </Suspense>
 
-      <SectionTitle title="Bán chạy" href="/search?sort=BESTSELLER" />
-      <Suspense fallback={<ProductGridSkeleton />}>
-        <Bestsellers />
-      </Suspense>
+      <section id="bestsellers" className="scroll-mt-sticky">
+        <SectionTitle title="Bán chạy" href="/search?sort=BESTSELLER" />
+        <Suspense fallback={<ProductGridSkeleton />}>
+          <Bestsellers />
+        </Suspense>
+      </section>
 
       <AffiliateBanner />
 
-      <SectionTitle title="Sản phẩm mới" href="/search" />
-      <Suspense fallback={<ProductGridSkeleton />}>
-        <Newest />
-      </Suspense>
+      <section id="newest" className="scroll-mt-sticky">
+        <SectionTitle title="Sản phẩm mới" href="/search" />
+        <Suspense fallback={<ProductGridSkeleton />}>
+          <Newest />
+        </Suspense>
+      </section>
 
-      <SectionTitle title="Vì sao chọn HWIN" />
-      <WhyHwin />
+      <section id="why-hwin" className="scroll-mt-sticky">
+        <SectionTitle title="Vì sao chọn HWIN" />
+        <WhyHwin />
+      </section>
     </>
   );
 }
@@ -102,7 +112,7 @@ async function Combos() {
   }
 
   return (
-    <section>
+    <section id="combos" className="scroll-mt-sticky">
       <SectionTitle title="Combo ưu đãi" href="/search?q=combo" />
       {/* 1–2 combo: thẻ ngang nổi bật; từ 3 combo trở lên: lưới thẻ thường */}
       {products.length <= 2 ? (
