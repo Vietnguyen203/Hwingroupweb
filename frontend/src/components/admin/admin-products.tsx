@@ -418,23 +418,31 @@ export function AdminProducts() {
                   />
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
+                  {/* Bấm vào ảnh / tên sản phẩm là mở form sửa (không có nút "Sửa" riêng ở cột Thao tác). Dùng <button> để bàn phím
+                      (Tab, Enter) cũng mở được; chỉ chứa phần tử dòng (span) cho đúng HTML. */}
+                  <button
+                    type="button"
+                    onClick={() => edit(p)}
+                    aria-label={`Sửa sản phẩm ${p.name}`}
+                    title="Bấm để sửa sản phẩm"
+                    className="group/edit flex w-full cursor-pointer items-center gap-3 rounded-lg text-left outline-offset-4 focus-visible:outline-2 focus-visible:outline-brand"
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     {p.images[0] ? (
-                      <img src={p.images[0]} alt="" className="size-11 rounded-lg border object-cover shadow-2xs" />
+                      <img src={p.images[0]} alt="" className="size-11 shrink-0 rounded-lg border object-cover shadow-2xs" />
                     ) : (
-                      <div className="size-11 rounded-lg bg-slate-100 border flex items-center justify-center text-xs text-slate-400">
+                      <span className="flex size-11 shrink-0 items-center justify-center rounded-lg border bg-slate-100 text-xs text-slate-400">
                         No img
-                      </div>
+                      </span>
                     )}
-                    <div>
-                      <span className="font-semibold text-slate-800">
+                    <span className="block">
+                      <span className="font-semibold text-slate-800 transition-colors group-hover/edit:text-brand">
                         {p.name}
                         {p.bestseller && <span className="ml-1.5 text-xs text-amber-500 font-bold">★ Bán chạy</span>}
                       </span>
-                      {p.unit && <div className="text-[11px] text-slate-400">{p.unit}</div>}
-                    </div>
-                  </div>
+                      {p.unit && <span className="block text-[11px] text-slate-400">{p.unit}</span>}
+                    </span>
+                  </button>
                 </td>
                 <td className="px-4 py-3 font-semibold text-slate-800">
                   {p.salePercent > 0 ? (
@@ -463,9 +471,6 @@ export function AdminProducts() {
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="inline-flex items-center gap-1.5">
-                    <IconButton label="Sửa sản phẩm" onClick={() => edit(p)}>
-                      <Pencil className="size-4" />
-                    </IconButton>
                     <IconButton label="Đặt % giảm giá thêm (cả combo)" onClick={() => setSalePicking(p)}>
                       <BadgePercent className="size-4" />
                     </IconButton>
