@@ -24,10 +24,11 @@ import com.vietnl.hwin.catalog.entity.Category;
 import com.vietnl.hwin.catalog.entity.Product;
 import com.vietnl.hwin.catalog.repository.CategoryRepository;
 import com.vietnl.hwin.catalog.repository.ProductRepository;
+import com.vietnl.hwin.common.domain.Money;
 import com.vietnl.hwin.common.util.TextNormalizer;
 
 /**
- * Tìm kiếm sản phẩm cho web khách.
+ * Tìm kiếm sản phẩm cho web khách (từ khóa, danh mục, khoảng giá thực trả, còn hàng, đang giảm giá).
  * Không dấu: so khớp cột search_text (= f_unaccent(lower(tên + mô tả ngắn))) với f_unaccent(lower(từ khóa)),
  * từ khóa luôn được bind dạng tham số (không nối chuỗi SQL).
  */
@@ -60,6 +61,23 @@ public class ProductSearchService {
                 Predicate p = cb.like(root.get("searchText"), normalized, '\\');
                 return p;
             });
+        }
+        if (c.minPrice() != null) {
+            Money min = Money.of(c.minPrice());
+            specs.add((root, query, cb) -> cb.greaterThanOrEqualTo(root.<Money>get("effectivePrice"), min));
+        }
+        if (c.maxPrice() != null) {
+            Money max = Money.of(c.maxPrice());
+            specs.add((root, query, cb) -> cb.lessThanOrEqualTo(root.<Money>get("effectivePrice"), max));
+        }
+        if (c.inStockOnly()) {
+            specs.add((root, query, cb) -> cb.greaterThan(root.<Integer>get("stock"), 0));
+        }
+        if (c.onSaleOnly()) {
+            // khớp Product.discountPercent(): giảm thêm % hoặc giá gạch ngang cao hơn giá thực trả
+            specs.add((root, query, cb) -> cb.or(
+                    cb.greaterThan(root.<Integer>get("salePercent"), 0),
+                    cb.greaterThan(root.<Money>get("compareAtPrice"), root.<Money>get("effectivePrice"))));
         }
         PageRequest pageable = PageRequest.of(c.page(), c.size(), toSort(c));
         return products.findAll(Specification.allOf(specs), pageable).map(mapper);

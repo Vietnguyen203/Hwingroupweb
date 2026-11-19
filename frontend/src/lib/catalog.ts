@@ -57,6 +57,11 @@ export type SearchParams = {
   sort?: ProductSort;
   page?: number;
   size?: number;
+  /** Giá khách thực trả (VND), đã gồm cả mốc. */
+  minPrice?: number;
+  maxPrice?: number;
+  inStock?: boolean;
+  onSale?: boolean;
 };
 
 export async function searchProducts(params: SearchParams): Promise<PageResponse<ProductCardResponse>> {
@@ -64,6 +69,10 @@ export async function searchProducts(params: SearchParams): Promise<PageResponse
   if (params.q) qs.set("q", params.q);
   if (params.category) qs.set("category", params.category);
   if (params.sort) qs.set("sort", params.sort);
+  if (params.minPrice) qs.set("min_price", String(params.minPrice));
+  if (params.maxPrice) qs.set("max_price", String(params.maxPrice));
+  if (params.inStock) qs.set("in_stock", "true");
+  if (params.onSale) qs.set("on_sale", "true");
   qs.set("page", String((params.page ?? 0) + 1)); // API: trang bắt đầu từ 1
   qs.set("page_size", String(params.size ?? 20));
   const page = await get<PageResponse<ProductCardResponse>>(`/api/products?${qs.toString()}`);

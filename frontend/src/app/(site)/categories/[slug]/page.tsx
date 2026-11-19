@@ -3,11 +3,13 @@ import { notFound } from "next/navigation";
 import { LayoutGrid } from "lucide-react";
 
 import { Pagination } from "@/components/pagination";
+import { ProductFilterBar } from "@/components/product-filter-bar";
 import { ProductGrid, ProductGridSkeleton } from "@/components/product/product-card";
 import { SortSelect } from "@/components/sort-select";
 import { NavSelect } from "@/components/ui/nav-select";
 import { getCategories, searchProducts } from "@/lib/catalog";
 import { parsePage, parseSort } from "@/lib/format";
+import { filterParams, parseFilters } from "@/lib/product-filters";
 
 /** Trang danh mục: /c/[slug]?sort=&page= */
 export default function CategoryPage(props: PageProps<"/categories/[slug]">) {
@@ -23,10 +25,11 @@ async function CategoryContent({ params, searchParams }: PageProps<"/categories/
   const sp = await searchParams;
   const sort = parseSort(sp.sort);
   const page = parsePage(sp.page);
+  const filters = parseFilters(sp);
 
   const [categories, result] = await Promise.all([
     getCategories(),
-    searchProducts({ category: slug, sort, page, size: 20 }),
+    searchProducts({ category: slug, sort, page, size: 20, ...filters }),
   ]);
   const category = categories.find((c) => c.slug === slug);
   if (!category) notFound();
@@ -43,10 +46,11 @@ async function CategoryContent({ params, searchParams }: PageProps<"/categories/
           value={slug}
           options={categories.map((c) => ({ value: c.slug, label: `${c.name} (${c.productCount})`, href: `/categories/${c.slug}` }))}
         />
-        <SortSelect basePath={`/categories/${slug}`} params={{}} current={sort} />
+        <SortSelect basePath={`/categories/${slug}`} params={filterParams(filters)} current={sort} />
       </div>
+      <ProductFilterBar basePath={`/categories/${slug}`} params={{ sort }} filters={filters} />
       <ProductGrid products={result.content} />
-      <Pagination basePath={`/categories/${slug}`} params={{ sort }} page={result.page} totalPages={result.totalPages} />
+      <Pagination basePath={`/categories/${slug}`} params={{ sort, ...filterParams(filters) }} page={result.page} totalPages={result.totalPages} />
     </>
   );
 }

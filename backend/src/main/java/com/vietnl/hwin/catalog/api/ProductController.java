@@ -42,15 +42,22 @@ public class ProductController {
         this.mapper = mapper;
     }
 
-    /** Danh sách / tìm kiếm không dấu, lọc danh mục, sắp xếp, phân trang. */
+    /**
+     * Danh sách / tìm kiếm không dấu, lọc danh mục, khoảng giá thực trả (min_price, max_price: VND), còn hàng (in_stock),
+     * đang giảm giá (on_sale), sắp xếp, phân trang.
+     */
     @GetMapping
     public ResponseEntity<PageResponse<ProductCardResponse>> search(@RequestParam(required = false) String q,
                                                     @RequestParam(required = false) String category,
                                                     @RequestParam(defaultValue = "NEWEST") ProductSort sort,
+                                                    @RequestParam(name = "min_price", required = false) Long minPrice,
+                                                    @RequestParam(name = "max_price", required = false) Long maxPrice,
+                                                    @RequestParam(name = "in_stock", defaultValue = "false") boolean inStock,
+                                                    @RequestParam(name = "on_sale", defaultValue = "false") boolean onSale,
                                                     @RequestParam(name = "page", defaultValue = "1") int pageNo,
                                                     @RequestParam(name = "page_size", defaultValue = "20") int size) {
         int page = Math.max(pageNo, 1) - 1; // API: trang bắt đầu từ 1
-        var criteria = new ProductSearchCriteria(q, category, sort, page, size, true);
+        var criteria = new ProductSearchCriteria(q, category, sort, page, size, true, minPrice, maxPrice, inStock, onSale);
         var result = searchService.search(criteria, mapper::toCard);
         return ResponseEntity.ok(PageResponse.of(result, Function.identity()));
     }

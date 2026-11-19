@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { FileText, Menu, Phone, Search } from "lucide-react";
+import { FileText, Menu, Phone } from "lucide-react";
 
 import { Logo } from "@/components/brand/logo";
 import { NotificationBell } from "@/components/notifications/notification-bell";
@@ -12,6 +12,7 @@ import { CartButton } from "./cart-button";
 import { CategoryNav } from "./category-nav";
 import { MobileMenu } from "./mobile-menu";
 import { QuickJumpBar } from "./quick-jump-bar";
+import { SearchBox } from "./search-box";
 
 /**
  * SiteHeader đồng bộ chuẩn hệ màu thương hiệu HWIN:
@@ -72,31 +73,8 @@ export function SiteHeader() {
             </div>
           </div>
 
-          {/* Thanh tìm kiếm viền màu Brand (#6c3bff) và nút Tìm kiếm màu Brand */}
-          <form
-            action="/search"
-            method="get"
-            role="search"
-            className="mx-2 min-w-0 flex-1 max-w-xl lg:max-w-2xl"
-          >
-            <label className="flex h-11 items-center rounded-full border-2 border-brand bg-white pl-4 pr-0 overflow-hidden shadow-2xs transition focus-within:border-brand-dark focus-within:shadow-[0_0_0_4px_rgb(108_59_255/0.12)]">
-              <input
-                name="q"
-                type="search"
-                placeholder="Tìm sản phẩm: nem chua, tôm khô, thịt gác bếp, lạp xưởng..."
-                maxLength={100}
-                className="h-full min-w-0 flex-1 bg-transparent pr-2 text-sm text-neutral-800 outline-none placeholder:text-neutral-400"
-              />
-              <button
-                type="submit"
-                aria-label="Tìm kiếm"
-                className="flex h-full shrink-0 items-center justify-center gap-1.5 bg-brand px-5 sm:px-6 text-sm font-bold text-white transition hover:bg-brand-dark active:scale-95 cursor-pointer"
-              >
-                <Search className="size-4" />
-                <span className="hidden sm:inline">Tìm kiếm</span>
-              </button>
-            </label>
-          </form>
+          {/* Thanh tìm kiếm viền màu Brand (#6c3bff), nút Tìm kiếm màu Brand, gợi ý sản phẩm khi gõ */}
+          <SearchBox />
 
           {/* Cụm 4 Action bên phải: Hotline, CTV, Tài khoản, Giỏ hàng */}
           <div className="flex shrink-0 items-center gap-4 sm:gap-6">
