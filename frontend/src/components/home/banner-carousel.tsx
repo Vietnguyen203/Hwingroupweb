@@ -75,6 +75,14 @@ export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
                 BACKGROUNDS[i % BACKGROUNDS.length],
               )}
             >
+              {/* Nền: chính ảnh sản phẩm làm mờ (phóng to để không lộ mép mờ), phủ lớp tối nhẹ ở bên chữ cho dễ đọc; dải màu bên dưới là dự phòng khi không có ảnh */}
+              {p.imageUrl && (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- ảnh sản phẩm từ backend (cùng URL với ảnh chính nên chỉ tải một lần) */}
+                  <img src={p.imageUrl} alt="" aria-hidden className="pointer-events-none absolute inset-0 size-full scale-125 object-cover blur-2xl saturate-150" />
+                  <span aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/60 via-black/35 to-black/10" />
+                </>
+              )}
               {/* Vệt sáng trang trí */}
               <span aria-hidden className="pointer-events-none absolute -top-24 -left-16 size-72 rounded-full bg-white/10 blur-3xl" />
               <span aria-hidden className="pointer-events-none absolute -right-10 -bottom-28 size-80 rounded-full bg-brand-accent/25 blur-3xl" />
@@ -96,13 +104,17 @@ export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
                 </span>
               </div>
 
+              {/* Ảnh chính luôn nằm giữa banner theo chiều dọc. Căn giữa bằng khung flex, KHÔNG dùng -translate-y-1/2:
+                  Tailwind 4 dịch bằng thuộc tính `translate`, bị hiệu ứng nổi (.fx-float) ghi đè làm ảnh tụt xuống. */}
               {p.imageUrl && (
-                // eslint-disable-next-line @next/next/no-img-element -- ảnh sản phẩm từ backend
-                <img
-                  src={p.imageUrl}
-                  alt=""
-                  className="fx-float absolute top-1/2 right-[4%] aspect-square h-[78%] -translate-y-1/2 rotate-2 rounded-3xl object-cover shadow-2xl ring-4 ring-white/25 transition duration-700 ease-out-expo group-hover/slide:rotate-0 group-hover/slide:scale-105 md:h-[85%]"
-                />
+                <div className="pointer-events-none absolute inset-y-0 right-[4%] flex items-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- ảnh sản phẩm từ backend */}
+                  <img
+                    src={p.imageUrl}
+                    alt=""
+                    className="fx-float aspect-square h-[78%] shrink-0 rotate-2 rounded-3xl object-cover shadow-2xl ring-4 ring-white/25 transition duration-700 ease-out-expo group-hover/slide:rotate-0 group-hover/slide:scale-105 md:h-[85%]"
+                  />
+                </div>
               )}
             </Link>
           ))}

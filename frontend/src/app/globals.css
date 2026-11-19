@@ -323,10 +323,12 @@
   }
   .fx-gradient-flow { background-size: 220% 220%; animation: fx-flow 10s ease-in-out infinite; }
 
-  /* Nổi lên xuống nhẹ; dùng thuộc tính `translate` riêng nên không đè lên transform của phần tử */
+  /* Nổi lên xuống nhẹ, dao động đối xứng quanh vị trí gốc (±5px) nên phần tử luôn ở đúng giữa chỗ đã căn.
+     Dùng thuộc tính `translate` riêng: không đè lên transform, nhưng sẽ đè lên các tiện ích translate-* của Tailwind 4
+     (chúng cũng dùng `translate`) -> phần tử nổi phải căn giữa bằng flex / inset, không dùng -translate-*. */
   @keyframes fx-float {
-    0%, 100% { translate: 0 0; }
-    50% { translate: 0 -10px; }
+    0%, 100% { translate: 0 5px; }
+    50% { translate: 0 -5px; }
   }
   .fx-float { animation: fx-float 4.5s ease-in-out infinite; }
 
