@@ -6,14 +6,10 @@ import { ArrowLeft } from "lucide-react";
 
 import { StatusBadge } from "@/components/ui/status-badge";
 import { api, errorMessage } from "@/lib/api";
-import { formatDateTime, ORDER_STATUS, PAYMENT_METHOD, type OrderDetailResponse } from "@/lib/account";
+import { formatDateTime, ORDER_STATUS, PAYMENT_METHOD } from "@/lib/account";
 import { formatVnd } from "@/lib/format";
 import { ActionButton, Loading } from "./admin-ui";
-
-type AdminOrderResponse = {
-  id: string; customerId: string; referralCode: string | null; paymentRef: string | null; detail: OrderDetailResponse;
-  history: { fromStatus: string | null; toStatus: string; actorId: string | null; note: string | null; at: string }[];
-};
+import type { AdminOrderResponse } from "./order-confirm-dialog";
 
 /** Chi tiết đơn cho admin + các thao tác theo vòng đời đơn. Backend kiểm tra lại mọi chuyển trạng thái. */
 export function AdminOrderDetail({ id }: { id: string }) {
