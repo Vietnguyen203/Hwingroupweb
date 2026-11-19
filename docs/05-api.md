@@ -43,7 +43,7 @@
 | Method | Path | Quyền | Mô tả |
 |---|---|---|---|
 | GET | `/api/categories` | public | Danh mục active theo `sortOrder` (menu icon), kèm `productCount` (số sản phẩm đang bán) – trang chủ ẩn danh mục rỗng |
-| GET | `/api/products` | public | `?q=&category=slug&sort=NEWEST\|PRICE_ASC\|PRICE_DESC\|BESTSELLER&page=&size=` – tìm không dấu |
+| GET | `/api/products` | public | `?q=&category=slug&sort=NEWEST\|PRICE_ASC\|PRICE_DESC\|BESTSELLER&min_price=&max_price=&in_stock=true&on_sale=true&page=&page_size=` – tìm không dấu. Lọc theo giá khách thực trả (VND, gồm cả mốc; `min_price` > `max_price` thì tự đổi chỗ, giá âm bỏ qua), còn hàng, đang giảm giá (có giá gạch ngang cao hơn giá bán hoặc đang giảm thêm %); các bộ lọc kết hợp được. Ô tìm kiếm ở header dùng chính API này với `page_size=6` để gợi ý khi gõ |
 | GET | `/api/products/bestsellers` | public | Sản phẩm cờ `bestseller` (trang chủ) |
 | GET | `/api/products/{slug}` | public | Giá: `price` (khách thực trả), `basePrice` (niêm yết), `salePercent`, `compareAtPrice`, `discountPercent`. Chi tiết: thương hiệu, khối lượng, đóng gói, xuất xứ, thành phần, đặc điểm, HDSD, 1–5 ảnh, `soldCount`, thông tin thực phẩm |
 | GET | `/api/product-reviews` | public | `?productId=&page=&page_size=` – đánh giá hiển thị (tên che bớt) |
@@ -116,11 +116,12 @@
 
 | Method | Path | Quyền | Mô tả |
 |---|---|---|---|
-| POST | `/api/referral-clicks` | public | `{code, landingPath}` → ghi click (không đếm trùng IP + mã trong 24h), mã hợp lệ thì set cookie `hwin_ref` 30 ngày. Luôn 204 |
+| POST | `/api/referral-clicks` | public | `{code, landingPath, source?}` → ghi click (không đếm trùng IP + mã trong 24h), mã hợp lệ thì set cookie `hwin_ref` 30 ngày. Luôn 204. `source` là nền tảng chia sẻ lấy từ `?src=` của link: `facebook`, `zalo`, `tiktok`, `youtube`, `instagram` (không phân biệt hoa thường); thiếu hoặc giá trị lạ thì lưu `OTHER` |
 | POST | `/api/affiliates/id-card-uploads` | CUSTOMER | Tải 1 ảnh CCCD (multipart `file`, JPG/PNG/WebP ≤ 5MB) vào kho riêng tư, trả `{key}`; gọi 2 lần (mặt trước, mặt sau). Tối đa 10 lần/giờ/người (quá hạn mức: 429 `ID_CARD_UPLOAD_LIMIT`) |
 | POST | `/api/affiliates/me` | CUSTOMER | Đăng ký CTV `{fullName, socialLink, note, acceptTerms, phone?, idCardFrontKey, idCardBackKey}` (2 khóa ảnh bắt buộc, phải do chính mình tải lên: `ID_CARD_REQUIRED` / `ID_CARD_INVALID`) – `phone` bắt buộc nếu tài khoản đăng nhập bằng email (`PHONE_REQUIRED`); đăng ký lại nếu đã bị từ chối |
 | GET | `/api/affiliates/me` | CUSTOMER | Hồ sơ CTV + trạng thái + lý do (404 nếu chưa đăng ký) |
 | GET | `/api/affiliates/me/dashboard` | AFFILIATE | Mã, link chia sẻ, click (tổng / 30 ngày), khách đã gắn, hoa hồng theo trạng thái, số dư khả dụng, đã rút, khóa rút đến |
+| GET | `/api/affiliates/me/click-stats` | AFFILIATE | `?days=30` (1–90, tính cả hôm nay, giờ Việt Nam) → `{days, daily: [{date, clicks}], bySource: [{source, clicks}]}`. `daily` chỉ gồm ngày có click (cũ → mới), `bySource` nhiều click nhất trước, `source`: `FACEBOOK`, `ZALO`, `TIKTOK`, `YOUTUBE`, `INSTAGRAM`, `OTHER` |
 | GET | `/api/affiliates/me/commissions` | AFFILIATE | Hoa hồng của tôi (mã đơn, cơ sở tính, số tiền, trạng thái, mốc duyệt) |
 | GET | `/api/affiliates/me/customers` | AFFILIATE | Khách đã gắn (SĐT đã che, ngày gắn) |
 | GET | `/api/affiliates/me/bank-account` | AFFILIATE | Ngân hàng (chỉ 4 số cuối) + `withdrawLockedUntil` |
@@ -208,7 +209,9 @@ Loại thông báo và người nhận:
 | `/affiliate/[id]/dashboard`, `/affiliate/[id]/links`, `/affiliate/[id]/earnings`, `/affiliate/[id]/performance` | CSR | đăng nhập (proxy.ts) + CTV đã duyệt (kiểm ở client, backend kiểm role AFFILIATE) |
 | `/affiliate/[id]/campaigns`, `/affiliate/[id]/products` | CSR | như trên; chưa có chức năng (trang "Sắp ra mắt") |
 
-`/affiliate/[id]/performance` (Hiệu suất) chỉ dùng API có sẵn: `GET /api/affiliates/me/dashboard` (tổng click, click 30 ngày) và `GET /api/affiliates/me/commissions` (đơn và hoa hồng theo ngày, 30 ngày so với 30 ngày trước). Chưa có click theo ngày / theo nền tảng vì backend chưa lưu nguồn click.
+`/affiliate/[id]/performance` (Hiệu suất) dùng `GET /api/affiliates/me/dashboard` (tổng click, click 30 ngày), `GET /api/affiliates/me/commissions` (đơn và hoa hồng theo ngày, 30 ngày so với 30 ngày trước) và `GET /api/affiliates/me/click-stats` (click theo ngày và theo nền tảng). Biểu đồ đổi được giữa Click / Đơn hàng / Hoa hồng; thẻ "Click theo nền tảng" tách theo `?src=` của link. Trang `/affiliate/[id]/links` có link riêng cho từng nền tảng (`<link chia sẻ>&src=facebook`…); `SessionSync` gửi `src` kèm `ref` khi khách mở link. Click cũ (trước khi có cột `source`) và link không gắn `src` nằm ở nhóm `OTHER` ("Khác / chưa gắn nguồn").
+
+`/search` và `/categories/[slug]` có thanh lọc (`ProductFilterBar`, render ở server): khoảng giá chọn nhanh, "Còn hàng", "Đang giảm giá"; bộ lọc nằm trên URL (`min_price`, `max_price`, `in_stock=1`, `on_sale=1`, cùng tên với API) và được giữ khi đổi sắp xếp / sang trang khác. Ô tìm kiếm ở header (`SearchBox`) gợi ý sản phẩm khi gõ từ 2 ký tự (chờ 250ms, hủy lời gọi cũ), dùng được bằng bàn phím và vẫn gửi form GET `/search?q=` khi chưa có JS.
 
 **`[id]` trên URL (`/account/[id]`, `/affiliate/[id]/…`) là ID tài khoản (`MeResponse.id`), chỉ để hiển thị**: dữ liệu luôn lấy theo phiên đăng nhập (`/api/me/...`, `/api/affiliates/me/...`), không dùng id trên URL. Component `OwnIdRedirect` giữ id trên URL luôn là id của chính người đang đăng nhập: `/account` và link cũ `/affiliate/<mục>` (vd `/affiliate/links`, kể cả `?tab=bank`) tự chuyển sang link có id; id của người khác tự chuyển về id của mình. Cổng CTV nằm ở `app/affiliate/[id]/`; dựng link bằng `PortalLink` / `portalPath` (`lib/portal-path.ts`).
 | `/admin/login` | CSR | public (đăng nhập 2 bước) |

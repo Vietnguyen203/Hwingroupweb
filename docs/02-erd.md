@@ -395,6 +395,7 @@ erDiagram
         varchar ip_hash "SHA-256(ip + salt)"
         varchar user_agent
         varchar landing_path
+        varchar source "FACEBOOK, ZALO, TIKTOK, YOUTUBE, INSTAGRAM, OTHER"
         timestamptz clicked_at "index"
     }
 

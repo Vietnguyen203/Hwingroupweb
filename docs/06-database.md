@@ -609,6 +609,7 @@ Lượt click link CTV. Không đếm trùng cùng IP + mã trong 24 giờ (Redi
 | user_agent | `character varying(255)` | ✓ |  |  |
 | landing_path | `character varying(500)` | ✓ |  |  |
 | clicked_at | `timestamp with time zone` |  |  |  |
+| source | `character varying(16)` |  | 'OTHER'::character varying | Nền tảng chia sẻ: FACEBOOK, ZALO, TIKTOK, YOUTUBE, INSTAGRAM; OTHER = khác / không gắn src / click trước khi có cột này |
 
 Ràng buộc:
 

@@ -108,8 +108,8 @@ sequenceDiagram
 
     K->>FE: Mở /p/cha-lua?ref=ABC123 (link CTV chia sẻ)
     FE->>FE: proxy.ts đọc ?ref, kiểm tra định dạng A-Z0-9
-    FE->>RC: POST /api/referral-clicks {code, landingPath} (kèm IP, UA)
-    RC->>RS: record(code, ip, ua, path)
+    FE->>RC: POST /api/referral-clicks {code, landingPath, source} (kèm IP, UA; source = ?src= của link)
+    RC->>RS: record(code, path, source, ip, ua)
     RS->>DB: findByReferralCode(code)
     alt Không tồn tại hoặc CTV không APPROVED
         RS-->>RC: ignored
@@ -117,7 +117,7 @@ sequenceDiagram
     else CTV APPROVED
         RS->>R: SET NX click:ABC123:ipHash EX 24h
         alt Key mới
-            RS->>DB: INSERT referral_clicks(ipHash, ua, path)
+            RS->>DB: INSERT referral_clicks(ipHash, ua, path, source)
         else Đã click trong 24h
             Note over RS: Không đếm trùng
         end
