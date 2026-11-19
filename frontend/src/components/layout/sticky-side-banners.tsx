@@ -28,7 +28,7 @@ export function StickySideBanners() {
   return (
     <>
       {!closed.has("freeship") && (
-        <SideBanner side="left" tone="from-brand-accent via-brand-red to-[#b42a05]" onClose={() => closeBanner("freeship")}>
+        <SideBanner side="left" tone="from-brand-accent via-brand-red to-[#b42a05]" image="/images/freeship-bg.svg" onClose={() => closeBanner("freeship")}>
           <span className="fx-float flex size-12 @min-[12rem]:size-16 items-center justify-center rounded-2xl bg-white/20 ring-1 ring-white/30">
             <Truck className="size-6 @min-[12rem]:size-8" />
           </span>

@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 680" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Xe giao hàng chở thùng hàng, giữ lạnh tận nơi">
+  <!-- Hình nền cho banner Freeship: xe giao hàng chở thùng hàng chạy trên đường, nền cam theo bảng màu thương hiệu.
+       Xe nằm ở phần dưới (dưới chữ, trên nút "Mua ngay"). Muốn dùng ảnh thật: thay file này hoặc đổi đường dẫn ở sticky-side-banners.tsx. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#ff7a45"/>
+      <stop offset="0.5" stop-color="#e2400f"/>
+      <stop offset="1" stop-color="#a82604"/>
+    </linearGradient>
+    <radialGradient id="glowTop" cx="0.25" cy="0.03" r="0.75">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowTruck" cx="0.5" cy="0.75" r="0.42">
+      <stop offset="0" stop-color="#ffd9a8" stop-opacity="0.38"/>
+      <stop offset="1" stop-color="#ffd9a8" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Bông tuyết (giữ lạnh) -->
+    <g id="snow" stroke="#fff" stroke-linecap="round" stroke-width="1.6">
+      <path d="M0 -9V9M-8 -4.5L8 4.5M-8 4.5L8 -4.5"/>
+    </g>
+  </defs>
+
+  <rect width="260" height="680" fill="url(#bg)"/>
+  <rect width="260" height="680" fill="url(#glowTop)"/>
+  <rect width="260" height="680" fill="url(#glowTruck)"/>
+
+  <!-- Tuyến giao hàng (nét đứt) chạy dọc mép trái xuống tới điểm nhận -->
+  <path d="M30 150C8 230 54 292 28 392" fill="none" stroke="#fff" stroke-opacity="0.35" stroke-width="1.6" stroke-dasharray="3 7" stroke-linecap="round"/>
+  <circle cx="30" cy="150" r="5" fill="#fff" fill-opacity="0.5"/>
+  <circle cx="28" cy="392" r="6" fill="none" stroke="#ffd400" stroke-opacity="0.85" stroke-width="2"/>
+  <circle cx="28" cy="392" r="2.4" fill="#ffd400" fill-opacity="0.9"/>
+
+  <!-- Bông tuyết trang trí -->
+  <g opacity="0.45">
+    <use href="#snow" x="226" y="118"/>
+    <use href="#snow" x="214" y="262" transform="translate(214 262) scale(0.7) translate(-214 -262)"/>
+    <use href="#snow" x="236" y="400" transform="translate(236 400) scale(0.55) translate(-236 -400)"/>
+  </g>
+  <g fill="#fff" fill-opacity="0.4">
+    <circle cx="150" cy="60" r="2"/>
+    <circle cx="238" cy="190" r="1.6"/>
+    <circle cx="20" cy="300" r="1.8"/>
+    <circle cx="120" cy="420" r="1.6"/>
+  </g>
+
+  <!-- Vạch chuyển động phía sau xe -->
+  <g stroke="#fff" stroke-opacity="0.45" stroke-width="2" stroke-linecap="round">
+    <line x1="3" y1="478" x2="15" y2="478"/>
+    <line x1="2" y1="496" x2="13" y2="496"/>
+    <line x1="4" y1="514" x2="14" y2="514"/>
+  </g>
+
+  <!-- Thùng hàng xếp trên thùng xe -->
+  <g>
+    <rect x="22" y="462" width="58" height="61" rx="4" fill="#ffd9a8"/>
+    <rect x="46" y="462" width="9" height="61" fill="#e7a35c" fill-opacity="0.55"/>
+    <rect x="82" y="474" width="50" height="49" rx="4" fill="#ffe6c4"/>
+    <rect x="102" y="474" width="8" height="49" fill="#e7a35c" fill-opacity="0.5"/>
+    <rect x="30" y="438" width="42" height="24" rx="3" fill="#ffcf94"/>
+    <rect x="48" y="438" width="7" height="24" fill="#e7a35c" fill-opacity="0.55"/>
+    <rect x="90" y="446" width="36" height="28" rx="3" fill="#fff1dc"/>
+    <rect x="105" y="446" width="6" height="28" fill="#e7a35c" fill-opacity="0.5"/>
+    <!-- Nhãn "giữ lạnh" trên thùng lớn -->
+    <circle cx="35" cy="500" r="9" fill="#fff" fill-opacity="0.9"/>
+    <path d="M35 493.5V506.5M29.4 496.8L40.6 503.2M29.4 503.2L40.6 496.8" stroke="#2f7fd1" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+  </g>
+
+  <!-- Thùng xe + khung gầm -->
+  <rect x="16" y="523" width="124" height="12" rx="3" fill="#fff" fill-opacity="0.95"/>
+  <rect x="12" y="535" width="222" height="10" rx="3" fill="#7a1d05" fill-opacity="0.85"/>
+
+  <!-- Cabin -->
+  <path d="M142 535V484Q142 474 152 474H190Q196 474 200 480L226 514Q230 520 230 527V535Z" fill="#fff" fill-opacity="0.96"/>
+  <path d="M152 484H188L210 514H152Z" fill="#ff9a6b" fill-opacity="0.65"/>
+  <circle cx="226" cy="523" r="3.6" fill="#ffd400"/>
+
+  <!-- Bánh xe -->
+  <g fill="#2b0d05">
+    <circle cx="48" cy="557" r="14"/>
+    <circle cx="112" cy="557" r="14"/>
+    <circle cx="196" cy="557" r="14"/>
+  </g>
+  <g fill="#f2c9b3">
+    <circle cx="48" cy="557" r="5.5"/>
+    <circle cx="112" cy="557" r="5.5"/>
+    <circle cx="196" cy="557" r="5.5"/>
+  </g>
+
+  <!-- Mặt đường -->
+  <line x1="0" y1="573" x2="260" y2="573" stroke="#fff" stroke-opacity="0.4" stroke-width="2"/>
+</svg>
