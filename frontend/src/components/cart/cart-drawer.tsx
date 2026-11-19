@@ -70,7 +70,7 @@ export function CartDrawer() {
   return (
     <div
       className={cn(
-        "fixed inset-0 z-50 transition-opacity duration-300",
+        "fixed inset-0 z-[60] flex items-center justify-center p-3 transition-opacity duration-300 sm:p-6",
         isDrawerOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
       )}
       aria-hidden={!isDrawerOpen}
@@ -81,15 +81,18 @@ export function CartDrawer() {
         onClick={closeDrawer}
       />
 
-      {/* Slide-over panel */}
+      {/* Hộp thoại nổi giữa màn hình (không còn trượt từ cạnh phải) */}
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Giỏ hàng của bạn"
         className={cn(
-          "absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-white shadow-2xl transition-transform duration-300 ease-out",
-          isDrawerOpen ? "translate-x-0" : "translate-x-full"
+          "relative flex max-h-[min(88dvh,46rem)] w-full max-w-lg flex-col overflow-hidden rounded-3xl bg-white shadow-pop transition duration-300 ease-out-expo",
+          isDrawerOpen ? "translate-y-0 scale-100" : "translate-y-4 scale-95"
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-4">
+        <div className="flex items-center justify-between border-b border-neutral-100 bg-gradient-to-b from-brand-soft/60 to-white px-5 py-4">
           <div className="flex items-center gap-2">
             <ShoppingBag className="size-5 text-brand" />
             <h2 className="text-base font-bold text-neutral-900">
