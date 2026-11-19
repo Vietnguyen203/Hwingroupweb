@@ -9,7 +9,7 @@ import { SaleStrip } from "@/components/home/sale-strip";
 import { WhyHwin } from "@/components/home/why-hwin";
 import { ProductGrid, ProductGridSkeleton } from "@/components/product/product-card";
 import { SectionTitle } from "@/components/section-title";
-import { getBestsellers, getCategories, searchProducts } from "@/lib/catalog";
+import { getBestsellersCached, getCategories, searchProductsCached } from "@/lib/catalog";
 import { cn } from "@/lib/utils";
 
 /**
@@ -59,7 +59,7 @@ export default function HomePage() {
 
 /** Banner: xen kẽ sản phẩm mới và bán chạy, bỏ trùng, tối đa 5. */
 async function Banners() {
-  const [newest, best] = await Promise.all([searchProducts({ sort: "NEWEST", size: 5 }), getBestsellers(5)]);
+  const [newest, best] = await Promise.all([searchProductsCached({ sort: "NEWEST", size: 5 }), getBestsellersCached(5)]);
   const slides: BannerSlide[] = [];
   const seen = new Set<string>();
   for (let i = 0; i < 5 && slides.length < 5; i++) {
@@ -80,15 +80,15 @@ async function Categories() {
 }
 
 async function OnSale() {
-  const page = await searchProducts({ sort: "BESTSELLER", size: 30 });
+  const page = await searchProductsCached({ sort: "BESTSELLER", size: 30 });
   return <SaleStrip products={page.content.filter((p) => p.discountPercent > 0).slice(0, 10)} />;
 }
 
 async function Combos() {
   // Tìm kiếm combo theo slug danh mục 'combo' hoặc từ khóa 'combo'
   const [byCat, byQuery] = await Promise.all([
-    searchProducts({ category: "combo", size: 8 }).catch(() => ({ content: [] })),
-    searchProducts({ q: "combo", size: 8 }).catch(() => ({ content: [] })),
+    searchProductsCached({ category: "combo", size: 8 }).catch(() => ({ content: [] })),
+    searchProductsCached({ q: "combo", size: 8 }).catch(() => ({ content: [] })),
   ]);
 
   const map = new Map<string, (typeof byCat.content)[0]>();
@@ -117,9 +117,9 @@ async function Combos() {
 }
 
 async function Bestsellers() {
-  return <ProductGrid products={await getBestsellers(12)} />;
+  return <ProductGrid products={await getBestsellersCached(12)} />;
 }
 
 async function Newest() {
-  return <ProductGrid products={(await searchProducts({ sort: "NEWEST", size: 12 })).content} />;
+  return <ProductGrid products={(await searchProductsCached({ sort: "NEWEST", size: 12 })).content} />;
 }

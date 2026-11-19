@@ -214,4 +214,6 @@ Loại thông báo và người nhận:
 | `/admin/login` | CSR | public (đăng nhập 2 bước) |
 | `/admin/orders`, `/admin/orders/[id]`, `/admin/products`, `/admin/customers`, `/admin/affiliates`, `/admin/commissions`, `/admin/payouts` | CSR | ADMIN |
 
+**Cache phía server (`lib/catalog.ts`):** danh mục (header, menu, trang chủ) và các danh sách ở trang chủ (mới nhất, bán chạy, giảm giá, combo, banner) được nhớ 60 giây trong bộ nhớ server Next.js, lỗi không được nhớ; trang chi tiết sản phẩm, tìm kiếm và trang danh mục vẫn gọi backend mỗi lần. Giá khi đặt hàng luôn do backend tính lại. Không dùng `use cache` của Next vì nó buộc backend phải chạy lúc `next build`.
+
 `src/proxy.ts` (Next.js 16 đổi tên `middleware.ts` thành `proxy.ts`) đọc cookie `hwin_at`, giải mã payload JWT (chỉ để điều hướng UX – backend vẫn là nơi kiểm quyền thật) và chuyển hướng về đăng nhập nếu thiếu role.

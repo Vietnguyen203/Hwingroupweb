@@ -6,7 +6,7 @@ import { SiteChrome } from "@/components/layout/site-chrome";
 import { ProductGrid, ProductGridSkeleton } from "@/components/product/product-card";
 import { SectionTitle } from "@/components/section-title";
 import { EmptyState, emptyStateButton } from "@/components/ui/empty-state";
-import { getBestsellers } from "@/lib/catalog";
+import { getBestsellersCached } from "@/lib/catalog";
 
 /** 404 toàn site (cả khi một trang gọi notFound()): có header / footer, nút quay về và vài món bán chạy để khách đi tiếp. */
 export default function NotFound() {
@@ -32,7 +32,7 @@ export default function NotFound() {
 
 /** Gợi ý món bán chạy; đọc dữ liệu trong Suspense để không chặn prerender. Backend lỗi thì chỉ bỏ phần gợi ý. */
 async function Popular() {
-  const popular = await getBestsellers(6).catch(() => []);
+  const popular = await getBestsellersCached(6).catch(() => []);
   if (popular.length === 0) return null;
   return (
     <>
