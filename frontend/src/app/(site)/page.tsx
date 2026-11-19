@@ -18,6 +18,8 @@ import { cn } from "@/lib/utils";
  * Web phục vụ cộng tác viên nên khối CTV nằm giữa trang (sau các món bán chạy), không bị đẩy xuống cuối.
  * Mỗi khối có `id` để thanh "đi nhanh" dưới header (QuickJumpBar) nhảy tới: categories, on-sale, combos, bestsellers,
  * affiliate, newest, why-hwin. Thêm / đổi khối thì sửa danh sách HOME_SECTIONS ở quick-jump-bar.tsx cho khớp.
+ * Khối nào không có dữ liệu (danh mục, giảm giá, combo, bán chạy, sản phẩm mới) thì ẩn cả khối: tiêu đề, nội dung và
+ * tab tương ứng ở thanh đi nhanh (tab tự ẩn vì id nằm trong khối), không hiện khung "Không có sản phẩm".
  */
 export default function HomePage() {
   return (
@@ -27,12 +29,15 @@ export default function HomePage() {
       </Suspense>
       <QuickTiles />
 
-      <section id="categories" className="scroll-mt-sticky">
-        <SectionTitle title="Danh mục sản phẩm" />
-        <Suspense fallback={<div className="mx-3 h-40 animate-pulse rounded-xl bg-neutral-200 md:mx-0" />}>
-          <Categories />
-        </Suspense>
-      </section>
+      <Suspense
+        fallback={
+          <HomeSection id="categories" title="Danh mục sản phẩm">
+            <div className="mx-3 h-40 animate-pulse rounded-xl bg-neutral-200 md:mx-0" />
+          </HomeSection>
+        }
+      >
+        <Categories />
+      </Suspense>
 
       <Suspense fallback={<div className="mx-3 mt-8 h-72 animate-pulse rounded-2xl bg-neutral-200 md:mx-0" />}>
         <OnSale />
@@ -43,27 +48,43 @@ export default function HomePage() {
         <Combos />
       </Suspense>
 
-      <section id="bestsellers" className="scroll-mt-sticky">
-        <SectionTitle title="Bán chạy" href="/search?sort=BESTSELLER" />
-        <Suspense fallback={<ProductGridSkeleton />}>
-          <Bestsellers />
-        </Suspense>
-      </section>
+      <Suspense
+        fallback={
+          <HomeSection id="bestsellers" title="Bán chạy" href="/search?sort=BESTSELLER">
+            <ProductGridSkeleton />
+          </HomeSection>
+        }
+      >
+        <Bestsellers />
+      </Suspense>
 
       <AffiliateBanner />
 
-      <section id="newest" className="scroll-mt-sticky">
-        <SectionTitle title="Sản phẩm mới" href="/search" />
-        <Suspense fallback={<ProductGridSkeleton />}>
-          <Newest />
-        </Suspense>
-      </section>
+      <Suspense
+        fallback={
+          <HomeSection id="newest" title="Sản phẩm mới" href="/search">
+            <ProductGridSkeleton />
+          </HomeSection>
+        }
+      >
+        <Newest />
+      </Suspense>
 
       <section id="why-hwin" className="scroll-mt-sticky">
         <SectionTitle title="Hãy đồng hành cùng HWIN" />
         <WhyHwin />
       </section>
     </>
+  );
+}
+
+/** Một khối của trang chủ: có `id` cho thanh đi nhanh, tiêu đề và nội dung. Dùng cả cho khung chờ lẫn khối đã tải xong. */
+function HomeSection({ id, title, href, children }: { id: string; title: string; href?: string; children: React.ReactNode }) {
+  return (
+    <section id={id} className="scroll-mt-sticky">
+      <SectionTitle title={title} href={href} />
+      {children}
+    </section>
   );
 }
 
@@ -86,7 +107,12 @@ async function Banners() {
 async function Categories() {
   // Danh mục chưa có sản phẩm nào đang bán thì không hiện ở trang chủ
   const categories = (await getCategories()).filter((c) => c.productCount > 0);
-  return <CategoryMenu categories={categories} />;
+  if (categories.length === 0) return null; // không có danh mục nào thì ẩn cả khối (kể cả tiêu đề)
+  return (
+    <HomeSection id="categories" title="Danh mục sản phẩm">
+      <CategoryMenu categories={categories} />
+    </HomeSection>
+  );
 }
 
 async function OnSale() {
@@ -127,9 +153,21 @@ async function Combos() {
 }
 
 async function Bestsellers() {
-  return <ProductGrid products={await getBestsellersCached(12)} />;
+  const products = await getBestsellersCached(12);
+  if (products.length === 0) return null; // chưa có sản phẩm bán chạy thì ẩn cả khối
+  return (
+    <HomeSection id="bestsellers" title="Bán chạy" href="/search?sort=BESTSELLER">
+      <ProductGrid products={products} />
+    </HomeSection>
+  );
 }
 
 async function Newest() {
-  return <ProductGrid products={(await searchProductsCached({ sort: "NEWEST", size: 12 })).content} />;
+  const products = (await searchProductsCached({ sort: "NEWEST", size: 12 })).content;
+  if (products.length === 0) return null; // chưa có sản phẩm nào thì ẩn cả khối
+  return (
+    <HomeSection id="newest" title="Sản phẩm mới" href="/search">
+      <ProductGrid products={products} />
+    </HomeSection>
+  );
 }

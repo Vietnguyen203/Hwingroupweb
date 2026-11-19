@@ -19,7 +19,7 @@ const HOME_SECTIONS: readonly { id: string; label: string; icon: LucideIcon; opt
   { id: "bestsellers", label: "Bán chạy", icon: Flame },
   { id: "affiliate", label: "Cộng tác viên", icon: HandCoins },
   { id: "newest", label: "Sản phẩm mới", icon: Sparkles },
-  { id: "why-hwin", label: "Vì sao HWIN", icon: ShieldCheck },
+  { id: "why-hwin", label: "Đồng hành cùng HWIN", icon: ShieldCheck },
 ];
 const ALL_IDS = HOME_SECTIONS.map((s) => s.id);
 const ALWAYS_IDS = HOME_SECTIONS.filter((s) => !s.optional).map((s) => s.id);
