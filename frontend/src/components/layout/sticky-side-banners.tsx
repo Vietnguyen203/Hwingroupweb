@@ -47,7 +47,7 @@ export function StickySideBanners() {
       )}
 
       {!closed.has("affiliate") && (
-        <SideBanner side="right" tone="from-brand via-brand-dark to-brand-deep" onClose={() => closeBanner("affiliate")}>
+        <SideBanner side="right" tone="from-brand via-brand-dark to-brand-deep" image="/images/cong-tac-vien-bg.svg" onClose={() => closeBanner("affiliate")}>
           <span className="fx-float flex size-12 @min-[12rem]:size-16 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25">
             <HandCoins className="size-6 @min-[12rem]:size-8 text-brand-accent" />
           </span>
@@ -76,11 +76,15 @@ const BANNER_WIDTH = "clamp(130px, calc(50% - 39rem), 240px)";
 function SideBanner({
   side,
   tone,
+  image,
   onClose,
   children,
 }: {
   side: "left" | "right";
+  /** Dải màu nền (cũng là nền dự phòng khi có `image`). */
   tone: string;
+  /** Ảnh nền phủ kín banner (đường dẫn trong public/), có lớp tối nhẹ phía trên để chữ dễ đọc. */
+  image?: string;
   onClose: () => void;
   children: React.ReactNode;
 }) {
@@ -92,10 +96,19 @@ function SideBanner({
     >
       <div
         className={cn(
-          "fx-gradient-flow relative flex w-full flex-col items-center justify-between overflow-hidden rounded-2xl @min-[12rem]:rounded-3xl bg-gradient-to-b px-3 @min-[12rem]:px-5 pt-8 @min-[12rem]:pt-12 pb-4 @min-[12rem]:pb-7 text-center text-white shadow-[0_14px_30px_-12px_rgb(0_0_0/0.45)] ring-1 ring-white/20 transition duration-300 ease-out-expo hover:-translate-y-1",
+          "fx-gradient-flow relative isolate flex w-full flex-col items-center justify-between overflow-hidden rounded-2xl @min-[12rem]:rounded-3xl bg-gradient-to-b px-3 @min-[12rem]:px-5 pt-8 @min-[12rem]:pt-12 pb-4 @min-[12rem]:pb-7 text-center text-white shadow-[0_14px_30px_-12px_rgb(0_0_0/0.45)] ring-1 ring-white/20 transition duration-300 ease-out-expo hover:-translate-y-1",
           tone,
         )}
       >
+        {image && (
+          <>
+            {/* Ảnh nền nằm dưới nội dung: khung có `isolate` (tự lập lớp xếp chồng) nên -z-10 vẫn nằm trên màu nền của khung.
+                eslint-disable-next-line bên dưới: ảnh nền tĩnh trong public/ */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={image} alt="" aria-hidden className="pointer-events-none absolute inset-0 -z-10 size-full object-cover" />
+            <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-black/10 via-black/25 to-black/10" />
+          </>
+        )}
         <span aria-hidden className="pointer-events-none absolute -top-10 -right-10 size-32 @min-[12rem]:size-48 rounded-full bg-white/15 blur-2xl" />
         <button
           type="button"
