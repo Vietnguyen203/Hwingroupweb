@@ -20,3 +20,13 @@ export function useMe() {
     staleTime: 60_000,
   });
 }
+
+/**
+ * Người dùng đang đăng nhập để HIỂN THỊ (header, chuông thông báo, nút CTV, trang đăng nhập).
+ * react-query giữ lại người dùng cũ khi lần kiểm tra gần nhất bị lỗi (backend tắt / 5xx), nên header có thể vẫn ghi tên
+ * dù phiên đã không còn xác nhận được -> coi như chưa biết (undefined) thay vì hiện là đã đăng nhập.
+ */
+export function useSignedInUser(): MeResponse | null | undefined {
+  const me = useMe();
+  return me.isError ? undefined : me.data;
+}

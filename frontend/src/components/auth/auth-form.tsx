@@ -9,7 +9,7 @@ import { ArrowLeft, Eye, EyeOff, Mail, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PasswordChecklist } from "@/components/auth/password-checklist";
 import { Input } from "@/components/ui/input";
-import { useMe } from "@/hooks/use-me";
+import { useSignedInUser } from "@/hooks/use-me";
 import { useQueryParam } from "@/hooks/use-query-param";
 import { api, ApiError, errorMessage } from "@/lib/api";
 import type { MeResponse, OtpSentResponse } from "@/lib/account";
@@ -42,7 +42,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
   const next = safeNext(useQueryParam("next"));
   const queryClient = useQueryClient();
-  const me = useMe();
+  const me = useSignedInUser();
   /**
    * Đi tiếp SAU KHI vừa đăng nhập / đăng ký xong: tải lại trang thay vì router.replace. Router của Next nhớ kết quả
    * "chuyển hướng về /login hay /register" của các trang cần đăng nhập (/admin, /affiliate) từ lúc còn là khách
@@ -78,16 +78,21 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Vào trang đăng nhập / đăng ký: kiểm tra lại phiên ngay (bản nhớ 60 giây có thể là của phiên đã hết hạn)
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["me"] });
+  }, [queryClient]);
+
   // Đã đăng nhập (hoặc làm mới phiên thành công) -> đi tiếp (Admin tự chuyển sang trang quản trị)
   useEffect(() => {
-    if (me.data) {
-      if (me.data.roles?.includes("ADMIN") && (!next || next === "/account")) {
+    if (me) {
+      if (me.roles?.includes("ADMIN") && (!next || next === "/account")) {
         router.replace("/admin/orders");
       } else {
         router.replace(next);
       }
     }
-  }, [me.data, next, router]);
+  }, [me, next, router]);
 
   useEffect(() => {
     if (cooldown <= 0) return;

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { UserRound } from "lucide-react";
 
-import { useMe } from "@/hooks/use-me";
+import { useSignedInUser } from "@/hooks/use-me";
 import { useMounted } from "@/hooks/use-mounted";
 import { cn } from "@/lib/utils";
 
@@ -15,7 +15,7 @@ export interface AccountLinkProps {
 /** Nút tài khoản trên header desktop: "Đăng nhập" hoặc tên / email người dùng. */
 export function AccountLink({ vertical = true, className }: AccountLinkProps) {
   const mounted = useMounted();
-  const me = useMe().data;
+  const me = useSignedInUser();
   const user = mounted ? me : null;
   const name = user ? user.fullName || user.email || user.phoneMasked || "Tài khoản" : null;
   const href = user?.roles?.includes("ADMIN") ? "/admin/orders" : user ? `/account/${user.id}` : "/login";

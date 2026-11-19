@@ -22,7 +22,7 @@ import {
   Wallet,
 } from "lucide-react";
 
-import { useMe } from "@/hooks/use-me";
+import { useSignedInUser } from "@/hooks/use-me";
 import { useMounted } from "@/hooks/use-mounted";
 import { useMarkRead, useNotificationList, useUnreadCount } from "@/hooks/use-notifications";
 import { describeNotification, timeAgo, type NotificationItem, type Tone } from "@/lib/notifications";
@@ -62,7 +62,7 @@ const TONE: Record<Tone, string> = {
  */
 export function NotificationBell({ variant = "site" }: { variant?: "site" | "admin" }) {
   const mounted = useMounted();
-  const me = useMe().data;
+  const me = useSignedInUser();
   const router = useRouter();
   const unread = useUnreadCount();
   const soundEnabled = useRealtime((s) => s.soundEnabled);

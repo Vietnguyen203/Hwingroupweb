@@ -43,7 +43,9 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
     // Định dạng lỗi backend: { messageCode, message, errors: [{ field, message }], details }
     // Lỗi từng trường: câu validator đã là tiếng Việt. Lỗi nghiệp vụ: dịch theo mã lỗi (enum) sang tiếng Việt;
     // câu tiếng Anh của backend dành cho log / lập trình viên, chỉ hiện khi mã chưa có bản dịch.
-    const message = fieldErrors[0]?.message ?? translateError(p.messageCode, p.details) ?? p.message ?? "Có lỗi xảy ra, vui lòng thử lại";
+    // Không có nội dung lỗi mà là 5xx: thường là backend chưa chạy / đang khởi động / quá tải (Next trả 500 rỗng)
+    const fallback = res.status >= 500 ? "Máy chủ chưa sẵn sàng hoặc đang bận, vui lòng thử lại sau ít giây" : "Có lỗi xảy ra, vui lòng thử lại";
+    const message = fieldErrors[0]?.message ?? translateError(p.messageCode, p.details) ?? p.message ?? fallback;
     throw new ApiError(res.status, p.messageCode, message, fieldErrors);
   }
   return (res.status === 204 ? undefined : await res.json()) as T;
