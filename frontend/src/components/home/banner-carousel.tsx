@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { formatVnd } from "@/lib/format";
 import type { ProductCardResponse } from "@/lib/types";
@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 export type BannerSlide = { product: ProductCardResponse; tag: "Mới" | "Bán chạy" };
 
-const INTERVAL_MS = 4500;
+const INTERVAL_MS = 3000;
 /** Mỗi slide một dải màu riêng (theo bảng màu thương hiệu) để các banner liền nhau dễ phân biệt. */
 const BACKGROUNDS = [
   "from-brand-deep via-brand-dark to-brand",
@@ -27,20 +27,19 @@ function subscribeReducedMotion(cb: () => void) {
 }
 
 /**
- * Banner chạy: tối đa 5 sản phẩm (mới + bán chạy), tự chuyển mỗi 4,5 giây. Dừng khi rê chuột / đang focus trong banner,
- * không tự chạy nếu người dùng bật "giảm chuyển động", có nút tạm dừng cho người dùng. Bấm vào banner -> trang chi tiết sản phẩm.
+ * Banner chạy: tối đa 5 sản phẩm (mới + bán chạy), tự chuyển mỗi 3 giây. Dừng khi rê chuột / đang focus trong banner,
+ * không tự chạy nếu người dùng bật "giảm chuyển động". Bấm vào banner -> trang chi tiết sản phẩm.
  */
 export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
   const [index, setIndex] = useState(0);
   const [hovering, setHovering] = useState(false);
-  const [userPaused, setUserPaused] = useState(false);
   const reducedMotion = useSyncExternalStore(
     subscribeReducedMotion,
     () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     () => false,
   );
   const count = slides.length;
-  const playing = !hovering && !userPaused && !reducedMotion && count > 1;
+  const playing = !hovering && !reducedMotion && count > 1;
 
   useEffect(() => {
     if (!playing) return;
@@ -129,14 +128,6 @@ export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
                 className={cn("h-2 rounded-full transition-all duration-300", i === index ? "w-7 bg-brand" : "w-2 bg-neutral-300 hover:bg-neutral-400")}
               />
             ))}
-            <button
-              type="button"
-              onClick={() => setUserPaused((v) => !v)}
-              aria-label={userPaused ? "Tự động chuyển banner" : "Tạm dừng chuyển banner"}
-              className="ml-1 flex size-6 items-center justify-center rounded-full text-neutral-500 transition hover:bg-neutral-200 hover:text-neutral-800"
-            >
-              {userPaused || reducedMotion ? <Play className="size-3" /> : <Pause className="size-3" />}
-            </button>
           </div>
         </>
       )}
