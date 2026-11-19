@@ -624,9 +624,13 @@ function ProductForm({
 
   const imageList = form.images.split("\n").map((x) => x.trim()).filter(Boolean);
 
+  // Sản phẩm "chưa phân loại" (danh mục cũ đã bị xóa) hoặc danh mục không còn trong danh sách thì coi là CHƯA CHỌN:
+  // ô chọn phải hiện đúng như vậy, không được hiện đại một danh mục khác trong khi giá trị thật đang trống.
+  const categoryId = categories.some((c) => c.id === form.categoryId) ? form.categoryId : "";
+
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.categoryId) {
+    if (!categoryId) {
       setError("Vui lòng chọn hoặc tạo danh mục cho sản phẩm!");
       return;
     }
@@ -638,7 +642,7 @@ function ProductForm({
     setError(null);
     const empty = (s: string) => (s.trim() ? s.trim() : null);
     const body = {
-      categoryId: form.categoryId,
+      categoryId,
       name: form.name.trim(),
       slug: empty(form.slug),
       price: Number(form.price),
@@ -752,11 +756,17 @@ function ProductForm({
             </div>
           ) : (
             <Select
-              value={form.categoryId}
+              value={categoryId}
               onChange={(v) => set("categoryId", v)}
               className="w-full"
+              placeholder="— Chọn danh mục —"
               options={categories.map((c) => [c.id, c.name])}
             />
+          )}
+          {form.id && !categoryId && categories.length > 0 && (
+            <p className="text-[11px] font-medium text-amber-700">
+              Sản phẩm này chưa có danh mục (danh mục cũ đã bị xóa). Hãy chọn danh mục mới rồi lưu.
+            </p>
           )}
         </div>
 

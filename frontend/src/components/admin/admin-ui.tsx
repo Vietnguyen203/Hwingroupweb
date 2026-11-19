@@ -35,17 +35,23 @@ export function FilterBar({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Dropdown lựa chọn được tùy biến đồng bộ với hệ thống */
+/**
+ * Dropdown lựa chọn được tùy biến đồng bộ với hệ thống.
+ * `placeholder`: thêm dòng đầu (value "", không chọn lại được) hiện khi chưa chọn gì. Không có dòng này mà `value` không khớp
+ * lựa chọn nào thì trình duyệt tự hiện lựa chọn ĐẦU TIÊN dù giá trị thật đang trống – người dùng tưởng đã chọn.
+ */
 export function Select({
   value,
   onChange,
   options,
   className,
+  placeholder,
 }: {
   value: string;
   onChange: (v: string) => void;
   options: [string, string][];
   className?: string;
+  placeholder?: string;
 }) {
   return (
     <select
@@ -56,6 +62,11 @@ export function Select({
         className
       )}
     >
+      {placeholder !== undefined && (
+        <option value="" disabled>
+          {placeholder}
+        </option>
+      )}
       {options.map(([v, l]) => (
         <option key={v} value={v}>
           {l}
