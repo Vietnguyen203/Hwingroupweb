@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Pager } from "@/components/ui/pager";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useAdminList } from "@/hooks/use-admin-list";
+import { useAffiliateNames } from "@/hooks/use-affiliate-names";
 import { errorMessage } from "@/lib/api";
 import { formatDateTime, ORDER_STATUS, PAYMENT_METHOD } from "@/lib/account";
 import { formatVnd } from "@/lib/format";
@@ -25,6 +26,7 @@ const STATUS_OPTIONS: [string, string][] = [["", "Mọi trạng thái"], ...Obje
 export function AdminOrders() {
   const { query, filters, setFilter, page, setPage } = useAdminList<AdminOrderSummaryResponse>("/api/admin/orders");
   const [confirming, setConfirming] = useState<string | null>(null); // id đơn đang mở màn xác nhận
+  const ctvNames = useAffiliateNames(query.data?.content.map((o) => o.referralCode) ?? []); // tên CTV theo mã, hiện thay cho mã
   return (
     <AdminPage title="Đơn hàng">
       <FilterBar>
@@ -46,7 +48,14 @@ export function AdminOrders() {
                 <td className="px-3 py-2 font-semibold">{formatVnd(o.total)}</td>
                 <td className="px-3 py-2 text-xs">{PAYMENT_METHOD[o.paymentMethod] ?? o.paymentMethod}<br />{o.paymentStatus === "PAID" ? "Đã thanh toán" : "Chưa thanh toán"}</td>
                 <td className="px-3 py-2"><StatusBadge map={ORDER_STATUS} value={o.status} /></td>
-                <td className="px-3 py-2 text-xs">{o.referralCode ?? "–"}</td>
+                <td className="px-3 py-2 text-xs">
+                  {o.referralCode ? (
+                    <>
+                      {ctvNames[o.referralCode] && <span className="font-semibold text-slate-800">{ctvNames[o.referralCode]}<br /></span>}
+                      <span className="font-mono text-[11px] text-slate-500">{o.referralCode}</span>
+                    </>
+                  ) : "–"}
+                </td>
                 <td className="px-3 py-2 text-xs">{formatDateTime(o.placedAt)}</td>
                 <td className="px-3 py-2">
                   {o.status === "PENDING" ? (

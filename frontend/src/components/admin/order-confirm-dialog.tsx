@@ -8,6 +8,7 @@ import { AlertTriangle, ClipboardCheck, CreditCard, MapPin, Phone, ShoppingBag, 
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { showToast } from "@/components/ui/toast";
+import { useAffiliateNames } from "@/hooks/use-affiliate-names";
 import { api, errorMessage } from "@/lib/api";
 import { formatDateTime, ORDER_STATUS, PAYMENT_METHOD, type OrderDetailResponse } from "@/lib/account";
 import { formatVnd } from "@/lib/format";
@@ -28,6 +29,8 @@ export function OrderConfirmDialog({ orderId, onClose }: { orderId: string; onCl
   const titleId = useId();
   const [askCancel, setAskCancel] = useState(false);
   const order = useQuery({ queryKey: ["admin-order", orderId], queryFn: () => api<AdminOrderResponse>(`/api/admin/orders/${orderId}`) });
+
+  const ctvNames = useAffiliateNames([order.data?.referralCode]);
 
   const act = useMutation({
     mutationFn: (action: "confirm" | "cancel") =>
@@ -124,7 +127,7 @@ export function OrderConfirmDialog({ orderId, onClose }: { orderId: string; onCl
                 </Field>
                 <Field icon={Tag} label="Nguồn đơn">
                   {order.data.referralCode
-                    ? <>Qua CTV <code className="rounded bg-brand-soft px-1.5 py-0.5 font-mono text-xs font-bold text-brand">{order.data.referralCode}</code></>
+                    ? <>Qua CTV {ctvNames[order.data.referralCode] && <b>{ctvNames[order.data.referralCode]} </b>}<code className="rounded bg-brand-soft px-1.5 py-0.5 font-mono text-xs font-bold text-brand">{order.data.referralCode}</code></>
                     : <span className="text-slate-500">Mua trực tiếp (không qua CTV)</span>}
                 </Field>
               </div>

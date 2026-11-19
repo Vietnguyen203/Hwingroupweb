@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 
 import { StatusBadge } from "@/components/ui/status-badge";
+import { useAffiliateNames } from "@/hooks/use-affiliate-names";
 import { api, errorMessage } from "@/lib/api";
 import { formatDateTime, ORDER_STATUS, PAYMENT_METHOD } from "@/lib/account";
 import { formatVnd } from "@/lib/format";
@@ -15,6 +16,7 @@ import type { AdminOrderResponse } from "./order-confirm-dialog";
 export function AdminOrderDetail({ id }: { id: string }) {
   const qc = useQueryClient();
   const order = useQuery({ queryKey: ["admin-order", id], queryFn: () => api<AdminOrderResponse>(`/api/admin/orders/${id}`) });
+  const ctvNames = useAffiliateNames([order.data?.referralCode]);
   const act = useMutation({
     mutationFn: ({ action, body }: { action: string; body?: unknown }) =>
       api<AdminOrderResponse>(`/api/admin/orders/${id}/${action}`, { method: "POST", body }),
@@ -43,7 +45,7 @@ export function AdminOrderDetail({ id }: { id: string }) {
         </div>
         <p className="text-sm text-muted-foreground">
           {formatDateTime(d.placedAt)} · {PAYMENT_METHOD[d.paymentMethod] ?? d.paymentMethod} · {d.paymentStatus === "PAID" ? "Đã thanh toán" : "Chưa thanh toán"}
-          {order.data.paymentRef && ` · Mã GD ${order.data.paymentRef}`}{order.data.referralCode && ` · CTV ${order.data.referralCode}`}
+          {order.data.paymentRef && ` · Mã GD ${order.data.paymentRef}`}{order.data.referralCode && ` · CTV ${ctvNames[order.data.referralCode] ? `${ctvNames[order.data.referralCode]} (${order.data.referralCode})` : order.data.referralCode}`}
         </p>
         <div className="flex flex-wrap gap-2 pt-1">
           {d.paymentMethod === "BANK_QR" && d.paymentStatus !== "PAID" && d.status !== "CANCELLED" &&
