@@ -2,12 +2,11 @@ import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import { GuestOnly } from "@/components/affiliate/affiliate-join-link";
-import { Commitments } from "@/components/home/commitments";
 import { Logo } from "@/components/brand/logo";
 import { siteConfig } from "@/lib/config";
 import { SocialLinks } from "./social-links";
 
-/** Cuối trang: dải đăng ký CTV (navy) · 4 ô cam kết · footer navy nhiều cột. */
+/** Cuối trang: dải đăng ký CTV (chỉ cho khách) · footer navy nhiều cột. */
 export function SiteFooter() {
   return (
     <footer className="mt-10 pb-16 md:pb-0">
@@ -26,10 +25,6 @@ export function SiteFooter() {
         </div>
       </section>
       </GuestOnly>
-
-      <div className="bg-white py-6">
-        <Commitments />
-      </div>
 
       <section className="bg-brand-deep text-sm text-white/80">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
