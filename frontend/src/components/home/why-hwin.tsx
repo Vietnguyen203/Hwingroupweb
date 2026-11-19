@@ -1,13 +1,13 @@
 import { BadgeCheck, Handshake, ShieldCheck, Truck } from "lucide-react";
 
 const ITEMS = [
-  { icon: BadgeCheck, title: "Chính hãng, rõ nguồn gốc", text: "Đủ giấy tự công bố và chứng nhận an toàn thực phẩm cho từng sản phẩm." },
-  { icon: Truck, title: "Giao nhanh, giữ lạnh", text: "Đóng gói giữ lạnh, giao tận nơi; đổi trả trong 7 ngày nếu lỗi." },
+  { icon: BadgeCheck, title: "Chính hãng, nguồn gốc rõ ràng", text: "HWIN cam kết hàng chính hãng, nguồn gốc rõ ràng và đầy đủ giấy tờ" },
+  { icon: Truck, title: "Giao hàng tận nơi", text: "Đóng gói cẩn thận, giao hàng nhanh chóng" },
   { icon: ShieldCheck, title: "Thanh toán an toàn", text: "Thanh toán khi nhận hàng hoặc chuyển khoản QR, xuất hóa đơn VAT." },
-  { icon: Handshake, title: "Cùng phát triển với CTV", text: "Hoa hồng 10% mỗi đơn thành công, khách gắn với CTV vĩnh viễn." },
+  { icon: Handshake, title: "Phát triển cùng HWIN", text: "Hợp đồng rõ ràng, hoa hồng theo năng lực" },
 ];
 
-/** Khối "Vì sao chọn HWIN" (desktop: 4 cột). */
+/** Khối "Hãy đồng hành cùng HWIN" (desktop: 4 cột). */
 export function WhyHwin() {
   return (
     <div className="grid gap-3 px-3 sm:grid-cols-2 md:px-0 lg:grid-cols-4 lg:gap-5">
