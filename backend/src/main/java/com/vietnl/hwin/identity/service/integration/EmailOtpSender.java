@@ -1,11 +1,12 @@
 package com.vietnl.hwin.identity.service.integration;
 
-import com.vietnl.hwin.identity.entity.ExceptionMessage;
-import org.springframework.http.HttpStatus;
-import com.vietnl.hwin.common.exception.ResponseException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -20,6 +21,8 @@ import com.vietnl.hwin.identity.service.config.OtpProperties;
 /**
  * Gửi OTP qua email (SMTP – biến MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, MAIL_FROM).
  * Dev: Mailpit, xem thư tại http://localhost:18025.
+ * Thư được gửi NỀN (luồng ảo): kết nối SMTP (Gmail: TLS + đăng nhập) mất vài giây, không để người dùng chờ ở bước gửi OTP –
+ * họ sang bước nhập mã ngay, thư đến sau. Lỗi gửi chỉ ghi log; mã vẫn hợp lệ và người dùng có thể bấm gửi lại.
  * Không cấu hình SMTP (MAIL_HOST trống):
  * - dev/test (log-code=true): chỉ log, mã lấy từ log / hộp thư dev;
  * - môi trường thật: backend từ chối khởi động (không thì không ai nhận được OTP).
@@ -34,13 +37,21 @@ public class EmailOtpSender implements OtpSender {
     private final JavaMailSender mailSender;
     private final OtpProperties props;
     private final String from;
+    private final Executor executor;
 
+    @Autowired
     public EmailOtpSender(ObjectProvider<JavaMailSender> mailSender, OtpProperties props,
                           @Value("${spring.mail.host:}") String host,
                           @Value("${hwin.mail.from:Hwin Food <no-reply@hwin.vn>}") String from) {
+        this(mailSender, props, host, from, Executors.newVirtualThreadPerTaskExecutor());
+    }
+
+    /** Cho test: truyền Executor để điều khiển nơi gửi thư (vd Runnable::run = gửi ngay trong luồng gọi). */
+    EmailOtpSender(ObjectProvider<JavaMailSender> mailSender, OtpProperties props, String host, String from, Executor executor) {
         this.mailSender = host.isBlank() ? null : mailSender.getIfAvailable();
         this.props = props;
         this.from = from;
+        this.executor = executor;
         if (this.mailSender == null && !props.logCode()) {
             throw new IllegalStateException("Chưa cấu hình SMTP (MAIL_HOST) để gửi OTP qua email");
         }
@@ -73,13 +84,14 @@ public class EmailOtpSender implements OtpSender {
                 Mã có hiệu lực %d phút. Không chia sẻ mã này cho bất kỳ ai, kể cả nhân viên Hwin Food.
                 Nếu bạn không yêu cầu mã, hãy bỏ qua email này.
                 """.formatted(code, purposeText(purpose), props.ttl().toMinutes()));
-        try {
-            mailSender.send(msg);
-            log.info("Đã gửi OTP {} tới {}", purpose, masked);
-        } catch (MailException e) {
-            log.warn("Gửi email OTP tới {} thất bại: {}", masked, e.getMessage());
-            throw new ResponseException(HttpStatus.UNPROCESSABLE_CONTENT, ExceptionMessage.OTP_SEND_FAILED);
-        }
+        executor.execute(() -> {
+            try {
+                mailSender.send(msg);
+                log.info("Đã gửi OTP {} tới {}", purpose, masked);
+            } catch (MailException e) {
+                log.warn("Gửi email OTP tới {} thất bại: {}", masked, e.getMessage());
+            }
+        });
     }
 
     /** Tên miền dành riêng theo RFC 2606 / 6761: không có hộp thư thật, gửi tới chỉ tạo thư báo lỗi. */

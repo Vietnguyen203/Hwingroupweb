@@ -13,6 +13,8 @@
   `EmailOtpSender`, `SimulatedSmsOtpSender`. Thêm SMS thật = viết implementation mới cho kênh `SMS`,
   không sửa `OtpService`.
 
+- **Email được gửi nền**: `EmailOtpSender` đưa việc gửi SMTP sang luồng ảo nên API `/api/auth/otp` trả lời ngay sau khi lưu mã vào Redis (kết nối Gmail mất vài giây). Web sang bước nhập OTP ngay, thư đến sau. Gửi thư lỗi chỉ ghi log (`Gửi email OTP tới ... thất bại`), không còn trả lỗi `OTP_SEND_FAILED` cho người dùng; mã vẫn hợp lệ và người dùng bấm gửi lại được.
+
 ### Cấu hình SMTP (môi trường thật)
 
 ```
