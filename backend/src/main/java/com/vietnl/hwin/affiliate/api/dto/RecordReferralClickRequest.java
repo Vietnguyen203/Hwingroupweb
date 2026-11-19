@@ -24,4 +24,7 @@ public class RecordReferralClickRequest {
     private String code;
     @LengthValidator(max = 500, field = "Trang đích")
     private String landingPath;
+    /** Nền tảng chia sẻ (?src= của link): facebook, zalo, tiktok, youtube, instagram; giá trị khác -> OTHER. */
+    @LengthValidator(max = 32, field = "Nguồn")
+    private String source;
 }

@@ -45,7 +45,7 @@ public class ReferralClickController {
 
     @PostMapping
     public ResponseEntity<Void> click(@Valid @RequestBody RecordReferralClickRequest body, HttpServletRequest request, HttpServletResponse response) {
-        clicks.record(body.getCode(), body.getLandingPath(), ClientInfo.from(request)).ifPresent(result ->
+        clicks.record(body.getCode(), body.getLandingPath(), body.getSource(), ClientInfo.from(request)).ifPresent(result ->
                 response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from(REF_COOKIE, result.referralCode())
                         .httpOnly(true)
                         .secure(security.cookieSecure())

@@ -84,3 +84,32 @@ export const PAYOUT_STATUS: Record<PayoutStatus, { label: string; className: str
   PAID: { label: "Đã chuyển", className: "bg-green-100 text-green-800" },
   REJECTED: { label: "Từ chối", className: "bg-red-100 text-red-800" },
 };
+
+/** Nền tảng chia sẻ của một lượt click (khớp enum ClickSource ở backend). */
+export type ClickSource = "FACEBOOK" | "ZALO" | "TIKTOK" | "YOUTUBE" | "INSTAGRAM" | "OTHER";
+/** Số click của một ngày; `date` dạng yyyy-MM-dd (giờ Việt Nam). */
+export type DailyClicks = { date: string; clicks: number };
+export type SourceClicks = { source: ClickSource; clicks: number };
+/** GET /api/affiliates/me/click-stats: `daily` chỉ gồm ngày có click; `bySource` nhiều click nhất trước. */
+export type ClickStats = { days: number; daily: DailyClicks[]; bySource: SourceClicks[] };
+
+/** Nền tảng có link riêng: `src` là giá trị tham số ?src= gắn vào link chia sẻ. */
+export const SHARE_PLATFORMS = [
+  { source: "FACEBOOK", src: "facebook", label: "Facebook" },
+  { source: "ZALO", src: "zalo", label: "Zalo" },
+  { source: "TIKTOK", src: "tiktok", label: "TikTok" },
+  { source: "YOUTUBE", src: "youtube", label: "YouTube" },
+  { source: "INSTAGRAM", src: "instagram", label: "Instagram" },
+] as const satisfies readonly { source: ClickSource; src: string; label: string }[];
+
+export const SOURCE_LABELS: Record<ClickSource, string> = {
+  FACEBOOK: "Facebook",
+  ZALO: "Zalo",
+  TIKTOK: "TikTok",
+  YOUTUBE: "YouTube",
+  INSTAGRAM: "Instagram",
+  OTHER: "Khác / chưa gắn nguồn",
+};
+
+/** Link chia sẻ kèm nền tảng: <shareLink>&src=facebook (shareLink luôn có sẵn ?ref=). */
+export const platformLink = (shareLink: string, src: string) => `${shareLink}${shareLink.includes("?") ? "&" : "?"}src=${src}`;

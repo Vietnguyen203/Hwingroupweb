@@ -10,9 +10,11 @@ import { api } from "@/lib/api";
 import type { AffiliateDashboard } from "@/lib/affiliate";
 import { siteConfig } from "@/lib/config";
 import { ShareLink } from "../affiliate-dashboard";
+import { PlatformLinks } from "./platform-links";
+import { PortalLink } from "./portal-link";
 import { Reveal } from "./reveal";
 
-/** Trang Link Affiliate: mã giới thiệu, link chia sẻ (chép 1 chạm) và cách hoạt động. */
+/** Trang Link Affiliate: mã giới thiệu, link chia sẻ (chép 1 chạm), link theo từng nền tảng và cách hoạt động. */
 export function AffiliateLinks() {
   const { profile } = useAffiliateProfile({ syncRole: false });
   const dash = useQuery({
@@ -42,6 +44,23 @@ export function AffiliateLinks() {
           <p className="text-xs font-semibold tracking-widest text-white/70 uppercase">Mã giới thiệu của bạn</p>
           <p className="mt-1 text-3xl font-black tracking-[0.2em]">{profile.data?.referralCode ?? "········"}</p>
           {dash.data ? <ShareLink link={dash.data.shareLink} /> : <Skeleton className="mt-3 h-12 rounded-xl bg-white/15" />}
+        </section>
+      </Reveal>
+
+      <Reveal delay={120}>
+        <section aria-labelledby="platform-links">
+          <h2 id="platform-links" className="text-base font-bold text-gray-900">Link theo từng nền tảng</h2>
+          <p className="mt-1 text-sm text-gray-500">
+            Đăng đúng link ở đúng nơi để biết khách đến từ đâu; số click theo nền tảng xem ở trang{" "}
+            <PortalLink slug="performance" className="font-semibold text-brand underline underline-offset-2">Hiệu suất</PortalLink>.
+          </p>
+          {dash.data ? (
+            <PlatformLinks shareLink={dash.data.shareLink} />
+          ) : (
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {[0, 1, 2].map((n) => <Skeleton key={n} className="h-[5.5rem] rounded-xl" />)}
+            </div>
+          )}
         </section>
       </Reveal>
 

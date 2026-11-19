@@ -6,11 +6,14 @@ import { compactVnd, formatNumber, niceScale, type DayPoint } from "@/lib/affili
 import { formatVnd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export type Metric = "orders" | "income";
+export type Metric = "clicks" | "orders" | "income";
+
+const METRICS: readonly Metric[] = ["clicks", "orders", "income"];
 
 const dayShort = (d: Date) => `${d.getDate()}/${d.getMonth() + 1}`;
 const dayLong = (d: Date) => d.toLocaleDateString("vi-VN", { weekday: "short", day: "2-digit", month: "2-digit" });
-const fullValue = (metric: Metric, v: number) => (metric === "orders" ? `${formatNumber(v)} đơn` : formatVnd(v));
+const fullValue = (metric: Metric, v: number) =>
+  metric === "income" ? formatVnd(v) : `${formatNumber(v)} ${metric === "clicks" ? "click" : "đơn"}`;
 
 /**
  * Biểu đồ cột theo ngày, một chuỗi (một màu, không cần chú giải; tiêu đề ở thẻ chứa đã nói rõ đang vẽ gì).
@@ -22,10 +25,10 @@ export function DailyChart({ points, metric, label }: { points: DayPoint[]; metr
   const n = points.length;
   const values = points.map((p) => p[metric]);
   const maxValue = Math.max(0, ...values);
-  const { step, top } = niceScale(maxValue, metric === "orders" ? 1 : 50_000);
+  const { step, top } = niceScale(maxValue, metric === "income" ? 50_000 : 1);
   const ticks: number[] = [];
   for (let v = 0; v <= top + 1e-9; v += step) ticks.push(v);
-  const axis = metric === "orders" ? (v: number) => formatNumber(v) : compactVnd;
+  const axis = metric === "income" ? compactVnd : (v: number) => formatNumber(v);
   const peak = maxValue > 0 ? values.indexOf(maxValue) : -1;
   const labelEvery = n > 14 ? 5 : 1;
   const a = active === null ? null : points[active];
@@ -76,7 +79,9 @@ export function DailyChart({ points, metric, label }: { points: DayPoint[]; metr
         </div>
 
         {maxValue === 0 && (
-          <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-gray-400">Chưa có đơn nào trong 30 ngày qua</p>
+          <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-gray-400">
+            {metric === "clicks" ? "Chưa có lượt click nào trong 30 ngày qua" : "Chưa có đơn nào trong 30 ngày qua"}
+          </p>
         )}
 
         {a && active !== null && (
@@ -86,7 +91,9 @@ export function DailyChart({ points, metric, label }: { points: DayPoint[]; metr
           >
             <p className="text-gray-300">{dayLong(a.date)}</p>
             <p className="text-sm font-bold tabular-nums">{fullValue(metric, values[active])}</p>
-            <p className="text-gray-400 tabular-nums">{fullValue(metric === "orders" ? "income" : "orders", a[metric === "orders" ? "income" : "orders"])}</p>
+            {METRICS.filter((m) => m !== metric).map((m) => (
+              <p key={m} className="text-gray-400 tabular-nums">{fullValue(m, a[m])}</p>
+            ))}
           </div>
         )}
       </div>
@@ -111,10 +118,11 @@ export function DailyTable({ points }: { points: DayPoint[] }) {
   return (
     <div className="max-h-80 overflow-auto rounded-xl border border-gray-100">
       <table className="w-full text-sm">
-        <caption className="sr-only">Đơn hàng và hoa hồng theo ngày</caption>
+        <caption className="sr-only">Click, đơn hàng và hoa hồng theo ngày</caption>
         <thead className="sticky top-0 bg-gray-50 text-xs text-gray-500">
           <tr>
             <th scope="col" className="px-4 py-2.5 text-left font-semibold">Ngày</th>
+            <th scope="col" className="px-4 py-2.5 text-right font-semibold">Click</th>
             <th scope="col" className="px-4 py-2.5 text-right font-semibold">Đơn hàng</th>
             <th scope="col" className="px-4 py-2.5 text-right font-semibold">Hoa hồng</th>
           </tr>
@@ -123,6 +131,7 @@ export function DailyTable({ points }: { points: DayPoint[] }) {
           {[...points].reverse().map((p) => (
             <tr key={p.date.getTime()}>
               <th scope="row" className="px-4 py-2 text-left font-medium text-gray-700">{dayLong(p.date)}</th>
+              <td className="px-4 py-2 text-right tabular-nums text-gray-700">{formatNumber(p.clicks)}</td>
               <td className="px-4 py-2 text-right tabular-nums text-gray-700">{formatNumber(p.orders)}</td>
               <td className="px-4 py-2 text-right tabular-nums text-gray-900">{formatVnd(p.income)}</td>
             </tr>

@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -40,17 +42,22 @@ public class ReferralClick {
 
     private String landingPath;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 16)
+    private ClickSource source;
+
     @Column(nullable = false)
     private Instant clickedAt;
 
     public static ReferralClick record(UUID affiliateId, String referralCode, String ipHash, String userAgent,
-                                       String landingPath, Instant now) {
+                                       String landingPath, ClickSource source, Instant now) {
         ReferralClick c = new ReferralClick();
         c.affiliateId = affiliateId;
         c.referralCode = referralCode;
         c.ipHash = ipHash;
         c.userAgent = userAgent;
         c.landingPath = landingPath == null || landingPath.length() <= 500 ? landingPath : landingPath.substring(0, 500);
+        c.source = source == null ? ClickSource.OTHER : source;
         c.clickedAt = now;
         return c;
     }

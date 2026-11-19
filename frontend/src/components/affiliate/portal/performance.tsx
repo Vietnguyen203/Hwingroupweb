@@ -5,13 +5,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Coins, MousePointerClick, Percent, ShoppingBag } from "lucide-react";
 
 import { api, errorMessage } from "@/lib/api";
-import type { AffiliateDashboard, CommissionResponse } from "@/lib/affiliate";
+import { SOURCE_LABELS, type AffiliateDashboard, type ClickStats, type CommissionResponse } from "@/lib/affiliate";
 import { dailySeries, formatNumber, formatPercent, percentChange, statusSplit, type StatusSplit } from "@/lib/affiliate-stats";
 import { formatVnd } from "@/lib/format";
 import type { PageResponse } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { DailyChart, DailyTable, type Metric } from "./daily-chart";
 import { KpiCard, type KpiTrend } from "./kpi-card";
+import { PortalLink } from "./portal-link";
 import { Reveal } from "./reveal";
 
 const DAYS = 30; // khớp với số liệu click 30 ngày của backend
@@ -35,18 +36,25 @@ async function fetchCommissions(): Promise<Fetched> {
   return { items, truncated: true };
 }
 
+const METRIC_TITLE: Record<Metric, string> = {
+  clicks: "Lượt click mỗi ngày",
+  orders: "Đơn hàng mỗi ngày",
+  income: "Hoa hồng mỗi ngày",
+};
+
 const sum = (pts: { orders: number; income: number }[], k: "orders" | "income") => pts.reduce((n, p) => n + p[k], 0);
 
-/** Trang Hiệu suất: KPI 30 ngày (so với 30 ngày trước), biểu đồ đơn / hoa hồng theo ngày, cơ cấu trạng thái hoa hồng. */
+/** Trang Hiệu suất: KPI 30 ngày (so với 30 ngày trước), biểu đồ click / đơn / hoa hồng theo ngày, click theo nền tảng, cơ cấu trạng thái hoa hồng. */
 export function Performance() {
   const dash = useQuery({ queryKey: ["affiliate-dashboard"], queryFn: () => api<AffiliateDashboard>("/api/affiliates/me/dashboard") });
   const commissions = useQuery({ queryKey: ["affiliate-commissions", "performance"], queryFn: fetchCommissions });
-  const [metric, setMetric] = useState<Metric>("orders");
+  const clickStats = useQuery({ queryKey: ["affiliate-click-stats", DAYS], queryFn: () => api<ClickStats>(`/api/affiliates/me/click-stats?days=${DAYS}`) });
+  const [metric, setMetric] = useState<Metric>("clicks");
   const [view, setView] = useState<"chart" | "table">("chart");
 
   const d = dash.data;
   const data = commissions.data;
-  const series = data ? dailySeries(data.items, DAYS * 2) : null;
+  const series = data ? dailySeries(data.items, DAYS * 2, clickStats.data?.daily) : null;
   const current = series?.slice(DAYS) ?? [];
   const previous = series?.slice(0, DAYS) ?? [];
   const orders = sum(current, "orders");
@@ -61,7 +69,8 @@ export function Performance() {
   };
 
   const loading = dash.isPending || commissions.isPending;
-  const error = dash.error ?? commissions.error;
+  const chartLoading = commissions.isPending || clickStats.isPending;
+  const error = dash.error ?? commissions.error ?? clickStats.error;
 
   return (
     <div className="space-y-6">
@@ -75,7 +84,7 @@ export function Performance() {
       {error && (
         <div role="alert" className="flex items-center justify-between gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
           <span>{errorMessage(error)}</span>
-          <button onClick={() => { dash.refetch(); commissions.refetch(); }} className="shrink-0 font-semibold underline underline-offset-2">Thử lại</button>
+          <button onClick={() => { dash.refetch(); commissions.refetch(); clickStats.refetch(); }} className="shrink-0 font-semibold underline underline-offset-2">Thử lại</button>
         </div>
       )}
 
@@ -126,20 +135,22 @@ export function Performance() {
         <section className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-base font-bold text-gray-900">{metric === "orders" ? "Đơn hàng mỗi ngày" : "Hoa hồng mỗi ngày"}</h2>
-              <p className="text-sm text-gray-500">30 ngày gần nhất, không tính đơn đã hủy</p>
+              <h2 className="text-base font-bold text-gray-900">{METRIC_TITLE[metric]}</h2>
+              <p className="text-sm text-gray-500">
+                {metric === "clicks" ? "30 ngày gần nhất, cùng một người chỉ tính 1 lần trong 24 giờ" : "30 ngày gần nhất, không tính đơn đã hủy"}
+              </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Segmented label="Số liệu" value={metric} onChange={setMetric} options={[{ value: "orders", label: "Đơn hàng" }, { value: "income", label: "Hoa hồng" }]} />
+              <Segmented label="Số liệu" value={metric} onChange={setMetric} options={[{ value: "clicks", label: "Click" }, { value: "orders", label: "Đơn hàng" }, { value: "income", label: "Hoa hồng" }]} />
               <Segmented label="Cách xem" value={view} onChange={setView} options={[{ value: "chart", label: "Biểu đồ" }, { value: "table", label: "Bảng" }]} />
             </div>
           </div>
 
           <div className={cn("mt-2 transition-opacity", commissions.isFetching && !commissions.isPending && "opacity-60")}>
-            {commissions.isPending ? (
+            {chartLoading ? (
               <div className="mt-4 h-72 animate-pulse rounded-xl bg-gray-100" aria-busy="true" aria-label="Đang tải" />
             ) : view === "chart" ? (
-              <DailyChart points={current} metric={metric} label={metric === "orders" ? "Số đơn mỗi ngày" : "Hoa hồng mỗi ngày"} />
+              <DailyChart points={current} metric={metric} label={METRIC_TITLE[metric]} />
             ) : (
               <div className="mt-3"><DailyTable points={current} /></div>
             )}
@@ -157,13 +168,7 @@ export function Performance() {
           <StatusCard split={data ? statusSplit(data.items, DAYS) : null} />
         </Reveal>
         <Reveal delay={460} className="h-full">
-          <section className="h-full rounded-xl border border-dashed border-gray-200 bg-white/60 p-5">
-            <h2 className="text-base font-bold text-gray-900">Chưa có thống kê click theo ngày và theo nền tảng</h2>
-            <p className="mt-1 text-sm text-gray-500">
-              Hiện chỉ có tổng lượt click (30 ngày và từ đầu). Click theo từng ngày và theo nền tảng chia sẻ (Facebook, Zalo, TikTok…) sẽ bổ sung sau,
-              nên biểu đồ trên mới vẽ đơn hàng và hoa hồng.
-            </p>
-          </section>
+          <SourceCard stats={clickStats.data ?? null} />
         </Reveal>
       </div>
     </div>
@@ -186,6 +191,49 @@ function Segmented<T extends string>({ label, value, options, onChange }: { labe
         </button>
       ))}
     </div>
+  );
+}
+
+/**
+ * Click theo nền tảng chia sẻ trong 30 ngày: thanh ngang mảnh một màu (gốc ở mép trái, đầu thanh bo 4px),
+ * kèm số click và tỉ lệ; nhiều nhất trước. Nền tảng đọc từ ?src= của link, link không gắn src nằm ở "Khác".
+ */
+function SourceCard({ stats }: { stats: ClickStats | null }) {
+  const total = stats ? stats.bySource.reduce((n, s) => n + s.clicks, 0) : 0;
+  const max = stats ? Math.max(0, ...stats.bySource.map((s) => s.clicks)) : 0;
+
+  return (
+    <section className="h-full rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+      <h2 className="text-base font-bold text-gray-900">Click theo nền tảng</h2>
+      <p className="text-sm text-gray-500">Nơi khách bấm link của bạn trong 30 ngày qua</p>
+
+      {!stats ? (
+        <div className="mt-4 h-24 animate-pulse rounded-xl bg-gray-100" aria-busy="true" aria-label="Đang tải" />
+      ) : total === 0 ? (
+        <p className="py-6 text-center text-sm text-gray-400">Chưa có lượt click nào trong 30 ngày qua</p>
+      ) : (
+        <ul className="mt-4 space-y-3 text-sm">
+          {stats.bySource.map((s) => (
+            <li key={s.source}>
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="font-medium text-gray-700">{SOURCE_LABELS[s.source]}</span>
+                <span className="text-gray-500 tabular-nums">
+                  <strong className="font-semibold text-gray-900">{formatNumber(s.clicks)}</strong> · {formatPercent((s.clicks / total) * 100)}
+                </span>
+              </div>
+              <div role="img" aria-label={`${SOURCE_LABELS[s.source]}: ${formatNumber(s.clicks)} click`} className="mt-1 h-2 rounded-r-[4px] bg-gray-100">
+                <span className="block h-full rounded-r-[4px] bg-brand-red" style={{ width: `${(s.clicks / max) * 100}%` }} />
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <p className="mt-4 border-t border-gray-100 pt-3 text-xs text-gray-500">
+        Chỉ link có gắn nền tảng mới được tách riêng, còn lại nằm ở “Khác”.{" "}
+        <PortalLink slug="links" className="font-semibold text-brand underline underline-offset-2">Lấy link theo nền tảng</PortalLink>
+      </p>
+    </section>
   );
 }
 

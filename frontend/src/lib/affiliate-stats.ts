@@ -1,7 +1,7 @@
-// Số liệu suy ra cho cổng CTV từ dữ liệu API sẵn có.
-// Backend chưa có API chuỗi thời gian / log click, nên chỉ tính những gì suy ra được từ danh sách hoa hồng, rút tiền.
+// Số liệu cho cổng CTV: đơn / hoa hồng suy ra từ danh sách hoa hồng, rút tiền;
+// click theo ngày lấy từ GET /api/affiliates/me/click-stats (backend chỉ trả ngày có click).
 
-import type { AffiliateDashboard, CommissionResponse, PayoutResponse } from "@/lib/affiliate";
+import type { AffiliateDashboard, CommissionResponse, DailyClicks, PayoutResponse } from "@/lib/affiliate";
 import { formatVnd } from "@/lib/format";
 import type { PageResponse } from "@/lib/types";
 
@@ -122,12 +122,15 @@ export function withdrawBlock(d: AffiliateDashboard): { reason: string; needsBan
   return null;
 }
 
-export type DayPoint = { date: Date; orders: number; income: number };
+export type DayPoint = { date: Date; clicks: number; orders: number; income: number };
 
 const DAY_MS = 86_400_000;
 
-/** Đơn và hoa hồng (không tính đã hủy) theo từng ngày (giờ địa phương) trong `days` ngày gần nhất, cũ -> mới (ngày cuối là hôm nay). */
-export function dailySeries(commissions: CommissionResponse[], days: number): DayPoint[] {
+/**
+ * Click, đơn và hoa hồng (không tính đã hủy) theo từng ngày (giờ địa phương) trong `days` ngày gần nhất, cũ -> mới (ngày cuối là hôm nay).
+ * `dailyClicks` chỉ gồm ngày có click (yyyy-MM-dd); ngày không có thì là 0.
+ */
+export function dailySeries(commissions: CommissionResponse[], days: number, dailyClicks: DailyClicks[] = []): DayPoint[] {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
   start.setDate(start.getDate() - (days - 1));
@@ -135,8 +138,14 @@ export function dailySeries(commissions: CommissionResponse[], days: number): Da
   const points: DayPoint[] = Array.from({ length: days }, (_, i) => {
     const date = new Date(start);
     date.setDate(start.getDate() + i);
-    return { date, orders: 0, income: 0 };
+    return { date, clicks: 0, orders: 0, income: 0 };
   });
+
+  for (const d of dailyClicks) {
+    const [y, m, day] = d.date.split("-").map(Number);
+    const i = Math.round((new Date(y, m - 1, day).getTime() - start.getTime()) / DAY_MS);
+    if (i >= 0 && i < days) points[i].clicks += d.clicks;
+  }
 
   for (const c of commissions) {
     if (c.status === "CANCELLED") continue;

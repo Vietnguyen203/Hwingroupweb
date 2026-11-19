@@ -2,6 +2,7 @@ package com.vietnl.hwin.affiliate.api;
 
 import com.vietnl.hwin.affiliate.service.model.AffiliateDashboard;
 import com.vietnl.hwin.affiliate.service.model.BoundCustomer;
+import com.vietnl.hwin.affiliate.service.model.ClickStats;
 import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -75,6 +76,13 @@ public class AffiliateController {
     @GetMapping("/dashboard")
     public ResponseEntity<AffiliateDashboard> dashboard(@AuthenticationPrincipal AuthPrincipal me) {
         return ResponseEntity.ok(dashboards.dashboard(me.userId()));
+    }
+
+    /** Click theo ngày và theo nền tảng chia sẻ (mặc định 30 ngày gần nhất, tối đa 90). */
+    @GetMapping("/click-stats")
+    public ResponseEntity<ClickStats> clickStats(@AuthenticationPrincipal AuthPrincipal me,
+                                                 @RequestParam(defaultValue = "30") int days) {
+        return ResponseEntity.ok(dashboards.clickStats(me.userId(), days));
     }
 
     @GetMapping("/commissions")
