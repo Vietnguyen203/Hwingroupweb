@@ -27,7 +27,7 @@ export function BottomNav() {
         <MessageCircle className="size-5" />Zalo
       </a>
       <button type="button" onClick={openDrawer} className={item(pathname === "/cart")}>
-        <span className="relative">
+        <span className="relative" data-cart-target>
           <ShoppingCart className="size-5" />
           {count > 0 && (
             <span className="absolute -top-1.5 -right-2.5 min-w-4 rounded-full bg-brand-red px-1 text-center text-[10px] leading-4 font-bold text-white">

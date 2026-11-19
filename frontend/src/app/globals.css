@@ -245,3 +245,99 @@
   transform-origin: 50% 0;
   animation: bell-ring 0.8s ease-in-out;
 }
+
+/* ===== Hiệu ứng màu sắc cho cửa hàng (xem lib/fx.ts). Hoạt ảnh lặp chỉ chạy khi người dùng KHÔNG bật "giảm chuyển động". ===== */
+
+/* Khung ảnh chờ tải: dải màu nhạt trượt qua */
+@keyframes fx-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+.fx-shimmer {
+  background: linear-gradient(110deg, #f1ecff 20%, #ffe9df 40%, #fff6d6 50%, #ffe9df 60%, #f1ecff 80%);
+  background-size: 200% 100%;
+}
+
+/* Hiện dần khi cuộn tới (hook useScrollReveal): con trực tiếp trượt lên lần lượt; fill "backwards" để không giữ transform sau khi xong */
+@keyframes fx-reveal-pop {
+  from { opacity: 0; transform: translateY(22px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+.scroll-reveal[data-reveal="hidden"] > * { opacity: 0; transform: translateY(22px) scale(0.97); }
+.scroll-reveal[data-reveal="shown"] > * { animation: fx-reveal-pop 0.65s var(--ease-out-expo) backwards; }
+.scroll-reveal[data-reveal="shown"] > :nth-child(2) { animation-delay: 60ms; }
+.scroll-reveal[data-reveal="shown"] > :nth-child(3) { animation-delay: 120ms; }
+.scroll-reveal[data-reveal="shown"] > :nth-child(4) { animation-delay: 180ms; }
+.scroll-reveal[data-reveal="shown"] > :nth-child(5) { animation-delay: 240ms; }
+.scroll-reveal[data-reveal="shown"] > :nth-child(6) { animation-delay: 300ms; }
+.scroll-reveal[data-reveal="shown"] > :nth-child(7) { animation-delay: 360ms; }
+.scroll-reveal[data-reveal="shown"] > :nth-child(8) { animation-delay: 420ms; }
+.scroll-reveal[data-reveal="shown"] > :nth-child(n+9) { animation-delay: 480ms; }
+
+/* Viền cầu vồng quay quanh thẻ khi rê chuột (chỉ thiết bị có chuột) */
+@property --fx-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+@keyframes fx-spin { to { --fx-angle: 360deg; } }
+.fx-rainbow { position: relative; }
+.fx-rainbow::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: calc(1rem + 2px);
+  padding: 3px;
+  background: conic-gradient(from var(--fx-angle), #6c3bff, #ff5fa2, #ff6b35, #ffd23f, #2fa84f, #22c3ee, #6c3bff);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .fx-rainbow:hover::before { opacity: 1; animation: fx-spin 3s linear infinite; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Dải sáng chéo quét qua nhãn (giảm giá, bán chạy…) */
+  @keyframes fx-shine {
+    0%, 55% { transform: translateX(-130%) skewX(-20deg); }
+    100% { transform: translateX(230%) skewX(-20deg); }
+  }
+  .fx-shine { position: relative; overflow: hidden; }
+  .fx-shine::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 45%;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.75), transparent);
+    animation: fx-shine 3.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* Nền gradient trôi chậm (banner, khối giảm giá) */
+  @keyframes fx-flow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  .fx-gradient-flow { background-size: 220% 220%; animation: fx-flow 10s ease-in-out infinite; }
+
+  /* Nổi lên xuống nhẹ; dùng thuộc tính `translate` riêng nên không đè lên transform của phần tử */
+  @keyframes fx-float {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -10px; }
+  }
+  .fx-float { animation: fx-float 4.5s ease-in-out infinite; }
+
+  /* Gạch chân tiêu đề khối: dải màu chạy */
+  @keyframes fx-underline {
+    from { background-position: 0% 50%; }
+    to { background-position: 200% 50%; }
+  }
+  .fx-underline {
+    background-image: linear-gradient(90deg, #ff6b35, #ff5fa2, #6c3bff, #22c3ee, #ff6b35);
+    background-size: 200% 100%;
+    animation: fx-underline 4s linear infinite;
+  }
+
+  /* Ảnh chờ tải */
+  .fx-shimmer { animation: fx-shimmer 1.8s linear infinite; }
+}

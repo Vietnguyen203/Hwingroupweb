@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, CheckCircle2, ChevronRight, CircleAlert, Copy, MapPin, Package, ShoppingBag } from "lucide-react";
@@ -12,6 +12,7 @@ import { useQueryParam } from "@/hooks/use-query-param";
 import { api, ApiError, errorMessage } from "@/lib/api";
 import { copyText } from "@/lib/clipboard";
 import { formatDateTime, ORDER_STATUS, PAYMENT_METHOD, type OrderDetailResponse, type OrderStatus } from "@/lib/account";
+import { confettiShower } from "@/lib/fx";
 import { formatVnd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -138,6 +139,9 @@ export function OrderDetailView({ code }: { code: string }) {
 /** Khối chúc mừng sau khi đặt hàng: mã đơn (chép được), lời nhắn theo cách thanh toán, lối đi tiếp. */
 function SuccessHero({ order: o }: { order: OrderDetailResponse }) {
   const isQr = o.paymentMethod === "BANK_QR" && !!o.payment;
+  useEffect(() => {
+    confettiShower(); // mưa pháo giấy ăn mừng đặt hàng thành công
+  }, []);
   return (
     <section className="overflow-hidden rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/40 p-5 text-center shadow-sm md:p-8">
       <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"><CheckCircle2 className="size-10" /></span>

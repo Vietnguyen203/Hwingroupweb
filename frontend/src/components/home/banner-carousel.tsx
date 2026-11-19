@@ -72,7 +72,7 @@ export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
               aria-hidden={i !== index}
               tabIndex={i === index ? 0 : -1}
               className={cn(
-                "group/slide relative flex aspect-[16/9] w-full shrink-0 items-center overflow-hidden rounded-3xl bg-gradient-to-br text-white sm:aspect-[2/1] md:aspect-[12/5] md:rounded-none",
+                "fx-gradient-flow group/slide relative flex aspect-[16/9] w-full shrink-0 items-center overflow-hidden rounded-3xl bg-gradient-to-br text-white sm:aspect-[2/1] md:aspect-[12/5] md:rounded-none",
                 BACKGROUNDS[i % BACKGROUNDS.length],
               )}
             >
@@ -102,7 +102,7 @@ export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
                 <img
                   src={p.imageUrl}
                   alt=""
-                  className="absolute top-1/2 right-[4%] aspect-square h-[78%] -translate-y-1/2 rotate-2 rounded-3xl object-cover shadow-2xl ring-4 ring-white/25 transition duration-700 ease-out-expo group-hover/slide:rotate-0 group-hover/slide:scale-105 md:h-[85%]"
+                  className="fx-float absolute top-1/2 right-[4%] aspect-square h-[78%] -translate-y-1/2 rotate-2 rounded-3xl object-cover shadow-2xl ring-4 ring-white/25 transition duration-700 ease-out-expo group-hover/slide:rotate-0 group-hover/slide:scale-105 md:h-[85%]"
                 />
               )}
             </Link>

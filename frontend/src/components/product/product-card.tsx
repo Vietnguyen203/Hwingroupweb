@@ -6,7 +6,9 @@ import { Eye, Flame, ImageOff, SearchX } from "lucide-react";
 
 import { AffiliateProductTools } from "@/components/affiliate/affiliate-product-tools";
 import { EmptyState, emptyStateButton } from "@/components/ui/empty-state";
+import { SmartImg } from "@/components/ui/smart-img";
 import { useProductDetail } from "@/hooks/use-product-detail";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { formatVnd } from "@/lib/format";
 import type { ProductCardResponse } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -35,28 +37,22 @@ export function ProductCard({ product }: { product: ProductCardResponse }) {
     <article
       onPointerEnter={() => setIntent(true)}
       onFocusCapture={() => setIntent(true)}
-      className="group/card @container relative flex h-full flex-col rounded-2xl bg-white shadow-card ring-1 ring-black/[0.04] transition duration-300 ease-out-expo focus-within:shadow-card-hover hoverable:hover:-translate-y-1.5 hoverable:hover:shadow-card-hover"
+      className="fx-rainbow group/card @container relative flex h-full flex-col rounded-2xl bg-white shadow-card ring-1 ring-black/[0.04] transition duration-300 ease-out-expo focus-within:shadow-card-hover hoverable:hover:-translate-y-1.5 hoverable:hover:shadow-card-hover"
     >
       {/* Ảnh */}
-      <div className="relative aspect-square overflow-hidden rounded-t-2xl bg-neutral-100">
+      <div className="fx-shimmer relative aspect-square overflow-hidden rounded-t-2xl bg-neutral-100">
         <Link href={`/products/${product.slug}`} aria-label={product.name} className="absolute inset-0 block">
           {product.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- ảnh sản phẩm từ backend / thư mục public
-            <img
+            <SmartImg
               src={product.imageUrl}
-              alt=""
-              loading="lazy"
               className="absolute inset-0 size-full object-cover transition duration-700 ease-out-expo hoverable:group-hover/card:scale-[1.06]"
             />
           ) : (
             <span className="absolute inset-0 flex items-center justify-center text-neutral-300"><ImageOff className="size-10" /></span>
           )}
           {secondary && (
-            // eslint-disable-next-line @next/next/no-img-element -- ảnh thứ hai, chỉ hiện khi rê chuột
-            <img
+            <SmartImg
               src={secondary}
-              alt=""
-              loading="lazy"
               aria-hidden
               className="absolute inset-0 size-full scale-105 object-cover opacity-0 transition duration-500 ease-out-expo hoverable:group-hover/card:scale-[1.06] hoverable:group-hover/card:opacity-100"
             />
@@ -66,10 +62,10 @@ export function ProductCard({ product }: { product: ProductCardResponse }) {
         {/* Nhãn */}
         <div className="pointer-events-none absolute top-2.5 left-2.5 z-10 flex flex-col items-start gap-1.5">
           {product.discountPercent > 0 && (
-            <span className="rounded-lg bg-brand-red px-2 py-0.5 text-[11px] font-extrabold tracking-wide text-white shadow-sm">-{product.discountPercent}%</span>
+            <span className="fx-shine rounded-lg bg-brand-red px-2 py-0.5 text-[11px] font-extrabold tracking-wide text-white shadow-sm">-{product.discountPercent}%</span>
           )}
           {product.bestseller && (
-            <span className="flex items-center gap-1 rounded-lg bg-brand-accent px-2 py-0.5 text-[11px] font-extrabold text-neutral-950 shadow-sm">
+            <span className="fx-shine flex items-center gap-1 rounded-lg bg-brand-accent px-2 py-0.5 text-[11px] font-extrabold text-neutral-950 shadow-sm">
               <Flame className="size-3" /> Bán chạy
             </span>
           )}
@@ -130,6 +126,7 @@ export function ProductCard({ product }: { product: ProductCardResponse }) {
 const GRID = "grid grid-cols-2 gap-3 px-3 sm:grid-cols-3 md:grid-cols-4 md:gap-5 md:px-0 lg:grid-cols-5 xl:grid-cols-6";
 
 export function ProductGrid({ products, className }: { products: ProductCardResponse[]; className?: string }) {
+  const { ref, state } = useScrollReveal<HTMLDivElement>(); // thẻ trượt vào lần lượt khi cuộn tới
   if (products.length === 0) {
     return (
       <EmptyState
@@ -142,7 +139,7 @@ export function ProductGrid({ products, className }: { products: ProductCardResp
     );
   }
   return (
-    <div className={cn(GRID, className)}>
+    <div ref={ref} data-reveal={state} className={cn(GRID, "scroll-reveal", className)}>
       {products.map((p) => (
         <ProductCard key={p.id} product={p} />
       ))}

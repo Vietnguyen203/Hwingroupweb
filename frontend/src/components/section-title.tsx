@@ -11,7 +11,7 @@ export function SectionTitle({ title, href }: { title: string; href?: string }) 
       <h2 className="flex items-center gap-2.5 text-lg font-extrabold text-neutral-900 md:flex-col md:gap-2 md:text-3xl md:tracking-tight md:text-brand-deep md:uppercase">
         <span aria-hidden className="h-5 w-1.5 rounded-full bg-brand-accent md:hidden" />
         {title}
-        <span aria-hidden className="hidden h-1 w-14 rounded-full bg-brand-accent md:block" />
+        <span aria-hidden className="fx-underline hidden h-1 w-14 rounded-full bg-brand-accent md:block" />
       </h2>
       {href && (
         <Link href={href} className="group/all inline-flex items-center gap-1 text-sm font-bold text-brand-link transition hover:text-brand-dark md:absolute md:right-0 md:rounded-full md:bg-white md:px-4 md:py-2 md:shadow-card md:hover:shadow-card-hover">

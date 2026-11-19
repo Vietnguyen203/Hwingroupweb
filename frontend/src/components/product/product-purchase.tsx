@@ -8,6 +8,7 @@ import { AffiliateProductTools } from "@/components/affiliate/affiliate-product-
 import { WishlistButton } from "@/components/product/wishlist-button";
 import { Button } from "@/components/ui/button";
 import { formatVnd } from "@/lib/format";
+import { useAddToCart } from "@/hooks/use-add-to-cart";
 import { useCart, type CartLine } from "@/stores/cart-store";
 
 const MAX_QTY = 99;
@@ -20,6 +21,7 @@ const MAX_QTY = 99;
 export function ProductPurchase({ product, stock, slug }: { product: Omit<CartLine, "quantity">; stock: number; slug: string }) {
   const router = useRouter();
   const add = useCart((s) => s.add);
+  const flyAdd = useAddToCart();
   const max = Math.min(stock, MAX_QTY);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
@@ -43,8 +45,8 @@ export function ProductPurchase({ product, stock, slug }: { product: Omit<CartLi
     add(product, qty);
     window.dispatchEvent(new CustomEvent("hwin:cart-added"));
   };
-  const onAdd = () => {
-    addToCart();
+  const onAdd = (e: React.MouseEvent<HTMLElement>) => {
+    flyAdd(product, qty, e.currentTarget); // ảnh bay vào giỏ rồi mới mở giỏ
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };

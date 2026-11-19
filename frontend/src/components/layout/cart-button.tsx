@@ -39,7 +39,7 @@ export function CartButton({ showLabel = true, className }: CartButtonProps) {
         className
       )}
     >
-      <div className="relative">
+      <div className="relative" data-cart-target>
         <ShoppingCart className={cn("size-6 transition-transform group-hover:scale-110", bouncing && "scale-125 text-brand")} />
         {count > 0 && (
           <span

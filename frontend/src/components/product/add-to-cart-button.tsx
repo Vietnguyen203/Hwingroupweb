@@ -4,7 +4,8 @@ import { useState } from "react";
 import { Check, Minus, Plus, ShoppingCart } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { useCart, type CartLine } from "@/stores/cart-store";
+import { useAddToCart } from "@/hooks/use-add-to-cart";
+import type { CartLine } from "@/stores/cart-store";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -19,17 +20,14 @@ type Props = {
 };
 
 export function AddToCartButton({ product, disabled, variant = "icon", className }: Props) {
-  const add = useCart((s) => s.add);
+  const addToCart = useAddToCart();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
-  const onAdd = () => {
-    add(product, variant === "full" ? qty : 1);
+  // Ảnh sản phẩm bay vào giỏ rồi mới mở giỏ; sự kiện "hwin:cart-added" (giỏ nảy số) do hiệu ứng bắn ra
+  const onAdd = (e: React.MouseEvent<HTMLElement>) => {
+    addToCart(product, variant === "full" ? qty : 1, e.currentTarget);
     setAdded(true);
-    // Bắn event để Header Cart Button nảy số
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("hwin:cart-added"));
-    }
     setTimeout(() => setAdded(false), 1500);
   };
 

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ArrowUpRight, Flame, Gift, Handshake } from "lucide-react";
 
+import { RevealGroup } from "@/components/ui/reveal-group";
+
 const TILES = [
   { title: "Bán chạy", text: "Món ngon được chọn nhiều nhất", href: "/search?sort=BESTSELLER", icon: Flame, bg: "bg-gradient-to-br from-brand-accent/20 to-brand-accent/5", color: "text-brand-red", iconBg: "bg-brand-accent" },
   { title: "Combo", text: "Mua theo bộ – giá tốt hơn", href: "/categories/combo", icon: Gift, bg: "bg-gradient-to-br from-brand/15 to-brand/5", color: "text-brand-dark", iconBg: "bg-brand" },
@@ -10,7 +12,7 @@ const TILES = [
 /** 3 ô truy cập nhanh (desktop): biểu tượng nổi trong ô màu, rê chuột ô nổi lên và mũi tên chéo hiện ra. */
 export function QuickTiles() {
   return (
-    <div className="hidden grid-cols-3 gap-5 pt-6 md:grid">
+    <RevealGroup className="hidden grid-cols-3 gap-5 pt-6 md:grid">
       {TILES.map(({ title, text, href, icon: Icon, bg, color, iconBg }) => (
         <Link
           key={title}
@@ -29,6 +31,6 @@ export function QuickTiles() {
           </span>
         </Link>
       ))}
-    </div>
+    </RevealGroup>
   );
 }

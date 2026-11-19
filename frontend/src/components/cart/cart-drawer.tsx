@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,6 +8,7 @@ import { ArrowRight, Minus, Plus, ShoppingBag, ShoppingCart, Trash2, X } from "l
 
 import { CartSuggestions } from "@/components/cart/cart-suggestions";
 import { buttonVariants } from "@/components/ui/button";
+import { confettiBurst } from "@/lib/fx";
 import { formatVnd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { cartSubtotal, useCart } from "@/stores/cart-store";
@@ -24,6 +25,17 @@ export function CartDrawer() {
   const { lines, isDrawerOpen, closeDrawer, setQuantity, remove } = useCart();
   // Giá, phí ship và ngưỡng miễn phí ship luôn lấy từ backend (chỉ gọi khi giỏ đang mở)
   const quote = useCartQuote(lines, mounted && isDrawerOpen);
+
+  // Vừa đủ điều kiện miễn phí vận chuyển (khi giỏ đang mở): bắn pháo giấy ăn mừng một lần
+  const reachedFreeship =
+    lines.length > 0 && (quote.data?.freeShippingThreshold ?? 0) > 0 && (quote.data?.subtotal ?? cartSubtotal(lines)) >= (quote.data?.freeShippingThreshold ?? 0);
+  const wasReached = useRef(false);
+  useEffect(() => {
+    if (isDrawerOpen && reachedFreeship && !wasReached.current) {
+      confettiBurst(window.innerWidth / 2, window.innerHeight * 0.32, { count: 70, power: 11 });
+    }
+    wasReached.current = reachedFreeship;
+  }, [isDrawerOpen, reachedFreeship]);
 
   // Đóng bằng phím Escape
   useEffect(() => {
