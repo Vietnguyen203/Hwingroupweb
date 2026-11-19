@@ -21,7 +21,7 @@
 **Trong phạm vi**
 
 - Web khách: trang chủ, danh mục, chi tiết sản phẩm, tìm kiếm không dấu, giỏ hàng, thanh toán kèm OTP, trang cảm ơn kèm QR, tài khoản (đơn của tôi, Mua lại, địa chỉ).
-- Trang CTV `/affiliate`: đăng ký, dashboard, thông tin ngân hàng, yêu cầu rút tiền.
+- Trang CTV: giới thiệu và đăng ký ở `/affiliate`; cổng CTV `/affiliate/<id tài khoản>/…` gồm tổng quan, link giới thiệu, hoa hồng & thanh toán (thông tin ngân hàng, yêu cầu rút tiền). Các mục Chiến dịch, Sản phẩm, Hiệu suất chưa có chức năng (trang "Sắp ra mắt").
 - Trang admin `/admin`: danh mục, sản phẩm, đơn hàng, khách hàng (lọc + CSV), duyệt CTV, duyệt / chi trả rút tiền.
 - Thanh toán: **COD** và **BANK_QR** (ảnh VietQR, admin xác nhận đã nhận tiền).
 - Thu thập thông tin xuất hóa đơn VAT (không phát hành hóa đơn thật).
@@ -136,8 +136,8 @@ flowchart TB
     U["Điện thoại / Trình duyệt<br/>khách, CTV, admin"]
 
     subgraph FE[Next.js App Router - frontend]
-        SSR["Trang khách SSR<br/>/, /c/slug, /p/slug, /search, /cart, /checkout, /account"]
-        CTV["/affiliate - CSR"]
+        SSR["Trang khách SSR<br/>/, /c/slug, /p/slug, /search, /cart, /checkout, /account/[id]"]
+        CTV["/affiliate, /affiliate/[id]/… - CSR"]
         ADM["/admin - CSR"]
         MW["proxy.ts (middleware Next 16)<br/>chặn /admin, /affiliate theo role<br/>đọc ?ref"]
         RW["rewrites /api/* → backend<br/>cookie cùng origin"]
