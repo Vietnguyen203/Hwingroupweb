@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 
-import { ComingSoon } from "@/components/affiliate/portal/coming-soon";
+import { Performance } from "@/components/affiliate/portal/performance";
+import { PortalGate } from "@/components/affiliate/portal/portal-gate";
 
 export const metadata: Metadata = { title: "Hiệu suất" };
 
 export default function AffiliatePerformancePage() {
-  return <ComingSoon slug="performance" />;
+  return (
+    <PortalGate>
+      <Performance />
+    </PortalGate>
+  );
 }

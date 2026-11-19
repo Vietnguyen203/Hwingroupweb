@@ -32,8 +32,8 @@ export const PORTAL_NAV: PortalNavItem[] = [
     description: "Mã giới thiệu và link chia sẻ riêng của bạn.",
   },
   {
-    slug: "performance", label: "Hiệu suất", icon: BarChart3, preview: "chart",
-    description: "Biểu đồ lượt click, đơn hàng và tỷ lệ chuyển đổi theo thời gian.",
+    slug: "performance", label: "Hiệu suất", icon: BarChart3,
+    description: "Biểu đồ đơn hàng, hoa hồng và tỷ lệ chuyển đổi theo thời gian.",
   },
   {
     slug: "earnings", label: "Hoa hồng & Thanh toán", icon: Wallet,

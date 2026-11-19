@@ -205,8 +205,10 @@ Loại thông báo và người nhận:
 | `/account`, `/account/[id]`, `/account/orders`, `/account/orders/[code]` | CSR | đăng nhập (kiểm ở client) |
 | `/affiliate` | CSR | public (giới thiệu) / dashboard cũ khi là CTV đã duyệt |
 | `/affiliate/register` | CSR | đăng nhập |
-| `/affiliate/[id]/dashboard`, `/affiliate/[id]/links`, `/affiliate/[id]/earnings` | CSR | đăng nhập (proxy.ts) + CTV đã duyệt (kiểm ở client, backend kiểm role AFFILIATE) |
-| `/affiliate/[id]/campaigns`, `/affiliate/[id]/products`, `/affiliate/[id]/performance` | CSR | như trên; chưa có chức năng (trang "Sắp ra mắt") |
+| `/affiliate/[id]/dashboard`, `/affiliate/[id]/links`, `/affiliate/[id]/earnings`, `/affiliate/[id]/performance` | CSR | đăng nhập (proxy.ts) + CTV đã duyệt (kiểm ở client, backend kiểm role AFFILIATE) |
+| `/affiliate/[id]/campaigns`, `/affiliate/[id]/products` | CSR | như trên; chưa có chức năng (trang "Sắp ra mắt") |
+
+`/affiliate/[id]/performance` (Hiệu suất) chỉ dùng API có sẵn: `GET /api/affiliates/me/dashboard` (tổng click, click 30 ngày) và `GET /api/affiliates/me/commissions` (đơn và hoa hồng theo ngày, 30 ngày so với 30 ngày trước). Chưa có click theo ngày / theo nền tảng vì backend chưa lưu nguồn click.
 
 **`[id]` trên URL (`/account/[id]`, `/affiliate/[id]/…`) là ID tài khoản (`MeResponse.id`), chỉ để hiển thị**: dữ liệu luôn lấy theo phiên đăng nhập (`/api/me/...`, `/api/affiliates/me/...`), không dùng id trên URL. Component `OwnIdRedirect` giữ id trên URL luôn là id của chính người đang đăng nhập: `/account` và link cũ `/affiliate/<mục>` (vd `/affiliate/links`, kể cả `?tab=bank`) tự chuyển sang link có id; id của người khác tự chuyển về id của mình. Cổng CTV nằm ở `app/affiliate/[id]/`; dựng link bằng `PortalLink` / `portalPath` (`lib/portal-path.ts`).
 | `/admin/login` | CSR | public (đăng nhập 2 bước) |

@@ -121,3 +121,65 @@ export function withdrawBlock(d: AffiliateDashboard): { reason: string; needsBan
   }
   return null;
 }
+
+export type DayPoint = { date: Date; orders: number; income: number };
+
+const DAY_MS = 86_400_000;
+
+/** Đơn và hoa hồng (không tính đã hủy) theo từng ngày (giờ địa phương) trong `days` ngày gần nhất, cũ -> mới (ngày cuối là hôm nay). */
+export function dailySeries(commissions: CommissionResponse[], days: number): DayPoint[] {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - (days - 1));
+
+  const points: DayPoint[] = Array.from({ length: days }, (_, i) => {
+    const date = new Date(start);
+    date.setDate(start.getDate() + i);
+    return { date, orders: 0, income: 0 };
+  });
+
+  for (const c of commissions) {
+    if (c.status === "CANCELLED") continue;
+    const at = new Date(c.createdAt);
+    at.setHours(0, 0, 0, 0);
+    const i = Math.round((at.getTime() - start.getTime()) / DAY_MS);
+    if (i >= 0 && i < days) {
+      points[i].orders += 1;
+      points[i].income += c.amount;
+    }
+  }
+  return points;
+}
+
+export type StatusSplit = Record<"PENDING" | "APPROVED" | "CANCELLED", { count: number; amount: number }>;
+
+/** Số hoa hồng và tiền theo trạng thái, tính cho các hoa hồng tạo trong `days` ngày gần nhất. */
+export function statusSplit(commissions: CommissionResponse[], days: number): StatusSplit {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - (days - 1));
+
+  const split: StatusSplit = { PENDING: { count: 0, amount: 0 }, APPROVED: { count: 0, amount: 0 }, CANCELLED: { count: 0, amount: 0 } };
+  for (const c of commissions) {
+    if (new Date(c.createdAt).getTime() < start.getTime()) continue;
+    split[c.status].count += 1;
+    split[c.status].amount += c.amount;
+  }
+  return split;
+}
+
+/** Số tiền rút gọn cho trục biểu đồ: 500k, 1,2tr. */
+export function compactVnd(n: number): string {
+  if (n >= 1_000_000) return `${percent.format(n / 1_000_000)}tr`;
+  if (n >= 1_000) return `${percent.format(n / 1_000)}k`;
+  return String(n);
+}
+
+/** Mốc trục tung "tròn" (1, 2, 5 × 10^k, không nhỏ hơn `minStep`): trả về bước và đỉnh trục. */
+export function niceScale(maxValue: number, minStep: number, target = 4): { step: number; top: number } {
+  const raw = Math.max(maxValue, minStep) / target;
+  const pow = 10 ** Math.floor(Math.log10(raw));
+  const f = raw / pow;
+  const step = Math.max((f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * pow, minStep);
+  return { step, top: step * Math.max(Math.ceil(maxValue / step), 1) };
+}
