@@ -92,7 +92,8 @@ export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
                   <span className="size-1.5 rounded-full bg-brand-accent" />
                   {tag === "Mới" ? "Sản phẩm mới" : "Bán chạy nhất"}
                 </span>
-                <h2 className="line-clamp-2 text-lg leading-[1.1] font-black tracking-tight uppercase drop-shadow-sm sm:text-2xl md:text-5xl">{p.name}</h2>
+                {/* Chữ hoa tiếng Việt hay chồng 2 dấu (Ề, Ố…): line-clamp cắt phần tràn nên cần giãn dòng + đệm trên/dưới để dấu không bị cắt */}
+                <h2 className="line-clamp-2 py-1.5 text-lg leading-[1.3] font-black tracking-tight uppercase drop-shadow-sm sm:text-2xl md:py-2 md:text-5xl md:leading-[1.25]">{p.name}</h2>
                 <p className="flex items-baseline gap-2 md:gap-3">
                   <span className="text-xl font-black text-[#ffd400] md:text-4xl">{formatVnd(p.price)}</span>
                   {p.compareAtPrice != null && p.compareAtPrice > p.price && (
