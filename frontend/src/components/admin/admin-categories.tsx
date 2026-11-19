@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, FolderPlus, FolderTree, Image as ImageIcon, Layers, Pencil, Plus, Trash2 } from "lucide-react";
+import { Check, Eye, EyeOff, FolderPlus, FolderTree, Image as ImageIcon, Layers, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
@@ -14,7 +14,7 @@ import { api, errorMessage } from "@/lib/api";
 import type { CategoryResponse } from "@/lib/types";
 import { ImageUploader } from "@/components/ui/image-uploader";
 import { CategoryAddProductsModal } from "./category-add-products-modal";
-import { ActionButton, AdminPage, FilterBar, Loading, Table } from "./admin-ui";
+import { AdminPage, FilterBar, IconButton, Loading, Table } from "./admin-ui";
 
 export type CategoryForm = {
   id?: string;
@@ -224,19 +224,29 @@ export function AdminCategories() {
           </Button>
         </div>
       ) : (
-        <Table head={["Icon", "Tên danh mục", "Thứ tự", "Số sản phẩm", "Trạng thái", "Thao tác"]}>
+        <Table head={["Danh mục", "Thứ tự", "Số sản phẩm", "Trạng thái", "Thao tác"]}>
           {list.map((c) => (
             <tr key={c.id} className="hover:bg-slate-50/70 transition-colors">
               <td className="px-4 py-3">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-slate-100 overflow-hidden border border-slate-200/80 shadow-2xs">
-                  {c.iconUrl ? (
-                    <Image src={c.iconUrl} alt={c.name} width={36} height={36} className="size-8 object-contain" />
-                  ) : (
-                    <Layers className="size-5 text-slate-400" />
-                  )}
-                </div>
+                {/* Bấm vào icon / tên danh mục là mở form sửa (giống bảng sản phẩm), không có nút "Sửa" riêng ở cột Thao tác.
+                    Dùng <button> để bàn phím (Tab, Enter) cũng mở được; chỉ chứa phần tử dòng (span) cho đúng HTML. */}
+                <button
+                  type="button"
+                  onClick={() => startEdit(c)}
+                  aria-label={`Sửa danh mục ${c.name}`}
+                  title="Bấm để sửa danh mục"
+                  className="group/edit flex w-full cursor-pointer items-center gap-3 rounded-lg text-left outline-offset-4 focus-visible:outline-2 focus-visible:outline-brand"
+                >
+                  <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200/80 bg-slate-100 shadow-2xs">
+                    {c.iconUrl ? (
+                      <Image src={c.iconUrl} alt="" width={36} height={36} className="size-8 object-contain" />
+                    ) : (
+                      <Layers className="size-5 text-slate-400" />
+                    )}
+                  </span>
+                  <span className="font-semibold text-slate-800 transition-colors group-hover/edit:text-brand">{c.name}</span>
+                </button>
               </td>
-              <td className="px-4 py-3 font-semibold text-slate-800">{c.name}</td>
               <td className="px-4 py-3 font-semibold text-slate-700">{c.sortOrder}</td>
               <td className="px-4 py-3">
                 <Link
@@ -259,34 +269,22 @@ export function AdminCategories() {
                   {c.active ? "Đang hiển thị" : "Đã ẩn"}
                 </span>
               </td>
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setAddingTo(c)}
-                    title="Thêm các sản phẩm đã có vào danh mục này"
-                    className="inline-flex items-center gap-1 rounded-lg border border-brand/30 bg-brand/5 px-2.5 py-1.5 text-xs font-semibold text-brand hover:bg-brand hover:text-white transition shadow-2xs"
-                  >
-                    <Plus className="size-3.5" /> Thêm SP
-                  </button>
-                  <ActionButton onClick={() => startEdit(c)}>
-                    <Pencil className="size-3.5 mr-1 text-slate-500" /> Sửa
-                  </ActionButton>
-                  <ActionButton
-                    tone={c.active ? "danger" : "default"}
+              <td className="px-4 py-3 whitespace-nowrap">
+                {/* Nút biểu tượng như cột Thao tác của bảng sản phẩm */}
+                <div className="inline-flex items-center gap-1.5">
+                  <IconButton label="Thêm các sản phẩm đã có vào danh mục này" onClick={() => setAddingTo(c)}>
+                    <Plus className="size-4" />
+                  </IconButton>
+                  <IconButton
+                    label={c.active ? "Ẩn danh mục khỏi trang bán hàng" : "Hiện danh mục trên trang bán hàng"}
                     onClick={() => toggleActive.mutate(c)}
                     disabled={toggleActive.isPending}
                   >
-                    {c.active ? "Ẩn danh mục" : "Bật hiển thị"}
-                  </ActionButton>
-                  <ActionButton
-                    tone="danger"
-                    onClick={() => setDeletingCategory(c)}
-                    disabled={deleteCategory.isPending}
-                    title="Xóa danh mục"
-                  >
-                    <Trash2 className="size-3.5 text-rose-500" />
-                  </ActionButton>
+                    {c.active ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </IconButton>
+                  <IconButton label="Xóa danh mục" tone="danger" onClick={() => setDeletingCategory(c)} disabled={deleteCategory.isPending}>
+                    <Trash2 className="size-4" />
+                  </IconButton>
                 </div>
               </td>
             </tr>
