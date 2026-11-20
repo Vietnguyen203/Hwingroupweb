@@ -2,12 +2,12 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 
 import { Breadcrumb } from "@/components/layout/breadcrumb";
-import { Price } from "@/components/product/price";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { ProductGrid } from "@/components/product/product-card";
 import { ProductPurchase } from "@/components/product/product-purchase";
 import { ProductTabs } from "@/components/product/product-tabs";
 import { StarRating } from "@/components/product/star-rating";
+import { PriceTag } from "@/components/ui/price-tag";
 import { SectionTitle } from "@/components/section-title";
 import { ProductPageSkeleton } from "@/components/skeletons/page-skeletons";
 import { getBestsellers, getProduct, getReviewSummary, searchProducts } from "@/lib/catalog";
@@ -81,10 +81,11 @@ async function ProductContent({ params }: PageProps<"/products/[slug]">) {
             </a>
           </div>
 
-          <div className="flex items-center gap-3 rounded-2xl bg-brand-soft p-4 ring-1 ring-brand/10">
-            <Price price={product.price} compareAtPrice={product.compareAtPrice} size="lg" />
+          {/* Tem giá giống ở trang chủ: số tiền lớn, "/ đơn vị" và giá gốc gạch ngang bên dưới */}
+          <div className="flex flex-wrap items-center gap-3">
+            <PriceTag price={product.price} compareAt={product.compareAtPrice} unit={product.unit} className="-rotate-1" />
             {product.discountPercent > 0 && (
-              <span className="rounded-lg bg-brand-red px-2.5 py-1 text-sm font-extrabold text-white">-{product.discountPercent}%</span>
+              <span className="rounded-md bg-brand-red px-2.5 py-1 text-sm font-bold text-white">-{product.discountPercent}%</span>
             )}
           </div>
 

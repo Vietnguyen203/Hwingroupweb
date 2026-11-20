@@ -3,12 +3,12 @@ import { Suspense } from "react";
 import { BannerCarousel, type BannerSlide } from "@/components/home/banner-carousel";
 import { CategoryMenu } from "@/components/home/category-menu";
 import { ComboFeature } from "@/components/home/combo-feature";
-import { QuickTiles } from "@/components/home/quick-tiles";
 import { AffiliateBanner } from "@/components/home/affiliate-banner";
 import { SaleStrip } from "@/components/home/sale-strip";
 import { WhyHwin } from "@/components/home/why-hwin";
 import { ProductGrid, ProductGridSkeleton } from "@/components/product/product-card";
 import { SectionTitle } from "@/components/section-title";
+import { Band } from "@/components/ui/band";
 import { getBestsellersCached, getCategories, searchProductsCached } from "@/lib/catalog";
 import { cn } from "@/lib/utils";
 
@@ -27,11 +27,10 @@ export default function HomePage() {
       <Suspense fallback={<div className="mx-3 mt-3 aspect-[12/5] animate-pulse rounded-2xl bg-neutral-200 md:mx-0" />}>
         <Banners />
       </Suspense>
-      <QuickTiles />
 
       <Suspense
         fallback={
-          <HomeSection id="categories" title="Danh mục sản phẩm">
+          <HomeSection id="categories" title="Danh mục sản phẩm" tone="bg-white">
             <div className="mx-3 h-40 animate-pulse rounded-xl bg-neutral-200 md:mx-0" />
           </HomeSection>
         }
@@ -62,7 +61,7 @@ export default function HomePage() {
 
       <Suspense
         fallback={
-          <HomeSection id="newest" title="Sản phẩm mới" href="/search">
+          <HomeSection id="newest" title="Sản phẩm mới" href="/search" tone="bg-white">
             <ProductGridSkeleton />
           </HomeSection>
         }
@@ -79,12 +78,12 @@ export default function HomePage() {
 }
 
 /** Một khối của trang chủ: có `id` cho thanh đi nhanh, tiêu đề và nội dung. Dùng cả cho khung chờ lẫn khối đã tải xong. */
-function HomeSection({ id, title, href, children }: { id: string; title: string; href?: string; children: React.ReactNode }) {
+function HomeSection({ id, title, href, tone, children }: { id: string; title: string; href?: string; tone?: string; children: React.ReactNode }) {
   return (
-    <section id={id} className="scroll-mt-sticky">
+    <Band id={id} tone={tone} className={tone ? "mt-10 pb-8 md:mt-14 md:pb-12" : "pb-4"}>
       <SectionTitle title={title} href={href} />
       {children}
-    </section>
+    </Band>
   );
 }
 
@@ -109,7 +108,7 @@ async function Categories() {
   const categories = (await getCategories()).filter((c) => c.productCount > 0);
   if (categories.length === 0) return null; // không có danh mục nào thì ẩn cả khối (kể cả tiêu đề)
   return (
-    <HomeSection id="categories" title="Danh mục sản phẩm">
+    <HomeSection id="categories" title="Danh mục sản phẩm" tone="bg-white">
       <CategoryMenu categories={categories} />
     </HomeSection>
   );
@@ -153,21 +152,21 @@ async function Combos() {
 }
 
 async function Bestsellers() {
-  const products = await getBestsellersCached(12);
+  const products = await getBestsellersCached(9); // 1 nổi bật + 8 thường = lấp kín 3 hàng lưới 4 cột
   if (products.length === 0) return null; // chưa có sản phẩm bán chạy thì ẩn cả khối
   return (
     <HomeSection id="bestsellers" title="Bán chạy" href="/search?sort=BESTSELLER">
-      <ProductGrid products={products} />
+      <ProductGrid products={products} featured="left" />
     </HomeSection>
   );
 }
 
 async function Newest() {
-  const products = (await searchProductsCached({ sort: "NEWEST", size: 12 })).content;
+  const products = (await searchProductsCached({ sort: "NEWEST", size: 9 })).content;
   if (products.length === 0) return null; // chưa có sản phẩm nào thì ẩn cả khối
   return (
-    <HomeSection id="newest" title="Sản phẩm mới" href="/search">
-      <ProductGrid products={products} />
+    <HomeSection id="newest" title="Sản phẩm mới" href="/search" tone="bg-white">
+      <ProductGrid products={products} featured="right" />
     </HomeSection>
   );
 }

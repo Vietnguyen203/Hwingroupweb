@@ -3,27 +3,29 @@ import Link from "next/link";
 import type { CategoryResponse } from "@/lib/types";
 
 /**
- * Danh mục: mobile = icon tròn 4 cột (cuộn dọc); desktop = thẻ trắng bo lớn, ảnh tròn,
- * rê chuột thẻ nổi lên và ảnh phóng nhẹ. Ảnh phủ kín vòng tròn (object-cover), không có nền màu lộ ra quanh ảnh.
+ * Danh mục: lưới thẻ ngang (ảnh vuông bo nhỏ bên trái, tên và số sản phẩm bên phải), 2 cột trên điện thoại, 6 cột trên máy tính.
+ * Ảnh phủ kín ô (object-cover); chưa có ảnh thì hiện ô xám, không có nền màu lộ ra quanh ảnh.
  */
 export function CategoryMenu({ categories }: { categories: CategoryResponse[] }) {
   if (!categories || categories.length === 0) return null;
   return (
-    <nav aria-label="Danh mục" className="grid grid-cols-4 gap-x-2 gap-y-4 px-3 sm:grid-cols-6 md:flex md:flex-wrap md:justify-center md:gap-5 md:px-0">
+    <nav aria-label="Danh mục" className="grid grid-cols-2 gap-2.5 px-3 sm:grid-cols-3 md:gap-3 md:px-0 lg:grid-cols-4 xl:grid-cols-6">
       {categories.map((c) => (
         <Link
           key={c.id}
           href={`/categories/${c.slug}`}
-          className="group/cat flex flex-col items-center gap-1.5 text-center md:w-[calc((100%-6.25rem)/6)] md:min-w-40 md:gap-3 md:rounded-2xl md:bg-white md:px-3 md:py-6 md:shadow-card md:ring-1 md:ring-black/[0.04] md:transition md:duration-300 md:ease-out-expo md:hover:-translate-y-1.5 md:hover:shadow-card-hover"
+          className="group/cat flex items-center gap-3 rounded-xl bg-page-bg p-2.5 ring-1 ring-black/[0.06] transition-colors hover:bg-brand-soft hover:ring-brand/30"
         >
-          <span className="flex size-16 items-center justify-center overflow-hidden rounded-full bg-brand-soft ring-1 ring-brand/10 transition duration-300 ease-spring group-hover/cat:scale-105 md:size-28 md:shadow-[0_10px_20px_-8px_rgb(0_0_0/0.3)]">
+          <span className="size-14 shrink-0 overflow-hidden rounded-lg bg-neutral-200">
             {c.iconUrl && (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={c.iconUrl} alt="" className="size-full object-cover transition duration-300 group-hover/cat:scale-110" />
             )}
           </span>
-          <span className="text-[13px] leading-4 font-medium text-neutral-800 transition-colors group-hover/cat:text-brand md:text-sm md:font-bold md:text-neutral-900">{c.name}</span>
-          {c.productCount > 0 && <span className="hidden rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-semibold text-brand md:block">{c.productCount} sản phẩm</span>}
+          <span className="min-w-0">
+            <span className="block line-clamp-2 text-sm leading-tight font-bold text-neutral-900 group-hover/cat:text-brand">{c.name}</span>
+            {c.productCount > 0 && <span className="mt-0.5 block text-xs text-neutral-500">{c.productCount} sản phẩm</span>}
+          </span>
         </Link>
       ))}
     </nav>

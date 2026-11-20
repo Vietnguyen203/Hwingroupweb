@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import { Pagination } from "@/components/pagination";
+import { PageHeading } from "@/components/page-heading";
 import { ProductFilterBar } from "@/components/product-filter-bar";
 import { ProductGrid, ProductGridSkeleton } from "@/components/product/product-card";
 import { SortSelect } from "@/components/sort-select";
@@ -29,10 +30,7 @@ async function SearchContent({ searchParams }: PageProps<"/search">) {
 
   return (
     <>
-      <h1 className="px-3 pt-5 pb-3 text-2xl font-extrabold tracking-tight md:px-0 md:text-3xl">
-        {q ? <>Kết quả cho “{q}”</> : "Tất cả sản phẩm"}{" "}
-        <span className="ml-1 rounded-full bg-brand-soft px-2.5 py-0.5 align-middle text-sm font-bold text-brand">{result.totalElements}</span>
-      </h1>
+      <PageHeading title={q ? `Kết quả cho “${q}”` : "Tất cả sản phẩm"} count={result.totalElements} />
       <div className="px-3 pb-4 md:px-0">
         <SortSelect basePath="/search" params={{ q, ...filterParams(filters) }} current={sort} />
       </div>

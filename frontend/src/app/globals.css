@@ -161,6 +161,8 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Các dải nền tràn hết bề ngang trang (w-screen) tính cả thanh cuộn dọc; clip để không sinh thanh cuộn ngang. Khác `hidden`, clip không làm hỏng phần tử sticky. */
+    overflow-x: clip;
   }
   html {
     @apply font-sans;
@@ -251,4 +253,9 @@
 .animate-bell-ring {
   transform-origin: 50% 0;
   animation: bell-ring 0.8s ease-in-out;
+}
+
+/* Tem giá: khối chữ nhật cắt chéo bốn góc như nhãn dán ở quầy hàng (xem components/ui/price-tag.tsx) */
+.tem {
+  clip-path: polygon(0 10px, 10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px));
 }

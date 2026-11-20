@@ -6,6 +6,7 @@ import { Eye, Flame, ImageOff, SearchX } from "lucide-react";
 
 import { AffiliateProductTools } from "@/components/affiliate/affiliate-product-tools";
 import { EmptyState, emptyStateButton } from "@/components/ui/empty-state";
+import { PriceTag } from "@/components/ui/price-tag";
 import { SmartImg } from "@/components/ui/smart-img";
 import { useProductDetail } from "@/hooks/use-product-detail";
 import { formatVnd } from "@/lib/format";
@@ -22,9 +23,10 @@ const ACTION_BASE = "flex size-10 shrink-0 items-center justify-center rounded-f
  * - Rê chuột: thẻ nhích lên nhẹ, ảnh phóng nhẹ và chuyển mờ dần sang ảnh thứ hai (lấy theo nhu cầu từ API chi tiết),
  *   thanh "Xem nhanh / Thêm vào giỏ" trượt lên từ đáy ảnh. Bàn phím: focus vào bất kỳ nút nào cũng hiện thanh này.
  * - Cảm ứng (không có hover): nút "Thêm vào giỏ" và "Xem nhanh" hiện sẵn bên dưới giá, không phụ thuộc hover.
+ * - `featured`: thẻ nổi bật của lưới trang chủ: ảnh lớn lấp đầy chiều cao ô, tên cỡ lớn, giá là tem đỏ cắt góc.
  * - Tim yêu thích luôn hiện ở góc ảnh; CTV đã duyệt thấy thêm hoa hồng dự kiến + nút chia sẻ.
  */
-export function ProductCard({ product }: { product: ProductCardResponse }) {
+export function ProductCard({ product, featured = false }: { product: ProductCardResponse; featured?: boolean }) {
   const [intent, setIntent] = useState(false); // đã rê chuột / focus vào thẻ -> mới tải ảnh thứ hai
   const [quickOpen, setQuickOpen] = useState(false);
   const detail = useProductDetail(product.slug, intent);
@@ -39,7 +41,7 @@ export function ProductCard({ product }: { product: ProductCardResponse }) {
       className="group/card @container relative flex h-full flex-col rounded-xl bg-white shadow-card ring-1 ring-black/[0.05] transition duration-300 ease-out-expo focus-within:shadow-card-hover hoverable:hover:-translate-y-1 hoverable:hover:shadow-card-hover"
     >
       {/* Ảnh */}
-      <div className="relative aspect-square overflow-hidden rounded-t-xl bg-neutral-100">
+      <div className={cn("relative overflow-hidden rounded-t-xl bg-neutral-100", featured ? "aspect-[16/10] md:aspect-auto md:min-h-0 md:flex-1" : "aspect-square")}>
         <Link href={`/products/${product.slug}`} aria-label={product.name} className="absolute inset-0 block">
           {product.imageUrl ? (
             <SmartImg
@@ -92,16 +94,28 @@ export function ProductCard({ product }: { product: ProductCardResponse }) {
       </div>
 
       {/* Thông tin */}
-      <div className="flex flex-1 flex-col gap-1 p-3 md:p-4">
+      <div className={cn("flex flex-col gap-1 p-3 md:p-4", featured ? "md:shrink-0" : "flex-1")}>
+        {featured ? (
+          <div className="flex items-end justify-between gap-3">
+            <Link
+              href={`/products/${product.slug}`}
+              className="line-clamp-3 font-display text-xl leading-tight font-bold text-balance text-neutral-900 transition-colors duration-200 hover:text-brand md:text-2xl"
+            >
+              {product.name}
+            </Link>
+            <PriceTag price={product.price} compareAt={product.compareAtPrice} unit={product.unit} />
+          </div>
+        ) : (
         <Link
           href={`/products/${product.slug}`}
           className="line-clamp-2 min-h-10 text-sm leading-5 font-semibold text-neutral-900 transition-colors duration-200 hover:text-brand group-hover/card:text-brand md:text-[15px]"
         >
           {product.name}
         </Link>
+        )}
 
         {/* Tem giá: số tiền đỏ to, "/ đơn vị" nhỏ liền bên cạnh, giá gốc gạch ngang ngay dưới */}
-        <div className="mt-auto pt-2">
+        <div className={cn("mt-auto pt-2", featured && "hidden")}>
           {/* Thẻ đủ rộng thì "/ đơn vị" nằm cạnh giá; thẻ hẹp thì xuống dòng dưới giá (không để chữ rớt dòng ngẫu nhiên) */}
           <p className="flex flex-col @min-[12rem]:flex-row @min-[12rem]:items-baseline @min-[12rem]:gap-x-1.5">
             <span className="font-display text-lg leading-none font-extrabold tracking-tight whitespace-nowrap text-brand-red tabular-nums md:text-xl">{formatVnd(product.price)}</span>
@@ -128,7 +142,13 @@ export function ProductCard({ product }: { product: ProductCardResponse }) {
 
 const GRID = "grid grid-cols-2 gap-3 px-3 sm:grid-cols-3 md:grid-cols-4 md:gap-5 md:px-0 lg:grid-cols-5 xl:grid-cols-6";
 
-export function ProductGrid({ products, className }: { products: ProductCardResponse[]; className?: string }) {
+/**
+ * Lưới sản phẩm. `featured`: sản phẩm đầu tiên là ô lớn (chiếm 2 cột × 2 hàng từ màn md; 2 cột trên điện thoại),
+ * nằm bên trái ("left") hoặc bên phải ("right"); lưới cố định 4 cột nên 9 sản phẩm (1 nổi bật + 8) lấp kín 3 hàng.
+ */
+const FEATURED_GRID = "grid grid-cols-2 gap-3 px-3 md:grid-cols-4 md:gap-5 md:px-0 md:grid-flow-dense";
+
+export function ProductGrid({ products, className, featured }: { products: ProductCardResponse[]; className?: string; featured?: "left" | "right" }) {
   if (products.length === 0) {
     return (
       <EmptyState
@@ -138,6 +158,19 @@ export function ProductGrid({ products, className }: { products: ProductCardResp
         actions={<Link href="/search" className={emptyStateButton.secondary}>Xem tất cả sản phẩm</Link>}
         className="py-10 md:py-14"
       />
+    );
+  }
+  if (featured) {
+    const [first, ...rest] = products;
+    return (
+      <div className={cn(FEATURED_GRID, className)}>
+        <div className={cn("col-span-2 md:row-span-2 md:row-start-1", featured === "left" ? "md:col-start-1" : "md:col-start-3")}>
+          <ProductCard product={first} featured />
+        </div>
+        {rest.map((p) => (
+          <ProductCard key={p.id} product={p} />
+        ))}
+      </div>
     );
   }
   return (

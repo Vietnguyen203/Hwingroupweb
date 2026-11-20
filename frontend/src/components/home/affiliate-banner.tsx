@@ -1,6 +1,7 @@
 import { Link2, Share2, Wallet } from "lucide-react";
 
 import { AffiliateJoinLink } from "@/components/affiliate/affiliate-join-link";
+import { Band } from "@/components/ui/band";
 
 const STEPS = [
   { icon: Link2, title: "Đăng ký miễn phí", text: "Nhận mã giới thiệu và link riêng sau khi được duyệt." },
@@ -8,33 +9,37 @@ const STEPS = [
   { icon: Wallet, title: "Nhận hoa hồng 10%", text: "Hoa hồng tự cộng khi đơn giao thành công, rút về ngân hàng." },
 ];
 
-/** Khối kêu gọi làm CTV trên trang chủ (web phục vụ affiliate nên đặt nổi bật). */
+/**
+ * Khối kêu gọi làm CTV trên trang chủ (web phục vụ affiliate nên đặt nổi bật): dải tím đêm tràn trang,
+ * con số 10% cỡ rất lớn là điểm nhấn, ba bước là một chuỗi thật nên được đánh số.
+ */
 export function AffiliateBanner() {
   return (
-    <section id="affiliate" className="scroll-mt-sticky mx-3 mt-10 overflow-hidden rounded-2xl bg-brand p-6 text-white shadow-[0_24px_50px_-20px_rgb(108_59_255/0.6)] md:mx-0 md:p-10">
-      <div className="grid items-center gap-8 lg:grid-cols-[1fr_1.4fr]">
+    <Band id="affiliate" tone="bg-brand-deep" className="mt-12 py-10 text-white md:mt-16 md:py-16">
+      <div className="grid items-center gap-8 px-3 md:px-0 lg:grid-cols-[1fr_1.1fr] lg:gap-14">
         <div>
-          <p className="text-sm font-semibold text-brand-accent">Cộng tác viên HWIN</p>
-          <h2 className="mt-2 text-2xl leading-tight font-black md:text-4xl">Chia sẻ món ngon,<br />nhận hoa hồng mỗi đơn</h2>
-          <p className="mt-3 text-white/80">Không cần vốn, không cần ôm hàng – HWIN lo sản phẩm, giao hàng và chăm sóc khách.</p>
+          <p className="font-display text-[5.5rem] leading-[0.85] font-extrabold tracking-tight text-brand-honey md:text-[9rem]">10%</p>
+          <h2 className="mt-4 text-2xl leading-tight font-bold text-balance md:text-4xl">hoa hồng cho mỗi đơn bạn giới thiệu</h2>
+          <p className="mt-3 max-w-md text-white/80">Không cần vốn, không cần ôm hàng. HWIN lo sản phẩm, giao hàng và chăm sóc khách.</p>
           <AffiliateJoinLink
-            guestLabel="Đăng ký CTV ngay"
-            className="mt-6 inline-block rounded-full bg-brand-accent px-7 py-3 font-extrabold text-neutral-950 shadow-lg shadow-brand-accent/30 transition duration-200 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0"
+            guestLabel="Đăng ký làm cộng tác viên"
+            className="mt-6 inline-block rounded-full bg-brand-honey px-7 py-3 font-bold text-neutral-900 transition duration-200 hover:brightness-105"
           />
         </div>
-        <ol className="grid gap-3 md:grid-cols-3">
+        <ol className="divide-y divide-white/15 border-y border-white/15">
           {STEPS.map(({ icon: Icon, title, text }, i) => (
-            <li key={title} className="rounded-2xl bg-white/10 p-5 ring-1 ring-white/15 backdrop-blur transition duration-300 hover:-translate-y-1 hover:bg-white/15">
-              <span className="flex items-center gap-2 text-sm font-bold text-brand-accent">
-                <span className="flex size-7 items-center justify-center rounded-full bg-brand-accent text-white">{i + 1}</span>
-                <Icon className="size-5" />
-              </span>
-              <h3 className="mt-3 font-bold">{title}</h3>
-              <p className="mt-1 text-sm text-white/75">{text}</p>
+            <li key={title} className="flex items-start gap-4 py-5">
+              <span className="font-display text-3xl leading-none font-extrabold text-brand-honey tabular-nums">{i + 1}</span>
+              <div className="min-w-0 flex-1">
+                <h3 className="flex items-center gap-2 text-lg font-bold">
+                  {title} <Icon className="size-4 text-white/60" />
+                </h3>
+                <p className="mt-1 text-sm text-white/75">{text}</p>
+              </div>
             </li>
           ))}
         </ol>
       </div>
-    </section>
+    </Band>
   );
 }

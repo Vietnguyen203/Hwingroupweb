@@ -4,21 +4,15 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
-import { formatVnd } from "@/lib/format";
+import { PriceTag } from "@/components/ui/price-tag";
 import type { ProductCardResponse } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export type BannerSlide = { product: ProductCardResponse; tag: "Mới" | "Bán chạy" };
 
-const INTERVAL_MS = 3000;
-/** Mỗi slide một dải màu riêng (theo bảng màu thương hiệu) để các banner liền nhau dễ phân biệt. */
-const BACKGROUNDS = [
-  "from-brand-deep via-brand-dark to-brand",
-  "from-[#b42a05] via-brand-red to-brand-accent",
-  "from-[#0b4f3a] via-[#12805a] to-brand-green",
-  "from-[#3a1383] via-[#7a35e8] to-[#d946ef]",
-  "from-[#1b1f3b] via-[#352a8a] to-brand",
-];
+const INTERVAL_MS = 4500;
+/** Nền dự phòng (theo bảng màu thương hiệu) khi sản phẩm chưa có ảnh; mỗi slide một màu để các banner liền nhau dễ phân biệt. */
+const BACKGROUNDS = ["bg-brand-deep", "bg-brand-red", "bg-[#12805a]", "bg-brand-dark", "bg-[#352a8a]"];
 
 function subscribeReducedMotion(cb: () => void) {
   const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -27,7 +21,8 @@ function subscribeReducedMotion(cb: () => void) {
 }
 
 /**
- * Banner chạy: tối đa 5 sản phẩm (mới + bán chạy), tự chuyển mỗi 3 giây. Dừng khi rê chuột / đang focus trong banner,
+ * Banner chạy: tối đa 5 sản phẩm (mới + bán chạy). Ảnh sản phẩm phủ kín khung, tiêu đề cỡ rất lớn nằm đè lên ảnh
+ * ở góc dưới trái, tem giá đỏ nghiêng ở góc dưới phải. Tự chuyển mỗi 4,5 giây; dừng khi rê chuột / đang focus trong banner,
  * không tự chạy nếu người dùng bật "giảm chuyển động". Bấm vào banner -> trang chi tiết sản phẩm.
  */
 export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
@@ -61,7 +56,7 @@ export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
       onFocus={() => setHovering(true)}
       onBlur={() => setHovering(false)}
     >
-      <div className="overflow-hidden px-3 md:rounded-2xl md:px-0">
+      <div className="overflow-hidden rounded-2xl mx-3 md:mx-0">
         <div className="flex transition-transform duration-700 ease-out-expo" style={{ transform: `translateX(-${index * 100}%)` }}>
           {slides.map(({ product: p, tag }, i) => (
             <Link
@@ -71,48 +66,32 @@ export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
               aria-hidden={i !== index}
               tabIndex={i === index ? 0 : -1}
               className={cn(
-                "group/slide relative flex aspect-[16/9] w-full shrink-0 items-center overflow-hidden rounded-2xl bg-gradient-to-br text-white sm:aspect-[2/1] md:aspect-[12/5] md:rounded-none",
+                "group/slide relative isolate flex h-[26rem] w-full shrink-0 items-end overflow-hidden text-white md:h-[30rem]",
                 BACKGROUNDS[i % BACKGROUNDS.length],
               )}
             >
-              {/* Nền: chính ảnh sản phẩm làm mờ (phóng to để không lộ mép mờ), phủ lớp tối nhẹ ở bên chữ cho dễ đọc; dải màu bên dưới là dự phòng khi không có ảnh */}
+              {/* Ảnh sản phẩm phủ kín khung; lớp tối dần từ dưới lên và từ trái sang để tiêu đề đè lên ảnh vẫn đọc được */}
               {p.imageUrl && (
-                <>
-                  {/* eslint-disable-next-line @next/next/no-img-element -- ảnh sản phẩm từ backend (cùng URL với ảnh chính nên chỉ tải một lần) */}
-                  <img src={p.imageUrl} alt="" aria-hidden className="pointer-events-none absolute inset-0 size-full scale-125 object-cover blur-2xl saturate-150" />
-                  <span aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/60 via-black/35 to-black/10" />
-                </>
+                // eslint-disable-next-line @next/next/no-img-element -- ảnh sản phẩm từ backend
+                <img src={p.imageUrl} alt="" aria-hidden className="absolute inset-0 -z-20 size-full object-cover transition duration-1000 ease-out-expo group-hover/slide:scale-105" />
               )}
-              <div className="relative z-10 w-[58%] space-y-1.5 pl-5 sm:pl-8 md:w-3/5 md:space-y-4 md:pl-16">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-[10px] font-bold ring-1 ring-white/25 backdrop-blur md:px-3.5 md:py-1 md:text-xs">
-                  <span className="size-1.5 rounded-full bg-brand-accent" />
-                  {tag === "Mới" ? "Sản phẩm mới" : "Bán chạy nhất"}
-                </span>
-                {/* line-clamp cắt phần tràn nên cần giãn dòng + đệm trên/dưới để dấu tiếng Việt (ế, ộ, ữ…) không bị cắt; text-balance chia đều hai dòng, tránh "(20 cái)" rớt lẻ */}
-                <h2 className="line-clamp-2 py-1.5 text-lg leading-[1.3] font-black tracking-tight text-balance drop-shadow-sm sm:text-2xl md:py-2 md:text-5xl md:leading-[1.25]">{p.name}</h2>
-                <p className="flex items-baseline gap-2 md:gap-3">
-                  <span className="text-xl font-black text-[#ffd400] md:text-4xl">{formatVnd(p.price)}</span>
-                  {p.compareAtPrice != null && p.compareAtPrice > p.price && (
-                    <span className="hidden text-xs text-white/70 line-through sm:inline md:text-lg">{formatVnd(p.compareAtPrice)}</span>
-                  )}
-                </p>
-                <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-xs font-extrabold text-brand-deep shadow-lg transition duration-300 group-hover/slide:gap-3 md:mt-2 md:px-7 md:py-3 md:text-base">
-                  Xem chi tiết <ArrowRight className="size-3.5 md:size-4" />
-                </span>
-              </div>
+              <span aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-black/35 to-black/5 md:bg-gradient-to-r md:from-black/75 md:via-black/30 md:to-transparent" />
 
-              {/* Ảnh chính luôn nằm giữa banner theo chiều dọc. Căn giữa bằng khung flex, KHÔNG dùng -translate-y-1/2:
-                  Tailwind 4 dịch bằng thuộc tính `translate`, dễ bị thuộc tính `translate` khác ghi đè làm ảnh lệch. */}
-              {p.imageUrl && (
-                <div className="pointer-events-none absolute inset-y-0 right-[4%] flex items-center">
-                  {/* eslint-disable-next-line @next/next/no-img-element -- ảnh sản phẩm từ backend */}
-                  <img
-                    src={p.imageUrl}
-                    alt=""
-                    className="aspect-square h-[78%] shrink-0 rotate-2 rounded-2xl object-cover shadow-2xl ring-4 ring-white/25 transition duration-700 ease-out-expo group-hover/slide:rotate-0 group-hover/slide:scale-105 md:h-[85%]"
-                  />
+              <div className="flex w-full flex-col items-start gap-4 p-5 sm:p-8 md:flex-row md:items-end md:justify-between md:p-14">
+                <div className="min-w-0 md:max-w-[60%]">
+                  <p className="inline-block border-l-4 border-brand-honey pl-2.5 text-sm font-semibold md:text-base">
+                    {tag === "Mới" ? "Sản phẩm mới" : "Bán chạy nhất"}
+                  </p>
+                  {/* line-clamp cắt phần tràn nên cần giãn dòng + đệm trên/dưới để dấu tiếng Việt (ế, ộ, ữ…) không bị cắt; text-balance chia đều dòng */}
+                  <h2 className="mt-3 line-clamp-3 py-1 font-display text-[2rem] leading-[1.08] font-extrabold tracking-tight text-balance sm:text-5xl md:text-7xl md:leading-[1.04]">
+                    {p.name}
+                  </h2>
+                  <span className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-brand-deep transition duration-300 group-hover/slide:gap-3 md:mt-6 md:px-7 md:py-3 md:text-base">
+                    Xem chi tiết <ArrowRight className="size-4" />
+                  </span>
                 </div>
-              )}
+                <PriceTag price={p.price} compareAt={p.compareAtPrice} unit={p.unit} size="lg" className="absolute top-5 right-5 -rotate-6 transition duration-500 ease-out-expo group-hover/slide:-rotate-3 md:static" />
+              </div>
             </Link>
           ))}
         </div>

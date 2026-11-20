@@ -7,17 +7,15 @@ const ITEMS = [
   { icon: Handshake, title: "Phát triển cùng HWIN", text: "Hợp đồng rõ ràng, hoa hồng theo năng lực" },
 ];
 
-/** Khối "Hãy đồng hành cùng HWIN" (desktop: 4 cột). */
+/** Khối "Hãy đồng hành cùng HWIN": bốn cam kết trình bày phẳng, ngăn bằng đường kẻ, không đóng khung từng ô. */
 export function WhyHwin() {
   return (
-    <div className="grid gap-3 px-3 sm:grid-cols-2 md:px-0 lg:grid-cols-4 lg:gap-5">
+    <div className="grid gap-x-8 gap-y-6 px-3 pb-12 sm:grid-cols-2 md:px-0 md:pb-16 lg:grid-cols-4">
       {ITEMS.map(({ icon: Icon, title, text }) => (
-        <div key={title} className="group/why rounded-2xl bg-white p-6 text-center shadow-card ring-1 ring-black/[0.04] transition duration-300 ease-out-expo hover:-translate-y-1 hover:shadow-card-hover">
-          <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-brand-soft text-brand transition duration-300 ease-spring group-hover/why:scale-110 group-hover/why:rotate-6 group-hover/why:bg-brand group-hover/why:text-white">
-            <Icon className="size-7" />
-          </span>
-          <h3 className="mt-4 font-extrabold text-neutral-900">{title}</h3>
-          <p className="mt-1 text-sm text-muted-foreground">{text}</p>
+        <div key={title} className="border-t-2 border-brand-deep pt-4">
+          <Icon className="size-7 text-brand" />
+          <h3 className="mt-3 text-lg leading-snug font-bold text-neutral-900">{title}</h3>
+          <p className="mt-1 text-sm text-neutral-600">{text}</p>
         </div>
       ))}
     </div>

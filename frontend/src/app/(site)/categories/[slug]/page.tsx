@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { LayoutGrid } from "lucide-react";
 
 import { Pagination } from "@/components/pagination";
+import { PageHeading } from "@/components/page-heading";
 import { ProductFilterBar } from "@/components/product-filter-bar";
 import { ProductGrid, ProductGridSkeleton } from "@/components/product/product-card";
 import { SortSelect } from "@/components/sort-select";
@@ -36,9 +37,7 @@ async function CategoryContent({ params, searchParams }: PageProps<"/categories/
 
   return (
     <>
-      <h1 className="px-3 pt-4 pb-3 text-2xl font-extrabold tracking-tight md:px-0 md:text-3xl">
-        {category.name} <span className="ml-1 rounded-full bg-brand-soft px-2.5 py-0.5 align-middle text-sm font-bold text-brand">{result.totalElements} sản phẩm</span>
-      </h1>
+      <PageHeading title={category.name} count={result.totalElements} />
       <div className="flex flex-wrap items-center gap-3 px-3 pb-4 md:px-0">
         <NavSelect
           label="Danh mục"
