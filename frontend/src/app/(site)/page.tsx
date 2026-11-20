@@ -30,7 +30,7 @@ export default function HomePage() {
 
       <Suspense
         fallback={
-          <HomeSection id="categories" title="Danh mục sản phẩm" tone="bg-white">
+          <HomeSection id="categories" title="Hôm nay bạn muốn ăn gì?" tone="bg-white">
             <div className="mx-3 h-40 animate-pulse rounded-xl bg-neutral-200 md:mx-0" />
           </HomeSection>
         }
@@ -49,7 +49,7 @@ export default function HomePage() {
 
       <Suspense
         fallback={
-          <HomeSection id="bestsellers" title="Bán chạy" href="/search?sort=BESTSELLER">
+          <HomeSection id="bestsellers" title="Được yêu thích nhất" href="/search?sort=BESTSELLER">
             <ProductGridSkeleton />
           </HomeSection>
         }
@@ -61,7 +61,7 @@ export default function HomePage() {
 
       <Suspense
         fallback={
-          <HomeSection id="newest" title="Sản phẩm mới" href="/search" tone="bg-white">
+          <HomeSection id="newest" title="Vừa lên kệ" href="/search" tone="bg-white">
             <ProductGridSkeleton />
           </HomeSection>
         }
@@ -70,7 +70,7 @@ export default function HomePage() {
       </Suspense>
 
       <section id="why-hwin" className="scroll-mt-sticky">
-        <SectionTitle title="Hãy đồng hành cùng Phúc Vị" />
+        <SectionTitle title="Vì sao bạn nên chọn Phúc Vị" />
         <WhyHwin />
       </section>
     </>
@@ -108,7 +108,7 @@ async function Categories() {
   const categories = (await getCategories()).filter((c) => c.productCount > 0);
   if (categories.length === 0) return null; // không có danh mục nào thì ẩn cả khối (kể cả tiêu đề)
   return (
-    <HomeSection id="categories" title="Danh mục sản phẩm" tone="bg-white">
+    <HomeSection id="categories" title="Hôm nay bạn muốn ăn gì?" tone="bg-white">
       <CategoryMenu categories={categories} />
     </HomeSection>
   );
@@ -138,7 +138,7 @@ async function Combos() {
 
   return (
     <section id="combos" className="scroll-mt-sticky">
-      <SectionTitle title="Combo ưu đãi" href="/search?q=combo" />
+      <SectionTitle title="Combo tiết kiệm" href="/search?q=combo" />
       {/* 1–2 combo: thẻ ngang nổi bật; từ 3 combo trở lên: lưới thẻ thường */}
       {products.length <= 2 ? (
         <div className={cn("grid gap-4 px-3 md:px-0", products.length === 2 ? "md:grid-cols-2" : "mx-auto max-w-3xl")}>
@@ -155,7 +155,7 @@ async function Bestsellers() {
   const products = await getBestsellersCached(9); // 1 nổi bật + 8 thường = lấp kín 3 hàng lưới 4 cột
   if (products.length === 0) return null; // chưa có sản phẩm bán chạy thì ẩn cả khối
   return (
-    <HomeSection id="bestsellers" title="Bán chạy" href="/search?sort=BESTSELLER">
+    <HomeSection id="bestsellers" title="Được yêu thích nhất" href="/search?sort=BESTSELLER">
       <ProductGrid products={products} featured="left" />
     </HomeSection>
   );
@@ -165,7 +165,7 @@ async function Newest() {
   const products = (await searchProductsCached({ sort: "NEWEST", size: 9 })).content;
   if (products.length === 0) return null; // chưa có sản phẩm nào thì ẩn cả khối
   return (
-    <HomeSection id="newest" title="Sản phẩm mới" href="/search" tone="bg-white">
+    <HomeSection id="newest" title="Vừa lên kệ" href="/search" tone="bg-white">
       <ProductGrid products={products} featured="right" />
     </HomeSection>
   );

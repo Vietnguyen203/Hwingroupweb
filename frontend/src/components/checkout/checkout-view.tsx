@@ -180,7 +180,7 @@ export function CheckoutView() {
 
   return (
     <div>
-      <PageHeading title="Thanh toán" />
+      <PageHeading title="Thanh toán" subtitle="Chỉ còn vài bước nữa là bạn nhận được món ngon." />
       <div className="px-3 pb-8 md:px-0 md:pb-12">
       {/* Các bước đặt hàng (một chuỗi thật nên có thứ tự) */}
       <nav aria-label="Các bước đặt hàng" className="mb-5 flex flex-wrap items-center gap-1.5 text-xs text-neutral-500 md:text-sm">

@@ -32,7 +32,7 @@ export function GettingStarted({ dash, orders }: { dash: AffiliateDashboard; ord
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <div>
           <h2 className="text-base font-bold text-gray-900">Bắt đầu nhanh</h2>
-          <p className="text-sm text-gray-500">Hoàn thành 3 bước để nhận hoa hồng đầu tiên.</p>
+          <p className="text-sm text-gray-500">Chỉ 3 bước nhỏ là bạn nhận được hoa hồng đầu tiên.</p>
         </div>
         <div className="flex items-center gap-3">
           <div

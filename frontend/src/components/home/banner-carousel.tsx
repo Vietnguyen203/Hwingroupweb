@@ -56,7 +56,7 @@ export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
       onFocus={() => setHovering(true)}
       onBlur={() => setHovering(false)}
     >
-      <div className="overflow-hidden rounded-2xl mx-3 md:mx-0">
+      <div className="mx-3 overflow-hidden rounded-3xl md:mx-0">
         <div className="flex transition-transform duration-700 ease-out-expo" style={{ transform: `translateX(-${index * 100}%)` }}>
           {slides.map(({ product: p, tag }, i) => (
             <Link
@@ -83,7 +83,7 @@ export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
                     {tag === "Mới" ? "Sản phẩm mới" : "Bán chạy nhất"}
                   </p>
                   {/* line-clamp cắt phần tràn nên cần giãn dòng + đệm trên/dưới để dấu tiếng Việt (ế, ộ, ữ…) không bị cắt; text-balance chia đều dòng */}
-                  <h2 className="mt-3 line-clamp-3 py-1 font-display text-[2rem] leading-[1.08] font-extrabold tracking-tight text-balance sm:text-5xl md:text-7xl md:leading-[1.04]">
+                  <h2 className="mt-3 line-clamp-3 py-1 font-display text-[2rem] leading-[1.08] font-extrabold tracking-tight text-balance sm:text-5xl md:text-6xl md:leading-[1.06]">
                     {p.name}
                   </h2>
                   <span className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-brand-deep transition duration-300 group-hover/slide:gap-3 md:mt-6 md:px-7 md:py-3 md:text-base">

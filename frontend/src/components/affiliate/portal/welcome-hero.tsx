@@ -28,10 +28,10 @@ export function WelcomeHero({ name, referralCode, shareLink }: Props) {
             Cổng cộng tác viên Phúc Vị
           </span>
           <h1 className="mt-3 text-2xl font-extrabold tracking-tight text-balance sm:text-3xl lg:text-4xl">
-            Chào mừng quay trở lại, <span className="text-brand-accent">{name}</span>!
+            Chào mừng bạn quay lại, <span className="text-brand-accent">{name}</span>!
           </h1>
           <p className="mt-2 max-w-xl text-sm text-white/75 sm:text-base">
-            Chia sẻ món ngon, theo dõi đơn hàng và hoa hồng của bạn ngay tại đây.
+            Mỗi lần bạn chia sẻ món ngon là một cơ hội nhận hoa hồng. Cùng xem hôm nay bạn đạt được gì nhé.
           </p>
           <Link
             href="/products"

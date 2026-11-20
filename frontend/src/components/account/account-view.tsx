@@ -37,7 +37,7 @@ export function AccountView() {
 
   return (
     <div>
-      <PageHeading title="Tài khoản của tôi" subtitle={me.data.fullName ?? undefined} />
+      <PageHeading title="Tài khoản của tôi" subtitle={me.data.fullName ? `Xin chào, ${me.data.fullName}` : undefined} />
       <div className="space-y-3 p-3 md:grid md:grid-cols-[320px_1fr] md:gap-4 md:space-y-0 md:px-0 md:pb-10">
         <div className="space-y-3">
           <ProfileCard />

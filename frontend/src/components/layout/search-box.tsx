@@ -110,7 +110,7 @@ export function SearchBox() {
       role="search"
       onSubmit={() => setOpen(false)}
       // Không `relative` trên mobile: khung gợi ý bám theo cả thanh header (ô tìm kiếm ở đó rất hẹp khi đã đăng nhập)
-      className="mx-2 min-w-0 max-w-xl flex-1 sm:relative lg:max-w-2xl"
+      className="relative order-last w-full min-w-0 md:order-none md:mx-2 md:max-w-xl md:flex-1 lg:max-w-2xl"
     >
       <label className="flex h-11 items-center overflow-hidden rounded-full border-2 border-brand bg-white pr-0 pl-4 shadow-2xs transition focus-within:border-brand-dark focus-within:shadow-[0_0_0_4px_rgb(108_59_255/0.12)]">
         <input
@@ -145,7 +145,7 @@ export function SearchBox() {
       </label>
 
       {showList && (
-        <div className="absolute inset-x-2 top-full z-50 mt-1 overflow-hidden rounded-2xl sm:inset-x-0 sm:mt-2 bg-white text-left shadow-2xl ring-1 shadow-black/10 ring-black/[0.06]">
+        <div className="absolute inset-x-0 top-full z-50 mt-2 overflow-hidden rounded-2xl bg-white text-left shadow-2xl ring-1 shadow-black/10 ring-black/[0.06]">
           <ul id={listId} role="listbox" aria-label="Gợi ý sản phẩm">
             {items.map((p, i) => (
               <li key={p.id} id={`${listId}-${i}`} role="option" aria-selected={active === i}>

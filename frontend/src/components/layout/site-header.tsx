@@ -59,7 +59,8 @@ export function SiteHeader() {
 
       {/* 2. MAIN HEADER NỀN TRẮNG */}
       <header data-site-header className="sticky top-0 z-40 w-full border-b border-neutral-100 bg-white/95 shadow-xs backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
+        {/* Điện thoại: hàng 1 là logo + thông báo + giỏ hàng, ô tìm kiếm xuống hàng 2 chiếm hết bề ngang (không bị bóp hẹp) */}
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3 md:flex-nowrap">
           {/* Logo thương hiệu + Slogan */}
           <div className="flex shrink-0 items-center gap-3">
             <Suspense fallback={<Menu className="size-6 text-brand md:hidden" />}>

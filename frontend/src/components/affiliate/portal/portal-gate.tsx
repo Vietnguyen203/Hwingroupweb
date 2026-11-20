@@ -23,16 +23,16 @@ export function PortalGate({ children }: { children: React.ReactNode }) {
   // Chưa mounted: luôn skeleton để khớp HTML server (React hydrate từng phần, lúc đó cache đăng nhập có thể đã có sẵn)
   if (!mounted || me.isPending || (me.data && profile.isPending) || needsRole) return <PortalSkeleton />;
   if (!me.data) {
-    return <Notice title="Bạn cần đăng nhập" text="Đăng nhập tài khoản cộng tác viên để xem cổng CTV." href="/login?next=%2Faffiliate%2Fdashboard" action="Đăng nhập" />;
+    return <Notice title="Mời bạn đăng nhập" text="Đăng nhập để vào cổng cộng tác viên của bạn." href="/login?next=%2Faffiliate%2Fdashboard" action="Đăng nhập" />;
   }
   if (profile.error) {
-    return <Notice title="Không tải được hồ sơ CTV" text={errorMessage(profile.error)} href="/affiliate" action="Về trang CTV" />;
+    return <Notice title="Chưa tải được hồ sơ của bạn" text={errorMessage(profile.error)} href="/affiliate" action="Về trang CTV" />;
   }
   if (!a) {
-    return <Notice title="Bạn chưa là cộng tác viên" text="Đăng ký chương trình để có link giới thiệu riêng và nhận hoa hồng trên mỗi đơn." href="/affiliate/register" action="Đăng ký làm CTV" />;
+    return <Notice title="Bạn chưa là cộng tác viên" text="Tham gia chương trình để nhận link giới thiệu riêng và hoa hồng cho mỗi đơn bạn giới thiệu." href="/affiliate/register" action="Đăng ký làm CTV" />;
   }
   if (a.status !== "APPROVED") {
-    return <Notice title="Hồ sơ CTV chưa hoạt động" text="Hồ sơ của bạn chưa ở trạng thái được duyệt. Xem chi tiết tại trang CTV." href="/affiliate" action="Xem trạng thái hồ sơ" />;
+    return <Notice title="Hồ sơ của bạn chưa được kích hoạt" text="Hồ sơ đang chờ duyệt hoặc chưa hoạt động. Bạn xem chi tiết ở trang CTV nhé." href="/affiliate" action="Xem trạng thái hồ sơ" />;
   }
   return children;
 }

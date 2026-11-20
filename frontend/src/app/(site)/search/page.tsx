@@ -30,7 +30,7 @@ async function SearchContent({ searchParams }: PageProps<"/search">) {
 
   return (
     <>
-      <PageHeading title={q ? `Kết quả cho “${q}”` : "Tất cả sản phẩm"} count={result.totalElements} />
+      <PageHeading title={q ? `Kết quả cho “${q}”` : "Tất cả món ngon"} subtitle={result.totalElements > 0 ? `Tìm thấy ${result.totalElements} món phù hợp` : "Chưa thấy món nào phù hợp, bạn thử từ khóa khác nhé"} />
       <div className="px-3 pb-4 md:px-0">
         <SortSelect basePath="/search" params={{ q, ...filterParams(filters) }} current={sort} />
       </div>

@@ -153,8 +153,8 @@ export function ProductGrid({ products, className, featured }: { products: Produ
     return (
       <EmptyState
         icon={SearchX}
-        title="Không có sản phẩm phù hợp"
-        description="Thử đổi từ khóa hoặc bỏ bớt bộ lọc để xem thêm sản phẩm."
+        title="Chưa có món nào phù hợp"
+        description="Bạn thử đổi từ khóa hoặc bỏ bớt bộ lọc để xem thêm món nhé."
         actions={<Link href="/search" className={emptyStateButton.secondary}>Xem tất cả sản phẩm</Link>}
         className="py-10 md:py-14"
       />

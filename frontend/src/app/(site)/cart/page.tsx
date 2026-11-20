@@ -56,7 +56,7 @@ export default function CartPage() {
           <ShoppingCart className="size-12 stroke-[1.5]" />
         </div>
         <h1 className="mt-5 text-xl font-bold text-neutral-800 md:text-2xl">
-          Giỏ hàng của bạn đang trống
+          Giỏ hàng của bạn còn trống
         </h1>
         <p className="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
           Chưa có món ngon nào trong giỏ. Phúc Vị Foods có rất nhiều đặc sản tươi ngon và combo ưu đãi hấp dẫn đang chờ bạn!
@@ -108,7 +108,7 @@ export default function CartPage() {
 
   return (
     <div>
-      <PageHeading title="Giỏ hàng" subtitle={`${totalItemCount} sản phẩm`} />
+      <PageHeading title="Giỏ hàng" subtitle={`Bạn đang chọn ${totalItemCount} món`} />
       <div className="space-y-6 px-3 pb-8 md:px-0 md:pb-12">
 
       {/* Freeship Alert Banner – chỉ hiện khi backend có chương trình miễn phí ship */}

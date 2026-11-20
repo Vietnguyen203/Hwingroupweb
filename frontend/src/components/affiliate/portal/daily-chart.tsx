@@ -80,7 +80,7 @@ export function DailyChart({ points, metric, label }: { points: DayPoint[]; metr
 
         {maxValue === 0 && (
           <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-gray-400">
-            {metric === "clicks" ? "Chưa có lượt click nào trong 30 ngày qua" : "Chưa có đơn nào trong 30 ngày qua"}
+            {metric === "clicks" ? "Chưa có lượt click nào trong 30 ngày qua, bạn thử chia sẻ link nhé" : "Chưa có đơn nào trong 30 ngày qua, cố lên nhé"}
           </p>
         )}
 

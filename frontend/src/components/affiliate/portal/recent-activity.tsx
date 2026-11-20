@@ -31,7 +31,7 @@ export function RecentActivity({ items, loading }: { items?: ActivityItem[]; loa
           {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-12 bg-gray-100" />)}
         </div>
       ) : items.length === 0 ? (
-        <p className="py-8 text-center text-sm text-gray-500">Chưa có hoạt động nào. Hãy chia sẻ link giới thiệu để nhận đơn đầu tiên!</p>
+        <p className="py-8 text-center text-sm text-gray-500">Chưa có hoạt động nào. Chia sẻ link giới thiệu để đón đơn hàng đầu tiên nhé!</p>
       ) : (
         <ul className="mt-2 divide-y divide-gray-100">
           {items.map((a) => {

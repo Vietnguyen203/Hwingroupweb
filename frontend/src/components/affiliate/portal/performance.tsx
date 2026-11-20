@@ -210,7 +210,7 @@ function SourceCard({ stats }: { stats: ClickStats | null }) {
       {!stats ? (
         <div className="mt-4 h-24 animate-pulse rounded-xl bg-gray-100" aria-busy="true" aria-label="Đang tải" />
       ) : total === 0 ? (
-        <p className="py-6 text-center text-sm text-gray-400">Chưa có lượt click nào trong 30 ngày qua</p>
+        <p className="py-6 text-center text-sm text-gray-400">Chưa có lượt click nào trong 30 ngày qua, bạn thử chia sẻ link nhé</p>
       ) : (
         <ul className="mt-4 space-y-3 text-sm">
           {stats.bySource.map((s) => (
@@ -255,7 +255,7 @@ function StatusCard({ split }: { split: StatusSplit | null }) {
       {!split ? (
         <div className="mt-4 h-24 animate-pulse rounded-xl bg-gray-100" aria-busy="true" aria-label="Đang tải" />
       ) : total === 0 ? (
-        <p className="py-6 text-center text-sm text-gray-400">Chưa có hoa hồng nào trong 30 ngày qua</p>
+        <p className="py-6 text-center text-sm text-gray-400">Chưa có hoa hồng nào trong 30 ngày qua, hoa hồng sẽ hiện ở đây khi có đơn nhé</p>
       ) : (
         <>
           <div role="img" aria-label={STATUS_ROWS.map((r) => `${r.label} ${split[r.key].count} đơn`).join(", ")} className="mt-4 flex h-2 gap-0.5 overflow-hidden rounded-full">
