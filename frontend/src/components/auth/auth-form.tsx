@@ -379,7 +379,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
             {/* Khối Thông tin tài khoản gom chung toàn bộ */}
             <div className="space-y-3 rounded-xl border border-neutral-200 bg-neutral-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Thông tin tài khoản</p>
+              <p className="text-xs font-semibold text-neutral-500">Thông tin tài khoản</p>
 
               <label className="block space-y-1.5">
                 <span className="text-sm font-medium">Họ và tên</span>

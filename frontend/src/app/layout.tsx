@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
-import { Be_Vietnam_Pro } from "next/font/google";
+import { Be_Vietnam_Pro, Bricolage_Grotesque } from "next/font/google";
 
 import "./globals.css";
 import { Providers } from "@/components/providers";
@@ -13,6 +13,12 @@ const font = Be_Vietnam_Pro({
   variable: "--font-sans",
   subsets: ["vietnamese", "latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
+});
+
+// Bricolage Grotesque: phông tiêu đề và giá, nét có cá tính hơn nội dung; subset vietnamese để không rơi về phông dự phòng
+const display = Bricolage_Grotesque({
+  variable: "--font-display",
+  subsets: ["vietnamese", "latin"],
 });
 
 export const metadata: Metadata = {
@@ -28,7 +34,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="vi" className={`${font.variable} h-full antialiased`}>
+    <html lang="vi" className={`${font.variable} ${display.variable} h-full antialiased`}>
       <body className="min-h-full font-sans antialiased">
         <Providers>
           {children}

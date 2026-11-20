@@ -74,7 +74,7 @@ export function QuickJumpBar({ hasCategories = false, loading = false, children 
 
         <Link
           href="/search?sort=PRICE_ASC"
-          className="hidden shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-100 px-4 py-1.5 text-sm font-bold text-orange-800 ring-1 ring-orange-200 transition duration-200 hover:from-orange-100 hover:to-orange-200 lg:inline-flex"
+          className="hidden shrink-0 items-center gap-1.5 rounded-full bg-amber-50 px-4 py-1.5 text-sm font-bold text-orange-800 ring-1 ring-orange-200 transition duration-200 hover:from-orange-100 hover:to-orange-200 lg:inline-flex"
         >
           <Flame className="size-4 fill-orange-400 text-orange-500" /> Khuyến mãi hot
         </Link>

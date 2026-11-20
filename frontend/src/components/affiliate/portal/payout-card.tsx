@@ -41,7 +41,7 @@ export function PayoutCard({ dash, latest }: Props) {
   const block = dash ? withdrawBlock(dash) : null;
 
   return (
-    <section className="flex h-full flex-col rounded-xl border border-gray-100 bg-gradient-to-br from-white to-orange-50/60 p-5 shadow-sm">
+    <section className="flex h-full flex-col rounded-xl border border-gray-100 bg-orange-50/50 p-5 shadow-sm">
       <h2 className="text-base font-bold text-gray-900">Rút tiền</h2>
       <p className="mt-0.5 text-sm text-gray-500">
         Số dư có thể rút
@@ -54,7 +54,7 @@ export function PayoutCard({ dash, latest }: Props) {
         ) : (
           <Skeleton className="h-9 w-40 bg-gray-200" />
         )}
-        <span aria-hidden className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-accent to-brand-red text-white shadow-md shadow-brand-red/25">
+        <span aria-hidden className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-brand-accent text-white shadow-md shadow-brand-red/25">
           <PiggyBank className="size-6" />
         </span>
       </div>

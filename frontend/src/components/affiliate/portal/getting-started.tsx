@@ -43,7 +43,7 @@ export function GettingStarted({ dash, orders }: { dash: AffiliateDashboard; ord
             aria-label="Tiến độ bắt đầu nhanh"
             className="h-2 w-28 overflow-hidden rounded-full bg-gray-100"
           >
-            <div className="h-full rounded-full bg-gradient-to-r from-brand-accent to-brand-red transition-[width] duration-700" style={{ width: `${(finished / steps.length) * 100}%` }} />
+            <div className="h-full rounded-full bg-brand-accent transition-[width] duration-700" style={{ width: `${(finished / steps.length) * 100}%` }} />
           </div>
           <span className="text-sm font-semibold text-gray-700 tabular-nums">{finished}/{steps.length}</span>
         </div>

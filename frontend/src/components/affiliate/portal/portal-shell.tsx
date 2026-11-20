@@ -59,7 +59,7 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
             <NotificationBell variant="admin" />
             <span aria-hidden className="h-6 w-px bg-gray-200" />
             <div className="flex items-center gap-2.5">
-              <span aria-hidden className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-dark text-sm font-bold text-white shadow-sm">
+              <span aria-hidden className="flex size-9 items-center justify-center rounded-full bg-brand text-sm font-bold text-white shadow-sm">
                 {initials(a?.fullName)}
               </span>
               <div className="leading-tight">

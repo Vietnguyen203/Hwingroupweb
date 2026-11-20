@@ -52,7 +52,7 @@ export function ConfirmModal({
       />
 
       {/* Thẻ hộp thoại */}
-      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl transition-all animate-in zoom-in-95 duration-200">
+      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-2xl transition-all animate-in zoom-in-95 duration-200">
         <button
           type="button"
           onClick={onCancel}

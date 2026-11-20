@@ -8,7 +8,6 @@ import { AffiliateProductTools } from "@/components/affiliate/affiliate-product-
 import { EmptyState, emptyStateButton } from "@/components/ui/empty-state";
 import { SmartImg } from "@/components/ui/smart-img";
 import { useProductDetail } from "@/hooks/use-product-detail";
-import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { formatVnd } from "@/lib/format";
 import type { ProductCardResponse } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -19,8 +18,8 @@ import { WishlistButton } from "./wishlist-button";
 const ACTION_BASE = "flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-neutral-800 shadow-sm ring-1 ring-black/5 transition duration-200 hover:scale-110 hover:text-brand active:scale-95";
 
 /**
- * Thẻ sản phẩm hiện đại, tương tác nhẹ nhàng:
- * - Rê chuột: thẻ nổi lên + đổ bóng tím, ảnh phóng nhẹ và chuyển mờ dần sang ảnh thứ hai (lấy theo nhu cầu từ API chi tiết),
+ * Thẻ sản phẩm: giá là điểm nhấn (số đỏ to kiểu tem giá ở chợ, đơn vị tính nhỏ bên cạnh, giá gốc gạch ngang):
+ * - Rê chuột: thẻ nhích lên nhẹ, ảnh phóng nhẹ và chuyển mờ dần sang ảnh thứ hai (lấy theo nhu cầu từ API chi tiết),
  *   thanh "Xem nhanh / Thêm vào giỏ" trượt lên từ đáy ảnh. Bàn phím: focus vào bất kỳ nút nào cũng hiện thanh này.
  * - Cảm ứng (không có hover): nút "Thêm vào giỏ" và "Xem nhanh" hiện sẵn bên dưới giá, không phụ thuộc hover.
  * - Tim yêu thích luôn hiện ở góc ảnh; CTV đã duyệt thấy thêm hoa hồng dự kiến + nút chia sẻ.
@@ -37,10 +36,10 @@ export function ProductCard({ product }: { product: ProductCardResponse }) {
     <article
       onPointerEnter={() => setIntent(true)}
       onFocusCapture={() => setIntent(true)}
-      className="fx-rainbow group/card @container relative flex h-full flex-col rounded-2xl bg-white shadow-card ring-1 ring-black/[0.04] transition duration-300 ease-out-expo focus-within:shadow-card-hover hoverable:hover:-translate-y-1.5 hoverable:hover:shadow-card-hover"
+      className="group/card @container relative flex h-full flex-col rounded-xl bg-white shadow-card ring-1 ring-black/[0.05] transition duration-300 ease-out-expo focus-within:shadow-card-hover hoverable:hover:-translate-y-1 hoverable:hover:shadow-card-hover"
     >
       {/* Ảnh */}
-      <div className="fx-shimmer relative aspect-square overflow-hidden rounded-t-2xl bg-neutral-100">
+      <div className="relative aspect-square overflow-hidden rounded-t-xl bg-neutral-100">
         <Link href={`/products/${product.slug}`} aria-label={product.name} className="absolute inset-0 block">
           {product.imageUrl ? (
             <SmartImg
@@ -62,10 +61,10 @@ export function ProductCard({ product }: { product: ProductCardResponse }) {
         {/* Nhãn */}
         <div className="pointer-events-none absolute top-2.5 left-2.5 z-10 flex flex-col items-start gap-1.5">
           {product.discountPercent > 0 && (
-            <span className="fx-shine rounded-lg bg-brand-red px-2 py-0.5 text-[11px] font-extrabold tracking-wide text-white shadow-sm">-{product.discountPercent}%</span>
+            <span className="rounded-md bg-brand-red px-2 py-0.5 text-[11px] font-bold text-white">-{product.discountPercent}%</span>
           )}
           {product.bestseller && (
-            <span className="fx-shine flex items-center gap-1 rounded-lg bg-brand-accent px-2 py-0.5 text-[11px] font-extrabold text-neutral-950 shadow-sm">
+            <span className="flex items-center gap-1 rounded-md bg-brand-honey px-2 py-0.5 text-[11px] font-bold text-neutral-900">
               <Flame className="size-3" /> Bán chạy
             </span>
           )}
@@ -100,11 +99,14 @@ export function ProductCard({ product }: { product: ProductCardResponse }) {
         >
           {product.name}
         </Link>
-        {product.unit && <span className="text-xs text-neutral-500">{product.unit}</span>}
 
-        <div className="mt-auto flex flex-wrap items-baseline gap-x-2 pt-2">
-          <span className="text-lg font-extrabold tracking-tight text-brand-red md:text-xl">{formatVnd(product.price)}</span>
-          {hasCompare && <span className="text-xs text-neutral-400 line-through">{formatVnd(product.compareAtPrice!)}</span>}
+        {/* Tem giá: số tiền đỏ to, "/ đơn vị" nhỏ liền bên cạnh, giá gốc gạch ngang ngay dưới */}
+        <div className="mt-auto pt-2">
+          <p className="flex flex-wrap items-baseline gap-x-1.5">
+            <span className="font-display text-lg leading-none font-extrabold tracking-tight whitespace-nowrap text-brand-red tabular-nums md:text-xl">{formatVnd(product.price)}</span>
+            {product.unit && <span className="text-xs text-neutral-500">/ {product.unit}</span>}
+          </p>
+          {hasCompare && <p className="mt-1 text-xs text-neutral-400 tabular-nums line-through">{formatVnd(product.compareAtPrice!)}</p>}
         </div>
         {product.salePercent > 0 && (
           <span className="w-fit rounded-md bg-brand-red/10 px-1.5 py-0.5 text-[11px] font-bold text-brand-red">Giảm thêm {product.salePercent}%</span>
@@ -126,7 +128,6 @@ export function ProductCard({ product }: { product: ProductCardResponse }) {
 const GRID = "grid grid-cols-2 gap-3 px-3 sm:grid-cols-3 md:grid-cols-4 md:gap-5 md:px-0 lg:grid-cols-5 xl:grid-cols-6";
 
 export function ProductGrid({ products, className }: { products: ProductCardResponse[]; className?: string }) {
-  const { ref, state } = useScrollReveal<HTMLDivElement>(); // thẻ trượt vào lần lượt khi cuộn tới
   if (products.length === 0) {
     return (
       <EmptyState
@@ -139,7 +140,7 @@ export function ProductGrid({ products, className }: { products: ProductCardResp
     );
   }
   return (
-    <div ref={ref} data-reveal={state} className={cn(GRID, "scroll-reveal", className)}>
+    <div className={cn(GRID, className)}>
       {products.map((p) => (
         <ProductCard key={p.id} product={p} />
       ))}
@@ -151,7 +152,7 @@ export function ProductGridSkeleton({ count = 6 }: { count?: number }) {
   return (
     <div className={GRID} aria-busy="true">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="overflow-hidden rounded-2xl bg-white shadow-card ring-1 ring-black/[0.04]">
+        <div key={i} className="overflow-hidden rounded-xl bg-white shadow-card ring-1 ring-black/[0.05]">
           <div className="aspect-square animate-pulse bg-neutral-200" />
           <div className="space-y-2 p-3">
             <div className="h-4 w-4/5 animate-pulse rounded bg-neutral-200" />

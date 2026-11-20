@@ -61,7 +61,7 @@ export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
       onFocus={() => setHovering(true)}
       onBlur={() => setHovering(false)}
     >
-      <div className="overflow-hidden px-3 md:rounded-3xl md:px-0">
+      <div className="overflow-hidden px-3 md:rounded-2xl md:px-0">
         <div className="flex transition-transform duration-700 ease-out-expo" style={{ transform: `translateX(-${index * 100}%)` }}>
           {slides.map(({ product: p, tag }, i) => (
             <Link
@@ -71,7 +71,7 @@ export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
               aria-hidden={i !== index}
               tabIndex={i === index ? 0 : -1}
               className={cn(
-                "fx-gradient-flow group/slide relative flex aspect-[16/9] w-full shrink-0 items-center overflow-hidden rounded-3xl bg-gradient-to-br text-white sm:aspect-[2/1] md:aspect-[12/5] md:rounded-none",
+                "group/slide relative flex aspect-[16/9] w-full shrink-0 items-center overflow-hidden rounded-2xl bg-gradient-to-br text-white sm:aspect-[2/1] md:aspect-[12/5] md:rounded-none",
                 BACKGROUNDS[i % BACKGROUNDS.length],
               )}
             >
@@ -84,16 +84,14 @@ export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
                 </>
               )}
               {/* Vệt sáng trang trí */}
-              <span aria-hidden className="pointer-events-none absolute -top-24 -left-16 size-72 rounded-full bg-white/10 blur-3xl" />
-              <span aria-hidden className="pointer-events-none absolute -right-10 -bottom-28 size-80 rounded-full bg-brand-accent/25 blur-3xl" />
 
               <div className="relative z-10 w-[58%] space-y-1.5 pl-5 sm:pl-8 md:w-3/5 md:space-y-4 md:pl-16">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ring-1 ring-white/25 backdrop-blur md:px-3.5 md:py-1 md:text-xs">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-[10px] font-bold ring-1 ring-white/25 backdrop-blur md:px-3.5 md:py-1 md:text-xs">
                   <span className="size-1.5 rounded-full bg-brand-accent" />
                   {tag === "Mới" ? "Sản phẩm mới" : "Bán chạy nhất"}
                 </span>
                 {/* Chữ hoa tiếng Việt hay chồng 2 dấu (Ề, Ố…): line-clamp cắt phần tràn nên cần giãn dòng + đệm trên/dưới để dấu không bị cắt */}
-                <h2 className="line-clamp-2 py-1.5 text-lg leading-[1.3] font-black tracking-tight uppercase drop-shadow-sm sm:text-2xl md:py-2 md:text-5xl md:leading-[1.25]">{p.name}</h2>
+                <h2 className="line-clamp-2 py-1.5 text-lg leading-[1.3] font-black tracking-tight drop-shadow-sm sm:text-2xl md:py-2 md:text-5xl md:leading-[1.25]">{p.name}</h2>
                 <p className="flex items-baseline gap-2 md:gap-3">
                   <span className="text-xl font-black text-[#ffd400] md:text-4xl">{formatVnd(p.price)}</span>
                   {p.compareAtPrice != null && p.compareAtPrice > p.price && (
@@ -106,14 +104,14 @@ export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
               </div>
 
               {/* Ảnh chính luôn nằm giữa banner theo chiều dọc. Căn giữa bằng khung flex, KHÔNG dùng -translate-y-1/2:
-                  Tailwind 4 dịch bằng thuộc tính `translate`, bị hiệu ứng nổi (.fx-float) ghi đè làm ảnh tụt xuống. */}
+                  Tailwind 4 dịch bằng thuộc tính `translate`, dễ bị thuộc tính `translate` khác ghi đè làm ảnh lệch. */}
               {p.imageUrl && (
                 <div className="pointer-events-none absolute inset-y-0 right-[4%] flex items-center">
                   {/* eslint-disable-next-line @next/next/no-img-element -- ảnh sản phẩm từ backend */}
                   <img
                     src={p.imageUrl}
                     alt=""
-                    className="fx-float aspect-square h-[78%] shrink-0 rotate-2 rounded-3xl object-cover shadow-2xl ring-4 ring-white/25 transition duration-700 ease-out-expo group-hover/slide:rotate-0 group-hover/slide:scale-105 md:h-[85%]"
+                    className="aspect-square h-[78%] shrink-0 rotate-2 rounded-2xl object-cover shadow-2xl ring-4 ring-white/25 transition duration-700 ease-out-expo group-hover/slide:rotate-0 group-hover/slide:scale-105 md:h-[85%]"
                   />
                 </div>
               )}

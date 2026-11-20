@@ -34,7 +34,7 @@ export function Sidebar({ profile, onClose }: { profile: AffiliateResponse | nul
     <div className="flex h-full flex-col bg-white">
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-gray-100 px-5">
         <PortalLink slug="dashboard" onClick={onClose} className="flex items-center gap-2.5">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-accent to-brand-red text-base font-black text-white shadow-sm">
+          <span className="flex size-9 items-center justify-center rounded-xl bg-brand-accent text-base font-black text-white shadow-sm">
             H
           </span>
           <span className="text-lg font-extrabold tracking-tight text-brand-deep">

@@ -112,7 +112,7 @@ export default function CartPage() {
 
       {/* Freeship Alert Banner – chỉ hiện khi backend có chương trình miễn phí ship */}
       {freeshipThreshold > 0 && (
-      <div className="rounded-2xl border border-amber-200/70 bg-gradient-to-r from-amber-50 to-orange-50/50 p-4 shadow-xs">
+      <div className="rounded-2xl border border-amber-200/70 bg-amber-50 p-4 shadow-xs">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2.5">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-800">
@@ -368,7 +368,7 @@ export default function CartPage() {
 
           {/* Trust Guarantees */}
           <div className="rounded-2xl border border-neutral-100 bg-neutral-50/70 p-4 space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-600">
+            <h3 className="text-xs font-bold text-neutral-600">
               Quyền lợi mua sắm tại Hwin Food
             </h3>
             <ul className="space-y-2 text-xs text-neutral-600">

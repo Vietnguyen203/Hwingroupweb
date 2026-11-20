@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 export function ComboFeature({ product, className }: { product: ProductCardResponse; className?: string }) {
   const hasCompare = product.compareAtPrice != null && product.compareAtPrice > product.price;
   return (
-    <article className={cn("group flex overflow-hidden rounded-2xl border border-amber-200/70 bg-gradient-to-br from-amber-50 via-white to-orange-50 shadow-card transition duration-300 ease-out-expo hover:-translate-y-1 hover:shadow-card-hover", className)}>
+    <article className={cn("group flex overflow-hidden rounded-2xl border border-amber-200/70 bg-amber-50 shadow-card transition duration-300 ease-out-expo hover:-translate-y-1 hover:shadow-card-hover", className)}>
       <Link href={`/products/${product.slug}`} className="relative block w-[42%] shrink-0 overflow-hidden bg-neutral-50 sm:w-2/5">
         {product.discountPercent > 0 && (
           <span className="absolute top-3 left-3 z-10 rounded-lg bg-brand-red px-2.5 py-1 text-xs font-extrabold text-white shadow-md">
@@ -27,10 +27,10 @@ export function ComboFeature({ product, className }: { product: ProductCardRespo
       </Link>
 
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 p-4 md:p-6">
-        <span className="flex w-fit items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-bold tracking-wide text-amber-800 uppercase">
+        <span className="flex w-fit items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-bold text-amber-800">
           <Gift className="size-3.5" /> Combo ưu đãi
         </span>
-        <Link href={`/products/${product.slug}`} className="text-lg leading-snug font-extrabold text-neutral-900 uppercase transition-colors group-hover:text-brand md:text-xl">
+        <Link href={`/products/${product.slug}`} className="text-lg leading-snug font-extrabold text-neutral-900 transition-colors group-hover:text-brand md:text-xl">
           {product.name}
         </Link>
         {product.unit && <p className="text-sm text-neutral-500">{product.unit}</p>}

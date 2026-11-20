@@ -182,7 +182,7 @@ function SuccessHero({ order: o }: { order: OrderDetailResponse }) {
     confettiShower(); // mưa pháo giấy ăn mừng đặt hàng thành công
   }, []);
   return (
-    <section className="overflow-hidden rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/40 p-5 text-center shadow-sm md:p-8">
+    <section className="overflow-hidden rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center shadow-sm md:p-8">
       <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"><CheckCircle2 className="size-10" /></span>
       <h1 className="mt-3 text-xl font-bold text-emerald-900 md:text-2xl">Đặt hàng thành công!</h1>
       <p className="mt-1 text-sm text-neutral-600">

@@ -39,9 +39,8 @@ export function AffiliateLinks() {
       </Reveal>
 
       <Reveal delay={80}>
-        <section className="relative isolate overflow-hidden rounded-2xl bg-gradient-to-br from-brand-deep via-brand-dark to-brand p-5 text-white shadow-lg shadow-brand/20 sm:p-6">
-          <div aria-hidden className="pointer-events-none absolute -top-20 -right-12 -z-10 size-64 rounded-full bg-brand-accent/30 blur-3xl" />
-          <p className="text-xs font-semibold tracking-widest text-white/70 uppercase">Mã giới thiệu của bạn</p>
+        <section className="relative isolate overflow-hidden rounded-2xl bg-brand-deep p-5 text-white shadow-lg shadow-brand/20 sm:p-6">
+          <p className="text-xs font-semibold text-white/70">Mã giới thiệu của bạn</p>
           <p className="mt-1 text-3xl font-black tracking-[0.2em]">{profile.data?.referralCode ?? "········"}</p>
           {dash.data ? <ShareLink link={dash.data.shareLink} /> : <Skeleton className="mt-3 h-12 rounded-xl bg-white/15" />}
         </section>
@@ -71,7 +70,7 @@ export function AffiliateLinks() {
             <li key={title}>
               <Reveal delay={160 + i * 70} className="h-full">
                 <div className="relative h-full overflow-hidden rounded-xl border border-gray-100 bg-white p-5 shadow-sm transition-[transform,box-shadow] duration-200 hoverable:hover:-translate-y-1 hoverable:hover:shadow-md">
-                  <span className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-accent to-brand-red text-white shadow-md shadow-brand-red/20">
+                  <span className="flex size-11 items-center justify-center rounded-xl bg-brand-accent text-white shadow-md shadow-brand-red/20">
                     <Icon className="size-5" aria-hidden />
                   </span>
                   <span aria-hidden className="absolute top-3 right-4 text-4xl font-black text-gray-100">{i + 1}</span>

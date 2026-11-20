@@ -9,7 +9,7 @@
 /* Token thiết kế dùng chung: đổ bóng, đường cong chuyển động */
 @theme {
   --shadow-card: 0 1px 2px rgb(23 23 23 / 0.04), 0 2px 10px rgb(23 23 23 / 0.05);
-  --shadow-card-hover: 0 4px 8px rgb(23 23 23 / 0.04), 0 18px 36px -10px rgb(108 59 255 / 0.28);
+  --shadow-card-hover: 0 2px 6px rgb(23 23 23 / 0.05), 0 12px 24px -10px rgb(23 23 23 / 0.2);
   --shadow-pop: 0 24px 60px -16px rgb(23 23 23 / 0.45);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -24,6 +24,7 @@
   --color-brand-red: var(--brand-red);
   --color-brand-cta: var(--brand-cta);
   --color-brand-green: var(--brand-green);
+  --color-brand-honey: var(--brand-honey);
   --color-brand-link: var(--brand-link);
   --color-page-bg: var(--page-bg);
   --color-brand-soft: var(--brand-soft);
@@ -31,7 +32,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-heading: var(--font-display);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -77,10 +79,11 @@
   --brand-dark: #4f26d6;     /* tím đậm: hover, gradient */
   --brand-deep: #1f1450;     /* tím rất đậm: chân trang, nền khối nổi bật */
   --brand-foreground: #ffffff;
-  --brand-red: #d6360a;      /* giá bán, nhãn giảm giá (cam đỏ đủ tương phản trên nền trắng) */
+  --brand-red: #c2321a;      /* đỏ lạp xưởng: giá bán, nhãn giảm giá (tương phản 5.9:1 trên nền trắng) */
   --brand-cta: #6c3bff;      /* nút hành động chính (cùng tím chủ đạo) */
   --brand-accent: #ff6b35;   /* cam: điểm nhấn, nhãn nổi bật, gạch chân */
-  --brand-green: #2fa84f;    /* xanh lá trong logo, trạng thái an toàn / còn hàng */
+  --brand-green: #2f7d46;    /* xanh lá chuối: trạng thái an toàn / còn hàng (chữ trắng 5.2:1) */
+  --brand-honey: #f2b84b;    /* vàng mật: nhãn Bán chạy / Tết, dùng ít; chữ trên nền này luôn là màu tối */
   --brand-link: #5b2de6;     /* link, "Xem tất cả" */
   --brand-soft: #eee9ff;     /* nền nhạt của màu chủ đạo */
   --page-bg: #f6f5f2;        /* nền trang ấm */
@@ -163,9 +166,10 @@
     @apply font-sans;
     scroll-behavior: smooth;
   }
-  /* Chữ tiêu đề đậm, khít hơn một chút cho cảm giác hiện đại */
+  /* Tiêu đề dùng phông hiển thị (Bricolage Grotesque, có đủ dấu tiếng Việt), khít chữ hơn nội dung */
   h1, h2, h3 {
-    letter-spacing: -0.015em;
+    font-family: var(--font-display), var(--font-sans), sans-serif;
+    letter-spacing: -0.02em;
   }
   /* Vòng focus rõ ràng cho điều hướng bằng bàn phím */
   :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
@@ -247,102 +251,4 @@
 .animate-bell-ring {
   transform-origin: 50% 0;
   animation: bell-ring 0.8s ease-in-out;
-}
-
-/* ===== Hiệu ứng màu sắc cho cửa hàng (xem lib/fx.ts). Hoạt ảnh lặp chỉ chạy khi người dùng KHÔNG bật "giảm chuyển động". ===== */
-
-/* Khung ảnh chờ tải: dải màu nhạt trượt qua */
-@keyframes fx-shimmer {
-  from { background-position: 200% 0; }
-  to { background-position: -200% 0; }
-}
-.fx-shimmer {
-  background: linear-gradient(110deg, #f1ecff 20%, #ffe9df 40%, #fff6d6 50%, #ffe9df 60%, #f1ecff 80%);
-  background-size: 200% 100%;
-}
-
-/* Hiện dần khi cuộn tới (hook useScrollReveal): con trực tiếp trượt lên lần lượt; fill "backwards" để không giữ transform sau khi xong */
-@keyframes fx-reveal-pop {
-  from { opacity: 0; transform: translateY(22px) scale(0.97); }
-  to { opacity: 1; transform: none; }
-}
-.scroll-reveal[data-reveal="hidden"] > * { opacity: 0; transform: translateY(22px) scale(0.97); }
-.scroll-reveal[data-reveal="shown"] > * { animation: fx-reveal-pop 0.65s var(--ease-out-expo) backwards; }
-.scroll-reveal[data-reveal="shown"] > :nth-child(2) { animation-delay: 60ms; }
-.scroll-reveal[data-reveal="shown"] > :nth-child(3) { animation-delay: 120ms; }
-.scroll-reveal[data-reveal="shown"] > :nth-child(4) { animation-delay: 180ms; }
-.scroll-reveal[data-reveal="shown"] > :nth-child(5) { animation-delay: 240ms; }
-.scroll-reveal[data-reveal="shown"] > :nth-child(6) { animation-delay: 300ms; }
-.scroll-reveal[data-reveal="shown"] > :nth-child(7) { animation-delay: 360ms; }
-.scroll-reveal[data-reveal="shown"] > :nth-child(8) { animation-delay: 420ms; }
-.scroll-reveal[data-reveal="shown"] > :nth-child(n+9) { animation-delay: 480ms; }
-
-/* Viền cầu vồng quay quanh thẻ khi rê chuột (chỉ thiết bị có chuột) */
-@property --fx-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
-@keyframes fx-spin { to { --fx-angle: 360deg; } }
-.fx-rainbow { position: relative; }
-.fx-rainbow::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  border-radius: calc(1rem + 2px);
-  padding: 3px;
-  background: conic-gradient(from var(--fx-angle), #6c3bff, #ff5fa2, #ff6b35, #ffd23f, #2fa84f, #22c3ee, #6c3bff);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  opacity: 0;
-  transition: opacity 0.3s;
-  pointer-events: none;
-}
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .fx-rainbow:hover::before { opacity: 1; animation: fx-spin 3s linear infinite; }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  /* Dải sáng chéo quét qua nhãn (giảm giá, bán chạy…) */
-  @keyframes fx-shine {
-    0%, 55% { transform: translateX(-130%) skewX(-20deg); }
-    100% { transform: translateX(230%) skewX(-20deg); }
-  }
-  .fx-shine { position: relative; overflow: hidden; }
-  .fx-shine::after {
-    content: "";
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 45%;
-    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.75), transparent);
-    animation: fx-shine 3.2s ease-in-out infinite;
-    pointer-events: none;
-  }
-
-  /* Nền gradient trôi chậm (banner, khối giảm giá) */
-  @keyframes fx-flow {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-  }
-  .fx-gradient-flow { background-size: 220% 220%; animation: fx-flow 10s ease-in-out infinite; }
-
-  /* Nổi lên xuống nhẹ, dao động đối xứng quanh vị trí gốc (±5px) nên phần tử luôn ở đúng giữa chỗ đã căn.
-     Dùng thuộc tính `translate` riêng: không đè lên transform, nhưng sẽ đè lên các tiện ích translate-* của Tailwind 4
-     (chúng cũng dùng `translate`) -> phần tử nổi phải căn giữa bằng flex / inset, không dùng -translate-*. */
-  @keyframes fx-float {
-    0%, 100% { translate: 0 5px; }
-    50% { translate: 0 -5px; }
-  }
-  .fx-float { animation: fx-float 4.5s ease-in-out infinite; }
-
-  /* Gạch chân tiêu đề khối: dải màu chạy */
-  @keyframes fx-underline {
-    from { background-position: 0% 50%; }
-    to { background-position: 200% 50%; }
-  }
-  .fx-underline {
-    background-image: linear-gradient(90deg, #ff6b35, #ff5fa2, #6c3bff, #22c3ee, #ff6b35);
-    background-size: 200% 100%;
-    animation: fx-underline 4s linear infinite;
-  }
-
-  /* Ảnh chờ tải */
-  .fx-shimmer { animation: fx-shimmer 1.8s linear infinite; }
 }

@@ -76,7 +76,7 @@ export function QuickViewDialog({ product, onClose }: { product: ProductCardResp
         aria-modal="true"
         aria-labelledby={titleId}
         onClick={(e) => e.stopPropagation()}
-        className="animate-sheet-up relative grid max-h-[92dvh] w-full max-w-3xl overflow-y-auto rounded-t-3xl bg-white shadow-pop sm:max-h-[90vh] sm:grid-cols-2 sm:rounded-3xl"
+        className="animate-sheet-up relative grid max-h-[92dvh] w-full max-w-3xl overflow-y-auto rounded-t-3xl bg-white shadow-pop sm:max-h-[90vh] sm:grid-cols-2 sm:rounded-2xl"
       >
         <button
           type="button"

@@ -42,7 +42,7 @@ export function ProductTabs({ productId, description, ingredients, features, usa
   const current = sections.find((s) => s.key === active) ?? sections[0];
 
   return (
-    <section id="chi-tiet" className="mt-6 rounded-3xl bg-white shadow-card ring-1 ring-black/[0.04]">
+    <section id="chi-tiet" className="mt-6 rounded-2xl bg-white shadow-card ring-1 ring-black/[0.04]">
       <div role="tablist" className="no-scrollbar flex overflow-x-auto border-b">
         {sections.map((s) => (
           <button

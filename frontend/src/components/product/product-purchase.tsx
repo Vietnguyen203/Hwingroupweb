@@ -111,7 +111,7 @@ export function ProductPurchase({ product, stock, slug }: { product: Omit<CartLi
               <img src={product.imageUrl} alt="" className="hidden size-12 shrink-0 rounded-lg border object-cover sm:block" />
             )}
             <div className="min-w-0 flex-1">
-              <p className="line-clamp-1 text-sm font-semibold text-neutral-800 uppercase">{product.name}</p>
+              <p className="line-clamp-1 text-sm font-semibold text-neutral-800">{product.name}</p>
               <p className="text-sm">
                 <b className="text-brand-red">{formatVnd(product.price)}</b>
                 <span className="ml-2 text-xs text-muted-foreground">× {qty}</span>

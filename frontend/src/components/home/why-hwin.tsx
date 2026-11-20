@@ -12,7 +12,7 @@ export function WhyHwin() {
   return (
     <div className="grid gap-3 px-3 sm:grid-cols-2 md:px-0 lg:grid-cols-4 lg:gap-5">
       {ITEMS.map(({ icon: Icon, title, text }) => (
-        <div key={title} className="group/why rounded-3xl bg-white p-6 text-center shadow-card ring-1 ring-black/[0.04] transition duration-300 ease-out-expo hover:-translate-y-1 hover:shadow-card-hover">
+        <div key={title} className="group/why rounded-2xl bg-white p-6 text-center shadow-card ring-1 ring-black/[0.04] transition duration-300 ease-out-expo hover:-translate-y-1 hover:shadow-card-hover">
           <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-brand-soft text-brand transition duration-300 ease-spring group-hover/why:scale-110 group-hover/why:rotate-6 group-hover/why:bg-brand group-hover/why:text-white">
             <Icon className="size-7" />
           </span>

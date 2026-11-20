@@ -99,12 +99,12 @@ export function CartDrawer() {
         aria-modal="true"
         aria-label="Giỏ hàng của bạn"
         className={cn(
-          "relative flex max-h-[min(88dvh,46rem)] w-full max-w-lg flex-col overflow-hidden rounded-3xl bg-white shadow-pop transition duration-300 ease-out-expo",
+          "relative flex max-h-[min(88dvh,46rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-pop transition duration-300 ease-out-expo",
           isDrawerOpen ? "translate-y-0 scale-100" : "translate-y-4 scale-95"
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-neutral-100 bg-gradient-to-b from-brand-soft/60 to-white px-5 py-4">
+        <div className="flex items-center justify-between border-b border-neutral-100 bg-brand-soft/60 px-5 py-4">
           <div className="flex items-center gap-2">
             <ShoppingBag className="size-5 text-brand" />
             <h2 className="text-base font-bold text-neutral-900">

@@ -11,10 +11,10 @@ const STEPS = [
 /** Khối kêu gọi làm CTV trên trang chủ (web phục vụ affiliate nên đặt nổi bật). */
 export function AffiliateBanner() {
   return (
-    <section id="affiliate" className="scroll-mt-sticky mx-3 mt-10 overflow-hidden rounded-3xl bg-gradient-to-br from-brand via-brand-dark to-brand-deep p-6 text-white shadow-[0_24px_50px_-20px_rgb(108_59_255/0.6)] md:mx-0 md:p-10">
+    <section id="affiliate" className="scroll-mt-sticky mx-3 mt-10 overflow-hidden rounded-2xl bg-brand p-6 text-white shadow-[0_24px_50px_-20px_rgb(108_59_255/0.6)] md:mx-0 md:p-10">
       <div className="grid items-center gap-8 lg:grid-cols-[1fr_1.4fr]">
         <div>
-          <p className="text-sm font-semibold tracking-widest text-brand-accent uppercase">Cộng tác viên HWIN</p>
+          <p className="text-sm font-semibold text-brand-accent">Cộng tác viên HWIN</p>
           <h2 className="mt-2 text-2xl leading-tight font-black md:text-4xl">Chia sẻ món ngon,<br />nhận hoa hồng mỗi đơn</h2>
           <p className="mt-3 text-white/80">Không cần vốn, không cần ôm hàng – HWIN lo sản phẩm, giao hàng và chăm sóc khách.</p>
           <AffiliateJoinLink

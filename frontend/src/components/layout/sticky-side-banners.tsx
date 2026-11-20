@@ -29,17 +29,17 @@ export function StickySideBanners() {
     <>
       {!closed.has("freeship") && (
         <SideBanner side="left" tone="from-brand-accent via-brand-red to-[#b42a05]" image="/images/freeship-bg.svg" onClose={() => closeBanner("freeship")}>
-          <span className="fx-float flex size-12 @min-[12rem]:size-16 items-center justify-center rounded-2xl bg-white/20 ring-1 ring-white/30">
+          <span className="flex size-12 @min-[12rem]:size-16 items-center justify-center rounded-2xl bg-white/20 ring-1 ring-white/30">
             <Truck className="size-6 @min-[12rem]:size-8" />
           </span>
           <div>
-            <p className="text-xs @min-[12rem]:text-sm font-bold tracking-widest uppercase opacity-90">Miễn phí</p>
+            <p className="text-xs @min-[12rem]:text-sm font-bold opacity-90">Miễn phí</p>
             <p className="text-2xl @min-[12rem]:text-5xl leading-none font-black uppercase">Ship</p>
             <p className="mt-2 @min-[12rem]:mt-3 text-xs @min-[12rem]:text-sm leading-snug text-white/85">Giao hàng giữ lạnh tận nơi cho đơn đủ điều kiện</p>
           </div>
           <Link
             href="/search"
-            className="fx-shine inline-block rounded-full bg-white px-3.5 py-1.5 @min-[12rem]:px-6 @min-[12rem]:py-2.5 text-xs @min-[12rem]:text-sm font-bold text-brand-red shadow transition hover:scale-105 active:scale-95"
+            className="inline-block rounded-full bg-white px-3.5 py-1.5 @min-[12rem]:px-6 @min-[12rem]:py-2.5 text-xs @min-[12rem]:text-sm font-bold text-brand-red shadow transition hover:scale-105 active:scale-95"
           >
             Mua ngay
           </Link>
@@ -48,17 +48,17 @@ export function StickySideBanners() {
 
       {!closed.has("affiliate") && (
         <SideBanner side="right" tone="from-brand via-brand-dark to-brand-deep" image="/images/cong-tac-vien-bg.svg" onClose={() => closeBanner("affiliate")}>
-          <span className="fx-float flex size-12 @min-[12rem]:size-16 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25">
+          <span className="flex size-12 @min-[12rem]:size-16 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25">
             <HandCoins className="size-6 @min-[12rem]:size-8 text-brand-accent" />
           </span>
           <div>
-            <p className="text-xs @min-[12rem]:text-sm font-bold tracking-widest text-brand-accent uppercase">Cộng tác viên</p>
+            <p className="text-xs @min-[12rem]:text-sm font-bold text-brand-accent">Cộng tác viên</p>
             <p className="text-3xl @min-[12rem]:text-6xl leading-none font-black">{Math.round(siteConfig.commissionRate * 100)}%</p>
             <p className="mt-2 @min-[12rem]:mt-3 text-xs @min-[12rem]:text-sm leading-snug text-white/85">Hoa hồng cho mỗi đơn giao thành công</p>
           </div>
           <AffiliateJoinLink
             guestLabel="Đăng ký CTV"
-            className="fx-shine inline-block rounded-full bg-brand-accent px-3.5 py-1.5 @min-[12rem]:px-6 @min-[12rem]:py-2.5 text-xs @min-[12rem]:text-sm font-extrabold text-neutral-950 shadow transition hover:scale-105 active:scale-95"
+            className="inline-block rounded-full bg-brand-accent px-3.5 py-1.5 @min-[12rem]:px-6 @min-[12rem]:py-2.5 text-xs @min-[12rem]:text-sm font-extrabold text-neutral-950 shadow transition hover:scale-105 active:scale-95"
           />
         </SideBanner>
       )}
@@ -96,7 +96,7 @@ function SideBanner({
     >
       <div
         className={cn(
-          "fx-gradient-flow relative isolate flex w-full flex-col items-center justify-between overflow-hidden rounded-2xl @min-[12rem]:rounded-3xl bg-gradient-to-b px-3 @min-[12rem]:px-5 pt-8 @min-[12rem]:pt-12 pb-4 @min-[12rem]:pb-7 text-center text-white shadow-[0_14px_30px_-12px_rgb(0_0_0/0.45)] ring-1 ring-white/20 transition duration-300 ease-out-expo hover:-translate-y-1",
+          "relative isolate flex w-full flex-col items-center justify-between overflow-hidden rounded-2xl @min-[12rem]:rounded-2xl bg-gradient-to-b px-3 @min-[12rem]:px-5 pt-8 @min-[12rem]:pt-12 pb-4 @min-[12rem]:pb-7 text-center text-white shadow-[0_14px_30px_-12px_rgb(0_0_0/0.45)] ring-1 ring-white/20 transition duration-300 ease-out-expo hover:-translate-y-1",
           tone,
         )}
       >

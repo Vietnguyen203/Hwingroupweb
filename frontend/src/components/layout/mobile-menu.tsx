@@ -30,7 +30,7 @@ export function MobileMenu({ categories }: { categories: CategoryResponse[] }) {
               <button aria-label="Đóng" onClick={() => setOpen(false)} className="p-1"><X className="size-5" /></button>
             </div>
             <div className="flex-1 overflow-y-auto">
-              <p className="px-4 pt-4 pb-2 text-xs font-semibold text-muted-foreground uppercase">Danh mục sản phẩm</p>
+              <p className="px-4 pt-4 pb-2 text-xs font-semibold text-muted-foreground">Danh mục sản phẩm</p>
               <ul>
                 {categories.map((c) => (
                   <li key={c.id}>
@@ -44,7 +44,7 @@ export function MobileMenu({ categories }: { categories: CategoryResponse[] }) {
                 ))}
               </ul>
 
-              <p className="border-t px-4 pt-4 pb-2 text-xs font-semibold text-muted-foreground uppercase">Chính sách & An toàn</p>
+              <p className="border-t px-4 pt-4 pb-2 text-xs font-semibold text-muted-foreground">Chính sách & An toàn</p>
               <ul className="space-y-0.5 px-2 pb-4 text-sm text-neutral-700">
                 <li>
                   <Link
@@ -100,7 +100,7 @@ export function MobileMenu({ categories }: { categories: CategoryResponse[] }) {
               </ul>
             </div>
             <div className="border-t p-4">
-              <Link href={isAffiliate ? portalPath("dashboard", myId) : "/affiliate"} onClick={() => setOpen(false)} className="block rounded-full bg-gradient-to-r from-brand to-brand-dark py-2.5 text-center text-sm font-bold text-white shadow-md shadow-brand/25">
+              <Link href={isAffiliate ? portalPath("dashboard", myId) : "/affiliate"} onClick={() => setOpen(false)} className="block rounded-full bg-brand py-2.5 text-center text-sm font-bold text-white shadow-md shadow-brand/25">
                 {isAffiliate ? "Trang cộng tác viên" : "Đăng ký cộng tác viên"}
               </Link>
             </div>

@@ -68,7 +68,7 @@ export function PolicyHubView() {
           </nav>
 
           {/* Hero Banner */}
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1e3a8a] via-[#243c84] to-[#0f172a] p-6 text-white shadow-xl md:p-10">
+          <div className="relative overflow-hidden rounded-2xl bg-brand-deep p-6 text-white shadow-xl md:p-10">
             <div className="relative z-10 max-w-3xl space-y-3">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1 text-xs font-semibold backdrop-blur-md border border-white/15 text-amber-300">
                 <ShieldCheck className="size-4 text-emerald-400" />
@@ -91,12 +91,12 @@ export function PolicyHubView() {
 
         {/* Danh sách mục: cột trái cố định khi cuộn (desktop), thanh tab cuộn ngang (mobile / tablet) */}
         <aside className="min-w-0 lg:sticky lg:top-24 lg:col-start-1 lg:row-span-2 lg:row-start-1">
-          <p className="mb-3 hidden px-2 text-xs font-extrabold tracking-wider text-neutral-400 uppercase lg:block">Mục chính sách</p>
+          <p className="mb-3 hidden px-2 text-xs font-extrabold text-neutral-400 lg:block">Mục chính sách</p>
           <div
             role="tablist"
             aria-label="Mục chính sách và pháp lý"
             onKeyDown={onTabKeyDown}
-            className="no-scrollbar flex gap-1 overflow-x-auto border-b border-neutral-200 lg:flex-col lg:gap-1.5 lg:overflow-visible lg:rounded-3xl lg:border lg:border-neutral-200/80 lg:bg-white lg:p-3 lg:shadow-card"
+            className="no-scrollbar flex gap-1 overflow-x-auto border-b border-neutral-200 lg:flex-col lg:gap-1.5 lg:overflow-visible lg:rounded-2xl lg:border lg:border-neutral-200/80 lg:bg-white lg:p-3 lg:shadow-card"
           >
             {TABS.map((tab) => {
               const Icon = tab.icon;
@@ -155,7 +155,7 @@ export function PolicyHubView() {
 
         {/* Tab 2: Chính sách bảo mật (Nghị định 13/2023/NĐ-CP) */}
         {activeTab === "bao-mat" && (
-          <article className="space-y-6 rounded-3xl border border-neutral-200/80 bg-white p-6 md:p-10 shadow-xs animate-in fade-in duration-300 text-neutral-700 text-sm leading-relaxed">
+          <article className="space-y-6 rounded-2xl border border-neutral-200/80 bg-white p-6 md:p-10 shadow-xs animate-in fade-in duration-300 text-neutral-700 text-sm leading-relaxed">
             <div className="border-b border-neutral-200 pb-4">
               <h2 className="text-xl font-bold text-neutral-900 md:text-2xl flex items-center gap-2.5">
                 <Lock className="size-6 text-brand" />
@@ -202,7 +202,7 @@ export function PolicyHubView() {
 
         {/* Tab 3: Chính sách đổi trả & Hoàn tiền */}
         {activeTab === "doi-tra" && (
-          <article className="space-y-6 rounded-3xl border border-neutral-200/80 bg-white p-6 md:p-10 shadow-xs animate-in fade-in duration-300 text-neutral-700 text-sm leading-relaxed">
+          <article className="space-y-6 rounded-2xl border border-neutral-200/80 bg-white p-6 md:p-10 shadow-xs animate-in fade-in duration-300 text-neutral-700 text-sm leading-relaxed">
             <div className="border-b border-neutral-200 pb-4">
               <h2 className="text-xl font-bold text-neutral-900 md:text-2xl flex items-center gap-2.5">
                 <RotateCcw className="size-6 text-brand" />
@@ -255,7 +255,7 @@ export function PolicyHubView() {
 
         {/* Tab 4: Kiểm hàng & Vận chuyển */}
         {activeTab === "kiem-hang" && (
-          <article className="space-y-6 rounded-3xl border border-neutral-200/80 bg-white p-6 md:p-10 shadow-xs animate-in fade-in duration-300 text-neutral-700 text-sm leading-relaxed">
+          <article className="space-y-6 rounded-2xl border border-neutral-200/80 bg-white p-6 md:p-10 shadow-xs animate-in fade-in duration-300 text-neutral-700 text-sm leading-relaxed">
             <div className="border-b border-neutral-200 pb-4">
               <h2 className="text-xl font-bold text-neutral-900 md:text-2xl flex items-center gap-2.5">
                 <Truck className="size-6 text-brand" />
@@ -299,7 +299,7 @@ export function PolicyHubView() {
 
         {/* Tab 5: Điều khoản dịch vụ TMĐT */}
         {activeTab === "dieu-khoan" && (
-          <article className="space-y-6 rounded-3xl border border-neutral-200/80 bg-white p-6 md:p-10 shadow-xs animate-in fade-in duration-300 text-neutral-700 text-sm leading-relaxed">
+          <article className="space-y-6 rounded-2xl border border-neutral-200/80 bg-white p-6 md:p-10 shadow-xs animate-in fade-in duration-300 text-neutral-700 text-sm leading-relaxed">
             <div className="border-b border-neutral-200 pb-4">
               <h2 className="text-xl font-bold text-neutral-900 md:text-2xl flex items-center gap-2.5">
                 <Scale className="size-6 text-brand" />

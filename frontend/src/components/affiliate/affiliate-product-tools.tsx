@@ -63,7 +63,7 @@ export function AffiliateProductTools({ slug, price, variant = "card" }: { slug:
   }
 
   return (
-    <div className="space-y-2 rounded-xl border border-brand/30 bg-gradient-to-br from-brand-soft to-white p-3.5">
+    <div className="space-y-2 rounded-xl border border-brand/30 bg-brand-soft p-3.5">
       <div className="flex items-center justify-between gap-3 text-sm">
         <span className="flex items-center gap-1.5 font-semibold text-brand"><Handshake className="size-4" /> Dành cho CTV</span>
         <span className="text-neutral-700">Hoa hồng dự kiến <b className="text-base text-brand-red">{formatVnd(commission)}</b></span>

@@ -18,7 +18,7 @@ export function ComingSoon({ slug }: { slug: PortalSlug }) {
     <Reveal className="mx-auto max-w-3xl">
       <section className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
         <div className="px-6 pt-10 pb-8 text-center sm:px-10">
-          <span className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-dark text-white shadow-lg shadow-brand/25">
+          <span className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-brand text-white shadow-lg shadow-brand/25">
             <item.icon className="size-8" aria-hidden />
           </span>
           <h1 className="mt-5 text-2xl font-extrabold tracking-tight text-gray-900">{item.label}</h1>
@@ -40,7 +40,7 @@ export function ComingSoon({ slug }: { slug: PortalSlug }) {
         </div>
 
         {item.preview && (
-          <div aria-hidden className="relative border-t border-gray-100 bg-gradient-to-b from-gray-50 to-white px-6 py-6 sm:px-10">
+          <div aria-hidden className="relative border-t border-gray-100 bg-gray-50 px-6 py-6 sm:px-10">
             {item.preview === "chart" ? <ChartPreview /> : <CardsPreview />}
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white to-transparent" />
           </div>
@@ -63,7 +63,7 @@ function ChartPreview() {
       </div>
       <div className="mt-4 flex h-36 items-end gap-2">
         {BARS.map((h, i) => (
-          <span key={i} style={{ height: `${h}%` }} className="flex-1 rounded-t-md bg-gradient-to-t from-brand/15 to-brand/55" />
+          <span key={i} style={{ height: `${h}%` }} className="flex-1 rounded-t-md bg-brand/15" />
         ))}
       </div>
     </div>
@@ -76,7 +76,7 @@ function CardsPreview() {
     <div className="grid grid-cols-3 gap-3 opacity-80">
       {[0, 1, 2].map((i) => (
         <div key={i} className="rounded-xl border border-gray-100 bg-white p-3">
-          <div className="aspect-[4/3] rounded-lg bg-gradient-to-br from-brand-soft to-orange-50" />
+          <div className="aspect-[4/3] rounded-lg bg-brand-soft" />
           <div className="mt-3 h-3 w-4/5 rounded-full bg-gray-200" />
           <div className="mt-2 h-3 w-1/2 rounded-full bg-gray-100" />
           <div className="mt-3 h-6 w-16 rounded-full bg-orange-100" />
