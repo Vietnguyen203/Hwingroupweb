@@ -83,15 +83,13 @@ export function BannerCarousel({ slides }: { slides: BannerSlide[] }) {
                   <span aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/60 via-black/35 to-black/10" />
                 </>
               )}
-              {/* Vệt sáng trang trí */}
-
               <div className="relative z-10 w-[58%] space-y-1.5 pl-5 sm:pl-8 md:w-3/5 md:space-y-4 md:pl-16">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-[10px] font-bold ring-1 ring-white/25 backdrop-blur md:px-3.5 md:py-1 md:text-xs">
                   <span className="size-1.5 rounded-full bg-brand-accent" />
                   {tag === "Mới" ? "Sản phẩm mới" : "Bán chạy nhất"}
                 </span>
-                {/* Chữ hoa tiếng Việt hay chồng 2 dấu (Ề, Ố…): line-clamp cắt phần tràn nên cần giãn dòng + đệm trên/dưới để dấu không bị cắt */}
-                <h2 className="line-clamp-2 py-1.5 text-lg leading-[1.3] font-black tracking-tight drop-shadow-sm sm:text-2xl md:py-2 md:text-5xl md:leading-[1.25]">{p.name}</h2>
+                {/* line-clamp cắt phần tràn nên cần giãn dòng + đệm trên/dưới để dấu tiếng Việt (ế, ộ, ữ…) không bị cắt; text-balance chia đều hai dòng, tránh "(20 cái)" rớt lẻ */}
+                <h2 className="line-clamp-2 py-1.5 text-lg leading-[1.3] font-black tracking-tight text-balance drop-shadow-sm sm:text-2xl md:py-2 md:text-5xl md:leading-[1.25]">{p.name}</h2>
                 <p className="flex items-baseline gap-2 md:gap-3">
                   <span className="text-xl font-black text-[#ffd400] md:text-4xl">{formatVnd(p.price)}</span>
                   {p.compareAtPrice != null && p.compareAtPrice > p.price && (

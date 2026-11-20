@@ -102,7 +102,8 @@ export function ProductCard({ product }: { product: ProductCardResponse }) {
 
         {/* Tem giá: số tiền đỏ to, "/ đơn vị" nhỏ liền bên cạnh, giá gốc gạch ngang ngay dưới */}
         <div className="mt-auto pt-2">
-          <p className="flex flex-wrap items-baseline gap-x-1.5">
+          {/* Thẻ đủ rộng thì "/ đơn vị" nằm cạnh giá; thẻ hẹp thì xuống dòng dưới giá (không để chữ rớt dòng ngẫu nhiên) */}
+          <p className="flex flex-col @min-[12rem]:flex-row @min-[12rem]:items-baseline @min-[12rem]:gap-x-1.5">
             <span className="font-display text-lg leading-none font-extrabold tracking-tight whitespace-nowrap text-brand-red tabular-nums md:text-xl">{formatVnd(product.price)}</span>
             {product.unit && <span className="text-xs text-neutral-500">/ {product.unit}</span>}
           </p>
