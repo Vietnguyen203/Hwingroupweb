@@ -69,7 +69,7 @@ public interface OrderMapper {
                 toVat(o.getVatInvoice()), o.getNote(), o.getItems().stream().map(this::toItem).toList(),
                 o.getPlacedAt(), o.getConfirmedAt(), o.getShippedAt(), o.getDeliveredAt(), o.getCompletedAt(),
                 o.getCancelledAt(), o.getReturnedAt(), o.getCancelReason() == null ? null : o.getCancelReason().name(),
-                o.isCancellableByCustomer(), o.isAwaitingTransfer() && payment != null ? toPayment(payment) : null);
+                o.isCancellableByCustomer(), o.isReceivableByCustomer(), o.isAwaitingTransfer() && payment != null ? toPayment(payment) : null);
     }
 
     default AdminOrderResponse toAdmin(Order o, PaymentInstruction payment) {

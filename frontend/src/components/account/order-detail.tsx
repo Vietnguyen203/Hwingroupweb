@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, CheckCircle2, ChevronRight, CircleAlert, Copy, MapPin, Package, ShoppingBag } from "lucide-react";
+import { Check, CheckCircle2, ChevronRight, CircleAlert, Copy, MapPin, Package, PackageCheck, ShoppingBag } from "lucide-react";
 
 import { Breadcrumb } from "@/components/layout/breadcrumb";
 import { OrderDetailSkeleton } from "@/components/skeletons/page-skeletons";
@@ -24,6 +24,7 @@ export function OrderDetailView({ code }: { code: string }) {
   const placed = useQueryParam("placed") === "1";
   const qc = useQueryClient();
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const [confirmReceive, setConfirmReceive] = useState(false);
   const order = useQuery({
     queryKey: ["order", code],
     queryFn: () => api<OrderDetailResponse>(`/api/me/orders/${encodeURIComponent(code)}`),
@@ -34,6 +35,16 @@ export function OrderDetailView({ code }: { code: string }) {
       qc.setQueryData(["order", code], o);
       qc.invalidateQueries({ queryKey: ["orders"] });
       setConfirmCancel(false);
+    },
+  });
+  // Khách xác nhận đã nhận hàng: đơn đang giao -> đã giao (mở hạn đổi trả và quyền đánh giá sản phẩm)
+  const receive = useMutation({
+    mutationFn: () => api<OrderDetailResponse>(`/api/me/orders/${encodeURIComponent(code)}/confirm-received`, { method: "POST" }),
+    onSuccess: (o) => {
+      qc.setQueryData(["order", code], o);
+      qc.invalidateQueries({ queryKey: ["orders"] });
+      setConfirmReceive(false);
+      confettiShower();
     },
   });
 
@@ -66,6 +77,23 @@ export function OrderDetailView({ code }: { code: string }) {
       )}
 
       <OrderProgress status={o.status} cancelReason={o.cancelReason} />
+
+      {o.receivable && (
+        <section className="flex flex-col gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/60 p-4 sm:flex-row sm:items-center sm:justify-between md:p-5">
+          <div className="flex items-start gap-3">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-600"><PackageCheck className="size-5" /></span>
+            <div>
+              <p className="font-bold text-neutral-900">Đơn hàng đang trên đường giao tới bạn</p>
+              <p className="text-sm text-neutral-600">Khi đã nhận đủ hàng, vui lòng bấm xác nhận để hoàn tất đơn.</p>
+            </div>
+          </div>
+          <button type="button" onClick={() => setConfirmReceive(true)}
+                  className="h-11 shrink-0 rounded-xl bg-brand px-5 text-sm font-semibold text-white transition hover:brightness-110">
+            Đã nhận được hàng
+          </button>
+        </section>
+      )}
+      {receive.error && <p className="text-sm text-destructive">{errorMessage(receive.error)}</p>}
 
       {o.payment && <BankTransferCard order={o} />}
 
@@ -131,6 +159,17 @@ export function OrderDetailView({ code }: { code: string }) {
         loading={cancel.isPending}
         onCancel={() => setConfirmCancel(false)}
         onConfirm={() => cancel.mutate()}
+      />
+      <ConfirmModal
+        isOpen={confirmReceive}
+        title={`Xác nhận đã nhận đơn ${o.code}?`}
+        message="Hãy kiểm tra hàng trước khi xác nhận. Sau khi xác nhận, đơn chuyển sang “Đã giao” và bạn có thể đánh giá sản phẩm."
+        confirmText="Đã nhận hàng"
+        cancelText="Chưa nhận"
+        tone="info"
+        loading={receive.isPending}
+        onCancel={() => setConfirmReceive(false)}
+        onConfirm={() => receive.mutate()}
       />
     </div>
   );

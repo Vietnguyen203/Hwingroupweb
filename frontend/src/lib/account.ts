@@ -48,6 +48,8 @@ export type OrderDetailResponse = Omit<OrderSummaryResponse, "itemCount" | "firs
   items: { productId: string; productName: string; productSlug: string; imageUrl: string | null; unitPrice: number; quantity: number; lineTotal: number }[];
   cancelReason: string | null;
   cancellable: boolean;
+  /** Khách bấm được "Đã nhận được hàng" (đơn đang giao). */
+  receivable: boolean;
   /** Hướng dẫn chuyển khoản – chỉ có khi BANK_QR chưa thanh toán. */
   payment: { qrImageUrl: string; bankBin: string; accountNo: string; accountName: string; amount: number; transferContent: string } | null;
 };

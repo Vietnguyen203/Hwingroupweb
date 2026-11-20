@@ -52,6 +52,7 @@ import lombok.NoArgsConstructor;
  * <pre>
  * PENDING -> CONFIRMED -> SHIPPING -> DELIVERED -> COMPLETED
  * PENDING|CONFIRMED -> CANCELLED      DELIVERED (trong hạn đổi trả) -> RETURNED
+ * SHIPPING -> DELIVERED do admin đánh dấu đã giao hoặc do khách xác nhận đã nhận hàng
  * </pre>
  * Giá luôn do backend tính từ catalog (xem PlaceOrderService), không nhận từ client.
  */
@@ -214,10 +215,23 @@ public class Order extends AggregateRoot<Order> {
         registerEvent(new OrderShippedEvent(UUID.randomUUID(), now, id, orderCode, customerId));
     }
 
-    /** Giao thành công. Đơn COD coi như đã thu tiền. */
+    /** Giao thành công (admin đánh dấu). Đơn COD coi như đã thu tiền. */
     public void markDelivered(UUID actorId, Instant now) {
         requireStatus(Set.of(OrderStatus.SHIPPING), "đánh dấu đã giao");
-        transition(OrderStatus.DELIVERED, actorId, null, now);
+        deliver(actorId, null, now);
+    }
+
+    /**
+     * Khách xác nhận đã nhận được hàng khi đơn đang giao. Kết quả giống admin đánh dấu đã giao
+     * (DELIVERED, mở hạn đổi trả và hạn chờ hoa hồng) nhưng lịch sử ghi rõ là do khách xác nhận.
+     */
+    public void confirmReceived(UUID customerId, Instant now) {
+        requireStatus(Set.of(OrderStatus.SHIPPING), "xác nhận đã nhận hàng");
+        deliver(customerId, "Khách xác nhận đã nhận hàng", now);
+    }
+
+    private void deliver(UUID actorId, String note, Instant now) {
+        transition(OrderStatus.DELIVERED, actorId, note, now);
         this.deliveredAt = now;
         if (paymentMethod == PaymentMethod.COD) {
             this.paymentStatus = PaymentStatus.PAID;
@@ -270,6 +284,11 @@ public class Order extends AggregateRoot<Order> {
 
     public boolean isCancellableByCustomer() {
         return status == OrderStatus.PENDING;
+    }
+
+    /** Khách bấm "Đã nhận được hàng" được khi đơn đang giao. */
+    public boolean isReceivableByCustomer() {
+        return status == OrderStatus.SHIPPING;
     }
 
     public boolean isAwaitingTransfer() {

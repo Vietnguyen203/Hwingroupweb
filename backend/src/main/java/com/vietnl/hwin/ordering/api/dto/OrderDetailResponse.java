@@ -40,5 +40,7 @@ public class OrderDetailResponse {
     private Instant returnedAt;
     private String cancelReason;
     private boolean cancellable;
+    /** Khách bấm được "Đã nhận được hàng" (đơn đang giao). */
+    private boolean receivable;
     private PaymentInstructionResponse payment;
 }

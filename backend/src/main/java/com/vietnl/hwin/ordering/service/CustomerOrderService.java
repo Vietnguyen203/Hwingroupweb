@@ -53,6 +53,14 @@ public class CustomerOrderService {
         return mapper.apply(orders.save(order));
     }
 
+    /** Khách xác nhận đã nhận hàng – chỉ khi đơn đang giao (quy tắc trong Order.confirmReceived). */
+    @Transactional
+    public <T> T confirmReceived(UUID customerId, String orderCode, Function<Order, T> mapper) {
+        Order order = load(customerId, orderCode);
+        order.confirmReceived(customerId, clock.instant());
+        return mapper.apply(orders.save(order));
+    }
+
     private Order load(UUID customerId, String orderCode) {
         return orders.findByOrderCodeAndCustomerId(orderCode, customerId)
                 .orElseThrow(() -> new ResponseException(HttpStatus.NOT_FOUND, ExceptionMessage.ORDER_NOT_FOUND));

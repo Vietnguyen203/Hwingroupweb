@@ -56,6 +56,12 @@ public class OrderController {
         return ResponseEntity.ok(service.cancel(me.userId(), code, this::detail));
     }
 
+    /** Khách xác nhận đã nhận được hàng: đơn SHIPPING -> DELIVERED. */
+    @PostMapping("/{code}/confirm-received")
+    public ResponseEntity<OrderDetailResponse> confirmReceived(@AuthenticationPrincipal AuthPrincipal me, @PathVariable String code) {
+        return ResponseEntity.ok(service.confirmReceived(me.userId(), code, this::detail));
+    }
+
     private OrderDetailResponse detail(Order o) {
         return mapper.toDetail(o, paymentGateway.instructionFor(o.getOrderCode(), o.getTotal(), o.getPaymentMethod()));
     }

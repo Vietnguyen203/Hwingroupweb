@@ -67,6 +67,39 @@ class OrderTest {
     }
 
     @Test
+    void customerConfirmsReceiptWhileShipping() {
+        Order o = newOrder(PaymentMethod.COD);
+        o.confirm(ADMIN, T0);
+        o.markShipping(ADMIN, T0);
+        assertThat(o.isReceivableByCustomer()).isTrue();
+
+        Instant at = T0.plus(Duration.ofDays(2));
+        o.confirmReceived(CUSTOMER, at);
+
+        assertThat(o.getStatus()).isEqualTo(OrderStatus.DELIVERED);
+        assertThat(o.getDeliveredAt()).isEqualTo(at);
+        assertThat(o.getPaymentStatus()).isEqualTo(PaymentStatus.PAID); // COD: giao xong coi như đã thu tiền
+        assertThat(o.isReceivableByCustomer()).isFalse();
+        OrderStatusHistory last = o.getHistory().get(o.getHistory().size() - 1);
+        assertThat(last.getToStatus()).isEqualTo(OrderStatus.DELIVERED);
+        assertThat(last.getActorId()).isEqualTo(CUSTOMER);
+        assertThat(last.getNote()).isEqualTo("Khách xác nhận đã nhận hàng");
+    }
+
+    @Test
+    void customerCannotConfirmReceiptBeforeShippingOrTwice() {
+        Order o = newOrder(PaymentMethod.COD);
+        assertThat(o.isReceivableByCustomer()).isFalse();
+        assertThatThrownBy(() -> o.confirmReceived(CUSTOMER, T0)).hasFieldOrPropertyWithValue("code", Order.INVALID_STATE);
+        o.confirm(ADMIN, T0);
+        assertThatThrownBy(() -> o.confirmReceived(CUSTOMER, T0)).hasFieldOrPropertyWithValue("code", Order.INVALID_STATE);
+        o.markShipping(ADMIN, T0);
+        o.confirmReceived(CUSTOMER, T0);
+        assertThatThrownBy(() -> o.confirmReceived(CUSTOMER, T0)).hasFieldOrPropertyWithValue("code", Order.INVALID_STATE);
+        assertThatThrownBy(() -> o.markDelivered(ADMIN, T0)).isInstanceOf(ResponseException.class);
+    }
+
+    @Test
     void bankQrMustBePaidBeforeConfirm() {
         Order o = newOrder(PaymentMethod.BANK_QR);
         assertThatThrownBy(() -> o.confirm(ADMIN, T0)).hasFieldOrPropertyWithValue("code", "PAYMENT_REQUIRED");

@@ -42,10 +42,13 @@ stateDiagram-v2
 | `cancel(reason)` | PENDING (khách), PENDING/CONFIRMED (admin, system) | CANCELLED | `OrderCancelledEvent` | Khách / Admin / `OrderStockEventListener` |
 | `markShipping()` | CONFIRMED | SHIPPING | – | Admin |
 | `markDelivered()` | SHIPPING | DELIVERED | `OrderDeliveredEvent` | Admin |
+| `confirmReceived()` | SHIPPING | DELIVERED | `OrderDeliveredEvent` | Khách (bấm "Đã nhận được hàng") |
 | `markReturned()` | DELIVERED (≤ 7 ngày) | RETURNED | `OrderReturnedEvent` | Admin |
 | `complete()` | DELIVERED (> 7 ngày) | COMPLETED | `OrderCompletedEvent` | Job |
 
 > Khách chỉ tự hủy được khi đơn còn `PENDING`; khi đã `CONFIRMED` phải liên hệ shop (admin hủy).
+>
+> `SHIPPING → DELIVERED` do admin đánh dấu "đã giao" **hoặc** do khách xác nhận đã nhận hàng, ai làm trước thì có hiệu lực (người còn lại gặp lỗi `INVALID_STATE_TRANSITION`). Hai cách cho cùng kết quả: phát `OrderDeliveredEvent` (mở hạn đổi trả 7 ngày và hạn chờ hoa hồng 7 ngày, đơn COD thành đã thanh toán); lịch sử trạng thái ghi người thực hiện và ghi chú "Khách xác nhận đã nhận hàng".
 
 ---
 

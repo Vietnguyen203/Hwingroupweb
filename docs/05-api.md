@@ -85,6 +85,7 @@
 | GET | `/api/me/orders` | CUSTOMER | Đơn của tôi (phân trang, lọc trạng thái) |
 | GET | `/api/me/orders/{code}` | CUSTOMER | Chi tiết đơn của tôi (+ `qrUrl` nếu BANK_QR chưa trả) |
 | POST | `/api/me/orders/{code}/cancel` | CUSTOMER | Tự hủy khi còn PENDING |
+| POST | `/api/me/orders/{code}/confirm-received` | CUSTOMER | Xác nhận đã nhận hàng: SHIPPING → DELIVERED. Chi tiết đơn có cờ `receivable` cho biết khách bấm được |
 | GET | `/api/admin/orders` | ADMIN | Lọc `status, paymentMethod, paymentStatus, q (mã/SĐT), from, to` |
 | GET | `/api/admin/orders/{id}` | ADMIN | Chi tiết + lịch sử trạng thái + VAT |
 | POST | `/api/admin/orders/{id}/mark-paid` | ADMIN | `{paymentRef}` – xác nhận đã nhận chuyển khoản |
