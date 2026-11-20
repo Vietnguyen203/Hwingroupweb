@@ -79,7 +79,7 @@ export function CameraCaptureDialog({ title, onCapture, onClose }: {
 
   return (
     <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-3" onClick={onClose}>
-      <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-neutral-900 text-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-2xl overflow-hidden rounded-xl bg-neutral-900 text-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-4 py-3">
           <h2 className="font-semibold">{title}</h2>
           <button type="button" aria-label="Đóng" onClick={onClose} className="rounded-full p-1.5 hover:bg-white/15"><X className="size-5" /></button>

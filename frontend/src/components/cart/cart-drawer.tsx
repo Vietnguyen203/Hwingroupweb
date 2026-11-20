@@ -158,7 +158,7 @@ export function CartDrawer() {
                 Giỏ hàng của bạn đang trống
               </h3>
               <p className="mt-1 text-sm text-neutral-500 max-w-xs">
-                Chưa có món ngon nào được chọn. Hãy cùng khám phá thực đơn đa dạng của Hwin Food nhé!
+                Chưa có món ngon nào được chọn. Hãy cùng khám phá thực đơn đa dạng của Phúc Vị Foods nhé!
               </p>
               <button
                 type="button"

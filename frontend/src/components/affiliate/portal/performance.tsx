@@ -132,7 +132,7 @@ export function Performance() {
       </section>
 
       <Reveal delay={340}>
-        <section className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+        <section className="rounded-xl border border-gray-100 bg-white p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-bold text-gray-900">{METRIC_TITLE[metric]}</h2>
@@ -185,7 +185,7 @@ function Segmented<T extends string>({ label, value, options, onChange }: { labe
           role="radio"
           aria-checked={value === o.value}
           onClick={() => onChange(o.value)}
-          className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors", value === o.value ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-800")}
+          className={cn("rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors", value === o.value ? "bg-white text-gray-900 " : "text-gray-500 hover:text-gray-800")}
         >
           {o.label}
         </button>
@@ -203,7 +203,7 @@ function SourceCard({ stats }: { stats: ClickStats | null }) {
   const max = stats ? Math.max(0, ...stats.bySource.map((s) => s.clicks)) : 0;
 
   return (
-    <section className="h-full rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+    <section className="h-full rounded-xl border border-gray-100 bg-white p-5 ">
       <h2 className="text-base font-bold text-gray-900">Click theo nền tảng</h2>
       <p className="text-sm text-gray-500">Nơi khách bấm link của bạn trong 30 ngày qua</p>
 
@@ -248,7 +248,7 @@ function StatusCard({ split }: { split: StatusSplit | null }) {
   const total = split ? STATUS_ROWS.reduce((n, r) => n + split[r.key].count, 0) : 0;
 
   return (
-    <section className="h-full rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+    <section className="h-full rounded-xl border border-gray-100 bg-white p-5 ">
       <h2 className="text-base font-bold text-gray-900">Hoa hồng theo trạng thái</h2>
       <p className="text-sm text-gray-500">Các đơn phát sinh trong 30 ngày qua</p>
 

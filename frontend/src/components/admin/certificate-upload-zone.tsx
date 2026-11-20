@@ -65,7 +65,7 @@ export function CertificateUploadZone({ onUploaded, onFinished }: {
         onDragLeave={() => setDragging(false)}
         onDrop={(e) => { e.preventDefault(); setDragging(false); void handle(e.dataTransfer.files); }}
         className={cn(
-          "relative overflow-hidden rounded-2xl border-2 border-dashed p-6 text-center transition sm:p-8",
+          "relative overflow-hidden rounded-xl border-2 border-dashed p-6 text-center transition sm:p-8",
           dragging ? "border-emerald-500 bg-emerald-50" : "border-emerald-200 bg-gradient-to-br from-emerald-50/70 via-white to-white hover:border-emerald-400",
         )}
       >
@@ -79,7 +79,7 @@ export function CertificateUploadZone({ onUploaded, onFinished }: {
           </div>
         ) : (
           <div className="mx-auto flex max-w-md flex-col items-center gap-3">
-            <span className="flex size-14 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-md shadow-emerald-600/25">
+            <span className="flex size-14 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-emerald-600/25">
               <UploadCloud className="size-7" />
             </span>
             <div>
@@ -88,7 +88,7 @@ export function CertificateUploadZone({ onUploaded, onFinished }: {
             </div>
             <div className="flex flex-wrap items-center justify-center gap-2">
               <button type="button" onClick={() => fileInput.current?.click()}
-                      className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 active:scale-[0.98]">
+                      className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 active:scale-[0.98]">
                 <ImagePlus className="size-4" /> Chọn ảnh từ máy
               </button>
               <button type="button" onClick={() => cameraInput.current?.click()}

@@ -1,13 +1,9 @@
 import { cn } from "@/lib/utils";
 
-/** Khối hiện dần + trượt nhẹ lên khi vào trang (so le theo `delay` ms). Người dùng bật "giảm chuyển động" thì không có hiệu ứng. */
-export function Reveal({ delay = 0, className, children }: { delay?: number; className?: string; children: React.ReactNode }) {
-  return (
-    <div
-      style={{ animationDelay: `${delay}ms` }}
-      className={cn("animate-in fade-in slide-in-from-bottom-3 fill-mode-backwards duration-500", className)}
-    >
-      {children}
-    </div>
-  );
+/**
+ * Khối nội dung của cổng CTV. Trước đây hiện dần + trượt lên khi vào trang; nay hiển thị ngay (hiệu ứng vào trang ở mọi khối
+ * là kiểu mặc định của trang tạo sẵn). Giữ nguyên chữ ký (`delay` không còn tác dụng) để các nơi dùng không phải đổi.
+ */
+export function Reveal({ className, children }: { delay?: number; className?: string; children: React.ReactNode }) {
+  return <div className={cn(className)}>{children}</div>;
 }

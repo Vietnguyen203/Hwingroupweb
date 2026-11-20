@@ -55,7 +55,7 @@ export function OrderDetailView({ code }: { code: string }) {
     const msg = order.error instanceof ApiError && order.error.status === 401
       ? <>Vui lòng <Link href={`/login?next=/account/orders/${code}`} className="text-brand-link">đăng nhập</Link>.</>
       : errorMessage(order.error);
-    return <div className="space-y-3 px-3 py-4 md:px-0 md:py-8">{back}<p className="rounded-2xl bg-white p-4 text-sm">{msg}</p></div>;
+    return <div className="space-y-3 px-3 py-4 md:px-0 md:py-8">{back}<p className="rounded-xl bg-white p-4 text-sm">{msg}</p></div>;
   }
 
   const o = order.data;
@@ -67,7 +67,7 @@ export function OrderDetailView({ code }: { code: string }) {
       {back}
 
       {placed ? <SuccessHero order={o} /> : (
-        <section className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-white p-4 shadow-sm md:p-5">
+        <section className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white p-4 ring-1 ring-black/[0.06] md:p-5">
           <div>
             <h1 className="text-xl font-bold text-brand">Đơn {o.code}</h1>
             <p className="text-sm text-muted-foreground">Đặt lúc {formatDateTime(o.placedAt)}</p>
@@ -79,9 +79,9 @@ export function OrderDetailView({ code }: { code: string }) {
       <OrderProgress status={o.status} cancelReason={o.cancelReason} />
 
       {o.receivable && (
-        <section className="flex flex-col gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/60 p-4 sm:flex-row sm:items-center sm:justify-between md:p-5">
+        <section className="flex flex-col gap-3 rounded-xl border border-transparent bg-brand-honey/15 p-4 sm:flex-row sm:items-center sm:justify-between md:p-5">
           <div className="flex items-start gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-600"><PackageCheck className="size-5" /></span>
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-honey/40 text-brand-deep"><PackageCheck className="size-5" /></span>
             <div>
               <p className="font-bold text-neutral-900">Đơn hàng đang trên đường giao tới bạn</p>
               <p className="text-sm text-neutral-600">Khi đã nhận đủ hàng, vui lòng bấm xác nhận để hoàn tất đơn.</p>
@@ -99,7 +99,7 @@ export function OrderDetailView({ code }: { code: string }) {
 
       <div className="grid items-start gap-4 lg:grid-cols-[1fr_380px]">
         <div className="space-y-4">
-          <section className="rounded-2xl bg-white p-4 shadow-sm md:p-5">
+          <section className="rounded-xl bg-white p-4 ring-1 ring-black/[0.06] md:p-5">
             <h2 className="mb-2 flex items-center gap-2 font-bold text-neutral-900"><Package className="size-4 text-brand" /> Sản phẩm ({o.items.reduce((n, i) => n + i.quantity, 0)})</h2>
             <ul className="divide-y text-sm">
               {o.items.map((i) => (
@@ -116,7 +116,7 @@ export function OrderDetailView({ code }: { code: string }) {
             </ul>
           </section>
 
-          <section className="rounded-2xl bg-white p-4 text-sm shadow-sm md:p-5">
+          <section className="rounded-xl bg-white p-4 text-sm ring-1 ring-black/[0.06] md:p-5">
             <h2 className="mb-2 flex items-center gap-2 font-bold text-neutral-900"><MapPin className="size-4 text-brand" /> Giao tới</h2>
             <p className="font-medium">{o.shippingAddress.recipientName} · {o.shippingAddress.recipientPhone}</p>
             <p className="text-muted-foreground">{o.shippingAddress.fullText}</p>
@@ -125,7 +125,7 @@ export function OrderDetailView({ code }: { code: string }) {
         </div>
 
         <aside className="space-y-4 lg:sticky lg:top-28">
-          <section className="space-y-2 rounded-2xl bg-white p-4 text-sm shadow-sm md:p-5">
+          <section className="space-y-2 rounded-xl bg-white p-4 text-sm ring-1 ring-black/[0.06] md:p-5">
             <h2 className="font-bold text-neutral-900">Thanh toán</h2>
             <p className="text-neutral-700">{PAYMENT_METHOD[o.paymentMethod] ?? o.paymentMethod}</p>
             <p className={cn("w-fit rounded-full px-2.5 py-0.5 text-xs font-semibold", o.paymentStatus === "PAID" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800")}>
@@ -182,8 +182,8 @@ function SuccessHero({ order: o }: { order: OrderDetailResponse }) {
     confettiShower(); // mưa pháo giấy ăn mừng đặt hàng thành công
   }, []);
   return (
-    <section className="overflow-hidden rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center shadow-sm md:p-8">
-      <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"><CheckCircle2 className="size-10" /></span>
+    <section className="overflow-hidden rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-center ring-1 ring-black/[0.06] md:p-8">
+      <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-100 text-brand-green"><CheckCircle2 className="size-10" /></span>
       <h1 className="mt-3 text-xl font-bold text-emerald-900 md:text-2xl">Đặt hàng thành công!</h1>
       <p className="mt-1 text-sm text-neutral-600">
         {isQr ? "Vui lòng chuyển khoản bên dưới để giữ đơn. Chúng tôi sẽ xác nhận ngay khi nhận được tiền."
@@ -213,7 +213,7 @@ const STEPS: { key: string; label: string; statuses: OrderStatus[] }[] = [
 function OrderProgress({ status, cancelReason }: { status: OrderStatus; cancelReason: string | null }) {
   if (status === "CANCELLED" || status === "RETURNED") {
     return (
-      <section className="flex items-start gap-3 rounded-2xl bg-neutral-100 p-4 text-sm text-neutral-700">
+      <section className="flex items-start gap-3 rounded-xl bg-neutral-100 p-4 text-sm text-neutral-700">
         <CircleAlert className="mt-0.5 size-5 shrink-0 text-neutral-500" />
         <div>
           <p className="font-semibold">{status === "CANCELLED" ? "Đơn hàng đã bị hủy" : "Đơn hàng đã được trả lại"}</p>
@@ -223,19 +223,19 @@ function OrderProgress({ status, cancelReason }: { status: OrderStatus; cancelRe
     );
   }
   return (
-    <section aria-label="Tiến trình đơn hàng" className="rounded-2xl bg-white p-4 shadow-sm md:p-5">
+    <section aria-label="Tiến trình đơn hàng" className="rounded-xl bg-white p-4 ring-1 ring-black/[0.06] md:p-5">
       <ol className="grid grid-cols-4">
         {STEPS.map((s, i) => {
           const done = s.statuses.includes(status);
           const nextDone = STEPS[i + 1]?.statuses.includes(status);
           return (
             <li key={s.key} className="relative flex flex-col items-center gap-1.5 text-center">
-              {i > 0 && <span className={cn("absolute top-3.5 right-1/2 h-0.5 w-full", done ? "bg-emerald-500" : "bg-neutral-200")} aria-hidden />}
+              {i > 0 && <span className={cn("absolute top-3.5 right-1/2 h-0.5 w-full", done ? "bg-brand-green" : "bg-neutral-200")} aria-hidden />}
               <span className={cn("relative z-10 flex size-7 items-center justify-center rounded-full border-2 text-xs font-bold",
-                done ? "border-emerald-500 bg-emerald-500 text-white" : "border-neutral-300 bg-white text-neutral-400")}>
+                done ? "border-brand-green bg-brand-green text-white" : "border-neutral-300 bg-white text-neutral-400")}>
                 {done ? <Check className="size-4" /> : i + 1}
               </span>
-              <span className={cn("text-xs md:text-sm", done ? "font-semibold text-neutral-900" : "text-neutral-400", done && !nextDone && "text-emerald-700")}>{s.label}</span>
+              <span className={cn("text-xs md:text-sm", done ? "font-semibold text-neutral-900" : "text-neutral-400", done && !nextDone && "text-brand-green")}>{s.label}</span>
             </li>
           );
         })}
@@ -249,7 +249,7 @@ function BankTransferCard({ order: o }: { order: OrderDetailResponse }) {
   const p = o.payment!;
   const deadline = new Date(new Date(o.placedAt).getTime() + QR_TIMEOUT_HOURS * 3600_000);
   return (
-    <section className="rounded-2xl border border-amber-200 bg-white p-4 shadow-sm md:p-6">
+    <section className="rounded-xl border border-transparent bg-white p-4 ring-1 ring-black/[0.06] md:p-6">
       <h2 className="mb-4 text-lg font-bold text-brand">Chuyển khoản để hoàn tất đơn</h2>
       <div className="flex flex-col gap-5 md:flex-row">
         <div className="mx-auto shrink-0 text-center">
@@ -272,7 +272,7 @@ function BankTransferCard({ order: o }: { order: OrderDetailResponse }) {
             <li>Xác nhận chuyển; đơn được xác nhận ngay khi nhận được tiền.</li>
           </ol>
 
-          <p className="flex items-start gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          <p className="flex items-start gap-1.5 rounded-lg bg-brand-honey/20 px-3 py-2 text-xs text-neutral-800">
             <CircleAlert className="mt-0.5 size-4 shrink-0" />
             Vui lòng chuyển khoản trước <b>{formatDateTime(deadline.toISOString())}</b> ({QR_TIMEOUT_HOURS} giờ). Quá hạn mà chưa nhận được tiền, đơn sẽ tự hủy.
           </p>
@@ -308,7 +308,7 @@ function CopyButton({ value, label }: { value: string; label: string }) {
       }}
       className="flex size-8 shrink-0 items-center justify-center rounded-md text-neutral-500 transition hover:bg-neutral-100 hover:text-brand"
     >
-      {copied ? <Check className="size-4 text-emerald-600" /> : <Copy className="size-4" />}
+      {copied ? <Check className="size-4 text-brand-green" /> : <Copy className="size-4" />}
     </button>
   );
 }

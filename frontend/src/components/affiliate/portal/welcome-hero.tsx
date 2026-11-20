@@ -14,7 +14,7 @@ type Props = {
 /** Khối chào mừng đầu trang Tổng quan: lời chào, CTA "Khám phá sản phẩm" và mã/link giới thiệu chép 1 chạm. */
 export function WelcomeHero({ name, referralCode, shareLink }: Props) {
   return (
-    <section className="relative isolate overflow-hidden rounded-2xl bg-brand-deep p-5 text-white shadow-lg shadow-brand/20 sm:p-8">
+    <section className="relative isolate overflow-hidden rounded-xl bg-brand-deep p-5 text-white shadow-lg shadow-brand/20 sm:p-8">
       {/* Trang trí: vầng sáng cam + lưới chấm mờ dần về phía dưới */}
       <div
         aria-hidden
@@ -25,7 +25,7 @@ export function WelcomeHero({ name, referralCode, shareLink }: Props) {
         <div className="min-w-0">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/12 px-3 py-1 text-xs font-semibold tracking-wide text-white/90 ring-1 ring-white/20">
             <Sparkles className="size-3.5 text-brand-accent" aria-hidden />
-            Cổng cộng tác viên HWIN
+            Cổng cộng tác viên Phúc Vị
           </span>
           <h1 className="mt-3 text-2xl font-extrabold tracking-tight text-balance sm:text-3xl lg:text-4xl">
             Chào mừng quay trở lại, <span className="text-brand-accent">{name}</span>!
@@ -43,9 +43,9 @@ export function WelcomeHero({ name, referralCode, shareLink }: Props) {
           </Link>
         </div>
 
-        <div className="min-w-0 rounded-2xl bg-white/10 p-4 ring-1 ring-white/20 backdrop-blur-sm sm:p-5">
+        <div className="min-w-0 rounded-xl bg-white/10 p-4 ring-1 ring-white/20 backdrop-blur-sm sm:p-5">
           <p className="text-xs font-semibold text-white/70">Mã giới thiệu của bạn</p>
-          <p className="mt-1 text-2xl font-black tracking-[0.2em] sm:text-3xl">{referralCode ?? "········"}</p>
+          <p className="mt-1 text-2xl font-extrabold tracking-[0.2em] sm:text-3xl">{referralCode ?? "········"}</p>
           {shareLink ? <ShareLink link={shareLink} /> : <Skeleton className="mt-3 h-12 rounded-xl bg-white/15" />}
         </div>
       </div>

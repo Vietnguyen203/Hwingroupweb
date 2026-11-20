@@ -29,7 +29,7 @@ export function PlatformLinks({ shareLink }: { shareLink: string }) {
           const link = platformLink(shareLink, src);
           const done = copied === src;
           return (
-            <li key={src} className="flex flex-col gap-2 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+            <li key={src} className="flex flex-col gap-2 rounded-xl border border-gray-100 bg-white p-4 ">
               <div className="flex items-center justify-between gap-2">
                 <span className="font-bold text-gray-900">{label}</span>
                 <button

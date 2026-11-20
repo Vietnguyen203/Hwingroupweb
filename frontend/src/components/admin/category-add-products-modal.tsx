@@ -79,7 +79,7 @@ export function CategoryAddProductsModal({ category, categories, onClose }: {
   return (
     <div role="dialog" aria-modal="true" aria-label="Thêm sản phẩm vào danh mục"
          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+      <div className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between border-b p-5">
           <div>
             <h2 className="text-lg font-bold text-slate-900">Thêm sản phẩm vào &ldquo;{category.name}&rdquo;</h2>

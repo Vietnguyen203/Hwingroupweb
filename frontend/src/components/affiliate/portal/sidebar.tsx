@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import { LogoMark } from "@/components/brand/logo";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -34,11 +35,9 @@ export function Sidebar({ profile, onClose }: { profile: AffiliateResponse | nul
     <div className="flex h-full flex-col bg-white">
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-gray-100 px-5">
         <PortalLink slug="dashboard" onClick={onClose} className="flex items-center gap-2.5">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-brand-accent text-base font-black text-white shadow-sm">
-            H
-          </span>
+          <span className="flex size-9 items-center justify-center rounded-xl bg-brand-deep text-brand-honey"><LogoMark tone="gold" className="h-6" /></span>
           <span className="text-lg font-extrabold tracking-tight text-brand-deep">
-            HWIN <span className="text-brand-red">Affiliate</span>
+            Phúc Vị <span className="text-brand-red">Affiliate</span>
           </span>
         </PortalLink>
         {onClose && (
@@ -72,7 +71,7 @@ export function Sidebar({ profile, onClose }: { profile: AffiliateResponse | nul
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-gray-900">{profile?.fullName ?? "Cộng tác viên"}</p>
             <p className="truncate text-xs text-gray-500">
-              {profile?.referralCode ? `Mã ${profile.referralCode}` : "Cộng tác viên HWIN"}
+              {profile?.referralCode ? `Mã ${profile.referralCode}` : "Cộng tác viên Phúc Vị"}
             </p>
           </div>
           <button

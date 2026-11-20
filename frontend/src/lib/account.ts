@@ -59,7 +59,7 @@ export type OrderStatus = "PENDING" | "CONFIRMED" | "SHIPPING" | "DELIVERED" | "
 export const ORDER_STATUS: Record<OrderStatus, { label: string; className: string }> = {
   PENDING: { label: "Chờ xác nhận", className: "bg-amber-100 text-amber-800" },
   CONFIRMED: { label: "Đã xác nhận", className: "bg-blue-100 text-blue-800" },
-  SHIPPING: { label: "Đang giao", className: "bg-indigo-100 text-indigo-800" },
+  SHIPPING: { label: "Đang giao", className: "bg-brand-honey/25 text-neutral-900" },
   DELIVERED: { label: "Đã giao", className: "bg-green-100 text-green-800" },
   COMPLETED: { label: "Hoàn tất", className: "bg-green-100 text-green-800" },
   CANCELLED: { label: "Đã hủy", className: "bg-neutral-200 text-neutral-700" },

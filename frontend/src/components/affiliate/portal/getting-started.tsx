@@ -28,7 +28,7 @@ export function GettingStarted({ dash, orders }: { dash: AffiliateDashboard; ord
   if (finished === steps.length) return null;
 
   return (
-    <section className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+    <section className="rounded-xl border border-gray-100 bg-white p-5 ">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <div>
           <h2 className="text-base font-bold text-gray-900">Bắt đầu nhanh</h2>

@@ -17,7 +17,7 @@ const RETRY_MAX_MS = 30_000;
  * Kênh thời gian thực cho người dùng đang đăng nhập (đặt một lần ở gốc ứng dụng, không hiển thị gì):
  * - Mở WebSocket /api/realtime (cùng tên miền nên dùng cookie đăng nhập), mất kết nối thì tự nối lại có giãn cách.
  * - Có thông báo mới: cập nhật số chưa đọc, phát âm báo, hiện toast, tải lại dữ liệu trang đang mở liên quan.
- * - Số chưa đọc hiện trên tiêu đề tab: "(3) Đơn hàng | HWIN".
+ * - Số chưa đọc hiện trên tiêu đề tab: "(3) Đơn hàng | Phúc Vị".
  */
 export function RealtimeProvider() {
   const me = useMe().data;

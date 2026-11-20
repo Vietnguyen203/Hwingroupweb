@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const TONES = {
   purple: { tile: "from-brand to-brand-dark", bar: "from-brand to-brand-dark", mark: "text-brand" },
   orange: { tile: "from-brand-accent to-brand-red", bar: "from-brand-accent to-brand-red", mark: "text-brand-red" },
-  navy: { tile: "from-indigo-500 to-brand-deep", bar: "from-indigo-500 to-brand-deep", mark: "text-brand-deep" },
+  navy: { tile: "from-brand-honey to-brand-accent", bar: "from-brand-honey to-brand-accent", mark: "text-brand-deep" },
   green: { tile: "from-emerald-400 to-green-600", bar: "from-emerald-400 to-green-600", mark: "text-green-600" },
 } as const;
 
@@ -40,14 +40,14 @@ export function KpiCard({ label, value, format, icon: Icon, tone, trend, loading
   return (
     <article
       style={{ animationDelay: `${delay}ms` }}
-      className="group relative h-full overflow-hidden rounded-xl border border-gray-100 bg-white p-4 shadow-sm animate-in fade-in slide-in-from-bottom-3 fill-mode-backwards duration-500 transition-[transform,box-shadow] ease-out-expo hoverable:hover:-translate-y-1 hoverable:hover:shadow-lg sm:p-5"
+      className="group relative h-full overflow-hidden rounded-xl border border-gray-100 bg-white p-4 animate-in fade-in slide-in-from-bottom-3 fill-mode-backwards duration-500 transition-[transform,box-shadow] ease-out-expo hoverable:hover:-translate-y-1 hoverable:hover:shadow-lg sm:p-5"
     >
       <span aria-hidden className={cn("absolute inset-x-0 top-0 h-1 bg-gradient-to-r", t.bar)} />
       <Icon aria-hidden className={cn("pointer-events-none absolute -right-3 -bottom-3 size-24 opacity-[0.06] transition-transform duration-500 group-hover:scale-110", t.mark)} />
 
       <div className="relative flex items-start justify-between gap-3">
         <h3 className="text-xs font-medium text-gray-500 sm:text-sm">{label}</h3>
-        <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-md shadow-black/10 sm:size-11", t.tile)}>
+        <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-black/10 sm:size-11", t.tile)}>
           <Icon className="size-4.5 sm:size-5" aria-hidden />
         </span>
       </div>

@@ -35,9 +35,9 @@ export function AffiliateDashboardView({ profile }: { profile: AffiliateResponse
 
   return (
     <div className="space-y-3 p-3 md:py-6">
-      <section className="rounded-2xl bg-brand p-4 text-white shadow-sm">
+      <section className="rounded-xl bg-brand p-4 text-white ">
         <p className="text-sm text-white/80">Xin chào {profile.fullName} · Mã giới thiệu</p>
-        <p className="text-2xl font-bold tracking-wider">{profile.referralCode}</p>
+        <p className="text-2xl font-bold">{profile.referralCode}</p>
         {d && <ShareLink link={d.shareLink} />}
         <PortalLink slug="dashboard" className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-white underline-offset-4 hover:underline">
           Mở cổng CTV mới <ArrowRight className="size-4" />
@@ -56,7 +56,7 @@ export function AffiliateDashboardView({ profile }: { profile: AffiliateResponse
           ))}
         </div>
       ) : (
-        <div className="h-28 animate-pulse rounded-2xl bg-neutral-200" />
+        <div className="h-28 animate-pulse rounded-xl bg-neutral-200" />
       )}
 
       <div className="no-scrollbar flex gap-2 overflow-x-auto">
@@ -67,7 +67,7 @@ export function AffiliateDashboardView({ profile }: { profile: AffiliateResponse
           </button>
         ))}
       </div>
-      <section className="rounded-2xl bg-white p-4 shadow-sm">
+      <section className="rounded-xl bg-white p-4 ">
         {tab === "commissions" && <Commissions />}
         {tab === "customers" && <Customers />}
         {tab === "payouts" && d && <Payouts dash={d} />}
@@ -79,7 +79,7 @@ export function AffiliateDashboardView({ profile }: { profile: AffiliateResponse
 
 function Stat({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
-    <div className="rounded-2xl bg-white p-3 shadow-sm">
+    <div className="rounded-xl bg-white p-3 ">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className={cn("font-bold", strong ? "text-lg text-brand-red" : "text-brand")}>{value}</p>
     </div>

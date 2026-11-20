@@ -258,7 +258,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       type="button"
       onClick={() => { setChannel(c); setContact(""); setError(null); setErrorCode(undefined); }}
       className={cn("flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-medium",
-        channel === c ? "bg-white text-brand shadow-sm" : "text-neutral-600")}
+        channel === c ? "bg-white text-brand ring-1 ring-black/[0.06]" : "text-neutral-600")}
     >
       <Icon className="size-4" /> {label}
     </button>
@@ -266,7 +266,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
   return (
     <div className="mx-auto w-full max-w-md px-3 py-6 md:py-12">
-      <div className="rounded-2xl bg-white p-5 shadow-sm md:p-7">
+      <div className="rounded-xl bg-white p-5 ring-1 ring-black/[0.06] md:p-7">
         <h1 className="text-xl font-bold text-brand">{isRegister ? "Đăng ký tài khoản" : "Đăng nhập"}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {isRegister

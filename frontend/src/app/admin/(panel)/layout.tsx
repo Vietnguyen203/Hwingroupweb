@@ -9,7 +9,7 @@ export default function AdminPanelLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen bg-slate-50/70 text-slate-900 antialiased">
       {/* Desktop Sidebar (Fixed) */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 lg:block shadow-md">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 lg:block ">
         <Suspense fallback={<div className="h-full w-64 bg-slate-900" />}>
           <AdminSidebarContent />
         </Suspense>

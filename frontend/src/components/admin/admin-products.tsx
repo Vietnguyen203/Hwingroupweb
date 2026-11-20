@@ -258,13 +258,13 @@ export function AdminProducts() {
             <Button
               type="button"
               onClick={() => setShowComboBuilder(true)}
-              className="gap-2 bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 font-bold text-white shadow-md shadow-rose-500/20 hover:from-rose-700 hover:to-amber-600"
+              className="gap-2 bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 font-bold text-white shadow-rose-500/20 hover:from-rose-700 hover:to-amber-600"
             >
               <Gift className="size-4" /> + Tạo Combo từ SP
             </Button>
             <Button
               onClick={() => setForm({ ...EMPTY, categoryId: cats[0]?.id ?? "" })}
-              className="gap-2 shadow-sm shadow-brand/20"
+              className="gap-2 shadow-brand/20"
             >
               <Plus className="size-4" /> Thêm sản phẩm
             </Button>
@@ -351,7 +351,7 @@ export function AdminProducts() {
       ) : (
         <>
           {selectedProducts.length > 0 && (
-            <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-brand/30 bg-brand-soft/60 px-4 py-2.5">
+            <div className="flex flex-wrap items-center gap-3 rounded-xl border border-brand/30 bg-brand-soft/60 px-4 py-2.5">
               <span className="text-sm font-semibold text-slate-800">Đã chọn {selectedProducts.length} sản phẩm</span>
               <button
                 type="button"
@@ -429,7 +429,7 @@ export function AdminProducts() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     {p.images[0] ? (
-                      <img src={p.images[0]} alt="" className="size-11 shrink-0 rounded-lg border object-cover shadow-2xs" />
+                      <img src={p.images[0]} alt="" className="size-11 shrink-0 rounded-lg border object-cover " />
                     ) : (
                       <span className="flex size-11 shrink-0 items-center justify-center rounded-lg border bg-slate-100 text-xs text-slate-400">
                         No img
@@ -588,7 +588,7 @@ function BulkButton({ icon, children, onClick, disabled, title, tone = "default"
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold shadow-xs transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
+      className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
         tone === "danger"
           ? "border-rose-200 bg-rose-50 text-rose-700 hover:border-rose-300 hover:bg-rose-100"
           : "border-slate-200 bg-white text-slate-700 hover:border-brand hover:bg-brand-soft hover:text-brand"
@@ -689,7 +689,7 @@ function ProductForm({
   );
 
   return (
-    <form onSubmit={save} className="space-y-4 rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm">
+    <form onSubmit={save} className="space-y-4 rounded-xl border border-slate-200/90 bg-white p-6 ">
       <div className="flex items-center justify-between border-b pb-3">
         <h2 className="text-lg font-bold text-slate-800">{form.id ? "Sửa sản phẩm" : "Thêm sản phẩm mới"}</h2>
         <button
@@ -703,9 +703,9 @@ function ProductForm({
 
       {/* Banner gợi ý tạo Combo nhanh khi thêm mới */}
       {!form.id && onOpenComboBuilder && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rose-200/90 bg-gradient-to-r from-rose-50 via-white to-amber-50 p-4 shadow-2xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-200/90 bg-gradient-to-r from-rose-50 via-white to-amber-50 p-4 ">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-rose-600 to-amber-500 text-white shadow-xs">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-rose-600 to-amber-500 text-white ">
               <Gift className="size-5" />
             </div>
             <div>
@@ -721,7 +721,7 @@ function ProductForm({
             type="button"
             size="sm"
             onClick={onOpenComboBuilder}
-            className="gap-1.5 bg-gradient-to-r from-rose-600 to-amber-600 text-xs font-bold text-white shadow-xs hover:from-rose-700 hover:to-amber-700"
+            className="gap-1.5 bg-gradient-to-r from-rose-600 to-amber-600 text-xs font-bold text-white hover:from-rose-700 hover:to-amber-700"
           >
             <Sparkles className="size-3.5" /> Mở bộ tạo Combo (-10%)
           </Button>
@@ -773,7 +773,7 @@ function ProductForm({
         {input("price", "Giá bán (đ) *", { required: true, type: "number", min: 1 })}
         {input("compareAtPrice", "Giá gốc gạch ngang (đ, không bắt buộc)", { type: "number", min: 1 })}
         {input("unit", "Đơn vị tính", { maxLength: 50, placeholder: "VD: đòn, hộp, gói" })}
-        {input("brand", "Thương hiệu *", { required: true, maxLength: 100, placeholder: "VD: HWIN Food" })}
+        {input("brand", "Thương hiệu *", { required: true, maxLength: 100, placeholder: "VD: Phúc Vị Foods" })}
         {input("weight", "Khối lượng *", { required: true, maxLength: 50, placeholder: "VD: 500g, 20 cái" })}
         {input("packaging", "Đóng gói *", { required: true, maxLength: 100, placeholder: "VD: Gói hút chân không" })}
         {input("origin", "Xuất xứ *", { required: true, maxLength: 100, placeholder: "VD: Việt Nam" })}
@@ -851,7 +851,7 @@ function ProductForm({
 
       <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
         <div className="flex gap-2.5">
-          <Button type="submit" disabled={busy} className="shadow-sm shadow-brand/20">
+          <Button type="submit" disabled={busy} className="shadow-brand/20">
             {busy ? "Đang lưu..." : "Lưu sản phẩm"}
           </Button>
           <Button type="button" variant="outline" onClick={() => setForm(null)}>

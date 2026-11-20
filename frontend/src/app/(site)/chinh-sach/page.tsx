@@ -4,9 +4,9 @@ import type { Metadata } from "next";
 import { PolicyHubView } from "@/components/policy/policy-hub-view";
 
 export const metadata: Metadata = {
-  title: "Chính sách pháp lý & Hồ sơ Chứng nhận VSATTP | HWIN Food",
+  title: "Chính sách pháp lý & Hồ sơ Chứng nhận VSATTP | Phúc Vị Foods",
   description:
-    "Hồ sơ pháp lý, giấy chứng nhận cơ sở đủ điều kiện an toàn thực phẩm, tiêu chuẩn ISO 22000, HACCP và các chính sách bảo mật, đổi trả, kiểm hàng của Hwin Food.",
+    "Hồ sơ pháp lý, giấy chứng nhận cơ sở đủ điều kiện an toàn thực phẩm, tiêu chuẩn ISO 22000, HACCP và các chính sách bảo mật, đổi trả, kiểm hàng của Phúc Vị Foods.",
 };
 
 export default function PolicyPage() {

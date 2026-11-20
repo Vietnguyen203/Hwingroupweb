@@ -62,7 +62,7 @@ export function AdminOrders() {
                     <button
                       type="button"
                       onClick={() => setConfirming(o.id)}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-brand px-3 text-xs font-semibold text-white shadow-sm shadow-brand/20 transition hover:bg-brand-dark"
+                      className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-brand px-3 text-xs font-semibold text-white shadow-brand/20 transition hover:bg-brand-dark"
                     >
                       <ClipboardCheck className="size-3.5" aria-hidden /> Xác nhận
                     </button>

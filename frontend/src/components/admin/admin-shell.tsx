@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { LogoMark } from "@/components/brand/logo";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -76,12 +77,10 @@ export function AdminSidebarContent({ onClose }: { onClose?: () => void }) {
       {/* Brand Header */}
       <div className="flex h-16 items-center justify-between border-b border-slate-800 px-5">
         <Link href="/admin/orders" className="flex items-center gap-3">
-          <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-tr from-brand to-rose-500 font-black text-white shadow-md shadow-brand/20">
-            H
-          </div>
+          <div className="flex size-9 items-center justify-center rounded-xl bg-brand-deep text-brand-honey"><LogoMark tone="gold" className="h-6" /></div>
           <div>
-            <div className="text-base font-extrabold tracking-wide text-white">HWIN GROUP</div>
-            <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            <div className="text-base font-extrabold tracking-wide text-white">Phúc Vị Foods</div>
+            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400">
               <ShieldCheck className="size-3 text-emerald-400" /> Quản trị viên
             </div>
           </div>
@@ -113,7 +112,7 @@ export function AdminSidebarContent({ onClose }: { onClose?: () => void }) {
       <div className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
         {NAV_GROUPS.map((group) => (
           <div key={group.title}>
-            <div className="px-3 pb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <div className="px-3 pb-2 text-[11px] font-bold text-slate-400">
               {group.title}
             </div>
             <nav className="space-y-1">
@@ -127,7 +126,7 @@ export function AdminSidebarContent({ onClose }: { onClose?: () => void }) {
                     className={cn(
                       "group flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-150",
                       isActive
-                        ? "bg-brand font-semibold text-white shadow-md shadow-brand/20"
+                        ? "bg-brand font-semibold text-white shadow-brand/20"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     )}
                   >

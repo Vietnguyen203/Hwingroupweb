@@ -51,7 +51,7 @@ export function PortalSkeleton() {
 
 function Notice({ title, text, href, action }: { title: string; text: string; href: string; action: string }) {
   return (
-    <div className="mx-auto max-w-lg rounded-xl border border-gray-100 bg-white p-6 text-center shadow-sm">
+    <div className="mx-auto max-w-lg rounded-xl border border-gray-100 bg-white p-6 text-center ">
       <h1 className="text-lg font-bold text-gray-900">{title}</h1>
       <p className="mt-1.5 text-sm text-gray-500">{text}</p>
       <Link href={href} className={cn(buttonVariants(), "mt-5 h-10 bg-brand-red px-5 text-sm font-semibold text-white hover:bg-brand-red/90")}>

@@ -16,9 +16,9 @@ export function ComingSoon({ slug }: { slug: PortalSlug }) {
 
   return (
     <Reveal className="mx-auto max-w-3xl">
-      <section className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-xl border border-gray-100 bg-white ">
         <div className="px-6 pt-10 pb-8 text-center sm:px-10">
-          <span className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-brand text-white shadow-lg shadow-brand/25">
+          <span className="mx-auto flex size-16 items-center justify-center rounded-xl bg-brand text-white shadow-lg shadow-brand/25">
             <item.icon className="size-8" aria-hidden />
           </span>
           <h1 className="mt-5 text-2xl font-extrabold tracking-tight text-gray-900">{item.label}</h1>

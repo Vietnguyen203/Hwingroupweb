@@ -50,7 +50,7 @@ export function RegisterAffiliateForm() {
     setForm((f) => ({ ...f, fullName: name }));
   }
 
-  if (!mounted || !me.data || profile.isPending || alreadyApplied) return <div className="mx-auto my-6 h-72 max-w-md animate-pulse rounded-2xl bg-neutral-200" />;
+  if (!mounted || !me.data || profile.isPending || alreadyApplied) return <div className="mx-auto my-6 h-72 max-w-md animate-pulse rounded-xl bg-neutral-200" />;
   const needsPhone = !me.data.phoneMasked;
 
   /** Ảnh CCCD vào kho riêng tư của backend; chỉ nhận lại khóa file để đính kèm phiếu đăng ký. */
@@ -87,7 +87,7 @@ export function RegisterAffiliateForm() {
 
   return (
     <div className="mx-auto w-full max-w-md px-3 py-6 md:py-10">
-      <form onSubmit={submit} className="space-y-3 rounded-2xl bg-white p-5 shadow-sm">
+      <form onSubmit={submit} className="space-y-3 rounded-xl bg-white p-5 ">
         <h1 className="text-xl font-bold text-brand">Đăng ký cộng tác viên</h1>
         <label className="block space-y-1">
           <span className="text-sm font-medium">Họ và tên</span>

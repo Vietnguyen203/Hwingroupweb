@@ -3,9 +3,9 @@
        Xe nằm ở phần dưới (dưới chữ, trên nút "Mua ngay"). Muốn dùng ảnh thật: thay file này hoặc đổi đường dẫn ở sticky-side-banners.tsx. -->
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0.3" y2="1">
-      <stop offset="0" stop-color="#ff7a45"/>
-      <stop offset="0.5" stop-color="#e2400f"/>
-      <stop offset="1" stop-color="#a82604"/>
+      <stop offset="0" stop-color="#c0342b"/>
+      <stop offset="0.5" stop-color="#9b1c22"/>
+      <stop offset="1" stop-color="#4a0a0d"/>
     </linearGradient>
     <radialGradient id="glowTop" cx="0.25" cy="0.03" r="0.75">
       <stop offset="0" stop-color="#ffffff" stop-opacity="0.3"/>
@@ -28,8 +28,8 @@
   <!-- Tuyến giao hàng (nét đứt) chạy dọc mép trái xuống tới điểm nhận -->
   <path d="M30 150C8 230 54 292 28 392" fill="none" stroke="#fff" stroke-opacity="0.35" stroke-width="1.6" stroke-dasharray="3 7" stroke-linecap="round"/>
   <circle cx="30" cy="150" r="5" fill="#fff" fill-opacity="0.5"/>
-  <circle cx="28" cy="392" r="6" fill="none" stroke="#ffd400" stroke-opacity="0.85" stroke-width="2"/>
-  <circle cx="28" cy="392" r="2.4" fill="#ffd400" fill-opacity="0.9"/>
+  <circle cx="28" cy="392" r="6" fill="none" stroke="#e3b04b" stroke-opacity="0.85" stroke-width="2"/>
+  <circle cx="28" cy="392" r="2.4" fill="#e3b04b" fill-opacity="0.9"/>
 
   <!-- Bông tuyết trang trí -->
   <g opacity="0.45">
@@ -68,12 +68,12 @@
 
   <!-- Thùng xe + khung gầm -->
   <rect x="16" y="523" width="124" height="12" rx="3" fill="#fff" fill-opacity="0.95"/>
-  <rect x="12" y="535" width="222" height="10" rx="3" fill="#7a1d05" fill-opacity="0.85"/>
+  <rect x="12" y="535" width="222" height="10" rx="3" fill="#3a0709" fill-opacity="0.85"/>
 
   <!-- Cabin -->
   <path d="M142 535V484Q142 474 152 474H190Q196 474 200 480L226 514Q230 520 230 527V535Z" fill="#fff" fill-opacity="0.96"/>
   <path d="M152 484H188L210 514H152Z" fill="#ff9a6b" fill-opacity="0.65"/>
-  <circle cx="226" cy="523" r="3.6" fill="#ffd400"/>
+  <circle cx="226" cy="523" r="3.6" fill="#e3b04b"/>
 
   <!-- Bánh xe -->
   <g fill="#2b0d05">

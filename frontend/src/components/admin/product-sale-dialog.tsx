@@ -45,7 +45,7 @@ export function ProductSaleDialog({ product, onClose, onSaved }: {
   return (
     <div role="dialog" aria-modal="true" aria-label="Giảm giá sản phẩm"
          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="w-full max-w-md space-y-4 rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-md space-y-4 rounded-xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-lg font-bold text-slate-900">Giảm giá thêm</h2>

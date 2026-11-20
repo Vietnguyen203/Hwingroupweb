@@ -76,12 +76,12 @@ public class EmailOtpSender implements OtpSender {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setFrom(from);
         msg.setTo(destination);
-        msg.setSubject("Mã xác thực Hwin Food: " + code);
+        msg.setSubject("Mã xác thực Phúc Vị Foods: " + code);
         msg.setText("""
                 Mã xác thực của bạn là: %s
 
                 Mục đích: %s
-                Mã có hiệu lực %d phút. Không chia sẻ mã này cho bất kỳ ai, kể cả nhân viên Hwin Food.
+                Mã có hiệu lực %d phút. Không chia sẻ mã này cho bất kỳ ai, kể cả nhân viên Phúc Vị Foods.
                 Nếu bạn không yêu cầu mã, hãy bỏ qua email này.
                 """.formatted(code, purposeText(purpose), props.ttl().toMinutes()));
         executor.execute(() -> {

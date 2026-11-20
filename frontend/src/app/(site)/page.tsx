@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Trang chủ (bố cục theo hwingroup.com), ưu tiên mua sắm:
- * banner – ô truy cập nhanh – danh mục – đang giảm giá – combo – bán chạy – khối CTV – sản phẩm mới – Hãy đồng hành cùng HWIN.
+ * banner – ô truy cập nhanh – danh mục – đang giảm giá – combo – bán chạy – khối CTV – sản phẩm mới – Hãy đồng hành cùng Phúc Vị.
  * Web phục vụ cộng tác viên nên khối CTV nằm giữa trang (sau các món bán chạy), không bị đẩy xuống cuối.
  * Mỗi khối có `id` để thanh "đi nhanh" dưới header (QuickJumpBar) nhảy tới: categories, on-sale, combos, bestsellers,
  * affiliate, newest, why-hwin. Thêm / đổi khối thì sửa danh sách HOME_SECTIONS ở quick-jump-bar.tsx cho khớp.
@@ -70,7 +70,7 @@ export default function HomePage() {
       </Suspense>
 
       <section id="why-hwin" className="scroll-mt-sticky">
-        <SectionTitle title="Hãy đồng hành cùng HWIN" />
+        <SectionTitle title="Hãy đồng hành cùng Phúc Vị" />
         <WhyHwin />
       </section>
     </>

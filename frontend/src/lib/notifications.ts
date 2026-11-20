@@ -48,7 +48,7 @@ export function describeNotification(n: Pick<NotificationItem, "type" | "data">)
     case "ORDER_SHIPPED":
       return { title: "Đơn hàng đang được giao", body: `Đơn ${code} đã giao cho đơn vị vận chuyển.`, tone: "info" };
     case "ORDER_DELIVERED":
-      return { title: "Giao hàng thành công", body: `Đơn ${code} đã được giao. Cảm ơn bạn đã mua sắm tại HWIN!`, tone: "success" };
+      return { title: "Giao hàng thành công", body: `Đơn ${code} đã được giao. Cảm ơn bạn đã mua sắm tại Phúc Vị!`, tone: "success" };
     case "ORDER_CANCELLED": {
       const why = CANCEL_REASON[str(d.reason)] ?? "";
       return { title: "Đơn hàng đã bị hủy", body: `Đơn ${code} đã bị hủy${why ? " " + why : ""}.`, tone: "danger" };
@@ -74,7 +74,7 @@ export function describeNotification(n: Pick<NotificationItem, "type" | "data">)
     case "AFFILIATE_APPLIED":
       return { title: "CTV mới chờ duyệt", body: `${str(d.fullName, "Một người dùng")} vừa gửi hồ sơ đăng ký cộng tác viên.`, tone: "info" };
     case "AFFILIATE_APPROVED":
-      return { title: "Hồ sơ CTV đã được duyệt", body: "Chúc mừng! Bạn đã là cộng tác viên HWIN. Hãy chia sẻ link giới thiệu để nhận hoa hồng.", tone: "success" };
+      return { title: "Hồ sơ CTV đã được duyệt", body: "Chúc mừng! Bạn đã là cộng tác viên Phúc Vị. Hãy chia sẻ link giới thiệu để nhận hoa hồng.", tone: "success" };
     case "AFFILIATE_REJECTED":
       return {
         title: "Hồ sơ CTV chưa được duyệt",

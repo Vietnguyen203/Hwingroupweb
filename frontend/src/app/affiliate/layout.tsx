@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { PortalShell } from "@/components/affiliate/portal/portal-shell";
 
 export const metadata: Metadata = {
-  title: { default: "Cổng cộng tác viên", template: "%s | HWIN Affiliate" },
+  title: { default: "Cổng cộng tác viên", template: "%s | Phúc Vị Affiliate" },
   robots: { index: false },
 };
 

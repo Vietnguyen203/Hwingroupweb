@@ -161,7 +161,7 @@ export function AdminCategories() {
                 sortOrder: (categories.data?.length ?? 0) + 1,
               })
             }
-            className="gap-2 shadow-sm shadow-brand/20"
+            className="gap-2 shadow-brand/20"
           >
             <Plus className="size-4" /> Thêm danh mục mới
           </Button>
@@ -203,8 +203,8 @@ export function AdminCategories() {
       ) : categories.error ? (
         <p className="text-sm text-destructive">{errorMessage(categories.error)}</p>
       ) : list.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white p-12 text-center shadow-xs">
-          <div className="mb-3 flex size-14 items-center justify-center rounded-2xl bg-brand/10 text-brand">
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-white p-12 text-center ">
+          <div className="mb-3 flex size-14 items-center justify-center rounded-xl bg-brand/10 text-brand">
             <FolderTree className="size-7" />
           </div>
           <h3 className="text-base font-bold text-slate-800">Chưa có danh mục nào</h3>
@@ -218,7 +218,7 @@ export function AdminCategories() {
                 sortOrder: 1,
               })
             }
-            className="gap-2 shadow-sm shadow-brand/20"
+            className="gap-2 shadow-brand/20"
           >
             <Plus className="size-4" /> Bắt đầu tạo danh mục mới
           </Button>
@@ -237,7 +237,7 @@ export function AdminCategories() {
                   title="Bấm để sửa danh mục"
                   className="group/edit flex w-full cursor-pointer items-center gap-3 rounded-lg text-left outline-offset-4 focus-visible:outline-2 focus-visible:outline-brand"
                 >
-                  <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200/80 bg-slate-100 shadow-2xs">
+                  <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200/80 bg-slate-100 ">
                     {c.iconUrl ? (
                       <Image src={c.iconUrl} alt="" width={36} height={36} className="size-8 object-contain" />
                     ) : (
@@ -252,7 +252,7 @@ export function AdminCategories() {
                 <Link
                   href={`/admin/products?category=${c.slug}`}
                   title="Bấm để xem các sản phẩm thuộc danh mục này"
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-brand/40 hover:bg-brand/5 hover:text-brand transition shadow-2xs"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:border-brand/40 hover:bg-brand/5 hover:text-brand transition "
                 >
                   <strong className="text-slate-900">{countForCategory(c.id)}</strong> SP ↗
                 </Link>
@@ -363,7 +363,7 @@ export function CategoryFormModal({
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-md transition-all">
+    <div className="rounded-xl border border-slate-200/90 bg-white p-6 transition-all">
       <div className="flex items-center justify-between border-b border-slate-100 pb-4">
         <div>
           <h2 className="text-lg font-bold text-slate-800">
@@ -451,7 +451,7 @@ export function CategoryFormModal({
         {error && <p role="alert" className="text-sm font-medium text-rose-600">{error}</p>}
 
         <div className="flex items-center gap-3 pt-2">
-          <Button type="submit" disabled={busy} className="h-10 px-6 font-semibold shadow-sm shadow-brand/20">
+          <Button type="submit" disabled={busy} className="h-10 px-6 font-semibold shadow-brand/20">
             {busy ? "Đang lưu..." : form.id ? "Cập nhật danh mục" : "Tạo danh mục"}
           </Button>
           <Button type="button" variant="outline" onClick={() => setForm(null)} className="h-10 px-5">

@@ -14,8 +14,8 @@ export function SiteFooter() {
       <section className="bg-brand text-white">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-7 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-lg font-bold">Đăng ký cộng tác viên HWIN</p>
-            <p className="text-sm text-white/80">Phát triển cùng HWIN</p>
+            <p className="text-lg font-bold">Đăng ký cộng tác viên Phúc Vị</p>
+            <p className="text-sm text-white/80">Phát triển cùng Phúc Vị</p>
           </div>
           {/* Vào thẳng form đăng ký CTV (chưa có tài khoản thì tự sang đăng ký tài khoản) */}
           <Link href="/affiliate/register"
@@ -29,9 +29,9 @@ export function SiteFooter() {
       <section className="bg-brand-deep text-sm text-white/80">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4">
-            <Logo tone="light" className="[&_img]:h-20" />
+            <Logo tone="light" full className="max-w-52" />
             <p className="leading-relaxed">Hệ sinh thái sản phẩm nhập khẩu chính hãng, mang đến cuộc sống chất lượng hơn cho mọi gia đình Việt.</p>
-            <p className="font-bold text-white">Theo dõi HWIN trên mạng xã hội</p>
+            <p className="font-bold text-white">Theo dõi Phúc Vị trên mạng xã hội</p>
             <SocialLinks />
           </div>
           <FooterCol title="Chính sách & Pháp lý" links={[
@@ -41,7 +41,7 @@ export function SiteFooter() {
             ["Kiểm hàng & Vận chuyển", "/chinh-sach?tab=kiem-hang"],
             ["Điều khoản giao dịch TMĐT", "/chinh-sach?tab=dieu-khoan"],
           ]} />
-          <FooterCol title="Về HWIN" links={[
+          <FooterCol title="Về Phúc Vị" links={[
             ["Giới thiệu", siteConfig.aboutUrl], ["Cộng tác viên", "/affiliate"], ["Tài khoản của tôi", "/account"], ["Tìm sản phẩm", "/search"],
           ]} />
           <div>

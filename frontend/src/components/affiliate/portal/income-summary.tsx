@@ -16,7 +16,7 @@ export function IncomeSummary({ dash, loading }: { dash?: AffiliateDashboard; lo
   ];
 
   return (
-    <section className="h-full rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+    <section className="h-full rounded-xl border border-gray-100 bg-white p-5 ">
       <h2 className="text-base font-bold text-gray-900">Thu nhập của bạn</h2>
       <p className="mt-0.5 text-sm text-gray-500">Hoa hồng được duyệt sau 7 ngày kể từ khi giao hàng thành công.</p>
 

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
-import { Be_Vietnam_Pro, Bricolage_Grotesque } from "next/font/google";
+import { Be_Vietnam_Pro, Bricolage_Grotesque, Dancing_Script, Playfair_Display } from "next/font/google";
 
 import "./globals.css";
 import { Providers } from "@/components/providers";
@@ -21,6 +21,10 @@ const display = Bricolage_Grotesque({
   subsets: ["vietnamese", "latin"],
 });
 
+// Chữ trong logo Phúc Vị: chữ đậm có chân (tên thương hiệu) và chữ viết tay (khẩu hiệu); cả hai có subset tiếng Việt
+const logoSerif = Playfair_Display({ variable: "--font-logo-serif", subsets: ["vietnamese", "latin"], weight: ["800", "900"] });
+const logoScript = Dancing_Script({ variable: "--font-logo-script", subsets: ["vietnamese", "latin"], weight: ["500"] });
+
 export const metadata: Metadata = {
   title: { default: `${siteConfig.name} – Thực phẩm chế biến sẵn`, template: `%s | ${siteConfig.name}` },
   description: siteConfig.description,
@@ -29,12 +33,12 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#6c3bff",
+  themeColor: "#4a0a0d",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="vi" className={`${font.variable} ${display.variable} h-full antialiased`}>
+    <html lang="vi" className={`${font.variable} ${display.variable} ${logoSerif.variable} ${logoScript.variable} h-full antialiased`}>
       <body className="min-h-full font-sans antialiased">
         <Providers>
           {children}

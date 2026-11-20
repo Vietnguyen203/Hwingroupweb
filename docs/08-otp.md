@@ -22,7 +22,7 @@ MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USERNAME=...
 MAIL_PASSWORD=...            # Gmail: dùng App Password, không dùng mật khẩu đăng nhập
-MAIL_FROM=Hwin Food <no-reply@hwin.vn>
+MAIL_FROM=Phúc Vị Foods <no-reply@hwin.vn>
 ```
 
 Có thể thay bằng SendGrid / Amazon SES / Mailgun (đều có SMTP). Nên cấu hình SPF + DKIM cho domain gửi

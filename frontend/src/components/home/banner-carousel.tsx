@@ -12,7 +12,7 @@ export type BannerSlide = { product: ProductCardResponse; tag: "Mới" | "Bán c
 
 const INTERVAL_MS = 4500;
 /** Nền dự phòng (theo bảng màu thương hiệu) khi sản phẩm chưa có ảnh; mỗi slide một màu để các banner liền nhau dễ phân biệt. */
-const BACKGROUNDS = ["bg-brand-deep", "bg-brand-red", "bg-[#12805a]", "bg-brand-dark", "bg-[#352a8a]"];
+const BACKGROUNDS = ["bg-brand-deep", "bg-brand-red", "bg-[#12805a]", "bg-brand-dark", "bg-[#6b4a0f]"];
 
 function subscribeReducedMotion(cb: () => void) {
   const mq = window.matchMedia("(prefers-reduced-motion: reduce)");

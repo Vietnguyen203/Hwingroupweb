@@ -53,7 +53,7 @@ const TONE: Record<Tone, string> = {
   info: "bg-sky-100 text-sky-700",
   warning: "bg-amber-100 text-amber-700",
   danger: "bg-rose-100 text-rose-700",
-  accent: "bg-violet-100 text-violet-700",
+  accent: "bg-brand-soft text-brand",
 };
 
 /**

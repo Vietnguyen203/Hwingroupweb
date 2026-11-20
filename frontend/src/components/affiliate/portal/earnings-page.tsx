@@ -44,7 +44,7 @@ export function Earnings() {
           { label: "Chờ xác nhận", value: dash.data?.commissions.PENDING?.amount ?? (dash.data ? 0 : undefined), tone: "text-gray-900", dot: "bg-amber-400" },
           { label: "Đã nhận", value: dash.data?.paidOut, tone: "text-gray-900", dot: "bg-green-500" },
         ].map((s) => (
-          <div key={s.label} className="rounded-xl border border-gray-100 bg-white p-3 shadow-sm sm:p-4">
+          <div key={s.label} className="rounded-xl border border-gray-100 bg-white p-3 sm:p-4">
             <p className="flex items-center gap-1.5 text-xs font-medium text-gray-500 sm:text-sm">
               <span aria-hidden className={cn("size-2 rounded-full", s.dot)} />
               {s.label}
@@ -69,7 +69,7 @@ export function Earnings() {
             onClick={() => setTab(t.key)}
             className={cn(
               "shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition-colors",
-              tab === t.key ? "bg-brand-red text-white shadow-sm" : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-100",
+              tab === t.key ? "bg-brand-red text-white " : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-100",
             )}
           >
             {t.label}
@@ -77,7 +77,7 @@ export function Earnings() {
         ))}
       </div>
 
-      <section role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-${tab}`} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+      <section role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-${tab}`} className="rounded-xl border border-gray-100 bg-white p-4 sm:p-5">
         {tab === "commissions" && <Commissions />}
         {tab === "customers" && <Customers />}
         {tab === "payouts" && (dash.data ? <Payouts dash={dash.data} /> : <Skeleton className="h-32 bg-gray-100" />)}

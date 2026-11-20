@@ -113,7 +113,7 @@ function AffiliateReviewDialog({ affiliate, busy, error, onClose, onApprove, onR
 
   return (
     <div role="dialog" aria-modal="true" aria-label="Hồ sơ cộng tác viên" className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <div className="max-h-full w-full max-w-3xl overflow-auto rounded-2xl bg-white p-5" onClick={(e) => e.stopPropagation()}>
+      <div className="max-h-full w-full max-w-3xl overflow-auto rounded-xl bg-white p-5" onClick={(e) => e.stopPropagation()}>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-bold">Hồ sơ CTV: {affiliate.fullName}</h2>
           <button type="button" onClick={onClose} className="rounded-lg border px-3 py-1 text-sm">Đóng</button>

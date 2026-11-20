@@ -59,12 +59,12 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
             <NotificationBell variant="admin" />
             <span aria-hidden className="h-6 w-px bg-gray-200" />
             <div className="flex items-center gap-2.5">
-              <span aria-hidden className="flex size-9 items-center justify-center rounded-full bg-brand text-sm font-bold text-white shadow-sm">
+              <span aria-hidden className="flex size-9 items-center justify-center rounded-full bg-brand text-sm font-bold text-white ">
                 {initials(a?.fullName)}
               </span>
               <div className="leading-tight">
                 <p className="text-sm font-semibold text-gray-900">{a?.fullName ?? "Cộng tác viên"}</p>
-                <p className="text-xs text-gray-500">{a?.referralCode ? `Mã ${a.referralCode}` : "Cộng tác viên HWIN"}</p>
+                <p className="text-xs text-gray-500">{a?.referralCode ? `Mã ${a.referralCode}` : "Cộng tác viên Phúc Vị"}</p>
               </div>
             </div>
           </div>
@@ -81,7 +81,7 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
             <Menu className="size-5" />
           </button>
           <PortalLink slug="dashboard" className="flex-1 text-base font-extrabold tracking-tight text-brand-deep">
-            HWIN <span className="text-brand-red">Affiliate</span>
+            Phúc Vị <span className="text-brand-red">Affiliate</span>
           </PortalLink>
           <span aria-hidden className="flex size-8 items-center justify-center rounded-full bg-brand-soft text-xs font-bold text-brand">
             {initials(a?.fullName)}

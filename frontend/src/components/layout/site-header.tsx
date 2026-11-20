@@ -16,7 +16,7 @@ import { SearchBox } from "./search-box";
 
 /**
  * SiteHeader đồng bộ chuẩn hệ màu thương hiệu HWIN:
- * 1. Top Bar: Nền tím than đậm đặc trưng (--brand-deep / #1f1450), đồng bộ với footer HWIN:
+ * 1. Top Bar: Nền đỏ đô đậm (--brand-deep / #4a0a0d), đồng bộ với footer HWIN:
  *    - Freeship đơn từ 500.000đ (nhấn màu vàng hổ phách) · Giao hàng giữ lạnh tận nơi
  *    - 100% Thực phẩm sạch – Đầy đủ giấy tờ VSATTP, ISO 22000
  *    - Hotline & Zalo tư vấn 8:00 – 22:00 (cả T7, CN)
@@ -34,7 +34,7 @@ import { SearchBox } from "./search-box";
 export function SiteHeader() {
   return (
     <>
-      {/* 1. TOP BAR NỀN TÍM THAN ĐẬM THƯƠNG HIỆU HWIN */}
+      {/* 1. TOP BAR NỀN ĐỎ ĐÔ ĐẬM THƯƠNG HIỆU PHÚC VỊ */}
       <div className="hidden bg-brand-deep py-2 text-xs text-white/85 md:block">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4">
           <div className="flex items-center gap-6">
@@ -73,7 +73,7 @@ export function SiteHeader() {
             </div>
           </div>
 
-          {/* Thanh tìm kiếm viền màu Brand (#6c3bff), nút Tìm kiếm màu Brand, gợi ý sản phẩm khi gõ */}
+          {/* Thanh tìm kiếm viền màu Brand (#9b1c22), nút Tìm kiếm màu Brand, gợi ý sản phẩm khi gõ */}
           <SearchBox />
 
           {/* Cụm 4 Action bên phải: Hotline, CTV, Tài khoản, Giỏ hàng */}

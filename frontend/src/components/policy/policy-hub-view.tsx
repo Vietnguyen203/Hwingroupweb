@@ -78,7 +78,7 @@ export function PolicyHubView() {
                 Chính Sách &amp; Hồ Sơ An Toàn Vệ Sinh Thực Phẩm
               </h1>
               <p className="text-sm leading-relaxed text-white/80 md:text-base">
-                HWIN FOOD cam kết tuân thủ nghiêm ngặt quy định pháp luật Việt Nam về Thương mại điện tử (Nghị định 52/2013/NĐ-CP &amp; 85/2021/NĐ-CP) cùng tiêu chuẩn Vệ sinh an toàn thực phẩm Quốc gia.
+                Phúc Vị Foods cam kết tuân thủ nghiêm ngặt quy định pháp luật Việt Nam về Thương mại điện tử (Nghị định 52/2013/NĐ-CP &amp; 85/2021/NĐ-CP) cùng tiêu chuẩn Vệ sinh an toàn thực phẩm Quốc gia.
               </p>
             </div>
 
@@ -145,7 +145,7 @@ export function PolicyHubView() {
                 Hồ Sơ Năng Lực &amp; Giấy Chứng Nhận Chất Lượng
               </h2>
               <p className="mt-1 text-sm text-neutral-500">
-                Giấy chứng nhận, giấy phép và kết quả kiểm nghiệm của HWIN FOOD được cập nhật trực tiếp bởi ban quản trị. Bấm vào ảnh để xem rõ.
+                Giấy chứng nhận, giấy phép và kết quả kiểm nghiệm của Phúc Vị Foods được cập nhật trực tiếp bởi ban quản trị. Bấm vào ảnh để xem rõ.
               </p>
             </div>
 
@@ -189,7 +189,7 @@ export function PolicyHubView() {
 
               <h3 className="text-base font-bold text-neutral-900 pt-3">3. Cam kết bảo mật và Công nghệ mã hóa</h3>
               <p>
-                HWIN FOOD áp dụng các tiêu chuẩn an ninh mạng nghiêm ngặt: Toàn bộ mật khẩu và mã OTP được băm bảo mật (Pepper + Salt), số CCCD và thông tin ngân hàng được mã hóa chuẩn <strong>AES-256</strong>. Chúng tôi tuyệt đối <strong>không bán, chia sẻ hoặc tiết lộ thông tin khách hàng</strong> cho bất kỳ bên thứ ba nào, trừ trường hợp cơ quan thực thi pháp luật Việt Nam yêu cầu theo đúng trình tự pháp luật.
+                Phúc Vị Foods áp dụng các tiêu chuẩn an ninh mạng nghiêm ngặt: Toàn bộ mật khẩu và mã OTP được băm bảo mật (Pepper + Salt), số CCCD và thông tin ngân hàng được mã hóa chuẩn <strong>AES-256</strong>. Chúng tôi tuyệt đối <strong>không bán, chia sẻ hoặc tiết lộ thông tin khách hàng</strong> cho bất kỳ bên thứ ba nào, trừ trường hợp cơ quan thực thi pháp luật Việt Nam yêu cầu theo đúng trình tự pháp luật.
               </p>
 
               <h3 className="text-base font-bold text-neutral-900 pt-3">4. Quyền của khách hàng đối với dữ liệu cá nhân</h3>
@@ -209,7 +209,7 @@ export function PolicyHubView() {
                 Chính Sách Đổi Trả &amp; Hoàn Tiền Trong 7 Ngày
               </h2>
               <p className="mt-1 text-xs text-neutral-500">
-                Áp dụng cho toàn bộ các sản phẩm thực phẩm chế biến đóng gói phân phối bởi HWIN FOOD.
+                Áp dụng cho toàn bộ các sản phẩm thực phẩm chế biến đóng gói phân phối bởi Phúc Vị Foods.
               </p>
             </div>
 
@@ -246,8 +246,8 @@ export function PolicyHubView() {
               <h3 className="text-base font-bold text-neutral-900 pt-3">2. Quy trình xử lý và Hoàn tiền</h3>
               <ol className="list-decimal pl-5 space-y-2 text-neutral-600">
                 <li><strong>Bước 1:</strong> Chụp ảnh hoặc quay video tình trạng sản phẩm lỗi gửi qua Zalo Hotline <strong>{siteConfig.hotline}</strong>.</li>
-                <li><strong>Bước 2:</strong> Bộ phận Chăm sóc khách hàng Hwin tiếp nhận và phản hồi giải pháp trong vòng <strong>30 phút</strong>.</li>
-                <li><strong>Bước 3:</strong> Hwin cử shipper thu hồi sản phẩm lỗi và giao sản phẩm mới thay thế tận nhà, hoặc chuyển khoản hoàn tiền 100% trong vòng <strong>24 giờ làm việc</strong>.</li>
+                <li><strong>Bước 2:</strong> Bộ phận Chăm sóc khách hàng Phúc Vị tiếp nhận và phản hồi giải pháp trong vòng <strong>30 phút</strong>.</li>
+                <li><strong>Bước 3:</strong> Phúc Vị cử shipper thu hồi sản phẩm lỗi và giao sản phẩm mới thay thế tận nhà, hoặc chuyển khoản hoàn tiền 100% trong vòng <strong>24 giờ làm việc</strong>.</li>
               </ol>
             </div>
           </article>
@@ -273,7 +273,7 @@ export function PolicyHubView() {
                   Quy định Đồng Kiểm (Mở thùng kiểm tra trước khi nhận)
                 </h3>
                 <p className="mt-1 text-xs text-amber-950 leading-relaxed">
-                  Khách hàng của HWIN FOOD có quyền và được khuyến khích <strong>đồng kiểm cùng nhân viên giao hàng</strong>: Được mở kiện hàng kiểm tra đúng mẫu mã, số lượng và tình trạng niêm phong bao bì trước khi ký nhận và thanh toán.
+                  Khách hàng của Phúc Vị Foods có quyền và được khuyến khích <strong>đồng kiểm cùng nhân viên giao hàng</strong>: Được mở kiện hàng kiểm tra đúng mẫu mã, số lượng và tình trạng niêm phong bao bì trước khi ký nhận và thanh toán.
                 </p>
               </div>
 
@@ -291,7 +291,7 @@ export function PolicyHubView() {
 
               <h3 className="text-base font-bold text-neutral-900 pt-2">3. Trách nhiệm của bên vận chuyển</h3>
               <p>
-                Đơn vị vận chuyển có trách nhiệm cung cấp chứng từ giao nhận hàng hóa đầy đủ. Trường hợp xảy ra mất mát, đổ vỡ hoặc chậm trễ do lỗi của bên vận chuyển, Hwin Food cam kết chịu trách nhiệm bồi thường hoặc gửi đơn hàng mới ngay lập tức cho quý khách.
+                Đơn vị vận chuyển có trách nhiệm cung cấp chứng từ giao nhận hàng hóa đầy đủ. Trường hợp xảy ra mất mát, đổ vỡ hoặc chậm trễ do lỗi của bên vận chuyển, Phúc Vị Foods cam kết chịu trách nhiệm bồi thường hoặc gửi đơn hàng mới ngay lập tức cho quý khách.
               </p>
             </div>
           </article>
@@ -306,7 +306,7 @@ export function PolicyHubView() {
                 Điều Khoản Dịch Vụ &amp; Quy Chế Hoạt Động Thương Mại Điện Tử
               </h2>
               <p className="mt-1 text-xs text-neutral-500">
-                Website Thương mại điện tử HWIN FOOD thuộc quyền sở hữu của Công ty Cổ phần Tập đoàn HWIN.
+                Website Thương mại điện tử Phúc Vị Foods thuộc quyền sở hữu của Công ty Cổ phần Tập đoàn HWIN.
               </p>
             </div>
 
@@ -326,7 +326,7 @@ export function PolicyHubView() {
 
               <h3 className="text-base font-bold text-neutral-900 pt-3">3. Giải quyết khiếu nại và Tranh chấp</h3>
               <p>
-                Mọi tranh chấp phát sinh trong quá trình giao dịch giữa HWIN FOOD và khách hàng sẽ được ưu tiên giải quyết trên tinh thần thương lượng và hòa giải. Trong trường hợp không đạt được thỏa thuận, tranh chấp sẽ được đưa ra Tòa án nhân dân có thẩm quyền giải quyết theo quy định của pháp luật nước Cộng hòa Xã hội Chủ nghĩa Việt Nam.
+                Mọi tranh chấp phát sinh trong quá trình giao dịch giữa Phúc Vị Foods và khách hàng sẽ được ưu tiên giải quyết trên tinh thần thương lượng và hòa giải. Trong trường hợp không đạt được thỏa thuận, tranh chấp sẽ được đưa ra Tòa án nhân dân có thẩm quyền giải quyết theo quy định của pháp luật nước Cộng hòa Xã hội Chủ nghĩa Việt Nam.
               </p>
             </div>
           </article>

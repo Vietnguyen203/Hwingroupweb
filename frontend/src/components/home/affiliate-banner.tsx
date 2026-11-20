@@ -20,7 +20,7 @@ export function AffiliateBanner() {
         <div>
           <p className="font-display text-[5.5rem] leading-[0.85] font-extrabold tracking-tight text-brand-honey md:text-[9rem]">10%</p>
           <h2 className="mt-4 text-2xl leading-tight font-bold text-balance md:text-4xl">hoa hồng cho mỗi đơn bạn giới thiệu</h2>
-          <p className="mt-3 max-w-md text-white/80">Không cần vốn, không cần ôm hàng. HWIN lo sản phẩm, giao hàng và chăm sóc khách.</p>
+          <p className="mt-3 max-w-md text-white/80">Không cần vốn, không cần ôm hàng. Phúc Vị lo sản phẩm, giao hàng và chăm sóc khách.</p>
           <AffiliateJoinLink
             guestLabel="Đăng ký làm cộng tác viên"
             className="mt-6 inline-block rounded-full bg-brand-honey px-7 py-3 font-bold text-neutral-900 transition duration-200 hover:brightness-105"

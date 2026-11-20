@@ -39,9 +39,9 @@ export function AffiliateLinks() {
       </Reveal>
 
       <Reveal delay={80}>
-        <section className="relative isolate overflow-hidden rounded-2xl bg-brand-deep p-5 text-white shadow-lg shadow-brand/20 sm:p-6">
+        <section className="relative isolate overflow-hidden rounded-xl bg-brand-deep p-5 text-white shadow-lg shadow-brand/20 sm:p-6">
           <p className="text-xs font-semibold text-white/70">Mã giới thiệu của bạn</p>
-          <p className="mt-1 text-3xl font-black tracking-[0.2em]">{profile.data?.referralCode ?? "········"}</p>
+          <p className="mt-1 text-3xl font-extrabold tracking-[0.2em]">{profile.data?.referralCode ?? "········"}</p>
           {dash.data ? <ShareLink link={dash.data.shareLink} /> : <Skeleton className="mt-3 h-12 rounded-xl bg-white/15" />}
         </section>
       </Reveal>
@@ -69,11 +69,11 @@ export function AffiliateLinks() {
           {steps.map(({ icon: Icon, title, text }, i) => (
             <li key={title}>
               <Reveal delay={160 + i * 70} className="h-full">
-                <div className="relative h-full overflow-hidden rounded-xl border border-gray-100 bg-white p-5 shadow-sm transition-[transform,box-shadow] duration-200 hoverable:hover:-translate-y-1 hoverable:hover:shadow-md">
-                  <span className="flex size-11 items-center justify-center rounded-xl bg-brand-accent text-white shadow-md shadow-brand-red/20">
+                <div className="relative h-full overflow-hidden rounded-xl border border-gray-100 bg-white p-5 transition-[transform,box-shadow] duration-200 hoverable:hover:-translate-y-1 hoverable:hover:shadow-md">
+                  <span className="flex size-11 items-center justify-center rounded-xl bg-brand-accent text-white shadow-brand-red/20">
                     <Icon className="size-5" aria-hidden />
                   </span>
-                  <span aria-hidden className="absolute top-3 right-4 text-4xl font-black text-gray-100">{i + 1}</span>
+                  <span aria-hidden className="absolute top-3 right-4 text-4xl font-extrabold text-gray-100">{i + 1}</span>
                   <h3 className="mt-3 font-bold text-gray-900">{title}</h3>
                   <p className="mt-1 text-sm text-gray-500">{text}</p>
                 </div>
@@ -86,7 +86,7 @@ export function AffiliateLinks() {
       <Reveal delay={400}>
         <Link
           href="/products"
-          className="group inline-flex h-11 items-center gap-2 rounded-xl bg-brand-red px-5 text-sm font-semibold text-white shadow-md shadow-brand-red/25 transition-all hover:bg-brand-red/90 hover:shadow-lg"
+          className="group inline-flex h-11 items-center gap-2 rounded-xl bg-brand-red px-5 text-sm font-semibold text-white shadow-brand-red/25 transition-all hover:bg-brand-red/90 hover:shadow-lg"
         >
           Chọn sản phẩm để chia sẻ
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden />

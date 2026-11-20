@@ -20,7 +20,7 @@ function iconOf(a: ActivityItem): LucideIcon {
 /** Dòng thời gian hoạt động gần đây: đơn mới ghi nhận, hoa hồng được duyệt, yêu cầu rút tiền. */
 export function RecentActivity({ items, loading }: { items?: ActivityItem[]; loading?: boolean }) {
   return (
-    <section className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+    <section className="rounded-xl border border-gray-100 bg-white p-5 ">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-base font-bold text-gray-900">Hoạt động gần đây</h2>
         <PortalLink slug="earnings" className="text-sm font-semibold text-brand-link hover:underline">Xem tất cả</PortalLink>

@@ -99,19 +99,19 @@ export function AdminCertificates() {
         {isLoading ? (
           <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" aria-busy="true">
             {[0, 1, 2, 3].map((i) => (
-              <li key={i} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+              <li key={i} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
                 <div className="aspect-[7/10] animate-pulse bg-slate-100" />
                 <div className="h-12 animate-pulse border-t border-slate-100 bg-white" />
               </li>
             ))}
           </ul>
         ) : isError ? (
-          <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center text-sm text-rose-700">
+          <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-6 text-center text-sm text-rose-700">
             Không tải được danh sách: {errorMessage(error)}{" "}
             <button type="button" onClick={() => refetch()} className="font-semibold underline">Thử lại</button>
           </div>
         ) : certs.length === 0 ? (
-          <div className="rounded-2xl border border-slate-200 bg-white py-14 text-center">
+          <div className="rounded-xl border border-slate-200 bg-white py-14 text-center">
             <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
               <FileCheck2 className="size-7" />
             </div>
@@ -121,7 +121,7 @@ export function AdminCertificates() {
         ) : (
           <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {certs.map((c, i) => (
-              <li key={c.id} className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs transition hover:-translate-y-0.5 hover:shadow-md">
+              <li key={c.id} className="group overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-md">
                 <button
                   type="button"
                   onClick={() => setViewing(i)}

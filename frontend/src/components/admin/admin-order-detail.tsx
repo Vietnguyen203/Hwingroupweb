@@ -38,7 +38,7 @@ export function AdminOrderDetail({ id }: { id: string }) {
   return (
     <div className="space-y-3">
       <Link href="/admin/orders" className="flex items-center gap-1 text-sm text-brand-link"><ArrowLeft className="size-4" /> Đơn hàng</Link>
-      <section className="space-y-2 rounded-2xl bg-white p-4 shadow-sm">
+      <section className="space-y-2 rounded-xl bg-white p-4 ">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-lg font-bold text-brand">Đơn {d.code}</h1>
           <StatusBadge map={ORDER_STATUS} value={d.status} />
@@ -61,13 +61,13 @@ export function AdminOrderDetail({ id }: { id: string }) {
       </section>
 
       <div className="grid gap-3 md:grid-cols-2">
-        <section className="rounded-2xl bg-white p-4 text-sm shadow-sm">
+        <section className="rounded-xl bg-white p-4 text-sm ">
           <h2 className="mb-1 font-bold">Giao tới</h2>
           <p className="font-medium">{d.shippingAddress.recipientName} · {d.shippingAddress.recipientPhone}</p>
           <p className="text-muted-foreground">{d.shippingAddress.fullText}</p>
           {d.note && <p className="mt-1 text-muted-foreground">Ghi chú: {d.note}</p>}
         </section>
-        <section className="rounded-2xl bg-white p-4 text-sm shadow-sm">
+        <section className="rounded-xl bg-white p-4 text-sm ">
           <h2 className="mb-1 font-bold">Lịch sử trạng thái</h2>
           <ul className="space-y-1">
             {history.map((h, i) => (
@@ -80,7 +80,7 @@ export function AdminOrderDetail({ id }: { id: string }) {
         </section>
       </div>
 
-      <section className="rounded-2xl bg-white p-4 text-sm shadow-sm">
+      <section className="rounded-xl bg-white p-4 text-sm ">
         <ul className="divide-y">
           {d.items.map((i) => (
             <li key={i.productId} className="flex justify-between gap-2 py-2">

@@ -17,6 +17,7 @@ import {
 } from "@/lib/account";
 import type { PageResponse } from "@/lib/types";
 import { formatVnd } from "@/lib/format";
+import { PageHeading } from "@/components/page-heading";
 import { AddPhoneForm } from "./add-phone-form";
 
 /** Trang tài khoản khách: hồ sơ, sổ địa chỉ, đơn hàng gần đây, đăng xuất. */
@@ -32,17 +33,20 @@ export function AccountView() {
     }
   }, [me.data, router]);
 
-  if (!me.data) return <div className="m-3 h-64 animate-pulse rounded-2xl bg-neutral-200" />;
+  if (!me.data) return <div className="m-3 h-64 animate-pulse rounded-xl bg-neutral-200" />;
 
   return (
-    <div className="space-y-3 p-3 md:grid md:grid-cols-[320px_1fr] md:gap-4 md:space-y-0 md:py-6">
-      <div className="space-y-3">
-        <ProfileCard />
-        <LogoutButton />
-      </div>
-      <div className="space-y-3">
-        <OrdersCard />
-        <AddressesCard />
+    <div>
+      <PageHeading title="Tài khoản của tôi" subtitle={me.data.fullName ?? undefined} />
+      <div className="space-y-3 p-3 md:grid md:grid-cols-[320px_1fr] md:gap-4 md:space-y-0 md:px-0 md:pb-10">
+        <div className="space-y-3">
+          <ProfileCard />
+          <LogoutButton />
+        </div>
+        <div className="space-y-3">
+          <OrdersCard />
+          <AddressesCard />
+        </div>
       </div>
     </div>
   );
@@ -52,9 +56,9 @@ function Card({ title, icon: Icon, action, children }: {
   title: string; icon: typeof UserRound; action?: React.ReactNode; children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl bg-white p-4 shadow-sm">
+    <section className="rounded-xl bg-white p-4 ring-1 ring-black/[0.06]">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 font-bold text-brand"><Icon className="size-5" />{title}</h2>
+        <h2 className="flex items-center gap-2 text-lg font-bold text-brand-deep"><Icon className="size-5 text-brand" />{title}</h2>
         {action}
       </div>
       {children}
@@ -151,7 +155,7 @@ function CopyIdButton({ id }: { id: string }) {
       className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] text-neutral-400 hover:bg-neutral-100 hover:text-brand transition cursor-pointer"
     >
       {copied ? (
-        <span className="flex items-center gap-1 text-emerald-600 font-semibold">
+        <span className="flex items-center gap-1 text-brand-green font-semibold">
           <Check className="size-3" /> Đã chép
         </span>
       ) : (

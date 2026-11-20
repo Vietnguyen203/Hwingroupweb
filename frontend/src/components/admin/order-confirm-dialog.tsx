@@ -74,7 +74,7 @@ export function OrderConfirmDialog({ orderId, onClose }: { orderId: string; onCl
         {/* Đầu hộp thoại */}
         <div className="flex items-start justify-between gap-3 border-b border-slate-100 bg-gradient-to-b from-brand-soft/60 to-white px-5 py-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-dark text-white shadow-md shadow-brand/25">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-dark text-white shadow-brand/25">
               <ClipboardCheck className="size-5.5" aria-hidden />
             </span>
             <div className="min-w-0">
@@ -133,10 +133,10 @@ export function OrderConfirmDialog({ orderId, onClose }: { orderId: string; onCl
               </div>
 
               <div>
-                <p className="mb-2 flex items-center gap-1.5 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                <p className="mb-2 flex items-center gap-1.5 text-xs font-bold text-slate-500">
                   <ShoppingBag className="size-3.5" aria-hidden /> Sản phẩm ({d.items.reduce((n, i) => n + i.quantity, 0)})
                 </p>
-                <ul className="divide-y divide-slate-100 rounded-2xl border border-slate-100">
+                <ul className="divide-y divide-slate-100 rounded-xl border border-slate-100">
                   {d.items.map((i) => (
                     <li key={i.productId} className="flex items-center gap-3 p-3">
                       {i.imageUrl ? (
@@ -159,7 +159,7 @@ export function OrderConfirmDialog({ orderId, onClose }: { orderId: string; onCl
                   <Row label="Phí giao hàng" value={d.shippingFee === 0 ? "Miễn phí" : formatVnd(d.shippingFee)} />
                   <div className="flex items-center justify-between border-t border-dashed border-slate-200 pt-2">
                     <dt className="font-bold text-slate-900">Tổng cộng</dt>
-                    <dd className="text-xl font-black text-brand-red tabular-nums">{formatVnd(d.total)}</dd>
+                    <dd className="text-xl font-extrabold text-brand-red tabular-nums">{formatVnd(d.total)}</dd>
                   </div>
                 </dl>
               </div>
@@ -212,7 +212,7 @@ export function OrderConfirmDialog({ orderId, onClose }: { orderId: string; onCl
                   autoFocus
                   onClick={() => act.mutate("confirm")}
                   disabled={act.isPending}
-                  className="h-10 rounded-xl bg-brand px-5 text-sm font-bold text-white shadow-md shadow-brand/25 transition hover:bg-brand-dark disabled:opacity-50"
+                  className="h-10 rounded-xl bg-brand px-5 text-sm font-bold text-white shadow-brand/25 transition hover:bg-brand-dark disabled:opacity-50"
                 >
                   {act.isPending ? "Đang xác nhận…" : "Xác nhận đơn"}
                 </button>

@@ -28,7 +28,7 @@ export function StickySideBanners() {
   return (
     <>
       {!closed.has("freeship") && (
-        <SideBanner side="left" tone="from-brand-accent via-brand-red to-[#b42a05]" image="/images/freeship-bg.svg" onClose={() => closeBanner("freeship")}>
+        <SideBanner side="left" tone="from-brand-red via-brand to-brand-deep" image="/images/freeship-bg.svg" onClose={() => closeBanner("freeship")}>
           <span className="flex size-12 @min-[12rem]:size-16 items-center justify-center rounded-2xl bg-white/20 ring-1 ring-white/30">
             <Truck className="size-6 @min-[12rem]:size-8" />
           </span>
@@ -47,7 +47,7 @@ export function StickySideBanners() {
       )}
 
       {!closed.has("affiliate") && (
-        <SideBanner side="right" tone="from-brand via-brand-dark to-brand-deep" image="/images/cong-tac-vien-bg.svg" onClose={() => closeBanner("affiliate")}>
+        <SideBanner side="right" tone="from-brand-dark via-brand-deep to-[#2a0507]" image="/images/cong-tac-vien-bg.jpg" scrim="from-brand-deep/90 via-brand-deep/45 to-brand-deep/90" onClose={() => closeBanner("affiliate")}>
           <span className="flex size-12 @min-[12rem]:size-16 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25">
             <HandCoins className="size-6 @min-[12rem]:size-8 text-brand-accent" />
           </span>
@@ -77,6 +77,7 @@ function SideBanner({
   side,
   tone,
   image,
+  scrim = "from-black/10 via-black/25 to-black/10",
   onClose,
   children,
 }: {
@@ -85,6 +86,8 @@ function SideBanner({
   tone: string;
   /** Ảnh nền phủ kín banner (đường dẫn trong public/), có lớp tối nhẹ phía trên để chữ dễ đọc. */
   image?: string;
+  /** Lớp tối phủ lên ảnh (gradient Tailwind, từ trên xuống) để chữ trắng đọc được; ảnh sáng như ảnh người thật cần lớp đậm hơn. */
+  scrim?: string;
   onClose: () => void;
   children: React.ReactNode;
 }) {
@@ -106,7 +109,7 @@ function SideBanner({
                 eslint-disable-next-line bên dưới: ảnh nền tĩnh trong public/ */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={image} alt="" aria-hidden className="pointer-events-none absolute inset-0 -z-10 size-full object-cover" />
-            <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-black/10 via-black/25 to-black/10" />
+            <span aria-hidden className={`pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b ${scrim}`} />
           </>
         )}
         <span aria-hidden className="pointer-events-none absolute -top-10 -right-10 size-32 @min-[12rem]:size-48 rounded-full bg-white/15 blur-2xl" />

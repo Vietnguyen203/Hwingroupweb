@@ -2,7 +2,7 @@
 // Mọi hiệu ứng tự bỏ qua khi người dùng bật "giảm chuyển động" trong hệ điều hành.
 
 /** Bảng màu thương hiệu + vài màu phụ cho vui mắt. */
-const COLORS = ["#6c3bff", "#ff6b35", "#ffd23f", "#2fa84f", "#ff5fa2", "#22c3ee", "#d6360a"];
+const COLORS = ["#9b1c22", "#d9a441", "#f2d58a", "#2f7d46", "#b3261e", "#7a1419", "#e3b04b"];
 
 const prefersReducedMotion = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -123,8 +123,8 @@ export function flyToCart(source: Element | null, imageUrl?: string | null): Pro
   ghost.setAttribute("aria-hidden", "true");
   ghost.style.cssText =
     `position:fixed;left:${sx}px;top:${sy}px;width:${size}px;height:${size}px;border-radius:16px;z-index:200;pointer-events:none;` +
-    "box-shadow:0 10px 28px -6px rgba(255,107,53,.65),0 0 0 3px #fff,0 0 0 5px #6c3bff;" +
-    (imageUrl ? `background:#fff url("${encodeURI(imageUrl)}") center/cover` : "background:linear-gradient(135deg,#6c3bff,#ff6b35)");
+    "box-shadow:0 10px 28px -6px rgba(155,28,34,.55),0 0 0 3px #fff,0 0 0 5px #9b1c22;" +
+    (imageUrl ? `background:#fff url("${encodeURI(imageUrl)}") center/cover` : "background:linear-gradient(135deg,#9b1c22,#d9a441)");
   document.body.appendChild(ghost);
 
   const animation = ghost.animate(

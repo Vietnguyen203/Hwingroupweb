@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, CheckCircle2, HelpCircle, Minus, Plus, ShieldCheck, ShoppingBag, ShoppingCart, Trash2, Truck } from "lucide-react";
 
 import { CartSuggestions } from "@/components/cart/cart-suggestions";
-import { Breadcrumb } from "@/components/layout/breadcrumb";
+import { PageHeading } from "@/components/page-heading";
 import { buttonVariants } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { showToast } from "@/components/ui/toast";
@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { cartSubtotal, useCart } from "@/stores/cart-store";
 
 /**
- * Trang giỏ hàng chuẩn thương mại điện tử hiện đại của Hwin Food:
+ * Trang giỏ hàng chuẩn thương mại điện tử hiện đại của Phúc Vị Foods:
  * - Danh sách sản phẩm dạng bảng rộng thoáng (desktop) / card (mobile)
  * - Tăng giảm số lượng, xóa từng món, xóa tất cả có xác nhận modal
  * - Tính toán giá tự động (backend quote + fallback local an toàn)
@@ -59,7 +59,7 @@ export default function CartPage() {
           Giỏ hàng của bạn đang trống
         </h1>
         <p className="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
-          Chưa có món ngon nào trong giỏ. Hwin Food có rất nhiều đặc sản tươi ngon và combo ưu đãi hấp dẫn đang chờ bạn!
+          Chưa có món ngon nào trong giỏ. Phúc Vị Foods có rất nhiều đặc sản tươi ngon và combo ưu đãi hấp dẫn đang chờ bạn!
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-4">
           <Link
@@ -107,21 +107,22 @@ export default function CartPage() {
   };
 
   return (
-    <div className="space-y-6 px-3 py-4 md:px-0 md:py-8">
-      <Breadcrumb items={[{ label: `Giỏ hàng (${totalItemCount})` }]} />
+    <div>
+      <PageHeading title="Giỏ hàng" subtitle={`${totalItemCount} sản phẩm`} />
+      <div className="space-y-6 px-3 pb-8 md:px-0 md:pb-12">
 
       {/* Freeship Alert Banner – chỉ hiện khi backend có chương trình miễn phí ship */}
       {freeshipThreshold > 0 && (
-      <div className="rounded-2xl border border-amber-200/70 bg-amber-50 p-4 shadow-xs">
+      <div className="rounded-xl bg-brand-honey/20 p-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-honey text-neutral-900">
               <Truck className="size-4" />
             </div>
             <div>
               {remainingForFreeship > 0 ? (
                 <p className="text-sm text-neutral-800">
-                  Mua thêm <strong className="text-brand-red font-bold">{formatVnd(remainingForFreeship)}</strong> để được <strong className="text-emerald-700 font-bold">MIỄN PHÍ GIAO HÀNG</strong> toàn quốc!
+                  Mua thêm <strong className="text-brand-red font-bold">{formatVnd(remainingForFreeship)}</strong> để được <strong className="text-brand-green font-bold">miễn phí giao hàng</strong> toàn quốc!
                 </p>
               ) : (
                 <p className="text-sm font-semibold text-emerald-700 flex items-center gap-1.5">
@@ -140,7 +141,7 @@ export default function CartPage() {
         </div>
         <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-neutral-200/80">
           <div
-            className="h-full rounded-full bg-emerald-500 transition-all duration-500 ease-out"
+            className="h-full rounded-full bg-brand-green transition-all duration-500 ease-out"
             style={{ width: `${freeshipProgress}%` }}
           />
         </div>
@@ -152,9 +153,9 @@ export default function CartPage() {
         {/* Left Column: Products List */}
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
-            <h1 className="text-xl font-bold text-neutral-900 md:text-2xl">
-              Danh sách sản phẩm trong giỏ ({totalItemCount})
-            </h1>
+            <h2 className="text-xl font-bold text-neutral-900 md:text-2xl">
+              Sản phẩm trong giỏ
+            </h2>
             <button
               type="button"
               onClick={() => setClearConfirmOpen(true)}
@@ -184,7 +185,7 @@ export default function CartPage() {
               return (
                 <div
                   key={item.productId}
-                  className="group relative flex flex-col gap-3 rounded-2xl border border-neutral-200/70 bg-white p-3.5 shadow-xs transition-shadow hover:shadow-md md:grid md:grid-cols-[2fr_1fr_1.2fr_1.2fr_40px] md:items-center md:gap-4 md:p-4"
+                  className="group relative flex flex-col gap-3 rounded-xl bg-white p-3.5 ring-1 ring-black/[0.06] md:grid md:grid-cols-[2fr_1fr_1.2fr_1.2fr_40px] md:items-center md:gap-4 md:p-4"
                 >
                   {/* Product info: Image + Name */}
                   <div className="flex items-center gap-3.5 min-w-0">
@@ -213,7 +214,7 @@ export default function CartPage() {
                         {item.name}
                       </Link>
                       <div className="mt-1 md:hidden">
-                        <span className="text-xs font-bold text-brand-red">{formatVnd(unitPrice)}</span>
+                        <span className="font-display text-sm font-bold text-brand-red">{formatVnd(unitPrice)}</span>
                       </div>
                       {v?.problem && (
                         <p className="mt-1 text-xs text-destructive font-medium">
@@ -262,7 +263,7 @@ export default function CartPage() {
                   </div>
 
                   {/* Line Total (Desktop) */}
-                  <div className="hidden text-right text-sm font-bold text-brand-red md:block">
+                  <div className="hidden text-right font-display text-base font-bold text-brand-red md:block">
                     {formatVnd(lineTotal)}
                   </div>
 
@@ -300,7 +301,7 @@ export default function CartPage() {
 
         {/* Right Column: Order Summary Card */}
         <div className="space-y-4 lg:sticky lg:top-28">
-          <div className="rounded-2xl border border-neutral-200/80 bg-white p-5 shadow-sm space-y-4">
+          <div className="rounded-xl bg-white p-5 ring-1 ring-black/[0.06] space-y-4">
             <h2 className="border-b border-neutral-100 pb-3 text-base font-bold text-neutral-900">
               Tóm tắt đơn hàng
             </h2>
@@ -329,7 +330,7 @@ export default function CartPage() {
                   <span className="text-base font-bold text-neutral-900">Tổng thanh toán</span>
                   <p className="text-[11px] text-neutral-400">(Đã bao gồm VAT nếu có)</p>
                 </div>
-                <span className="text-xl font-black text-brand-red">
+                <span className="font-display text-2xl font-extrabold text-brand-red">
                   {formatVnd(finalTotal)}
                 </span>
               </div>
@@ -347,8 +348,8 @@ export default function CartPage() {
               aria-disabled={!checkoutReady}
               className={cn(
                 buttonVariants(),
-                "flex h-12 w-full items-center justify-center gap-2 rounded-xl text-base font-bold bg-brand-cta text-white shadow-lg shadow-brand/30 hover:-translate-y-0.5 hover:bg-brand-dark transition-all active:translate-y-0 active:scale-[0.98]",
-                !checkoutReady && "pointer-events-none opacity-50 shadow-none"
+                "flex h-12 w-full items-center justify-center gap-2 rounded-xl text-base font-bold bg-brand-cta text-white hover:bg-brand-dark transition-colors active:scale-[0.98]",
+                !checkoutReady && "pointer-events-none opacity-50"
               )}
             >
               {me.data ? "Tiến hành đặt hàng" : "Đăng nhập để đặt hàng"}
@@ -367,9 +368,9 @@ export default function CartPage() {
           </div>
 
           {/* Trust Guarantees */}
-          <div className="rounded-2xl border border-neutral-100 bg-neutral-50/70 p-4 space-y-3">
+          <div className="rounded-xl bg-neutral-100/70 p-4 space-y-3">
             <h3 className="text-xs font-bold text-neutral-600">
-              Quyền lợi mua sắm tại Hwin Food
+              Quyền lợi mua sắm tại Phúc Vị Foods
             </h3>
             <ul className="space-y-2 text-xs text-neutral-600">
               <li className="flex items-center gap-2">
@@ -400,6 +401,7 @@ export default function CartPage() {
         onConfirm={handleClearAll}
         onCancel={() => setClearConfirmOpen(false)}
       />
+      </div>
     </div>
   );
 }

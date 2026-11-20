@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Banknote, Check, ChevronRight, Lock, MapPin, QrCode, ShoppingBag, Truck } from "lucide-react";
 
+import { PageHeading } from "@/components/page-heading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCartQuote } from "@/hooks/use-cart-quote";
@@ -165,9 +166,9 @@ export function CheckoutView() {
   const itemCount = lines.reduce((n, l) => n + l.quantity, 0);
 
   /** Thẻ lựa chọn (địa chỉ / phương thức): viền + nền nổi bật khi đang chọn. */
-  const optionCard = "flex cursor-pointer gap-3 rounded-xl border border-neutral-200 p-3.5 text-sm transition hover:border-brand/50 has-checked:border-brand has-checked:bg-brand-soft has-checked:shadow-xs";
+  const optionCard = "flex cursor-pointer gap-3 rounded-xl border border-neutral-200 p-3.5 text-sm transition hover:border-brand/50 has-checked:border-brand has-checked:bg-brand-soft";
   const section = (step: number, title: string, icon: React.ReactNode, children: React.ReactNode) => (
-    <section className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs md:p-6">
+    <section className="rounded-xl bg-white p-4 ring-1 ring-black/[0.06] md:p-6">
       <h2 className="mb-4 flex items-center gap-2.5 text-base font-bold text-neutral-900 md:text-lg">
         <span className="flex size-7 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">{step}</span>
         {title}
@@ -178,8 +179,10 @@ export function CheckoutView() {
   );
 
   return (
-    <div className="px-3 py-4 md:px-0 md:py-8">
-      {/* Breadcrumb + các bước */}
+    <div>
+      <PageHeading title="Thanh toán" />
+      <div className="px-3 pb-8 md:px-0 md:pb-12">
+      {/* Các bước đặt hàng (một chuỗi thật nên có thứ tự) */}
       <nav aria-label="Các bước đặt hàng" className="mb-5 flex flex-wrap items-center gap-1.5 text-xs text-neutral-500 md:text-sm">
         <Link href="/cart" className="hover:text-brand">Giỏ hàng</Link>
         <ChevronRight className="size-3.5" />
@@ -187,8 +190,6 @@ export function CheckoutView() {
         <ChevronRight className="size-3.5" />
         <span>Hoàn tất</span>
       </nav>
-      <h1 className="mb-4 text-xl font-bold text-neutral-900 md:mb-6 md:text-2xl">Thanh toán</h1>
-
       <form onSubmit={placeOrder} noValidate className="grid items-start gap-5 lg:grid-cols-[1fr_400px]">
         <div className="space-y-4">
           {section(1, "Địa chỉ nhận hàng", <MapPin className="size-5" />, (
@@ -271,7 +272,7 @@ export function CheckoutView() {
 
         {/* Tóm tắt đơn hàng */}
         <aside className="space-y-4 lg:sticky lg:top-28">
-          <div className="space-y-4 rounded-2xl border border-neutral-200/80 bg-white p-5 text-sm shadow-sm">
+          <div className="space-y-4 rounded-xl bg-white p-5 text-sm ring-1 ring-black/[0.06]">
             <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
               <h2 className="text-base font-bold text-neutral-900">Đơn hàng ({itemCount} sản phẩm)</h2>
               <Link href="/cart" className="text-xs font-semibold text-brand hover:underline">Sửa giỏ hàng</Link>
@@ -301,16 +302,16 @@ export function CheckoutView() {
                 <div className="flex justify-between text-neutral-600"><span>Tạm tính</span><span className="font-semibold text-neutral-800">{formatVnd(view.subtotal)}</span></div>
                 <div className="flex justify-between text-neutral-600">
                   <span>Phí giao hàng</span>
-                  {view.shippingFee === 0 ? <span className="font-semibold text-emerald-600">Miễn phí</span> : <span className="font-semibold text-neutral-800">{formatVnd(view.shippingFee)}</span>}
+                  {view.shippingFee === 0 ? <span className="font-semibold text-brand-green">Miễn phí</span> : <span className="font-semibold text-neutral-800">{formatVnd(view.shippingFee)}</span>}
                 </div>
                 {view.freeShippingThreshold > 0 && view.subtotal < view.freeShippingThreshold && (
-                  <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                  <p className="rounded-lg bg-brand-honey/20 px-3 py-2 text-xs text-neutral-800">
                     Mua thêm <b>{formatVnd(view.freeShippingThreshold - view.subtotal)}</b> để được miễn phí giao hàng.
                   </p>
                 )}
                 <div className="flex items-baseline justify-between border-t border-neutral-100 pt-3">
                   <span className="text-base font-bold text-neutral-900">Tổng cộng</span>
-                  <span className="text-2xl font-black text-brand-red">{formatVnd(view.total)}</span>
+                  <span className="font-display text-2xl font-extrabold text-brand-red">{formatVnd(view.total)}</span>
                 </div>
               </div>
             )}
@@ -320,7 +321,7 @@ export function CheckoutView() {
             )}
             {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-destructive">{error}</p>}
 
-            <Button type="submit" disabled={busy || !view?.checkoutReady} className="h-12 w-full rounded-xl bg-brand-cta text-base font-bold text-white shadow-lg shadow-brand/30 transition hover:-translate-y-0.5 hover:bg-brand-dark">
+            <Button type="submit" disabled={busy || !view?.checkoutReady} className="h-12 w-full rounded-xl bg-brand-cta text-base font-bold text-white transition-colors hover:bg-brand-dark">
               {busy ? "Đang đặt hàng..." : <>Đặt hàng · {view ? formatVnd(view.total) : ""}</>}
             </Button>
             <p className="flex items-center justify-center gap-1.5 text-center text-xs text-neutral-500">
@@ -328,12 +329,13 @@ export function CheckoutView() {
             </p>
           </div>
 
-          <ul className="space-y-2 rounded-2xl border border-neutral-100 bg-neutral-50/70 p-4 text-xs text-neutral-600">
+          <ul className="space-y-2 rounded-xl bg-neutral-100/70 p-4 text-xs text-neutral-600">
             <li className="flex items-center gap-2"><Check className="size-4 shrink-0 text-emerald-600" /> 100% thực phẩm có chứng nhận VSATTP</li>
             <li className="flex items-center gap-2"><Check className="size-4 shrink-0 text-emerald-600" /> Đổi trả trong 7 ngày nếu sản phẩm lỗi</li>
           </ul>
         </aside>
       </form>
+      </div>
     </div>
   );
 }
