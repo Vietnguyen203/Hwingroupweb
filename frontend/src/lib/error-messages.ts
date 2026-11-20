@@ -138,6 +138,18 @@ export const ERROR_MESSAGES = {
   ALREADY_REGISTERED: "Bạn đã đăng ký CTV (trạng thái #status#)",
   PAYOUT_OPEN: "Bạn đang có một yêu cầu rút tiền chưa xử lý xong",
   PAYOUT_NOT_FOUND: "Không tìm thấy yêu cầu rút tiền",
+  VIDEO_NOT_FOUND: "Không tìm thấy video",
+  VIDEO_TITLE_REQUIRED: "Vui lòng nhập tiêu đề video",
+  VIDEO_URL_INVALID: "Link video không hợp lệ hoặc chưa được hỗ trợ. Hãy dán link của một video Facebook, TikTok hoặc YouTube",
+  VIDEO_URL_HTTPS_REQUIRED: "Chỉ nhận link bắt đầu bằng https",
+  VIDEO_URL_UNSUPPORTED_PLATFORM: "Chỉ hỗ trợ video Facebook, TikTok và YouTube",
+  VIDEO_URL_SHORT_LINK: "Chưa hỗ trợ link rút gọn hoặc link chia sẻ. Hãy mở video rồi sao chép link đầy đủ trên thanh địa chỉ",
+  VIDEO_PLATFORM_MISMATCH: "Nền tảng đã chọn không khớp với link video",
+  VIDEO_ALREADY_EXISTS: "Video này đã được thêm trước đó",
+  VIDEO_THUMBNAIL_INVALID: "Ảnh bìa phải là ảnh tải lên hoặc link ảnh bắt đầu bằng https",
+  VIDEO_CATEGORY_NOT_FOUND: "Danh mục đã chọn không còn tồn tại",
+  VIDEO_PRODUCT_NOT_FOUND: "Có sản phẩm không còn tồn tại hoặc chưa được gắn với video này",
+  VIDEO_TOO_MANY_PRODUCTS: "Mỗi video gắn tối đa #max# sản phẩm",
 } as const satisfies Record<string, string>;
 
 export type ErrorCode = keyof typeof ERROR_MESSAGES;
