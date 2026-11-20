@@ -53,6 +53,8 @@ public class SecurityConfig {
                                 "/api/auth/logout", "/api/admin/auth/login", "/api/admin/auth/login/verify").permitAll()
                         // Catalog công khai
                         .requestMatchers(HttpMethod.GET, "/api/categories/**", "/api/products/**", "/api/product-reviews/**", "/api/certificates/**").permitAll()
+                        // Thư viện video mạng xã hội (chỉ trả video đã đăng; quản trị nằm dưới /api/admin/videos)
+                        .requestMatchers(HttpMethod.GET, "/api/videos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         // Giỏ ẩn danh tính giá + cấu hình thanh toán
                         .requestMatchers(HttpMethod.POST, "/api/cart-quotes").permitAll()

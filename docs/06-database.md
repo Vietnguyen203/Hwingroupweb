@@ -36,6 +36,8 @@
 | `affiliate` | [`customer_bindings`](#affiliatecustomer_bindings) | Gắn khách vĩnh viễn (first-touch): đơn đầu tiên có ref hợp lệ -> mọi đơn sau của khách tính hoa hồng cho CTV này |
 | `affiliate` | [`payouts`](#affiliatepayouts) | Yêu cầu rút tiền: REQUESTED -> APPROVED -> PAID; REJECTED (tiền tự trở lại số dư). Tối thiểu 200.000đ |
 | `affiliate` | [`referral_clicks`](#affiliatereferral_clicks) | Lượt click link CTV. Không đếm trùng cùng IP + mã trong 24 giờ (Redis) |
+| `content` | [`videos`](#contentvideos) | Video mạng xã hội (Facebook / TikTok / YouTube): link gốc + địa chỉ nhúng do backend dựng. Không lưu file video |
+| `content` | [`video_products`](#contentvideo_products) | Sản phẩm được giới thiệu trong video (thứ tự hiển thị). Unique (video_id, product_id) |
 | `audit` | [`audit_logs`](#auditaudit_logs) | Nhật ký thay đổi liên quan tới tiền. Chỉ INSERT – trigger chặn UPDATE/DELETE |
 | `public` | [`event_publication`](#publicevent_publication) | Spring Modulith: event nội bộ giữa các module; completion_date null = chưa xử lý xong (sẽ phát lại) |
 
@@ -618,6 +620,44 @@ Ràng buộc:
 Index:
 
 - `idx_referral_click_affiliate_time` – `btree (affiliate_id, clicked_at)`
+
+## Schema `content`
+
+### content.videos
+
+Video mạng xã hội hiển thị trên web; video vẫn nằm ở nền tảng gốc. Chỉ video `PUBLISHED` được khách thấy.
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|---|---|---|
+| id | `uuid` |  | `uuid_generate_v7()` | Khóa chính |
+| title | `character varying(200)` |  |  | Tiêu đề |
+| slug | `character varying(220)` |  |  | Đường dẫn `/videos/{slug}`; duy nhất, giữ nguyên khi sửa |
+| description | `text` | ✓ |  | Mô tả |
+| platform | `character varying(16)` |  |  | `FACEBOOK` \| `TIKTOK` \| `YOUTUBE` (check constraint) |
+| source_url | `character varying(1000)` |  |  | Đường dẫn gốc đã chuẩn hóa (https), dùng cho nút "Xem bài gốc" |
+| external_id | `character varying(200)` |  |  | Mã video trên nền tảng |
+| embed_url | `character varying(1000)` |  |  | Địa chỉ nhúng do backend dựng từ `source_url` |
+| thumbnail_url | `character varying(1000)` | ✓ |  | Ảnh bìa (ảnh tải lên hoặc URL https; YouTube tự suy) |
+| category_id | `uuid` | ✓ |  | Danh mục (catalog.categories) – không FK xuyên schema |
+| display_order | `integer` |  | `0` | Thứ tự hiển thị tăng dần |
+| status | `character varying(16)` |  | `'HIDDEN'` | `PUBLISHED` \| `HIDDEN` (check constraint) |
+| created_at | `timestamp with time zone` |  | `now()` |  |
+| updated_at | `timestamp with time zone` |  | `now()` |  |
+
+Ràng buộc: `uq_videos_slug` UNIQUE (slug); `uq_videos_platform_external` UNIQUE (platform, external_id) – một video chỉ thêm được một lần.
+
+Index: `idx_videos_status_order` (status, display_order); `idx_videos_category` (category_id); `idx_videos_platform` (platform).
+
+### content.video_products
+
+| Cột | Kiểu | Null | Mặc định | Mô tả |
+|---|---|---|---|---|
+| id | `uuid` |  | `uuid_generate_v7()` | Khóa chính |
+| video_id | `uuid` |  |  | FOREIGN KEY → content.videos(id) ON DELETE CASCADE |
+| product_id | `uuid` |  |  | Sản phẩm (catalog.products) – không FK xuyên schema, service kiểm tra tồn tại |
+| display_order | `integer` |  | `0` | Thứ tự sản phẩm trong video |
+
+Ràng buộc: `uq_video_products` UNIQUE (video_id, product_id). Index: `idx_video_products_product` (product_id).
 
 ## Schema `audit`
 

@@ -28,7 +28,7 @@
 
 **Ngoài phạm vi (chỉ để sẵn port + implementation giả)**
 
-VNPay/MoMo thật, GHN/GHTK thật, hóa đơn điện tử thật, SMS/Zalo OTP thật, video theo danh mục, Flash Sale, tích điểm, voucher (field `discount` luôn = 0 trong demo), tách microservice, message broker.
+VNPay/MoMo thật, GHN/GHTK thật, hóa đơn điện tử thật, SMS/Zalo OTP thật, lưu / tải file video lên máy chủ (video chỉ nhúng từ mạng xã hội, xem module `content`), Flash Sale, tích điểm, voucher (field `discount` luôn = 0 trong demo), tách microservice, message broker.
 
 ### 1.2 Vai trò người dùng
 
@@ -50,6 +50,7 @@ Một user có thể **vừa là CUSTOMER vừa là AFFILIATE** (`user_roles` l�
 | `affiliate` | **Core** | Hồ sơ CTV, mã giới thiệu, ghi nhận click, gắn khách vĩnh viễn, tính hoa hồng, rút tiền, audit tiền | `Affiliate`, `CustomerBinding`, `ReferralClick`, `Commission`, `Payout` |
 | `ordering` | **Core** | Giỏ hàng, đặt hàng, tính giá ở backend, vòng đời đơn, thanh toán COD/QR, phí ship, thông tin VAT | `Cart`, `Order` |
 | `catalog` | Supporting | Danh mục, sản phẩm, thông tin thực phẩm, tìm kiếm, tồn kho | `Category`, `Product` |
+| `content` | Supporting | Thư viện video mạng xã hội (Facebook, TikTok, YouTube) gắn với sản phẩm: chỉ lưu đường dẫn gốc; nền tảng, mã video và địa chỉ nhúng do backend dựng từ link; không lưu file video | `Video` |
 | `customer` | Supporting | Hồ sơ khách, sổ địa chỉ, thống kê (read model), phân nhóm khách, Mua lại, sản phẩm hay mua | `Customer` |
 | `identity` | Generic | User, vai trò, OTP, JWT + refresh token xoay vòng, đăng nhập admin | `UserAccount`, `RefreshToken` |
 | `common` | Shared kernel | `Money`, `PhoneNumber`, `Address`, base `DomainEvent`, `DomainException`, security, config, `AuditLogger`, rate limiter | – |
@@ -69,6 +70,8 @@ common  ←  identity  ←  catalog  ←  ordering  ←  customer
                 ↑                       ↑
                 └──────── affiliate ────┘
 ```
+
+`content` (video mạng xã hội) là module **downstream của `catalog`**: chỉ đọc `ProductSnapshot` / `CategorySnapshot` qua `@NamedInterface("query")`; không module nào phụ thuộc `content`.
 
 - Module **phía dưới (downstream)** được phép: gọi service public của module phía trên **và** nghe event của module phía trên.
 - Module **phía trên (upstream)** không bao giờ biết module phía dưới.
@@ -192,7 +195,7 @@ flowchart TB
 - **Next.js rewrites `/api/*` sang Spring Boot** → trình duyệt chỉ thấy 1 origin, cookie JWT HttpOnly + SameSite=Lax hoạt động không cần cấu hình cross-site. CORS vẫn bật, chỉ cho `FRONTEND_ORIGIN`. Trang SSR gọi backend trực tiếp qua `BACKEND_INTERNAL_URL` (chuyển tiếp cookie).
 - **Event nội bộ** dùng `ApplicationEventPublisher` + `@ApplicationModuleListener` (async, chạy sau commit, transaction mới). Spring Modulith **Event Publication Registry (JPA)** lưu event chưa xử lý xong để retry khi khởi động lại → không mất event khi listener lỗi. Khi tách microservice chỉ cần externalize event (`@Externalized`) ra Kafka/RabbitMQ.
 - **Mỗi module một schema PostgreSQL**, không FK xuyên schema. Bảng `event_publication` đặt ở schema `public`. Bảng `audit_logs` thuộc schema `audit` do `common` quản lý.
-- **Flyway** một lần chạy, script đặt theo module: `db/migration/{common,identity,catalog,ordering,customer,affiliate}`.
+- **Flyway** một lần chạy, script đặt theo module: `db/migration/{common,identity,catalog,ordering,customer,affiliate,notification,content}`.
 
 ---
 

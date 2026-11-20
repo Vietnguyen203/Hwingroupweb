@@ -145,6 +145,28 @@
 | POST | `/api/admin/payouts/{id}/pay` | ADMIN | `{transactionRef}` → PAID |
 | POST | `/api/admin/payouts/{id}/reject` | ADMIN | `{reason}` → REJECTED (tiền tự trở lại số dư) |
 
+## content (video mạng xã hội)
+
+Thư viện video Facebook / TikTok / YouTube gắn với sản phẩm. Video **vẫn nằm ở nền tảng gốc**: backend chỉ lưu link, và **tự dựng** nền tảng, mã video, link chuẩn hóa và địa chỉ nhúng từ link admin dán (client không gửi iframe/embed). Không gọi mạng tới nền tảng khi kiểm tra link.
+
+Link hợp lệ: `https` + host đúng danh sách (YouTube: `watch?v=`, `youtu.be`, `shorts`, `embed`; TikTok: `/@user/video/{id}`; Facebook: `/{page}/videos/{id}`, `watch/?v=`, `reel/{id}`, `video.php?v=`). Link rút gọn / chia sẻ (`vm.tiktok.com`, `fb.watch`, `facebook.com/share/…`) bị từ chối `VIDEO_URL_SHORT_LINK`. Lỗi link: 422 với `messageCode` `VIDEO_URL_INVALID`, `VIDEO_URL_HTTPS_REQUIRED`, `VIDEO_URL_UNSUPPORTED_PLATFORM`, `VIDEO_URL_SHORT_LINK`.
+
+| Method | Path | Quyền | Mô tả |
+|---|---|---|---|
+| GET | `/api/videos` | public | Chỉ video `PUBLISHED`. `?q=&platform=FACEBOOK\|TIKTOK\|YOUTUBE&category=slug&page=&page_size=` (`page_size` ≤ 50, mặc định 12). Sắp theo `displayOrder` tăng dần rồi mới nhất. Mỗi video kèm `products[]` (chỉ sản phẩm đang bán) |
+| GET | `/api/videos/{slug}` | public | Video đã đăng; video ẩn hoặc không có → 404 `VIDEO_NOT_FOUND` |
+| GET | `/api/admin/videos` | ADMIN | `?q=&platform=&categoryId=&status=PUBLISHED\|HIDDEN&sort=ORDER\|NEWEST&page=&page_size=` (`page_size` ≤ 100) |
+| GET | `/api/admin/videos/{id}` | ADMIN | Chi tiết (kể cả video ẩn) |
+| POST | `/api/admin/videos/preview` | ADMIN | `{sourceUrl}` → `{platform, externalId, sourceUrl, embedUrl, thumbnailUrl}`. Chưa lưu, không gọi mạng |
+| POST | `/api/admin/videos` | ADMIN | `{title, description?, sourceUrl, platform?, thumbnailUrl?, categoryId?, displayOrder?, status?, productIds?[≤20]}` → 201. `platform` chỉ để đối chiếu (khác nền tảng nhận ra từ link → 422 `VIDEO_PLATFORM_MISMATCH`). `status` mặc định `HIDDEN`. Trùng video (cùng nền tảng + mã) → 422 `VIDEO_ALREADY_EXISTS`. Slug tự sinh từ tiêu đề, trùng thì thêm `-2`, `-3`… |
+| PUT | `/api/admin/videos/{id}` | ADMIN | Như POST; slug giữ nguyên. `status` / `productIds` bỏ trống = giữ nguyên; có `productIds` = thay toàn bộ và đổi thứ tự |
+| PATCH | `/api/admin/videos/{id}/status` | ADMIN | `{status}` đăng / ẩn video |
+| DELETE | `/api/admin/videos/{id}` | ADMIN | Xóa hẳn video và các liên kết sản phẩm (muốn tạm ẩn thì đổi trạng thái `HIDDEN`) → 204 |
+| POST | `/api/admin/videos/{id}/products` | ADMIN | `{productId}` thêm vào cuối danh sách (đã có thì giữ nguyên); sản phẩm không tồn tại → 422 `VIDEO_PRODUCT_NOT_FOUND` |
+| DELETE | `/api/admin/videos/{id}/products/{productId}` | ADMIN | Gỡ sản phẩm; chưa gắn → 404 `VIDEO_PRODUCT_NOT_FOUND` |
+
+Ảnh bìa `thumbnailUrl` tùy chọn: ảnh đã tải lên (`/uploads/...`) hoặc URL `https`; không hợp lệ → 422 `VIDEO_THUMBNAIL_INVALID`. Máy chủ **không** tải ảnh này về. YouTube tự có ảnh bìa suy từ mã video. Danh mục / sản phẩm không tồn tại → 422 `VIDEO_CATEGORY_NOT_FOUND` / `VIDEO_PRODUCT_NOT_FOUND`; tối đa 20 sản phẩm / video (`VIDEO_TOO_MANY_PRODUCTS`).
+
 ## notification
 
 Thông báo trong ứng dụng (chuông). Mọi vai trò đã đăng nhập đều dùng được; luôn theo `userId` trong token, KHÔNG nhận `userId` từ client.
