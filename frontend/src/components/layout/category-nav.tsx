@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Clapperboard } from "lucide-react";
 
 import { getCategories } from "@/lib/catalog";
 import { QuickJumpBar } from "./quick-jump-bar";
@@ -14,6 +15,17 @@ export async function CategoryNav() {
   return (
     <QuickJumpBar hasCategories={categories.length > 0}>
       <ul className="no-scrollbar flex min-w-0 flex-1 items-center gap-1 overflow-x-auto scroll-smooth">
+        <li className="shrink-0">
+          <Link
+            href="/videos"
+            className="group/nav flex items-center gap-2 rounded-full py-1 pr-3.5 pl-1.5 text-sm font-semibold whitespace-nowrap text-brand transition-colors duration-200 hover:bg-brand-soft"
+          >
+            <span className="flex size-7 items-center justify-center overflow-hidden rounded-full bg-brand-soft text-brand ring-1 ring-brand/10 transition duration-300 ease-spring group-hover/nav:scale-110">
+              <Clapperboard className="size-3.5" />
+            </span>
+            Video
+          </Link>
+        </li>
         {categories.map((c) => (
           <li key={c.id} className="shrink-0">
             <Link

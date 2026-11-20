@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Flame, Gift, HandCoins, LayoutGrid, ShieldCheck, Sparkles, Zap, type LucideIcon } from "lucide-react";
+import { Clapperboard, Flame, Gift, HandCoins, LayoutGrid, ShieldCheck, Sparkles, Zap, type LucideIcon } from "lucide-react";
 
 import { useSectionSpy } from "@/hooks/use-section-spy";
 import { cn } from "@/lib/utils";
@@ -71,6 +71,13 @@ export function QuickJumpBar({ hasCategories = false, loading = false, children 
         </Link>
 
         {isHome ? <HomeTabs topOffset={stickyHeight} measureTopOffset={measureStack} /> : children}
+
+        <Link
+          href="/videos"
+          className="hidden shrink-0 items-center gap-1.5 rounded-full bg-brand-soft px-3.5 py-1.5 text-sm font-semibold text-brand transition duration-200 hover:bg-brand hover:text-white md:inline-flex"
+        >
+          <Clapperboard className="size-4" /> Video
+        </Link>
 
         <Link
           href="/search?sort=PRICE_ASC"

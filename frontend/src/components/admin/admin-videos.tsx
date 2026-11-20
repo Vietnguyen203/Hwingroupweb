@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Clapperboard, ExternalLink, Eye, EyeOff, Plus, Trash2 } from "lucide-react";
+import { Clapperboard, ExternalLink, Eye, EyeOff, Globe, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
@@ -56,28 +57,40 @@ export function AdminVideos() {
     onError: (err) => showToast({ type: "error", title: "Chưa xóa được", message: errorMessage(err) }),
   });
 
-  /** Nút thao tác của một video: đăng / ẩn, mở bài gốc, xóa (dùng cho cả bảng và thẻ điện thoại). */
+  /** Nút thao tác của một video: đăng / ẩn, xem trên web, mở bài gốc, xóa (dùng cho cả bảng và thẻ điện thoại). */
   const actions = (v: VideoResponse) => {
     const source = safeSourceUrl(v.platform, v.sourceUrl);
     return (
-          <div className="inline-flex items-center gap-1.5">
-            <IconButton
-              label={v.status === "PUBLISHED" ? "Ẩn video khỏi trang web" : "Đăng video lên trang web"}
-              disabled={setStatus.isPending}
-              onClick={() => setStatus.mutate({ id: v.id, status: v.status === "PUBLISHED" ? "HIDDEN" : "PUBLISHED" })}
-            >
-              {v.status === "PUBLISHED" ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-            </IconButton>
-            {source && (
-              <a href={source} target="_blank" rel="noopener noreferrer" title="Mở bài gốc" aria-label="Mở bài gốc ở tab mới"
-                 className="inline-flex size-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-xs transition hover:border-brand hover:bg-brand-soft hover:text-brand">
-                <ExternalLink className="size-4" />
-              </a>
-            )}
-            <IconButton label="Xóa video" tone="danger" onClick={() => setDeleting(v)}>
-              <Trash2 className="size-4" />
-            </IconButton>
-          </div>
+      <div className="inline-flex items-center gap-1.5">
+        {v.status === "PUBLISHED" && (
+          <Link
+            href={`/videos/${v.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Xem trên web"
+            aria-label="Xem trên web ở tab mới"
+            className="inline-flex size-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-xs transition hover:border-brand hover:bg-brand-soft hover:text-brand"
+          >
+            <Globe className="size-4" />
+          </Link>
+        )}
+        <IconButton
+          label={v.status === "PUBLISHED" ? "Ẩn video khỏi trang web" : "Đăng video lên trang web"}
+          disabled={setStatus.isPending}
+          onClick={() => setStatus.mutate({ id: v.id, status: v.status === "PUBLISHED" ? "HIDDEN" : "PUBLISHED" })}
+        >
+          {v.status === "PUBLISHED" ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+        </IconButton>
+        {source && (
+          <a href={source} target="_blank" rel="noopener noreferrer" title="Mở bài gốc" aria-label="Mở bài gốc ở tab mới"
+             className="inline-flex size-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-xs transition hover:border-brand hover:bg-brand-soft hover:text-brand">
+            <ExternalLink className="size-4" />
+          </a>
+        )}
+        <IconButton label="Xóa video" tone="danger" onClick={() => setDeleting(v)}>
+          <Trash2 className="size-4" />
+        </IconButton>
+      </div>
     );
   };
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronRight, FileText, Headset, Info, Menu, Phone, ShieldCheck, X } from "lucide-react";
+import { ChevronRight, Clapperboard, FileText, Headset, Info, Menu, Phone, ShieldCheck, X } from "lucide-react";
 
 import { Logo } from "@/components/brand/logo";
 import { useAffiliateCode } from "@/hooks/use-affiliate-code";
@@ -30,6 +30,18 @@ export function MobileMenu({ categories }: { categories: CategoryResponse[] }) {
               <button aria-label="Đóng" onClick={() => setOpen(false)} className="p-1"><X className="size-5" /></button>
             </div>
             <div className="flex-1 overflow-y-auto">
+              <div className="border-b px-3 py-2.5">
+                <Link
+                  href="/videos"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-3 rounded-xl bg-brand-soft px-3 py-2 text-sm font-bold text-brand transition active:bg-brand active:text-white"
+                >
+                  <Clapperboard className="size-5" />
+                  <span className="flex-1">Video trải nghiệm</span>
+                  <ChevronRight className="size-4" />
+                </Link>
+              </div>
+
               <p className="px-4 pt-4 pb-2 text-xs font-semibold text-muted-foreground">Danh mục sản phẩm</p>
               <ul>
                 {categories.map((c) => (
